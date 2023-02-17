@@ -1,3 +1,11 @@
+# Summary
+This project uses foundry.
+
+# Router Proxy
+
+Proxy architecture developed by Synthetix referred to as the "Router Proxy".
+It is effectively a way to merge several contracts, into a single implementation contract which is the router itself. This router is used as the implementation of the main proxy of the system.
+
 # Comments
 
 For public or external methods and variables, use NatSpec comments.
