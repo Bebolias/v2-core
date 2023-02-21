@@ -9,8 +9,8 @@ import "../../errors/AccessError.sol";
 import "../../errors/InitError.sol";
 import "../../errors/ParameterError.sol";
 import "../../storage/ERC721Storage.sol";
-// import "../utils/AddressUtil.sol";
-// import "../utils/StringUtil.sol";
+import "../../helpers/AddressUtil.sol";
+import "../../helpers/StringUtil.sol";
 /*
  * @title ERC721 non-fungible token (NFT) contract.
  * See IERC721.
