@@ -1,5 +1,7 @@
+
+
 # Summary
-This project uses foundry.
+This project uses foundry. Licensing is not finalised yet, as a placeholder using MIT in a few places to keep the linter happy.
 
 # Router Proxy
 

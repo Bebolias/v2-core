@@ -9,7 +9,7 @@ import "../../utils/helpers/SafeCast.sol";
  */
 library Account {
     using AccountRBAC for AccountRBAC.Data;
-    // using SetUtil for SetUtil.UintSet;
+    // todo: do we need the safe casts in here?
     using SafeCastU128 for uint128;
     using SafeCastU256 for uint256;
     using SafeCastI128 for int128;

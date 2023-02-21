@@ -10,7 +10,7 @@ import "../utils/storage/AssociatedSystem.sol";
  * @dev See IAccountManager.
  */
 contract AccountManager is IAccountManager {
-    bytes32 private constant _ACCOUNT_SYSTEM = "accountNft";
+    bytes32 private constant _ACCOUNT_SYSTEM = "accountNFT";
 
     /**
      * @inheritdoc IAccountManager
