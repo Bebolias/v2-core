@@ -18,3 +18,5 @@ docs/
 
 # VS Code
 /.vscode
+
+bin/

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-/// @title Interface a Market needs to adhere.
-interface IMarket {
-    // get account annualized filled and unfilled notionals (base in quote terms)
+import "../utils/interfaces/IERC165.sol";
 
+/// @title Interface a Market needs to adhere.
+interface IMarket is IERC165 {
     /// @notice returns a human-readable name for a given market
     function name(uint128 marketId) external view returns (string memory);
 
