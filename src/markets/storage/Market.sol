@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.13;
+
+// import "../../interfaces/IMarket.sol";
+
+/**
+ * @title Connects external contracts that implement the `IMarket` interface to the protocol.
+ */
+library Market {
+    /**
+     * @dev Thrown when a specified market is not found.
+     */
+    error MarketNotFound(uint128 marketId);
+
+    struct Data {
+        /**
+         * @dev Numeric identifier for the market. Must be unique.
+         * @dev There cannot be a market with id zero (See MarketCreator.create()). Id zero is used as a null market reference.
+         */
+        uint128 id;
+        /**
+         * @dev Address for the external contract that implements the `IMarket` interface, which this Market objects connects to.
+         *
+         * Note: This object is how the system tracks the market. The actual market is external to the system, i.e. its own contract.
+         */
+        address marketAddress;
+    }
+}
