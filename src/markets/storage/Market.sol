@@ -25,4 +25,14 @@ library Market {
          */
         address marketAddress;
     }
+
+    /**
+     * @dev Returns the market stored at the specified market id.
+     */
+    function load(uint128 id) internal pure returns (Data storage market) {
+        bytes32 s = keccak256(abi.encode("xyz.voltz.Market", id));
+        assembly {
+            market.slot := s
+        }
+    }
 }
