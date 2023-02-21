@@ -2,6 +2,6 @@
 pragma solidity >=0.8.13;
 
 /**
- * @title Module with custom NFT logic for the account token.
+ * @title Account Token.
  */
-interface IAccountTokenModule {}
+interface IAccountToken {}
