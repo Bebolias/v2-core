@@ -5,6 +5,7 @@ pragma solidity >=0.8.13;
 
 /**
  * @title Connects external contracts that implement the `IMarket` interface to the protocol.
+ *
  */
 library Market {
     /**
@@ -24,6 +25,18 @@ library Market {
          * Note: This object is how the system tracks the market. The actual market is external to the system, i.e. its own contract.
          */
         address marketAddress;
+        /**
+         * @dev Text identifier for the market.
+         *
+         * Not required to be unique.
+         */
+        string name;
+        /**
+         * @dev Creator of the market, which has configuration access rights for the market.
+         *
+         * See onlyMarketOwner.
+         */
+        address owner;
     }
 
     /**
