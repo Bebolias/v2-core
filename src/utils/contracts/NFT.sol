@@ -5,6 +5,7 @@ import "./initializable/InitializableMixin.sol";
 import "../errors/AddressError.sol";
 import "../storage/OwnableStorage.sol";
 import "../storage/Initialized.sol";
+import "./token/ERC721Enumerable.sol";
 import "../interfaces/INFT.sol";
 
 /**
