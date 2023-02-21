@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
+import "./initializable/InitializableMixin.sol";
 import "../errors/AddressError.sol";
 import "../storage/OwnableStorage.sol";
 import "../storage/Initialized.sol";
