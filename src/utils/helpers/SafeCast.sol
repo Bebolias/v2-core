@@ -7,3 +7,4 @@ pragma solidity >=0.8.13;
 
 import "./safe-cast/SafeCastAddress.sol";
 import "./safe-cast/SafeCastBytes32.sol";
+import "./SafeCast/SafeCastU256.sol";
