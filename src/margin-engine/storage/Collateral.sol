@@ -17,14 +17,14 @@ library Collateral {
     /**
      * @dev Increments the entry's balance.
      */
-    function increaseAvailableCollateral(Data storage self, uint256 amountD18) internal {
+    function increaseCollateralBalance(Data storage self, uint256 amountD18) internal {
         self.balanceD18 += amountD18;
     }
 
     /**
      * @dev Decrements the entry's balance.
      */
-    function decreaseAvailableCollateral(Data storage self, uint256 amountD18) internal {
+    function decreaseCollateralBalance(Data storage self, uint256 amountD18) internal {
         self.balanceD18 -= amountD18;
     }
 }

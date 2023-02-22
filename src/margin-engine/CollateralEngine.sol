@@ -27,9 +27,9 @@ contract CollateralEngine is ICollateralEngine {
             revert IERC20.InsufficientAllowance(tokenAmount, allowance);
         }
         collateralType.safeTransferFrom(depositFrom, self, tokenAmount);
-        // account.collaterals[collateralType].increaseAvailableCollateral(
-        //     CollateralConfiguration.load(collateralType).convertTokenToSystemAmount(tokenAmount)
-        // );
+        account.collaterals[collateralType].increaseCollateralBalance(
+            CollateralConfiguration.load(collateralType).convertTokenToSystemAmount(tokenAmount)
+        );
         emit Deposited(accountId, collateralType, tokenAmount, msg.sender);
     }
 
@@ -37,26 +37,15 @@ contract CollateralEngine is ICollateralEngine {
      * @inheritdoc ICollateralEngine
      */
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external override {
-        // todo: revisit loadAccountAndValidatePermissionAndTimeout
-        Account.Data storage account = Account.loadAccountAndValidatePermissionAndTimeout(
-            accountId, AccountRBAC._WITHDRAW_PERMISSION, uint256(Config.read(_CONFIG_TIMEOUT_WITHDRAW))
-        );
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
 
         uint256 tokenAmountD18 = CollateralConfiguration.load(collateralType).convertTokenToSystemAmount(tokenAmount);
 
-        (uint256 totalDeposited, uint256 totalAssigned, uint256 totalLocked) =
-            account.getCollateralTotals(collateralType);
+        uint256 collateralBalanceD18 = account.getCollateralBalance(collateralType);
 
-        // The amount that cannot be withdrawn from the protocol is the max of either
-        // locked collateral or delegated collateral.
-        uint256 unavailableCollateral = totalLocked > totalAssigned ? totalLocked : totalAssigned;
+        // todo: include im logic from python
 
-        uint256 availableForWithdrawal = totalDeposited - unavailableCollateral;
-        if (tokenAmountD18 > availableForWithdrawal) {
-            revert InsufficientAccountCollateral(tokenAmountD18);
-        }
-
-        account.collaterals[collateralType].decreaseAvailableCollateral(tokenAmountD18);
+        account.collaterals[collateralType].decreaseCollateralBalance(tokenAmountD18);
 
         collateralType.safeTransfer(msg.sender, tokenAmount);
 

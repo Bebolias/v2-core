@@ -90,8 +90,8 @@ library Account {
         view
         returns (uint256 totalBalanceD18)
     {
-        totalBalanceD18 = self.balanceD18;
-        return totalBalanceD18;
+        collateralBalanceD18 = self.balanceD18;
+        return collateralBalanceD18;
     }
 
     /**
