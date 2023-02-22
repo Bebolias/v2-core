@@ -1,5 +1,12 @@
 # TODOs
 
+Margin Engine
+
+- Collateral Configuration
+- CollateralEngine
+
+Markets
+
 - implement a mock market & fully define the IMarket interface referencing the python logic
 - test market creation and registration flow
 - introduce more market tests
