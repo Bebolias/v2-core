@@ -7,7 +7,7 @@ Math
 Liquidation Engine
 
 - introduce LiquidationData
-- 
+- introduce ERC20Helper
 
 Markets
 
@@ -17,7 +17,7 @@ Markets
 
 Account
 
-- ...
+- getAnnualizedExposures
 
 Pools
 

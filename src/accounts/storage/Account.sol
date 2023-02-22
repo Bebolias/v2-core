@@ -45,6 +45,10 @@ library Account {
          * @dev Address set of collaterals that are being used in the protocols by this account.
          */
         mapping(address => Collateral.Data) collaterals;
+        /**
+         * @dev Ids of all the markets in which the account has active positions
+         */
+        uint128[] activeMarketIds;
     }
 
     /**
@@ -105,6 +109,12 @@ library Account {
         account = Account.load(accountId);
         if (!account.rbac.authorized(msg.sender)) {
             revert PermissionDenied(accountId, msg.sender);
+        }
+    }
+
+    function getAnnualizedExposures(Data storage self) internal returns (Exposure[] memory exposures) {
+        for (uint256 i = 0; i < self.activeMarketIds.length; i++) {
+            // need to get the market by talking to the market manager
         }
     }
 }

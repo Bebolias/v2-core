@@ -54,4 +54,11 @@ interface ILiquidationEngine {
      * @return canLiquidate A boolean with the response to the query.
      */
     function isAccountLiquidatable(uint128 accountId) external returns (bool canLiquidate);
+
+    function getAccountMarginRequirements(uint128 accountId)
+        external
+        view
+        returns (uint256 initialMarginRequirementD18, uint256 liquidationMarginRequirementD18);
+
+    function isAccountIMSatisfied(uint128 accountID) external view returns (bool isIMSatisfied);
 }
