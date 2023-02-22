@@ -3,6 +3,7 @@ pragma solidity >=0.8.13;
 
 import "./AccountRBAC.sol";
 import "../../utils/helpers/SafeCast.sol";
+import "../../margin-engine/storage/Collateral.sol";
 
 /**
  * @title Object for tracking accounts with access control and collateral tracking.
@@ -30,6 +31,10 @@ library Account {
          * @dev Role based access control data for the account.
          */
         AccountRBAC.Data rbac;
+        /**
+         * @dev Address set of collaterals that are being used in the protocols by this account.
+         */
+        mapping(address => Collateral.Data) collaterals;
     }
 
     /**
