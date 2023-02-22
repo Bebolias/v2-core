@@ -21,6 +21,11 @@ library Account {
      */
     error AccountNotFound(uint128 accountId);
 
+    /**
+     * @dev Thrown when an account does not have sufficient collateral for a particular operation in the protocol.
+     */
+    error InsufficientAccountCollateral(uint256 requestedAmount);
+
     struct Data {
         /**
          * @dev Numeric identifier for the account. Must be unique.
@@ -70,5 +75,17 @@ library Account {
         }
 
         return a;
+    }
+
+    /**
+     * @dev Given a collateral type, returns information about the total balance of the account
+     */
+    function getCollateralBalance(Data storage self, address collateralType)
+        internal
+        view
+        returns (uint256 totalBalanceD18)
+    {
+        totalBalanceD18 = self.balanceD18;
+        return totalBalanceD18;
     }
 }

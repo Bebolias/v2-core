@@ -11,7 +11,7 @@ library Collateral {
         /**
          * @dev The net amount that is deposited in this collateral
          */
-        uint256 balance;
+        uint256 balanceD18;
     }
 
     /**
