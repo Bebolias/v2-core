@@ -4,13 +4,8 @@ Math
 - Prb math
 - user defined types
 
-
-
 Account
-- increaseAvailableCollateral
-- revisit loadAccountAndValidatePermissionAndTimeout 
-- getCollateralTotals
-- decrease available collateral
+- ...
 
 Margin Engine
 

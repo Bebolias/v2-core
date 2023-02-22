@@ -19,6 +19,13 @@ library CollateralConfiguration {
      */
     error CollateralDepositDisabled(address collateralType);
 
+    /**
+     * @dev Thrown when attempting to convert a token to the protocol amount and the conversion results in a loss of precision.
+     * @param tokenAmount The amount of tokens that were attempted to be converted.
+     * @param decimals The number of decimals of the token that was attempted to be converted.
+     */
+    error PrecisionLost(uint256 tokenAmount, uint8 decimals);
+
     struct Data {
         /**
          * @dev Allows the owner to control deposits and delegation of collateral types.
@@ -92,7 +99,6 @@ library CollateralConfiguration {
         }
     }
 
-    // todo: introduce convertTokenToSystemAmount with prb and user defined types, check out projects that use prb
     /**
      * @dev Converts token amounts with non-protocol decimal precisions, to 18 decimals of precision.
      * E.g: $TOKEN_A uses 6 decimals of precision, so this would upscale it by 12 decimals.
@@ -101,34 +107,34 @@ library CollateralConfiguration {
      * @param tokenAmount The token amount, denominated in its native decimal precision.
      * @return amountD18 The converted amount, denominated in the system's 18 decimal precision.
      */
-    // function convertTokenToSystemAmount(Data storage self, uint256 tokenAmount)
-    //     internal
-    //     view
-    //     returns (uint256 amountD18)
-    // {
-    //     // this extra condition is to prevent potentially malicious untrusted code from being executed on the next statement
-    //     if (self.tokenAddress == address(0)) {
-    //         revert CollateralNotFound();
-    //     }
+    function convertTokenToSystemAmount(Data storage self, uint256 tokenAmount)
+        internal
+        view
+        returns (uint256 amountD18)
+    {
+        // this extra condition is to prevent potentially malicious untrusted code from being executed on the next statement
+        if (self.tokenAddress == address(0)) {
+            revert CollateralNotFound();
+        }
 
-    //     /// @dev this try-catch block assumes there is no malicious code in the token's fallback function
-    //     try IERC20(self.tokenAddress).decimals() returns (uint8 decimals) {
-    //         if (decimals == 18) {
-    //             amountD18 = tokenAmount;
-    //         } else if (decimals < 18) {
-    //             amountD18 = (tokenAmount * DecimalMath.UNIT) / (10 ** decimals);
-    //         } else {
-    //             // ensure no precision is lost when converting to 18 decimals
-    //             if (tokenAmount % (10 ** (decimals - 18)) != 0) {
-    //                 revert PrecisionLost(tokenAmount, decimals);
-    //             }
+        /// @dev this try-catch block assumes there is no malicious code in the token's fallback function
+        try IERC20(self.tokenAddress).decimals() returns (uint8 decimals) {
+            if (decimals == 18) {
+                amountD18 = tokenAmount;
+            } else if (decimals < 18) {
+                amountD18 = (tokenAmount * DecimalMath.UNIT) / (10 ** decimals);
+            } else {
+                // ensure no precision is lost when converting to 18 decimals
+                if (tokenAmount % (10 ** (decimals - 18)) != 0) {
+                    revert PrecisionLost(tokenAmount, decimals);
+                }
 
-    //             // this will scale down the amount by the difference between the token's decimals and 18
-    //             amountD18 = (tokenAmount * DecimalMath.UNIT) / (10 ** decimals);
-    //         }
-    //     } catch {
-    //         // if the token doesn't have a decimals function, assume it's 18 decimals
-    //         amountD18 = tokenAmount;
-    //     }
-    // }
+                // this will scale down the amount by the difference between the token's decimals and 18
+                amountD18 = (tokenAmount * DecimalMath.UNIT) / (10 ** decimals);
+            }
+        } catch {
+            // if the token doesn't have a decimals function, assume it's 18 decimals
+            amountD18 = tokenAmount;
+        }
+    }
 }
