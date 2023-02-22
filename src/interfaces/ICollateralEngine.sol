@@ -80,4 +80,21 @@ interface ICollateralManager {
         external
         view
         returns (uint256 amountD18);
+
+    /**
+     * @notice Propagates casfhlows from a registered market (e.g. when a given market settles it's virtual tokens)
+     * @param accountId The id of the account whose collateral is being debit or credited
+     * @param collateralType The address of the collateral type whose amount is being debited or credited
+     * @param tokenAmount The amount being debited or credited, denominated in the token's native decimal representation.
+     */
+    function cashflowPropagation(uint128 accountId, address collateralType, int256 tokenAmount) external;
+
+    /**
+     * @notice Returns the total account value pertaining to account `accountId` in terms of the quote token of the (single token) account
+     * @param accountId The id of the account whose total account value is being queried.
+     * @return totalAccountValue The total account value in terms of the quote token of the account, denominated with 18 decimals of precision.
+     */
+    function getTotalAccountValue(uint128 accountId) external view returns (uint256 totalAccountValue);
+
+    // todo: distribute fees
 }
