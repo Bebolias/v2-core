@@ -38,7 +38,7 @@ library MarketCreator {
      *
      * Note: If an external `IMarket` contract tracks several market ids, this function should be called for each market it tracks, resulting in multiple ids for the same address.
      */
-    function create(address marketAddress) internal returns (Market.Data storage market) {
+    function create(address marketAddress, address owner) internal returns (Market.Data storage market) {
         Data storage marketStore = getMarketStore();
 
         uint128 id = marketStore.lastCreatedMarketId;
@@ -48,7 +48,7 @@ library MarketCreator {
 
         market.id = id;
         market.marketAddress = marketAddress;
-
+        market.owner = owner;
         marketStore.lastCreatedMarketId = id;
 
         loadIdsByAddress(marketAddress).push(id);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-// import "../../interfaces/IMarket.sol";
+import "../../utils/errors/AccessError.sol";
 
 /**
  * @title Connects external contracts that implement the `IMarket` interface to the protocol.
@@ -26,6 +26,10 @@ library Market {
          */
         address marketAddress;
         /**
+         * @dev Address of the quote token in which this market settles
+         */
+        address quoteAddress;
+        /**
          * @dev Text identifier for the market.
          *
          * Not required to be unique.
@@ -46,6 +50,15 @@ library Market {
         bytes32 s = keccak256(abi.encode("xyz.voltz.Market", id));
         assembly {
             market.slot := s
+        }
+    }
+
+    /**
+     * @dev Reverts if the caller is not the owner of the specified market
+     */
+    function onlyMarketOwner(uint128 marketId, address caller) internal view {
+        if (Market.load(marketId).owner != caller) {
+            revert AccessError.Unauthorized(caller);
         }
     }
 }
