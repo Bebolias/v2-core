@@ -61,7 +61,6 @@ contract CollateralEngine is ICollateralEngine {
         override
         returns (uint256 collateralBalance)
     {
-        // consider returning more data in here, the protocol starts to behave like a lens contract
         return Account.load(accountId).getCollateralBalance(collateralType);
     }
 }

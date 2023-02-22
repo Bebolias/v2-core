@@ -63,7 +63,7 @@ interface ICollateralManager {
      * @notice Returns the total balance pertaining to account `accountId` for `collateralType`.
      * @param accountId The id of the account whose collateral is being queried.
      * @param collateralType The address of the collateral type whose amount is being queried.
-     * @return totalDeposited The total collateral deposited in the account, denominated with 18 decimals of precision.
+     * @return collateralBalance The total collateral deposited in the account, denominated with 18 decimals of precision.
      */
     function getAccountCollateralBalance(uint128 accountId, address collateralType)
         external
@@ -76,10 +76,10 @@ interface ICollateralManager {
      * @param collateralType The address of the collateral type whose amount is being queried.
      * @return amountD18 The amount of collateral that is available for withdrawal or delegation, denominated with 18 decimals of precision.
      */
-    function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
-        external
-        view
-        returns (uint256 amountD18);
+    // function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
+    //     external
+    //     view
+    //     returns (uint256 amountD18);
 
     /**
      * @notice Propagates casfhlows from a registered market (e.g. when a given market settles it's virtual tokens)
