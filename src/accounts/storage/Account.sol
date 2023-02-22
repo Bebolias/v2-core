@@ -17,6 +17,11 @@ library Account {
     using SafeCastI256 for int256;
 
     /**
+     * @dev Thrown when the given target address does not own the given account.
+     */
+    error PermissionDenied(uint128 accountId, address target);
+
+    /**
      * @dev Thrown when an account cannot be found.
      */
     error AccountNotFound(uint128 accountId);
@@ -87,5 +92,19 @@ library Account {
     {
         totalBalanceD18 = self.balanceD18;
         return totalBalanceD18;
+    }
+
+    /**
+     * @dev Loads the Account object for the specified accountId,
+     * and validates that sender has the ownership of the account id. These
+     * are different actions but they are merged in a single function
+     * because loading an account and checking for ownership is a very
+     * common use case in other parts of the code.
+     */
+    function loadAccountAndValidateOwnership(uint128 accountId) internal returns (Data storage account) {
+        account = Account.load(accountId);
+        if (!account.rbac.authorized(msg.sender)) {
+            revert PermissionDenied(accountId, msg.sender);
+        }
     }
 }

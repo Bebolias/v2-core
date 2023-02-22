@@ -19,4 +19,11 @@ library AccountRBAC {
     function setOwner(Data storage self, address owner) internal {
         self.owner = owner;
     }
+
+    /**
+     * @dev Returns wether the specified target address is the owner of the account.
+     */
+    function authorized(Data storage self, address target) internal view returns (bool) {
+        return target == self.owner;
+    }
 }
