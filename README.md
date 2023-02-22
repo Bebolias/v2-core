@@ -8,6 +8,7 @@ Liquidation Engine
 
 - introduce LiquidationData
 - introduce ERC20Helper
+- introduce Exposure struct
 
 Markets
 
@@ -18,6 +19,7 @@ Markets
 Account
 
 - getAnnualizedExposures
+- AssociatedSystem.load
 
 Pools
 

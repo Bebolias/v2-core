@@ -34,9 +34,9 @@ library AssociatedSystem {
         return ITokenModule(self.proxy);
     }
 
-    function asNft(Data storage self) internal view returns (INftModule) {
+    function asNft(Data storage self) internal view returns (INFT) {
         expectKind(self, KIND_ERC721);
-        return INftModule(self.proxy);
+        return INFT(self.proxy);
     }
 
     function set(Data storage self, address proxy, address impl, bytes32 kind) internal {

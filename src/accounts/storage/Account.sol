@@ -111,10 +111,4 @@ library Account {
             revert PermissionDenied(accountId, msg.sender);
         }
     }
-
-    function getAnnualizedExposures(Data storage self) internal returns (Exposure[] memory exposures) {
-        for (uint256 i = 0; i < self.activeMarketIds.length; i++) {
-            // need to get the market by talking to the market manager
-        }
-    }
 }
