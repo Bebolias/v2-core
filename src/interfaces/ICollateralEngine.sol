@@ -60,15 +60,15 @@ interface ICollateralManager {
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external;
 
     /**
-     * @notice Returns the total values pertaining to account `accountId` for `collateralType`.
+     * @notice Returns the total balance pertaining to account `accountId` for `collateralType`.
      * @param accountId The id of the account whose collateral is being queried.
      * @param collateralType The address of the collateral type whose amount is being queried.
      * @return totalDeposited The total collateral deposited in the account, denominated with 18 decimals of precision.
      */
-    function getAccountCollateral(uint128 accountId, address collateralType)
+    function getAccountCollateralBalance(uint128 accountId, address collateralType)
         external
         view
-        returns (uint256 totalDeposited);
+        returns (uint256 collateralBalance);
 
     /**
      * @notice Returns the amount of collateral of type `collateralType` deposited with account `accountId` that can be withdrawn
@@ -76,7 +76,7 @@ interface ICollateralManager {
      * @param collateralType The address of the collateral type whose amount is being queried.
      * @return amountD18 The amount of collateral that is available for withdrawal or delegation, denominated with 18 decimals of precision.
      */
-    function getAccountAvailableCollateral(uint128 accountId, address collateralType)
+    function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
         external
         view
         returns (uint256 amountD18);
