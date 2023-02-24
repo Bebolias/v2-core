@@ -3,7 +3,7 @@ pragma solidity >=0.8.13;
 
 import "./SafeCast.sol";
 
-// todo: do we need all the below logic or can we trim it down
+// todo: do we need all the below logic or can we trim it down, do we need to use sets or can use an alternative?
 library SetUtil {
     using SafeCastAddress for address;
     using SafeCastBytes32 for bytes32;

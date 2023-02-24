@@ -7,6 +7,8 @@ import "../../utils/helpers/SetUtil.sol";
  * @title Tracks protocol-wide settings for each collateral type, as well as helper functions for it, such as retrieving its current price from the oracle manager -> relevant for multi-collateral.
  */
 library CollateralConfiguration {
+    using SetUtil for SetUtil.AddressSet;
+
     bytes32 private constant _SLOT_AVAILABLE_COLLATERALS =
         keccak256(abi.encode("xyz.voltz.CollateralConfiguration_availableCollaterals"));
 
@@ -43,7 +45,7 @@ library CollateralConfiguration {
          * @dev The oracle manager node id which reports the current price for this collateral type.
          */
         // bytes32 oracleNodeId;
-        // + function getCollateralPric
+        // + function getCollateralPrice function
         /**
          * @dev The token address for this collateral type.
          */
