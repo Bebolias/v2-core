@@ -37,6 +37,7 @@ library MarketCreator {
      * The id used to track the market will be automatically assigned by the protocol according to the last id used.
      *
      * Note: If an external `IMarket` contract tracks several market ids, this function should be called for each market it tracks, resulting in multiple ids for the same address.
+     * For example if a given market works across maturities, each maturity internally will be represented as a unique market id
      */
     function create(address marketAddress, address owner) internal returns (Market.Data storage market) {
         Data storage marketStore = getMarketStore();

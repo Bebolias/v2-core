@@ -6,7 +6,7 @@ pragma solidity >=0.8.13;
  */
 library CollateralConfiguration {
     bytes32 private constant _SLOT_AVAILABLE_COLLATERALS =
-        keccak256(abi.encode("io.voltz.CollateralConfiguration_availableCollaterals"));
+        keccak256(abi.encode("xyz.voltz.CollateralConfiguration_availableCollaterals"));
 
     /**
      * @dev Thrown when the token address of a collateral cannot be found.
@@ -54,7 +54,7 @@ library CollateralConfiguration {
      * @return collateralConfiguration The CollateralConfiguration object.
      */
     function load(address token) internal pure returns (Data storage collateralConfiguration) {
-        bytes32 s = keccak256(abi.encode("io.voltz.CollateralConfiguration", token));
+        bytes32 s = keccak256(abi.encode("xyz.voltz.CollateralConfiguration", token));
         assembly {
             collateralConfiguration.slot := s
         }

@@ -16,6 +16,16 @@ Markets
 - test market creation and registration flow
 - introduce more market tests
 
+
+Market Manager
+
+- implementation and interface skeleton
+
+
+Feature Flags
+
+- FeatureFlag.ensureAccessToFeature(_MARKET_FEATURE_FLAG); -> register a new market
+
 Account
 
 - getAnnualizedExposures
@@ -24,6 +34,10 @@ Account
 Pools
 
 - ...
+
+Oracles
+
+- Oracle Manager
 
 
 # Summary
