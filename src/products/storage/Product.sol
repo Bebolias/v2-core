@@ -63,14 +63,25 @@ library Product {
         }
     }
 
+    /**
+     * @dev The product at self.productAddress is expected to aggregate the pnl for a given account in all maturities and pools
+     */
     function getAccountUnrealizedPnLInQuote(Data storage self, uint128 accountId)
         internal
         view
         returns (int256 accountUnrealizedPnLInQuote)
     {
-        // todo: rename IProduct to IProduct?
-        // getAccountUnrealizedPnLInQuote inside of the product aggregates the pnl for all maturities and pools
-        // each product has a product address
         return IProduct(self.productAddress).getAccountUnrealizedPnLInQuote(accountId);
+    }
+
+    /**
+     * @dev The product at self.productAddress is expected to aggregate filled and unfilled notionals for all maturities and pools
+     */
+    function getAccountAnnualizedFilledUnfilledNotionalsInQuote(Data storage self, uint128 accountId)
+        internal
+        view
+        returns (int256 filledNotional, uint256 unfilledLongNotional, uint256 unfilledShortNotional)
+    {
+        return IProduct(self.productAddress).getAccountAnnualizedFilledUnfilledNotionalsInQuote(accountId);
     }
 }
