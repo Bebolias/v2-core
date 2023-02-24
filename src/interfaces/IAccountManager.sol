@@ -54,4 +54,12 @@ interface IAccountManager {
      * @return owner The owner of the given account id.
      */
     function getAccountOwner(uint128 accountId) external view returns (address owner);
+
+    /**
+     * @notice Checks wether a given `user` addres owns a given account identified by its `accountId`
+     * @param accountId The account id whose ownership authority is being queried
+     * @param user The address checked to have authority over a given account
+     * @return _isAuthorized boolean value which is true only if the queried user owns a the account id
+     */
+    function isAuthorized(uint128 accountId, address user) external view returns (bool _isAuthorized);
 }

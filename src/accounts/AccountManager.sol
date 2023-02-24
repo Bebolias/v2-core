@@ -52,6 +52,13 @@ contract AccountManager is IAccountManager {
     }
 
     /**
+     * @inheritdoc IAccountManager
+     */
+    function isAuthorized(uint128 accountId, address user) public view override returns (bool _isAuthorized) {
+        return Account.load(accountId).rbac.authorized(user);
+    }
+
+    /**
      * @dev Reverts if the caller is not the account token managed by this module.
      */
     function _onlyAccountToken() internal view {
