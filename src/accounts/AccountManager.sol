@@ -5,12 +5,16 @@ import "../interfaces/IAccountToken.sol";
 import "../interfaces/IAccountManager.sol";
 import "../utils/storage/AssociatedSystem.sol";
 import "./storage/Account.sol";
+import "./storage/AccountRBAC.sol";
 
 /**
  * @title Account Manager.
  * @dev See IAccountManager.
  */
 contract AccountManager is IAccountManager {
+    using AccountRBAC for AccountRBAC.Data;
+    using Account for Account.Data;
+
     bytes32 private constant _ACCOUNT_SYSTEM = "accountNFT";
 
     /**
