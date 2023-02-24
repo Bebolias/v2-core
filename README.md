@@ -23,6 +23,8 @@ Products
 - BaseDatedProduct.sol
 - DatedIRSProduct.sol
 
+- add bases, market = product + base + maturity (optional, i.e. not all products are dated)
+
 minor
 - check how these base products can represent pools and maturities as ids, define these in the base dated product contract
 - glp as a service = composability = lp token wars

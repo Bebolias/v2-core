@@ -34,6 +34,35 @@ interface ICollateralEngine {
     );
 
     /**
+     * @notice Returns the total balance pertaining to account `accountId` for `collateralType`.
+     * @param accountId The id of the account whose collateral is being queried.
+     * @param collateralType The address of the collateral type whose amount is being queried.
+     * @return collateralBalance The total collateral deposited in the account, denominated with 18 decimals of precision.
+     */
+    function getAccountCollateralBalance(uint128 accountId, address collateralType)
+        external
+        view
+        returns (uint256 collateralBalance);
+
+    /**
+     * @notice Returns the amount of collateral of type `collateralType` deposited with account `accountId` that can be withdrawn
+     * @param accountId The id of the account whose collateral is being queried.
+     * @param collateralType The address of the collateral type whose amount is being queried.
+     * @return amountD18 The amount of collateral that is available for withdrawal (difference between balance and IM), denominated with 18 decimals of precision.
+     */
+    function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
+        external
+        view
+        returns (uint256 amountD18);
+
+    /**
+     * @notice Returns the total account value pertaining to account `accountId` in terms of the quote token of the (single token) account
+     * @param accountId The id of the account whose total account value is being queried.
+     * @return totalAccountValue The total account value in terms of the quote token of the account, denominated with 18 decimals of precision.
+     */
+    function getTotalAccountValue(uint128 accountId) external view returns (uint256 totalAccountValue);
+
+    /**
      * @notice Deposits `tokenAmount` of collateral of type `collateralType` into account `accountId`.
      * @dev Anyone can deposit into anyone's active account without restriction.
      * @param accountId The id of the account that is making the deposit.
@@ -58,29 +87,6 @@ interface ICollateralEngine {
      *
      */
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external;
-
-    /**
-     * @notice Returns the total balance pertaining to account `accountId` for `collateralType`.
-     * @param accountId The id of the account whose collateral is being queried.
-     * @param collateralType The address of the collateral type whose amount is being queried.
-     * @return collateralBalance The total collateral deposited in the account, denominated with 18 decimals of precision.
-     */
-    function getAccountCollateralBalance(uint128 accountId, address collateralType)
-        external
-        view
-        returns (uint256 collateralBalance);
-
-    /**
-     * @notice Returns the amount of collateral of type `collateralType` deposited with account `accountId` that can be withdrawn
-     * @param accountId The id of the account whose collateral is being queried.
-     * @param collateralType The address of the collateral type whose amount is being queried.
-     * @return amountD18 The amount of collateral that is available for withdrawal or delegation, denominated with 18 decimals of precision.
-     */
-    // function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
-    //     external
-    //     view
-    //     returns (uint256 amountD18);
-
     /**
      * @notice Propagates casfhlows from a registered product (e.g. when a given product settles it's virtual tokens)
      * @param accountId The id of the account whose collateral is being debit or credited
@@ -88,13 +94,6 @@ interface ICollateralEngine {
      * @param tokenAmount The amount being debited or credited, denominated in the token's native decimal representation.
      */
     function cashflowPropagation(uint128 accountId, address collateralType, int256 tokenAmount) external;
-
-    /**
-     * @notice Returns the total account value pertaining to account `accountId` in terms of the quote token of the (single token) account
-     * @param accountId The id of the account whose total account value is being queried.
-     * @return totalAccountValue The total account value in terms of the quote token of the account, denominated with 18 decimals of precision.
-     */
-    function getTotalAccountValue(uint128 accountId) external view returns (uint256 totalAccountValue);
 
     // todo: distribute fees
 }

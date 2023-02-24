@@ -68,4 +68,24 @@ contract CollateralEngine is ICollateralEngine {
     {
         return Account.load(accountId).getCollateralBalance(collateralType);
     }
+    /**
+     * @inheritdoc ICollateralEngine
+     */
+
+    function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
+        external
+        view
+        override
+        returns (uint256 amountD18)
+    {}
+
+    /**
+     * @inheritdoc ICollateralEngine
+     */
+    function getTotalAccountValue(uint128 accountId) external view override returns (uint256 totalAccountValue) {}
+
+    /**
+     * @inheritdoc ICollateralEngine
+     */
+    function cashflowPropagation(uint128 accountId, address collateralType, int256 tokenAmount) external {}
 }
