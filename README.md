@@ -6,6 +6,8 @@ Math
 
 Liquidation Engine
 
+- how does the liquidation engine talk to the market manager?
+
 - isAccountIMSatisfied
 - getAccountMarginRequirements
 - isAccountLiquidatable
@@ -45,7 +47,13 @@ Pools
 
 Oracles
 
-- Oracle Manager
+- Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
+
+Notes on Associated System
+
+- Associated systems become available to all system modules for communication and interaction, but as opposed to inter-modular communications, interactions with associated systems will require the use of `CALL`.
+-  Managed systems are connected via a proxy, which means that their implementation can be updated, and the system controls the execution context of the associated system. Example, an snxUSD token connected to the system, and controlled by the system.
+- Unmanaged systems are just addresses tracked by the system, for which it has no control whatsoever. Example, Uniswap v3, Curve, etc.
 
 
 # Summary

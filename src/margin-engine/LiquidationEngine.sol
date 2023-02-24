@@ -10,22 +10,11 @@ import "../interfaces/ILiquidationEngine.sol";
  * @dev See ILiquidationEngine
  */
 
-contract LiquidationModule is ILiquidationModule {
-    function getAccountMarginRequirements(uint128 accountId) external view override {
-        // load the account
-        // get annualized filled and unfilled orders
-        // we could cache the length of the array to avoid calculating it every time in this func
-
-        // annualizedFilledAndUnfilledOrders = [];
-        // worstCaseFilledOrders = [];
-
-        // for ()
-    }
-
+contract LiquidationEngine is ILiquidationEngine {
     function getAccountAnnualizedExposures(uint128 accountId) internal returns (Exposure[] memory exposures) {
         Account.exists(accountId);
         Account.Data storage account = Account.load(accountId);
-        uint256 _activeMarketIdsLength = account.activeMarketIds.length;
+        uint256 _activeProductIdsLength = account.activeProductIds.length;
 
         for (uint256 i = 0; i < _activeMarketIdsLength; i++) {
             // need to get the product by talking to the product manager

@@ -46,9 +46,10 @@ library Account {
          */
         mapping(address => Collateral.Data) collaterals;
         /**
-         * @dev Ids of all the markets in which the account has active positions
+         * @dev Ids of all the products in which the account has active positions
+         * todo: needs logic to mark active products (check out python)
          */
-        uint128[] activeMarketIds;
+        uint128[] activeProductIds;
     }
 
     /**
