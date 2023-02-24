@@ -18,6 +18,17 @@ interface IMarketManager {
      */
     event MarketRegistered(address indexed market, uint128 indexed marketId, address indexed sender);
 
+    /// @notice returns the unrealized pnl in quote token terms for account
+    function getAccountUnrealizedPnLInQuote(uint128 marketId, uint128 accountId) external view returns (int256);
+
+    /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
+    function getAccountAnnualizedFilledUnfilledNotionalsInQuote(uint128 marketId, uint128 accountId)
+        external
+        view
+        returns (int256, uint256, uint256);
+
+    // state changing functions
+
     /**
      * @notice Connects a market to the system.
      * @dev Creates a Market object to track the market, and returns the newly created market id.
@@ -25,15 +36,6 @@ interface IMarketManager {
      * @return newMarketId The id with which the market will be registered in the system.
      */
     function registerMarket(address market) external returns (uint128 newMarketId);
-
-    /// @notice returns the unrealized pnl in quote token terms for account
-    function getAccountUnrealizedPnLInQuote(uint128 marketId, uint128 accountId) external returns (int256);
-
-    /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
-    function getAccountAnnualizedFilledUnfilledNotionalsInQuote(uint128 marketId, uint128 accountId)
-        external
-        view
-        returns (int256, uint256, uint256);
 
     /// @notice attempts to close all the unfilled and filled positions of a given account in a given market (marketId)
     function closeAccount(uint128 marketId, uint128 accountId) external;

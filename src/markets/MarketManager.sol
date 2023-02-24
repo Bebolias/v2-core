@@ -19,6 +19,31 @@ contract MarketManager is IMarketManager {
     /**
      * @inheritdoc IMarketManager
      */
+    function getAccountUnrealizedPnLInQuote(uint128 marketId, uint128 accountId)
+        external
+        view
+        override
+        returns (int256 accountUnrealizedPnLInQuote)
+    {
+        accountUnrealizedPnLInQuote = Market.load(marketId).getAccountUnrealizedPnLInQuote(accountId);
+    }
+
+    /**
+     * @inheritdoc IMarketManager
+     */
+    function getAccountAnnualizedFilledUnfilledNotionalsInQuote(uint128 marketId, uint128 accountId)
+        external
+        view
+        override
+        returns (int256 filledNotional, uint256 unfilledLongNotional, uint256 unfilledShortNotional)
+    {
+        (filledNotional, unfilledLongNotional, unfilledShortNotional) =
+            Market.load(marketId).getAccountAnnualizedFilledUnfilledNotionalsInQuote(accountId);
+    }
+
+    /**
+     * @inheritdoc IMarketManager
+     */
     function registerMarket(address market) external override returns (uint128 marketId) {
         // todo: ensure acces to feature flag check
 
@@ -33,6 +58,12 @@ contract MarketManager is IMarketManager {
         return marketId;
     }
 
-    // add all the mission critical functions for markets in here
-    
+    /**
+     * @inheritdoc IMarketManager
+     */
+
+    function closeAccount(uint128 marketId, uint128 accountId) external override {
+        // todo: consider returning data that might be useful in the future
+        Market.load(marketId).closeAccount(accountId);
+    }
 }
