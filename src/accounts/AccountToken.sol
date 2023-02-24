@@ -21,6 +21,6 @@ contract AccountToken is IAccountToken, NFT {
         address to,
         uint256 tokenId
     ) internal virtual override {
-        IAccountModule(OwnableStorage.getOwner()).notifyAccountTransfer(to, tokenId.to128());
+        IAccountManager(OwnableStorage.getOwner()).notifyAccountTransfer(to, tokenId.to128());
     }
 }

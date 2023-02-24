@@ -7,6 +7,11 @@ pragma solidity >=0.8.13;
  */
 interface IAccountManager {
     /**
+     * @notice Thrown when the account interacting with the system is expected to be the associated account token, but is not.
+     */
+    error OnlyAccountTokenProxy(address origin);
+
+    /**
      * @notice Emitted when an account token with id `accountId` is minted to `owner`.
      * @param accountId The id of the account.
      * @param owner The address that owns the created account.
