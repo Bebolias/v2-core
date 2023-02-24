@@ -5,15 +5,18 @@ import "../interfaces/ICollateralEngine.sol";
 import "../accounts/storage/Account.sol";
 import "./storage/CollateralConfiguration.sol";
 import "../utils/contracts/token/ERC20Helper.sol";
-
+import "./storage/Collateral.sol";
 /**
  * @title Module for managing user collateral.
  * @dev See ICollateralEngine.
  */
+
 contract CollateralEngine is ICollateralEngine {
     using ERC20Helper for address;
+    using CollateralConfiguration for CollateralConfiguration.Data;
     using Account for Account.Data;
     using AccountRBAC for AccountRBAC.Data;
+    using Collateral for Collateral.Data;
 
     /**
      * @inheritdoc ICollateralEngine
