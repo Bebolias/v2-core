@@ -1,34 +1,34 @@
 # TODOs
 
 Math
-- Prb math
-- user defined types
+- PRB Math V3
+- User Defined Types
 
 Liquidation Engine
 
+- isAccountIMSatisfied
+- getAccountMarginRequirements
+- isAccountLiquidatable
+- liquidate
+
+minor
 - introduce LiquidationData
 - introduce ERC20Helper
 - introduce Exposure struct
 
-Markets
+Products
 
-- implement a mock market & fully define the IMarket interface referencing the python logic
-- test market creation and registration flow
-- introduce more market tests
+- BaseDatedProduct.sol
+- DatedIRSProduct.sol
 
-
-Market Manager
-
-- supporting market storage functions that interface with the market address
-- include interface for a function that enables the market to query initial margin requirements for a given account?
-- anything else that should be present in the IMarket interface?
-- mapping between risk parameters and market ids given that now market ids are unique for all maturities now
-- what if pools propagated locked trades to the market instead of the market having to request them, similar to a notify transfer in the account object
-- kick off irs implementation instead of a mock market and check how it'd fit into the router proxy architecture, maybe a storage can be reserved for the maturities -> glp as a service = composability = lp token wars, a market can act similar to a manager where it is managing maturities and pools, the market contract is basically also the pool manager
-- market id + product id for margining purposes
-- unique productId -> product address mapping and then within a given product there may be a few active maturities or a single one, but that's abstracted from the rest of the architecture -> rename market to Product or Instrument -> change the market manager, imarket, etc to a product
+minor
+- check how these base products can represent pools and maturities as ids, define these in the base dated product contract
+- glp as a service = composability = lp token wars
+- a product can act similar to a manager where it is managing maturities and pools, the market contract is basically also the pool manager
+- unique productId -> product address mapping and then within a given product there may be a few active maturities or a single one, but that's abstracted from the rest of the architecture
 - all the maturities of a given account are stored in the product object itself, each product has a single risk parameter, the product abstracts away maturities and pools from the rest of the architecture (mainly the margining system)
-
+- anything else that should be present in IProduct interface?
+- what if pools propagated locked trades to the market instead of the market having to request them, similar to a notify transfer in the account object
 
 Feature Flags
 
