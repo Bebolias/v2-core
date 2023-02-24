@@ -17,6 +17,8 @@ interface IMarket is IERC165 {
         view
         returns (int256, uint256, uint256);
 
+    // todo: include interface for a function that enables the market to query initial margin requirements for a given account
+
     // state-changing functions
 
     /// @notice attempts to close all the unfilled and filled positions of a given account in the market

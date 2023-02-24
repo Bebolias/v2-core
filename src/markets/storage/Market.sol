@@ -2,6 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "../../utils/errors/AccessError.sol";
+import "../../interfaces/IMarket.sol";
 
 /**
  * @title Connects external contracts that implement the `IMarket` interface to the protocol.
@@ -24,7 +25,7 @@ library Market {
          *
          * Note: This object is how the system tracks the market. The actual market is external to the system, i.e. its own contract.
          */
-        address marketAddress;
+        address productAddress;
         /**
          * @dev Address of the quote token in which this market settles
          */
@@ -60,5 +61,16 @@ library Market {
         if (Market.load(marketId).owner != caller) {
             revert AccessError.Unauthorized(caller);
         }
+    }
+
+    function getAccountUnrealizedPnLInQuote(Data storage self, uint128 accountId)
+        internal
+        view
+        returns (int256 accountUnrealizedPnLInQuote)
+    {
+        // todo: rename IMarket to IProduct?
+        // getAccountUnrealizedPnLInQuote inside of the product aggregates the pnl for all maturities and pools
+        // each market has a product address
+        return IMarket(self.productAddress).getAccountUnrealizedPnLInQuote(accountId);
     }
 }
