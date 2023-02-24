@@ -26,7 +26,7 @@ Products
 minor
 - check how these base products can represent pools and maturities as ids, define these in the base dated product contract
 - glp as a service = composability = lp token wars
-- a product can act similar to a manager where it is managing maturities and pools, the market contract is basically also the pool manager
+- a product can act similar to a manager where it is managing maturities and pools and bases.., the market contract is basically also the pool manager
 - unique productId -> product address mapping and then within a given product there may be a few active maturities or a single one, but that's abstracted from the rest of the architecture
 - all the maturities of a given account are stored in the product object itself, each product has a single risk parameter, the product abstracts away maturities and pools from the rest of the architecture (mainly the margining system)
 - anything else that should be present in IProduct interface?
@@ -37,6 +37,8 @@ Feature Flags
 - FeatureFlag.ensureAccessToFeature(_MARKET_FEATURE_FLAG); -> register a new market
 
 Account
+
+- turn active products in the account into active bases per product id which returns an array of bases (could just be addresses)
 
 - getAnnualizedExposures
 - AssociatedSystem.load
