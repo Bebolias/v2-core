@@ -13,7 +13,7 @@ library ProductCreator {
         /**
          * @dev Tracks an array of Product ids for each external IProduct address.
          */
-        mapping(address => uint128[]) ProductIdsForAddress;
+        mapping(address => uint128[]) productIdsForAddress;
         /**
          * @dev Keeps track of the last Product id created.
          * Used for easily creating new Products.
@@ -24,10 +24,10 @@ library ProductCreator {
     /**
      * @dev Returns the singleton Product store of the system.
      */
-    function getProductStore() internal pure returns (Data storage ProductStore) {
+    function getProductStore() internal pure returns (Data storage productStore) {
         bytes32 s = _SLOT_Product_CREATOR;
         assembly {
-            ProductStore.slot := s
+            productStore.slot := s
         }
     }
 
@@ -39,20 +39,20 @@ library ProductCreator {
      * Note: If an external `IProduct` contract tracks several Product ids, this function should be called for each Product it tracks, resulting in multiple ids for the same address.
      * For example if a given Product works across maturities, each maturity internally will be represented as a unique Product id
      */
-    function create(address ProductAddress, address owner) internal returns (Product.Data storage Product) {
-        Data storage ProductStore = getProductStore();
+    function create(address productAddress, address owner) internal returns (Product.Data storage product) {
+        Data storage productStore = getProductStore();
 
-        uint128 id = ProductStore.lastCreatedProductId;
+        uint128 id = productStore.lastCreatedProductId;
         id++;
 
-        Product = Product.load(id);
+        product = Product.load(id);
 
-        Product.id = id;
-        Product.ProductAddress = ProductAddress;
-        Product.owner = owner;
-        ProductStore.lastCreatedProductId = id;
+        product.id = id;
+        product.productAddress = productAddress;
+        product.owner = owner;
+        productStore.lastCreatedProductId = id;
 
-        loadIdsByAddress(ProductAddress).push(id);
+        loadIdsByAddress(productAddress).push(id);
     }
 
     /**
@@ -60,7 +60,7 @@ library ProductCreator {
      *
      * Note: A contract implementing the `IProduct` interface may represent more than just one Product, and thus several Product ids could be associated to a single external contract address.
      */
-    function loadIdsByAddress(address ProductAddress) internal view returns (uint128[] storage ids) {
-        return getProductStore().ProductIdsForAddress[ProductAddress];
+    function loadIdsByAddress(address productAddress) internal view returns (uint128[] storage ids) {
+        return getProductStore().productIdsForAddress[productAddress];
     }
 }
