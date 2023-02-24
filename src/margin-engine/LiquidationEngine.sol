@@ -28,7 +28,7 @@ contract LiquidationModule is ILiquidationModule {
         uint256 _activeMarketIdsLength = account.activeMarketIds.length;
 
         for (uint256 i = 0; i < _activeMarketIdsLength; i++) {
-            // need to get the market by talking to the market manager
+            // need to get the product by talking to the product manager
         }
     }
 }
