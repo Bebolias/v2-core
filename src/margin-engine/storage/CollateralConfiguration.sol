@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
+import "../../utils/helpers/SetUtil.sol";
+
 /**
  * @title Tracks protocol-wide settings for each collateral type, as well as helper functions for it, such as retrieving its current price from the oracle manager -> relevant for multi-collateral.
  */
@@ -112,29 +114,31 @@ library CollateralConfiguration {
         view
         returns (uint256 amountD18)
     {
-        // this extra condition is to prevent potentially malicious untrusted code from being executed on the next statement
-        if (self.tokenAddress == address(0)) {
-            revert CollateralNotFound();
-        }
+        return tokenAmount;
+        // todo: needs implementation with PRB Math, below is logic from synthetix for reference
+        // // this extra condition is to prevent potentially malicious untrusted code from being executed on the next statement
+        // if (self.tokenAddress == address(0)) {
+        //     revert CollateralNotFound();
+        // }
 
-        /// @dev this try-catch block assumes there is no malicious code in the token's fallback function
-        try IERC20(self.tokenAddress).decimals() returns (uint8 decimals) {
-            if (decimals == 18) {
-                amountD18 = tokenAmount;
-            } else if (decimals < 18) {
-                amountD18 = (tokenAmount * DecimalMath.UNIT) / (10 ** decimals);
-            } else {
-                // ensure no precision is lost when converting to 18 decimals
-                if (tokenAmount % (10 ** (decimals - 18)) != 0) {
-                    revert PrecisionLost(tokenAmount, decimals);
-                }
+        // /// @dev this try-catch block assumes there is no malicious code in the token's fallback function
+        // try IERC20(self.tokenAddress).decimals() returns (uint8 decimals) {
+        //     if (decimals == 18) {
+        //         amountD18 = tokenAmount;
+        //     } else if (decimals < 18) {
+        //         amountD18 = (tokenAmount * DecimalMath.UNIT) / (10 ** decimals);
+        //     } else {
+        //         // ensure no precision is lost when converting to 18 decimals
+        //         if (tokenAmount % (10 ** (decimals - 18)) != 0) {
+        //             revert PrecisionLost(tokenAmount, decimals);
+        //         }
 
-                // this will scale down the amount by the difference between the token's decimals and 18
-                amountD18 = (tokenAmount * DecimalMath.UNIT) / (10 ** decimals);
-            }
-        } catch {
-            // if the token doesn't have a decimals function, assume it's 18 decimals
-            amountD18 = tokenAmount;
-        }
+        //         // this will scale down the amount by the difference between the token's decimals and 18
+        //         amountD18 = (tokenAmount * DecimalMath.UNIT) / (10 ** decimals);
+        //     }
+        // } catch {
+        //     // if the token doesn't have a decimals function, assume it's 18 decimals
+        //     amountD18 = tokenAmount;
+        // }
     }
 }

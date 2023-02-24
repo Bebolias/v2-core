@@ -5,7 +5,7 @@ pragma solidity >=0.8.13;
  * @title Module for managing user collateral.
  * @notice Allows users to deposit and withdraw collateral from the protocol
  */
-interface ICollateralManager {
+interface ICollateralEngine {
     /**
      * @notice Thrown when an interacting account does not have sufficient collateral for an operation (e.g. withdrawal)
      */

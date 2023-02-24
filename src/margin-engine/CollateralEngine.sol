@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
+import "../interfaces/ICollateralEngine.sol";
 import "../accounts/storage/Account.sol";
 import "./storage/CollateralConfiguration.sol";
 
