@@ -84,4 +84,11 @@ library Product {
     {
         return IProduct(self.productAddress).getAccountAnnualizedFilledUnfilledNotionalsInQuote(accountId);
     }
+
+    /**
+     * @dev The product at self.productAddress is expected to close filled and unfilled positions for all maturities and pools
+     */
+    function closeAccount(Data storage self, uint128 accountId) internal {
+        IProduct(self.productAddress).closeAccount(accountId);
+    }
 }
