@@ -4,6 +4,7 @@ pragma solidity >=0.8.13;
 import "../interfaces/IAccountToken.sol";
 import "../interfaces/IAccountManager.sol";
 import "../utils/storage/AssociatedSystem.sol";
+import "./storage/Account.sol";
 
 /**
  * @title Account Manager.
@@ -20,7 +21,7 @@ contract AccountManager is IAccountManager {
     }
 
     /**
-     * @inheritdoc IAccountModule
+     * @inheritdoc IAccountManager
      */
     function createAccount(uint128 requestedAccountId) external override {
         IAccountToken accountToken = IAccountToken(getAccountTokenAddress());
@@ -30,7 +31,7 @@ contract AccountManager is IAccountManager {
     }
 
     /**
-     * @inheritdoc IAccountModule
+     * @inheritdoc IAccountManager
      */
     function notifyAccountTransfer(address to, uint128 accountId) external override {
         _onlyAccountToken();
@@ -40,7 +41,7 @@ contract AccountManager is IAccountManager {
     }
 
     /**
-     * @inheritdoc IAccountModule
+     * @inheritdoc IAccountManager
      */
     function getAccountOwner(uint128 accountId) public view returns (address) {
         return Account.load(accountId).rbac.owner;

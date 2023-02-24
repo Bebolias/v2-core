@@ -10,11 +10,6 @@ import "../../margin-engine/storage/Collateral.sol";
  */
 library Account {
     using AccountRBAC for AccountRBAC.Data;
-    // todo: do we need the safe casts in here?
-    using SafeCastU128 for uint128;
-    using SafeCastU256 for uint256;
-    using SafeCastI128 for int128;
-    using SafeCastI256 for int256;
 
     /**
      * @dev Thrown when the given target address does not own the given account.
@@ -93,9 +88,9 @@ library Account {
     function getCollateralBalance(Data storage self, address collateralType)
         internal
         view
-        returns (uint256 totalBalanceD18)
+        returns (uint256 collateralBalanceD18)
     {
-        collateralBalanceD18 = self.balanceD18;
+        collateralBalanceD18 = self.collaterals[collateralType].balanceD18;
         return collateralBalanceD18;
     }
 
@@ -106,7 +101,7 @@ library Account {
      * because loading an account and checking for ownership is a very
      * common use case in other parts of the code.
      */
-    function loadAccountAndValidateOwnership(uint128 accountId) internal returns (Data storage account) {
+    function loadAccountAndValidateOwnership(uint128 accountId) internal view returns (Data storage account) {
         account = Account.load(accountId);
         if (!account.rbac.authorized(msg.sender)) {
             revert PermissionDenied(accountId, msg.sender);
