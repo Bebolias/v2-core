@@ -1,5 +1,6 @@
 # TODOs
 
+
 Math
 - PRB Math V3
 - User Defined Types
@@ -12,6 +13,10 @@ Account
 minor
 - add settlement token checks
 
+Oracles
+
+- Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
+
 Collateral Engine
 
 - deposit
@@ -19,10 +24,6 @@ Collateral Engine
 - getAccountCollateralBalanceAvailable
 - getTotalAccountValue (where does this live in python?)
 - cashflowPropagation
-
-Oracles
-
-- Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
 
 Liquidation Engine
 
