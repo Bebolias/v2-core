@@ -10,7 +10,7 @@ Oracles
 
 Liquidation Engine
 
-- getAccountMarginRequirements --> (1)
+- getAccountMarginRequirements --> (1) --> can we just bring this into the account as well?
 - isAccountIMSatisfied --> (3)
 - isAccountLiquidatable --> (2)
 - liquidate --> (4), also check the liquidation deposit logic (consider removing or simplifying the logic to avoid the need for a separate storage for liquidation deposits)

@@ -11,6 +11,8 @@ import "../../products/storage/Product.sol";
  * @title Object for tracking accounts with access control and collateral tracking.
  */
 library Account {
+    // todo: this seems circular, having to use Account within the Account library, is there a cleaner way?
+    using Account for Account.Data;
     using AccountRBAC for AccountRBAC.Data;
     using Product for Product.Data;
     using SetUtil for SetUtil.UintSet;
@@ -174,6 +176,17 @@ library Account {
             uint128 productIndex = _activeProducts.valueAt(i).to128();
             Product.Data storage _product = Product.load(productIndex);
             unrealizedPnL += _product.getAccountUnrealizedPnL(self.id);
+        }
+    }
+
+    /**
+     * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
+     */
+    function getMarginRequirements(Data storage self) internal view returns (uint256 im, uint256 lm) {
+        SetUtil.UintSet storage _activeProducts = self.activeProducts;
+        for (uint256 i = 1; i < _activeProducts.length(); i++) {
+            uint128 productId = _activeProducts.valueAt(i).to128();
+            Exposure[] memory annualizedProductExposures = self.getAnnualizedProductExposures(productId);
         }
     }
 }

@@ -31,7 +31,9 @@ contract LiquidationEngine is ILiquidationEngine {
         external
         view
         returns (uint256 initialMarginRequirementD18, uint256 liquidationMarginRequirementD18)
-    {}
+    {
+        
+    }
     /**
      * @inheritdoc ILiquidationEngine
      */
