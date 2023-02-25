@@ -9,13 +9,10 @@ interface IProduct is IERC165 {
     function name(uint128 marketId) external view returns (string memory);
 
     /// @notice returns the unrealized pnl in quote token terms for account
-    function getAccountUnrealizedPnLInQuote(uint128 accountId) external view returns (int256);
+    function getAccountUnrealizedPnL(uint128 accountId) external view returns (int256);
 
     /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
-    function getAccountAnnualizedFilledUnfilledNotionalsInQuote(uint128 accountId)
-        external
-        view
-        returns (int256, uint256, uint256);
+    function getAnnualizedAccountExposures(uint128 accountId) external view returns (int256, uint256, uint256);
 
     // state-changing functions
 
