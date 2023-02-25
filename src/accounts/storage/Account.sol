@@ -75,8 +75,9 @@ library Account {
         // uint128 productId; -> since already have it in the exposures mapping
         uint128 marketId;
         int256 filled;
-        uint256 unfilledLong;
-        uint256 unfilledShort;
+        // this value should technically be uint256, however using int256 to minimise need for casting
+        int256 unfilledLong;
+        int256 unfilledShort;
     }
 
     /**
@@ -179,14 +180,64 @@ library Account {
         }
     }
 
+    function getRiskParameter(uint128 productId, uint128 marketId) internal pure returns (int256 riskParameter) {
+        // todo: add implementation with the RiskConfiguration.sol storage migrated into the accounts storage
+        return 1;
+    }
+
+    /**
+     * @dev Note, im multiplier is assumed to be the same across all products, markets and maturities
+     */
+    function getIMMultiplier() internal pure returns (int256 imMultiplier) {
+        // todo: add implementation with the RiskConfiguration.sol storage migrated into the accounts storage
+        // todo: prb, user defined type
+        return 2;
+    }
+
     /**
      * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
+     * todo: add user defined types
+     * todo: consider representing im and lm as uint256 with casting in the function body
+     * when summations with int256 need to take place
      */
-    function getMarginRequirements(Data storage self) internal view returns (uint256 im, uint256 lm) {
+    function getMarginRequirements(Data storage self) internal view returns (int256 im, int256 lm) {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
         for (uint256 i = 1; i < _activeProducts.length(); i++) {
             uint128 productId = _activeProducts.valueAt(i).to128();
-            Exposure[] memory annualizedProductExposures = self.getAnnualizedProductExposures(productId);
+            Exposure[] memory annualizedProductMarketExposures = self.getAnnualizedProductExposures(productId);
+            int256 worstCashflowUp;
+            int256 worstCashflowDown;
+            for (uint256 j = 1; i < annualizedProductMarketExposures.length; i++) {
+                Exposure memory exposure = annualizedProductMarketExposures[j];
+                uint128 marketId = exposure.marketId;
+                int256 riskParameter = getRiskParameter(productId, marketId);
+                int256 maxLong = exposure.filled + exposure.unfilledLong;
+                int256 maxShort = exposure.filled + exposure.unfilledShort;
+                // note: this conditional logic is redundunt if no correlations, should just be maxLong
+                // hence, why we need to use int256 for risk parameter + minimises need for casting
+                int256 worstFilledUp = riskParameter > 0 ? maxLong : maxShort;
+                int256 worstFilledDown = riskParameter > 0 ? maxShort : maxLong;
+
+                worstCashflowUp += worstFilledUp * riskParameter;
+                worstCashflowDown += worstFilledDown * riskParameter;
+            }
+
+            (worstCashflowUp, worstCashflowDown) = (abs(worstCashflowUp), abs(worstCashflowDown));
+            lm += max(worstCashflowUp, worstCashflowDown);
         }
+        int256 imMultiplier = getIMMultiplier();
+        im = lm * imMultiplier;
+    }
+
+    function max(int256 a, int256 b) internal pure returns (int256) {
+        return a >= b ? a : b;
+    }
+    /**
+     * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
+     *  todo: consider replacing with prb math
+     */
+
+    function abs(int256 x) private pure returns (int256) {
+        return x >= 0 ? x : -x;
     }
 }
