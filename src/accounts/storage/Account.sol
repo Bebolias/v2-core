@@ -4,12 +4,14 @@ pragma solidity >=0.8.13;
 import "./AccountRBAC.sol";
 import "../../utils/helpers/SafeCast.sol";
 import "../../margin-engine/storage/Collateral.sol";
+import "../../products/storage/Product.sol";
 
 /**
  * @title Object for tracking accounts with access control and collateral tracking.
  */
 library Account {
     using AccountRBAC for AccountRBAC.Data;
+    using Product for Product.Data;
 
     /**
      * @dev Thrown when the given target address does not own the given account.
@@ -124,5 +126,14 @@ library Account {
     /**
      * @dev Returns the aggregate annualized exposures of the account in all products in which the account is active
      */
-    function getAccountAnnualizedExposures(Data storage self) internal returns (Exposure[] memory exposures) {}
+    function getAccountAnnualizedExposures(Data storage self) internal view returns (Exposure[] memory exposures) {
+        uint128[] memory _activeProductIds = self.activeProductIds;
+        // consider following the below pattern instead
+        // ref: https://github.com/Synthetixio/synthetix-v3/blob/91d59830636f8d367c41f5d42f043993ebc39992/protocol/synthetix/contracts/storage/Account.sol#L129
+        for (uint256 i = 1; i < _activeProductIds.length; i++) {
+            Product.Data storage _product = Product.load(_activeProductIds[i]);
+            Exposure memory _exposure = _product.getAccountAnnualizedExposures(self.id);
+            exposures.push(_exposure);
+        }
+    }
 }
