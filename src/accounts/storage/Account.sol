@@ -14,7 +14,8 @@ library Account {
     using AccountRBAC for AccountRBAC.Data;
     using Product for Product.Data;
     using SetUtil for SetUtil.UintSet;
-    using SafeCastU128 for uint128; // stopped here, introduce a new casting way
+    using SafeCastU128 for uint128;
+    using SafeCastU256 for uint256;
 
     /**
      * @dev Thrown when the given target address does not own the given account.
