@@ -155,21 +155,13 @@ library Account {
      * note, the annualized exposures are expected to be in notional terms and in terms of the settlement token of this account
      * what if we do margin calculations per product for now, that'd help with bringing down the gas costs (since atm we're doing no correlations)
      */
-    function getAnnualizedExposures(Data storage self)
+    function getAnnualizedProductExposures(Data storage self, uint128 productId)
         internal
         view
-        returns (mapping(uint128 => Exposure[]) storage exposuresPerProduct)
+        returns (Exposure[] memory productExposures)
     {
-        // todo: consider using a fixed size array for exposures or some other data structure to minimise gas
-        // todo: do we need uintset in here or can we just use uint128[] memory?
-
-        SetUtil.UintSet storage _activeProducts = self.activeProducts;
-        for (uint256 i = 1; i < _activeProducts.length(); i++) {
-            uint128 productIndex = _activeProducts.valueAt(i).to128();
-            Product.Data storage _product = Product.load(productIndex);
-            Exposure[] memory _exposures = _product.getAccountAnnualizedExposures(self.id);
-            exposuresPerProduct[productIndex] = _exposures;
-        }
+        Product.Data storage _product = Product.load(productId);
+        productExposures = _product.getAccountAnnualizedExposures(self.id);
     }
 
     /**
