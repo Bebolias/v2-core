@@ -4,20 +4,32 @@ Math
 - PRB Math V3
 - User Defined Types
 
+Oracles
+
+- Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
+
 Liquidation Engine
 
-- how does the liquidation engine talk to the market manager? --> KEY QUESTION!
-- where should the account exposures live?
-
-- isAccountIMSatisfied
-- getAccountMarginRequirements
-- isAccountLiquidatable
-- liquidate
+- getAccountMarginRequirements --> (1)
+- isAccountIMSatisfied --> (3)
+- isAccountLiquidatable --> (2)
+- liquidate --> (4), also check the liquidation deposit logic (consider removing or simplifying the logic to avoid the need for a separate storage for liquidation deposits)
 
 minor
 - introduce LiquidationData
 - introduce ERC20Helper
-- introduce Exposure struct
+
+Collateral Engine
+
+- deposit
+- withdraw
+- getAccountCollateralBalanceAvailable
+- getTotalAccountValue (where does this live in python?)
+- cashflowPropagation
+
+Account
+
+- add settlement token checks
 
 Products
 
@@ -35,24 +47,13 @@ minor
 - anything else that should be present in IProduct interface?
 - what if pools propagated locked trades to the market instead of the market having to request them, similar to a notify transfer in the account object
 
-Feature Flags
-
-- FeatureFlag.ensureAccessToFeature(_MARKET_FEATURE_FLAG); -> register a new market
-
-Account
-
-- turn active products in the account into active bases per product id which returns an array of bases (could just be addresses)
-- add settlement token checks
-- what if we do margin calculations per product for now, that'd help with bringing down the gas costs (since atm we're doing no correlations)
-- margin requirements can be calculated for each product separately assuming no correlations between products
-
 Pools
 
 - introduce a Pool.sol object, should share similarities with the product object
 
-Oracles
+Feature Flags
 
-- Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
+- FeatureFlag.ensureAccessToFeature(_MARKET_FEATURE_FLAG); -> register a new market
 
 Notes on Associated System
 
