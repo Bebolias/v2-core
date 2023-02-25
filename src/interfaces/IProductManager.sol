@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
+import "../accounts/storage/Account.sol";
+
 /**
  * @title System-wide entry point for the management of products connected to the protocol.
  */
@@ -19,13 +21,13 @@ interface IProductManager {
     event ProductRegistered(address indexed product, uint128 indexed productId, address indexed sender);
 
     /// @notice returns the unrealized pnl in quote token terms for account
-    function getAccountUnrealizedPnLInQuote(uint128 productId, uint128 accountId) external view returns (int256);
+    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId) external view returns (int256);
 
     /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
-    function getAccountAnnualizedFilledUnfilledNotionalsInQuote(uint128 productId, uint128 accountId)
+    function getAccountAnnualizedExposures(uint128 productId, uint128 accountId)
         external
         view
-        returns (int256, uint256, uint256);
+        returns (Account.Exposure[] memory exposures);
 
     // state changing functions
 

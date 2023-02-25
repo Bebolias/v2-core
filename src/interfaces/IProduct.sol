@@ -2,6 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "../utils/interfaces/IERC165.sol";
+import "../accounts/storage/Account.sol";
 
 /// @title Interface a Product needs to adhere.
 interface IProduct is IERC165 {
@@ -9,10 +10,13 @@ interface IProduct is IERC165 {
     function name(uint128 marketId) external view returns (string memory);
 
     /// @notice returns the unrealized pnl in quote token terms for account
-    function getAccountUnrealizedPnL(uint128 accountId) external view returns (int256);
+    function getAccountUnrealizedPnL(uint128 accountId) external view returns (int256 unrealizedPnL);
 
     /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
-    function getAnnualizedAccountExposures(uint128 accountId) external view returns (int256, uint256, uint256);
+    function getAccountAnnualizedExposures(uint128 accountId)
+        external
+        view
+        returns (Account.Exposure[] memory exposures);
 
     // state-changing functions
 

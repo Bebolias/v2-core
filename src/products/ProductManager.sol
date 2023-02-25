@@ -19,26 +19,25 @@ contract ProductManager is IProductManager {
     /**
      * @inheritdoc IProductManager
      */
-    function getAccountUnrealizedPnLInQuote(uint128 productId, uint128 accountId)
+    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId)
         external
         view
         override
-        returns (int256 accountUnrealizedPnLInQuote)
+        returns (int256 accountUnrealizedPnL)
     {
-        accountUnrealizedPnLInQuote = Product.load(productId).getAccountUnrealizedPnLInQuote(accountId);
+        accountUnrealizedPnL = Product.load(productId).getAccountUnrealizedPnL(accountId);
     }
 
     /**
      * @inheritdoc IProductManager
      */
-    function getAccountAnnualizedFilledUnfilledNotionalsInQuote(uint128 productId, uint128 accountId)
+    function getAccountAnnualizedExposures(uint128 productId, uint128 accountId)
         external
         view
         override
-        returns (int256 filledNotional, uint256 unfilledLongNotional, uint256 unfilledShortNotional)
+        returns (Account.Exposure[] memory exposures)
     {
-        (filledNotional, unfilledLongNotional, unfilledShortNotional) =
-            Product.load(productId).getAccountAnnualizedFilledUnfilledNotionalsInQuote(accountId);
+        exposures = Product.load(productId).getAccountAnnualizedExposures(accountId);
     }
 
     /**

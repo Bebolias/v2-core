@@ -87,7 +87,7 @@ library Product {
         view
         returns (Account.Exposure[] memory exposures)
     {
-        return IProduct(self.productAddress).getAnnualizedAccountExposures(accountId);
+        return IProduct(self.productAddress).getAccountAnnualizedExposures(accountId);
     }
 
     /**
