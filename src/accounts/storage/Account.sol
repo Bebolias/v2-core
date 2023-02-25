@@ -60,6 +60,19 @@ library Account {
         address settlementToken;
     }
 
+    struct Exposure {
+        // productId (IRS) -> marketID (aUSDC lend) -> maturity (30th December)
+        // productId (Dated Future) -> marketID (BTC) -> maturity (30th December)
+        // productId (Perp) -> marketID (ETH)
+        // note, we don't neeed to keep track of the maturity for the purposes of of IM, LM calc
+        // because the risk parameter is shared across maturities for a given productId marketId pair
+        uint128 productId;
+        uint128 marketId;
+        int256 filled;
+        uint256 unfilledLong;
+        uint256 unfilledShort;
+    }
+
     /**
      * @dev Returns the account stored at the specified account id.
      */
@@ -81,6 +94,17 @@ library Account {
 
         account.id = id;
         account.rbac.owner = owner;
+    }
+
+    /**
+     * @dev Closes all account filled and unfilled orders in all the products in which the account is active
+     */
+    function closeAllFilledAndUnfilledOrders(Data storage self) internal {
+        uint128[] memory _activeProductIds = self.activeProductIds;
+        for (uint256 i = 1; i < _activeProductIds.length; i++) {
+            Product.Data storage _product = Product.load(_activeProductIds[i]);
+            _product.closeAllAccountFilledAndUnfilledOrders(self.id);
+        }
     }
 
     /**
@@ -119,19 +143,6 @@ library Account {
         if (!account.rbac.authorized(msg.sender)) {
             revert PermissionDenied(accountId, msg.sender);
         }
-    }
-
-    struct Exposure {
-        // productId (IRS) -> marketID (aUSDC lend) -> maturity (30th December)
-        // productId (Dated Future) -> marketID (BTC) -> maturity (30th December)
-        // productId (Perp) -> marketID (ETH)
-        // note, we don't neeed to keep track of the maturity for the purposes of of IM, LM calc
-        // because the risk parameter is shared across maturities for a given productId marketId pair
-        uint128 productId;
-        uint128 marketId;
-        int256 filled;
-        uint256 unfilledLong;
-        uint256 unfilledShort;
     }
 
     /**
