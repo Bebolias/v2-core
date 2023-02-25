@@ -43,9 +43,7 @@ Account
 
 - turn active products in the account into active bases per product id which returns an array of bases (could just be addresses)
 - add settlement token checks
-
-- getAnnualizedExposures
-- AssociatedSystem.load
+- what if we do margin calculations per product for now, that'd help with bringing down the gas costs (since atm we're doing no correlations)
 
 Pools
 

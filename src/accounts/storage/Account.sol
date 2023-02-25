@@ -70,7 +70,7 @@ library Account {
         // productId (Perp) -> marketID (ETH)
         // note, we don't neeed to keep track of the maturity for the purposes of of IM, LM calc
         // because the risk parameter is shared across maturities for a given productId marketId pair
-        uint128 productId;
+        // uint128 productId; -> since already have it in the exposures mapping
         uint128 marketId;
         int256 filled;
         uint256 unfilledLong;
@@ -151,18 +151,24 @@ library Account {
     }
 
     /**
-     * @dev Returns the aggregate annualized exposures of the account in all products in which the account is active
+     * @dev Returns the aggregate annualized exposures of the account in all products in which the account is active (annualized exposures are per product)
      * note, the annualized exposures are expected to be in notional terms and in terms of the settlement token of this account
+     * what if we do margin calculations per product for now, that'd help with bringing down the gas costs (since atm we're doing no correlations)
      */
-    function getAnnualizedExposures(Data storage self) internal view returns (Exposure[] memory exposures) {
+    function getAnnualizedExposures(Data storage self)
+        internal
+        view
+        returns (mapping(uint128 => Exposure[]) storage exposuresPerProduct)
+    {
+        // todo: consider using a fixed size array for exposures or some other data structure to minimise gas
+        // todo: do we need uintset in here or can we just use uint128[] memory?
+
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
-        // consider following the below pattern instead
-        // ref: https://github.com/Synthetixio/synthetix-v3/blob/91d59830636f8d367c41f5d42f043993ebc39992/protocol/synthetix/contracts/storage/Account.sol#L129
         for (uint256 i = 1; i < _activeProducts.length(); i++) {
             uint128 productIndex = _activeProducts.valueAt(i).to128();
             Product.Data storage _product = Product.load(productIndex);
-            Exposure memory _exposure = _product.getAccountAnnualizedExposures(self.id);
-            exposures.push(_exposure);
+            Exposure[] memory _exposures = _product.getAccountAnnualizedExposures(self.id);
+            exposuresPerProduct[productIndex] = _exposures;
         }
     }
 

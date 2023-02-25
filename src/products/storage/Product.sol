@@ -73,7 +73,7 @@ library Product {
     function getAccountUnrealizedPnL(Data storage self, uint128 accountId)
         internal
         view
-        returns (int256 accountUnrealizedPnLInQuote)
+        returns (int256 accountUnrealizedPnL)
     {
         return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId);
     }
