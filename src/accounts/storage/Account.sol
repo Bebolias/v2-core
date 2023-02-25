@@ -47,6 +47,17 @@ library Account {
          * todo: needs logic to mark active products (check out python)
          */
         uint128[] activeProductIds;
+        /**
+         * @dev A single token account can only create positions that settle in the account's settlement token
+         * @dev A single token account can only deposit collateral type that's the same as the account's settlement token
+         * @dev If a user wants to engage in positions with a different settlement token, they can create a new account with a
+         * different settlement token
+         * @dev The settlement token of the account is defined as soon as the account makes its first deposit where the
+         * settlement token is set to the collateral type of the first deposit
+         * note, for the time being the settlement token cannot be changed for a given account as soon as it's initialised
+         * following the first deposit
+         */
+        address settlementToken;
     }
 
     /**
@@ -125,8 +136,9 @@ library Account {
 
     /**
      * @dev Returns the aggregate annualized exposures of the account in all products in which the account is active
+     * note, the annualized exposures are expected to be in notional terms and in terms of the settlement token of this account
      */
-    function getAccountAnnualizedExposures(Data storage self) internal view returns (Exposure[] memory exposures) {
+    function getAnnualizedExposures(Data storage self) internal view returns (Exposure[] memory exposures) {
         uint128[] memory _activeProductIds = self.activeProductIds;
         // consider following the below pattern instead
         // ref: https://github.com/Synthetixio/synthetix-v3/blob/91d59830636f8d367c41f5d42f043993ebc39992/protocol/synthetix/contracts/storage/Account.sol#L129
@@ -134,6 +146,18 @@ library Account {
             Product.Data storage _product = Product.load(_activeProductIds[i]);
             Exposure memory _exposure = _product.getAccountAnnualizedExposures(self.id);
             exposures.push(_exposure);
+        }
+    }
+
+    /**
+     * @dev Returns the aggregate unrealized pnl of the account in all products in which the account has positions with unrealized pnl
+     * note, the unrealized pnl is expected to be in terms of the settlement token of this account
+     */
+    function getUnrealizedPnL(Data storage self) internal view returns (int256 unrealizedPnL) {
+        uint128[] memory _activeProductIds = self.activeProductIds;
+        for (uint256 i = 1; i < _activeProductIds.length; i++) {
+            Product.Data storage _product = Product.load(_activeProductIds[i]);
+            unrealizedPnL += _product.getAccountUnrealizedPnL(self.id);
         }
     }
 }
