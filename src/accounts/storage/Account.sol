@@ -14,6 +14,7 @@ library Account {
     using AccountRBAC for AccountRBAC.Data;
     using Product for Product.Data;
     using SetUtil for SetUtil.UintSet;
+    using SafeCastU128 for uint128; // stopped here, introduce a new casting way
 
     /**
      * @dev Thrown when the given target address does not own the given account.
@@ -102,9 +103,10 @@ library Account {
      * @dev Closes all account filled (i.e. attempts to fully unwind) and unfilled orders in all the products in which the account is active
      */
     function closeAccount(Data storage self) internal {
-        SetUtil.UintSet memory _activeProducts = self.activeProducts;
-        for (uint256 i = 1; i < _activeProducts.length; i++) {
-            Product.Data storage _product = Product.load(_activeProducts[i]);
+        SetUtil.UintSet storage _activeProducts = self.activeProducts;
+        for (uint256 i = 1; i < _activeProducts.length(); i++) {
+            uint128 productIndex = _activeProducts.valueAt(i).to128();
+            Product.Data storage _product = Product.load(productIndex);
             _product.closeAccount(self.id);
         }
     }
@@ -155,8 +157,9 @@ library Account {
         SetUtil.UintSet memory _activeProducts = self.activeProducts;
         // consider following the below pattern instead
         // ref: https://github.com/Synthetixio/synthetix-v3/blob/91d59830636f8d367c41f5d42f043993ebc39992/protocol/synthetix/contracts/storage/Account.sol#L129
-        for (uint256 i = 1; i < _activeProducts.length; i++) {
-            Product.Data storage _product = Product.load(_activeProducts[i]);
+        for (uint256 i = 1; i < _activeProducts.length(); i++) {
+            uint128 productIndex = _activeProducts.valueAt(i).to128();
+            Product.Data storage _product = Product.load(productIndex);
             Exposure memory _exposure = _product.getAccountAnnualizedExposures(self.id);
             exposures.push(_exposure);
         }
@@ -169,7 +172,8 @@ library Account {
     function getUnrealizedPnL(Data storage self) internal view returns (int256 unrealizedPnL) {
         SetUtil.UintSet memory _activeProducts = self.activeProducts;
         for (uint256 i = 1; i < _activeProducts.length(); i++) {
-            Product.Data storage _product = Product.load(_activeProducts[i]);
+            uint128 productIndex = _activeProducts.valueAt(i).to128();
+            Product.Data storage _product = Product.load(productIndex);
             unrealizedPnL += _product.getAccountUnrealizedPnL(self.id);
         }
     }
