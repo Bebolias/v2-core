@@ -3,6 +3,7 @@ pragma solidity >=0.8.13;
 
 import "../../utils/errors/AccessError.sol";
 import "../../interfaces/IProduct.sol";
+import "../../accounts/storage/Account.sol";
 
 /**
  * @title Connects external contracts that implement the `IProduct` interface to the protocol.
@@ -76,13 +77,14 @@ library Product {
 
     /**
      * @dev The product at self.productAddress is expected to aggregate filled and unfilled notionals for all maturities and pools
+     * note: needs to be in terms of the settlement token of the accunt given currently only supporting single-token mode
      */
-    function getAccountAnnualizedFilledUnfilledNotionalsInQuote(Data storage self, uint128 accountId)
+    function getAnnualizedAccountExposures(Data storage self, uint128 accountId)
         internal
         view
-        returns (int256 filledNotional, uint256 unfilledLongNotional, uint256 unfilledShortNotional)
+        returns (Account.Exposure[] memory exposures)
     {
-        return IProduct(self.productAddress).getAccountAnnualizedFilledUnfilledNotionalsInQuote(accountId);
+        return IProduct(self.productAddress).getAnnualizedAccountExposures(accountId);
     }
 
     /**

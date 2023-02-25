@@ -42,6 +42,7 @@ Feature Flags
 Account
 
 - turn active products in the account into active bases per product id which returns an array of bases (could just be addresses)
+- add settlement token checks
 
 - getAnnualizedExposures
 - AssociatedSystem.load

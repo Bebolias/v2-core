@@ -44,7 +44,7 @@ library Account {
         mapping(address => Collateral.Data) collaterals;
         /**
          * @dev Ids of all the products in which the account has active positions
-         * todo: needs logic to mark active products (check out python)
+         * todo: needs logic to mark active products (check out python) and also check out how marking is done in synthetix, how and why they use sets vs. simple arrays
          */
         uint128[] activeProductIds;
         /**
@@ -97,13 +97,13 @@ library Account {
     }
 
     /**
-     * @dev Closes all account filled and unfilled orders in all the products in which the account is active
+     * @dev Closes all account filled (i.e. attempts to fully unwind) and unfilled orders in all the products in which the account is active
      */
-    function closeAllFilledAndUnfilledOrders(Data storage self) internal {
+    function closeAccount(Data storage self) internal {
         uint128[] memory _activeProductIds = self.activeProductIds;
         for (uint256 i = 1; i < _activeProductIds.length; i++) {
             Product.Data storage _product = Product.load(_activeProductIds[i]);
-            _product.closeAllAccountFilledAndUnfilledOrders(self.id);
+            _product.closeAccount(self.id);
         }
     }
 
