@@ -66,20 +66,23 @@ library Product {
 
     /**
      * @dev The product at self.productAddress is expected to aggregate the pnl for a given account in all maturities and pools
+     * @dev note, given that the account only supports a single token, the unrealised pnl is expected to be in terms of the
+     * settlement token of the account, i.e. all the positions used in the unrealised pnl calculation should settle/quote in a token
+     * that matches the settlement token of the account.
      */
-    function getAccountUnrealizedPnLInQuote(Data storage self, uint128 accountId)
+    function getAccountUnrealizedPnL(Data storage self, uint128 accountId)
         internal
         view
         returns (int256 accountUnrealizedPnLInQuote)
     {
-        return IProduct(self.productAddress).getAccountUnrealizedPnLInQuote(accountId);
+        return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId);
     }
 
     /**
      * @dev The product at self.productAddress is expected to aggregate filled and unfilled notionals for all maturities and pools
      * note: needs to be in terms of the settlement token of the accunt given currently only supporting single-token mode
      */
-    function getAnnualizedAccountExposures(Data storage self, uint128 accountId)
+    function getAccountAnnualizedExposures(Data storage self, uint128 accountId)
         internal
         view
         returns (Account.Exposure[] memory exposures)
