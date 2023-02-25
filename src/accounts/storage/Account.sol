@@ -3,6 +3,7 @@ pragma solidity >=0.8.13;
 
 import "./AccountRBAC.sol";
 import "../../utils/helpers/SafeCast.sol";
+import "../../utils/helpers/SetUtil.sol";
 import "../../margin-engine/storage/Collateral.sol";
 import "../../products/storage/Product.sol";
 
@@ -12,6 +13,7 @@ import "../../products/storage/Product.sol";
 library Account {
     using AccountRBAC for AccountRBAC.Data;
     using Product for Product.Data;
+    using SetUtil for SetUtil.UintSet;
 
     /**
      * @dev Thrown when the given target address does not own the given account.
@@ -46,7 +48,7 @@ library Account {
          * @dev Ids of all the products in which the account has active positions
          * todo: needs logic to mark active products (check out python) and also check out how marking is done in synthetix, how and why they use sets vs. simple arrays
          */
-        uint128[] activeProductIds;
+        SetUtil.UintSet activeProducts;
         /**
          * @dev A single token account can only create positions that settle in the account's settlement token
          * @dev A single token account can only deposit collateral type that's the same as the account's settlement token
@@ -100,9 +102,9 @@ library Account {
      * @dev Closes all account filled (i.e. attempts to fully unwind) and unfilled orders in all the products in which the account is active
      */
     function closeAccount(Data storage self) internal {
-        uint128[] memory _activeProductIds = self.activeProductIds;
-        for (uint256 i = 1; i < _activeProductIds.length; i++) {
-            Product.Data storage _product = Product.load(_activeProductIds[i]);
+        SetUtil.UintSet memory _activeProducts = self.activeProducts;
+        for (uint256 i = 1; i < _activeProducts.length; i++) {
+            Product.Data storage _product = Product.load(_activeProducts[i]);
             _product.closeAccount(self.id);
         }
     }
@@ -150,11 +152,11 @@ library Account {
      * note, the annualized exposures are expected to be in notional terms and in terms of the settlement token of this account
      */
     function getAnnualizedExposures(Data storage self) internal view returns (Exposure[] memory exposures) {
-        uint128[] memory _activeProductIds = self.activeProductIds;
+        SetUtil.UintSet memory _activeProducts = self.activeProducts;
         // consider following the below pattern instead
         // ref: https://github.com/Synthetixio/synthetix-v3/blob/91d59830636f8d367c41f5d42f043993ebc39992/protocol/synthetix/contracts/storage/Account.sol#L129
-        for (uint256 i = 1; i < _activeProductIds.length; i++) {
-            Product.Data storage _product = Product.load(_activeProductIds[i]);
+        for (uint256 i = 1; i < _activeProducts.length; i++) {
+            Product.Data storage _product = Product.load(_activeProducts[i]);
             Exposure memory _exposure = _product.getAccountAnnualizedExposures(self.id);
             exposures.push(_exposure);
         }
@@ -165,9 +167,9 @@ library Account {
      * note, the unrealized pnl is expected to be in terms of the settlement token of this account
      */
     function getUnrealizedPnL(Data storage self) internal view returns (int256 unrealizedPnL) {
-        uint128[] memory _activeProductIds = self.activeProductIds;
-        for (uint256 i = 1; i < _activeProductIds.length; i++) {
-            Product.Data storage _product = Product.load(_activeProductIds[i]);
+        SetUtil.UintSet memory _activeProducts = self.activeProducts;
+        for (uint256 i = 1; i < _activeProducts.length(); i++) {
+            Product.Data storage _product = Product.load(_activeProducts[i]);
             unrealizedPnL += _product.getAccountUnrealizedPnL(self.id);
         }
     }
