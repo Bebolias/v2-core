@@ -4,20 +4,13 @@ Math
 - PRB Math V3
 - User Defined Types
 
-Oracles
+Account
 
-- Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
-
-Liquidation Engine
-
-- getAccountMarginRequirements --> (1) --> can we just bring this into the account as well?
-- isAccountIMSatisfied --> (3)
-- isAccountLiquidatable --> (2)
-- liquidate --> (4), also check the liquidation deposit logic (consider removing or simplifying the logic to avoid the need for a separate storage for liquidation deposits)
+- isAccountLiquidatable --> (1) --> consider putting this into the account
+- isAccountIMSatisfied --> (2) --> consider putting this into the account
 
 minor
-- introduce LiquidationData
-- introduce ERC20Helper
+- add settlement token checks
 
 Collateral Engine
 
@@ -27,9 +20,17 @@ Collateral Engine
 - getTotalAccountValue (where does this live in python?)
 - cashflowPropagation
 
-Account
+Oracles
 
-- add settlement token checks
+- Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
+
+Liquidation Engine
+
+- liquidate --> also check the liquidation deposit logic (consider removing or simplifying the logic to avoid the need for a separate storage for liquidation deposits)
+
+minor
+- introduce LiquidationData
+- introduce ERC20Helper
 
 Products
 
