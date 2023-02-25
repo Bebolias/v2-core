@@ -6,7 +6,8 @@ Math
 
 Liquidation Engine
 
-- how does the liquidation engine talk to the market manager?
+- how does the liquidation engine talk to the market manager? --> KEY QUESTION!
+- where should the account exposures live?
 
 - isAccountIMSatisfied
 - getAccountMarginRequirements
@@ -47,7 +48,7 @@ Account
 
 Pools
 
-- ...
+- introduce a Pool.sol object, should share similarities with the product object
 
 Oracles
 

@@ -36,16 +36,4 @@ contract LiquidationEngine is ILiquidationEngine {
      * @inheritdoc ILiquidationEngine
      */
     function isAccountIMSatisfied(uint128 accountID) external view returns (bool isIMSatisfied) {}
-
-    // todo: where should this function live? in the account or in the liquidation engine
-    // how can the account talk to the product manager
-    // function getAccountAnnualizedExposures(uint128 accountId) internal returns (Exposure[] memory exposures) {
-    //     Account.exists(accountId);
-    //     Account.Data storage account = Account.load(accountId);
-    //     uint256 _activeProductIdsLength = account.activeProductIds.length;
-
-    //     for (uint256 i = 0; i < _activeMarketIdsLength; i++) {
-    //         // need to get the product by talking to the product manager
-    //     }
-    // }
 }

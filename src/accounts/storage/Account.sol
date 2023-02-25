@@ -107,4 +107,22 @@ library Account {
             revert PermissionDenied(accountId, msg.sender);
         }
     }
+
+    struct Exposure {
+        // productId (IRS) -> marketID (aUSDC lend) -> maturity (30th December)
+        // productId (Dated Future) -> marketID (BTC) -> maturity (30th December)
+        // productId (Perp) -> marketID (ETH)
+        // note, we don't neeed to keep track of the maturity for the purposes of of IM, LM calc
+        // because the risk parameter is shared across maturities for a given productId marketId pair
+        uint128 productId;
+        uint128 marketId;
+        int256 filled;
+        uint256 unfilledLong;
+        uint256 unfilledShort;
+    }
+
+    /**
+     * @dev Returns the aggregate annualized exposures of the account in all products in which the account is active
+     */
+    function getAccountAnnualizedExposures(Data storage self) internal returns (Exposure[] memory exposures) {}
 }
