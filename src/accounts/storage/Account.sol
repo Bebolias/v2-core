@@ -155,7 +155,7 @@ library Account {
      * note, the annualized exposures are expected to be in notional terms and in terms of the settlement token of this account
      */
     function getAnnualizedExposures(Data storage self) internal view returns (Exposure[] memory exposures) {
-        SetUtil.UintSet memory _activeProducts = self.activeProducts;
+        SetUtil.UintSet storage _activeProducts = self.activeProducts;
         // consider following the below pattern instead
         // ref: https://github.com/Synthetixio/synthetix-v3/blob/91d59830636f8d367c41f5d42f043993ebc39992/protocol/synthetix/contracts/storage/Account.sol#L129
         for (uint256 i = 1; i < _activeProducts.length(); i++) {
@@ -171,7 +171,7 @@ library Account {
      * note, the unrealized pnl is expected to be in terms of the settlement token of this account
      */
     function getUnrealizedPnL(Data storage self) internal view returns (int256 unrealizedPnL) {
-        SetUtil.UintSet memory _activeProducts = self.activeProducts;
+        SetUtil.UintSet storage _activeProducts = self.activeProducts;
         for (uint256 i = 1; i < _activeProducts.length(); i++) {
             uint128 productIndex = _activeProducts.valueAt(i).to128();
             Product.Data storage _product = Product.load(productIndex);
