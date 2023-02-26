@@ -36,7 +36,11 @@ contract DatedIRSProduct is IBaseDatedProduct {
      * @inheritdoc IBaseDatedProduct
      */
 
-    function settle(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override {}
+    function settle(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override {
+        Account.Data storage account = Account.load(accountId);
+        DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
+        int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp);
+    }
 
     /**
      * @inheritdoc IBaseDatedProduct

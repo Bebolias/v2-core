@@ -1,11 +1,17 @@
 # TODOs
 
+CI
+- initial unit tests
+- github flows
 
 Math
 - PRB Math V3
 - User Defined Types
 
 Products - IRS
+
+- don't think we need cashflow propagation in the collateral engine
+
 - initiateTakerOrder
 - initiateMakerOrder
 - settle 
