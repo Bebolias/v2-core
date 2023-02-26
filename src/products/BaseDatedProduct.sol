@@ -2,6 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "./interfaces/IBaseDatedProduct.sol";
+import "../accounts/storage/Account.sol";
 
 // todo: make this abstract
 
@@ -11,15 +12,22 @@ import "./interfaces/IBaseDatedProduct.sol";
  */
 
 contract BaseDatedProduct is IBaseDatedProduct {
-    /**
-     * @inheritdoc IBaseDatedProduct
-     */
-    function settle(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override {}
+    using Account for Account.Data;
 
     /**
      * @inheritdoc IBaseDatedProduct
      */
-    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override {}
+    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override {
+        // check if account exists
+        // check if market id is valid + check there is an active pool with maturityTimestamp requested
+        Account.Data storage account = Account.load(accountId);
+        (int256 executedBaseAmount, int256 executedQuoteAmount) = pool.executeTakerOrder(marketId, maturityTimestamp);
+    }
+    /**
+     * @inheritdoc IBaseDatedProduct
+     */
+
+    function settle(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override {}
 
     /**
      * @inheritdoc IBaseDatedProduct
@@ -35,7 +43,10 @@ contract BaseDatedProduct is IBaseDatedProduct {
     /**
      * @inheritdoc IProduct
      */
-    function name(uint128 productId) external view override returns (string memory) {}
+    function name(uint128 productId) external pure override returns (string memory) {
+        // todo: make this virtual
+        return "Dated Product";
+    }
 
     /**
      * @inheritdoc IProduct
