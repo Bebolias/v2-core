@@ -76,8 +76,10 @@ contract CollateralEngine is ICollateralEngine {
         external
         view
         override
-        returns (uint256 amountD18)
-    {}
+        returns (uint256 collateralBalanceAvailable)
+    {
+        return Account.load(accountId).getCollateralBalanceAvailable(collateralType);
+    }
 
     /**
      * @inheritdoc ICollateralEngine
