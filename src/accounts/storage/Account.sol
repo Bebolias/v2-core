@@ -208,7 +208,10 @@ library Account {
      * @dev Comes out as true if a given account initial margin requirement is satisfied
      * i.e. account value (collateral + unrealized pnl) >= initial margin requirement
      */
-    function isIMSatisfied() internal view returns (bool imSatisfied) {}
+    function isIMSatisfied(Data storage self) internal view returns (bool imSatisfied, int256 im) {
+        (im,) = self.getMarginRequirements();
+        imSatisfied = self.getTotalAccountValue() >= im;
+    }
 
     /**
      * @dev Comes out as true if a given account is liquidatable, i.e. account value (collateral + unrealized pnl) < lm
