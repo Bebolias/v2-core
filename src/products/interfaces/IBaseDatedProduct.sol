@@ -22,7 +22,9 @@ interface IBaseDatedProduct is IProduct {
      * @param marketId Id of the market in which the account wants to initiate a taker order (e.g. 1 for aUSDC lend)
      * @param maturityTimestamp Maturity timestamp of the market in which the account wants to initiate a taker order
      */
-    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external;
+    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint256 maturityTimestamp)
+        external
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount);
 
     /**
      * @notice Initiates a maker order for a given account by providing liquidity to the pool connected to this product

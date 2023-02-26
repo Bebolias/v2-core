@@ -14,17 +14,23 @@ import "./storage/DatedIRSPortfolio.sol"
 
 contract DatedIRSProduct is IBaseDatedProduct {
     using Account for Account.Data;
+    using DatedIRSPortfolio for DatedIRSPortfolio.Data;
 
     /**
      * @inheritdoc IBaseDatedProduct
      */
-    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override {
+    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override returns (
+        int256 executedBaseAmount, int256 executedQuoteAmount
+    ) {
         // check if account exists
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
-        // note: portfolio and account id are the same
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
-        (int256 executedBaseAmount, int256 executedQuoteAmount) = pool.executeTakerOrder(marketId, maturityTimestamp);
-        // the storage position object can execute this
+        (executedBaseAmount, executedQuoteAmount) = pool.executeTakerOrder(marketId, maturityTimestamp);
+        portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
+        // todo: mark product in the account object (see python implementation for more details, solidity uses setutil though)
+        // todo: process taker fees (these should also be returned)
+        account.imCheck();
     }
     /**
      * @inheritdoc IBaseDatedProduct
