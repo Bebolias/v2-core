@@ -18,6 +18,7 @@ library Account {
     using SetUtil for SetUtil.UintSet;
     using SafeCastU128 for uint128;
     using SafeCastU256 for uint256;
+    using SafeCastI256 for int256;
 
     /**
      * @dev Thrown when the given target address does not own the given account.
@@ -140,6 +141,18 @@ library Account {
     }
 
     /**
+     * @dev Given a collateral type, returns information about the total balance of the account that's available to withdraw
+     */
+    function getCollateralBalanceAvailable(Data storage self, address collateralType)
+        internal
+        view
+        returns (uint256 collateralBalanceAvailableD18)
+    {
+        (int256 im,) = self.getMarginRequirements();
+        collateralBalanceAvailableD18 = self.getCollateralBalance(collateralType);
+    }
+
+    /**
      * @dev Loads the Account object for the specified accountId,
      * and validates that sender has the ownership of the account id. These
      * are different actions but they are merged in a single function
@@ -198,7 +211,7 @@ library Account {
     /**
      * @dev Note, im multiplier is assumed to be the same across all products, markets and maturities
      */
-    function getIMMultiplier() internal pure returns (int256 imMultiplier) {
+    function getIMMultiplier() internal pure returns (uint256 imMultiplier) {
         // todo: add implementation with the RiskConfiguration.sol storage migrated into the accounts storage
         // todo: prb, user defined type
         return 2;
@@ -208,18 +221,18 @@ library Account {
      * @dev Comes out as true if a given account initial margin requirement is satisfied
      * i.e. account value (collateral + unrealized pnl) >= initial margin requirement
      */
-    function isIMSatisfied(Data storage self) internal view returns (bool imSatisfied, int256 im) {
+    function isIMSatisfied(Data storage self) internal view returns (bool imSatisfied, uint256 im) {
         (im,) = self.getMarginRequirements();
-        imSatisfied = self.getTotalAccountValue() >= im;
+        imSatisfied = self.getTotalAccountValue() >= im.toInt();
     }
 
     /**
      * @dev Comes out as true if a given account is liquidatable, i.e. account value (collateral + unrealized pnl) < lm
      */
 
-    function isLiquidatable(Data storage self) internal view returns (bool liquidatable, int256 im, int256 lm) {
+    function isLiquidatable(Data storage self) internal view returns (bool liquidatable, uint256 im, uint256 lm) {
         (im, lm) = self.getMarginRequirements();
-        liquidatable = self.getTotalAccountValue() < lm;
+        liquidatable = self.getTotalAccountValue() < lm.toInt();
     }
     /**
      * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
@@ -228,7 +241,7 @@ library Account {
      * when summations with int256 need to take place
      */
 
-    function getMarginRequirements(Data storage self) internal view returns (int256 im, int256 lm) {
+    function getMarginRequirements(Data storage self) internal view returns (uint256 im, uint256 lm) {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
         for (uint256 i = 1; i < _activeProducts.length(); i++) {
             uint128 productId = _activeProducts.valueAt(i).to128();
@@ -251,10 +264,9 @@ library Account {
             }
 
             (worstCashflowUp, worstCashflowDown) = (abs(worstCashflowUp), abs(worstCashflowDown));
-            lm += max(worstCashflowUp, worstCashflowDown);
+            lm += max(worstCashflowUp, worstCashflowDown).toUint();
         }
-        int256 imMultiplier = getIMMultiplier();
-        im = lm * imMultiplier;
+        im = lm * getIMMultiplier();
     }
 
     function max(int256 a, int256 b) internal pure returns (int256) {

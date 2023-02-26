@@ -18,6 +18,8 @@ Oracles
 
 Account
 
+- parametrisation smth like RiskConfiguration.sol
+
 minor
 - add settlement token checks
 - can we cache margin requirement calculations and only apply deltas (trickier with annualization of notionals in case of irs)
