@@ -7,10 +7,10 @@ Math
 
 Collateral Engine
 
-- deposit
-- withdraw
-- getAccountCollateralBalanceAvailable
 - cashflowPropagation
+
+minor 
+- introduce liquidator deposit logic or propose an alternative
 
 Oracles
 

@@ -82,7 +82,9 @@ contract CollateralEngine is ICollateralEngine {
     /**
      * @inheritdoc ICollateralEngine
      */
-    function getTotalAccountValue(uint128 accountId) external view override returns (uint256 totalAccountValue) {}
+    function getTotalAccountValue(uint128 accountId) external view override returns (int256 totalAccountValue) {
+        return Account.load(accountId).getTotalAccountValue();
+    }
 
     /**
      * @inheritdoc ICollateralEngine

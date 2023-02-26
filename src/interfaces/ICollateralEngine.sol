@@ -60,7 +60,7 @@ interface ICollateralEngine {
      * @param accountId The id of the account whose total account value is being queried.
      * @return totalAccountValue The total account value in terms of the quote token of the account, denominated with 18 decimals of precision.
      */
-    function getTotalAccountValue(uint128 accountId) external view returns (uint256 totalAccountValue);
+    function getTotalAccountValue(uint128 accountId) external view returns (int256 totalAccountValue);
 
     /**
      * @notice Deposits `tokenAmount` of collateral of type `collateralType` into account `accountId`.
