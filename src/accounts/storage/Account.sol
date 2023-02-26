@@ -133,7 +133,7 @@ library Account {
     function getCollateralBalance(Data storage self, address collateralType)
         internal
         view
-        returns (int256 collateralBalanceD18)
+        returns (uint256 collateralBalanceD18)
     {
         collateralBalanceD18 = self.collaterals[collateralType].balanceD18;
         return collateralBalanceD18;
@@ -186,7 +186,7 @@ library Account {
 
     function getTotalAccountValue(Data storage self) internal view returns (int256 totalAccountValue) {
         int256 unrealizedPnL = self.getUnrealizedPnL();
-        int256 collateralBalance = self.getCollateralBalance(self.settlementToken);
+        int256 collateralBalance = self.getCollateralBalance(self.settlementToken).toInt();
         totalAccountValue = unrealizedPnL + collateralBalance;
     }
 
