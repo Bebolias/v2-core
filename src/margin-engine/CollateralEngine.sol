@@ -86,22 +86,4 @@ contract CollateralEngine is ICollateralEngine {
     function getTotalAccountValue(uint128 accountId) external view override returns (int256 totalAccountValue) {
         return Account.load(accountId).getTotalAccountValue();
     }
-
-    /**
-     * @inheritdoc ICollateralEngine
-     */
-    function cashflowPropagation(uint128 accountId, address collateralType, int256 tokenAmount) external {
-        Account.Data storage account = Account.load(accountId);
-        // todo: needs a feature flag since since this function can only be called by [...]
-        // todo: check if tokenAmount == 0, don't do anything
-        if (tokenAmount > 0) {
-            account.collaterals[collateralType].increaseCollateralBalance(
-                CollateralConfiguration.load(collateralType).convertTokenToSystemAmount(tokenAmount.toUint())
-            );
-        } else {
-            account.collaterals[collateralType].decreaseCollateralBalance(
-                CollateralConfiguration.load(collateralType).convertTokenToSystemAmount((-tokenAmount).toUint())
-            );
-        }
-    }
 }

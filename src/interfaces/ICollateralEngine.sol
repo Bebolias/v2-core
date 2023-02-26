@@ -87,13 +87,6 @@ interface ICollateralEngine {
      *
      */
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external;
-    /**
-     * @notice Propagates casfhlows from a registered product (e.g. when a given product settles it's virtual tokens)
-     * @param accountId The id of the account whose collateral is being debit or credited
-     * @param collateralType The address of the collateral type whose amount is being debited or credited
-     * @param tokenAmount The amount being debited or credited, denominated in the token's native decimal representation.
-     */
-    function cashflowPropagation(uint128 accountId, address collateralType, int256 tokenAmount) external;
 
     // todo: distribute fees
 }

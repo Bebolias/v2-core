@@ -15,4 +15,10 @@ library DatedIRSPosition {
         self.baseBalance += baseDelta;
         self.quoteBalance += quoteDelta;
     }
+
+    function settle(Data storage self) internal {
+        // todo: for now assuming no pools, but need to include pools asap
+        self.baseBalance = 0;
+        self.quoteBalance = 0;
+    }
 }

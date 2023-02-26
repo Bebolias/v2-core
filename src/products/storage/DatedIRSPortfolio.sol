@@ -62,4 +62,12 @@ library DatedIRSPortfolio {
         DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
         position.update(baseDelta, quoteDelta);
     }
+
+    /**
+     * @dev create, edit or close an irs position for a given marketId (e.g. aUSDC lend) and maturityTimestamp (e.g. 31st Dec 2023)
+     */
+    function settle(Data storage self, uint128 marketId, uint256 maturityTimestamp) internal {
+        DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
+        position.settle();
+    }
 }

@@ -10,6 +10,7 @@ Math
 
 Products - IRS
 
+- layer in pool logic and think about how it'd impact the gas costs
 - don't think we need cashflow propagation in the collateral engine
 
 - initiateTakerOrder

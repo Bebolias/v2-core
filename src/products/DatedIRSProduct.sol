@@ -3,7 +3,8 @@ pragma solidity >=0.8.13;
 
 import "./interfaces/IBaseDatedProduct.sol";
 import "../accounts/storage/Account.sol";
-import "./storage/DatedIRSPortfolio.sol"
+import "./storage/DatedIRSPortfolio.sol";
+import "../utils/contracts/SafeCast.sol";
 
 // todo: no need for base for no since not doing dated futures in the near future
 
@@ -15,13 +16,16 @@ import "./storage/DatedIRSPortfolio.sol"
 contract DatedIRSProduct is IBaseDatedProduct {
     using Account for Account.Data;
     using DatedIRSPortfolio for DatedIRSPortfolio.Data;
+    using SafeCastI256 for int256;
 
     /**
      * @inheritdoc IBaseDatedProduct
      */
-    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override returns (
-        int256 executedBaseAmount, int256 executedQuoteAmount
-    ) {
+    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint256 maturityTimestamp)
+        external
+        override
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount)
+    {
         // check if account exists
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
@@ -40,6 +44,12 @@ contract DatedIRSProduct is IBaseDatedProduct {
         Account.Data storage account = Account.load(accountId);
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
         int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp);
+
+        if (settlementCashflowInQuote > 0) {
+            account.collaterals[quoteToken].increaseCollateralBalance(settlementCashflowInQuote.toUint());
+        } else {
+            account.collaterals[quoteToken].decreaseCollateralBalance((-settlementCashflowInQuote).toUint());
+        }
     }
 
     /**
