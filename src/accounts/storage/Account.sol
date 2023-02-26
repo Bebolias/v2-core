@@ -26,6 +26,11 @@ library Account {
     error PermissionDenied(uint128 accountId, address target);
 
     /**
+     * @dev Thrown when a given account's total value is below the initial margin requirement
+     */
+    error AccountBelowIM(uint128 accountId);
+
+    /**
      * @dev Thrown when an account cannot be found.
      */
     error AccountNotFound(uint128 accountId);
@@ -218,6 +223,13 @@ library Account {
         // todo: add implementation with the RiskConfiguration.sol storage migrated into the accounts storage
         // todo: prb, user defined type
         return 2;
+    }
+
+    function imCheck(Data storage self) internal view {
+        (bool isSatisfied,) = self.isIMSatisfied();
+        if (!isSatisfied) {
+            revert AccountBelowIM(self.id);
+        }
     }
 
     /**

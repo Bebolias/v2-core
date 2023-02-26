@@ -46,11 +46,9 @@ contract CollateralEngine is ICollateralEngine {
 
         uint256 tokenAmountD18 = CollateralConfiguration.load(collateralType).convertTokenToSystemAmount(tokenAmount);
 
-        uint256 collateralBalanceD18 = account.getCollateralBalance(collateralType);
-
-        // todo: include im logic from python
-
         account.collaterals[collateralType].decreaseCollateralBalance(tokenAmountD18);
+
+        account.imCheck();
 
         collateralType.safeTransfer(msg.sender, tokenAmount);
 

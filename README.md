@@ -16,18 +16,19 @@ Oracles
 
 - Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
 
+Liquidation Engine
+
+- liquidate --> also check the liquidation deposit logic (consider removing or simplifying the logic to avoid the need for a separate storage for liquidation deposits)
+
 Account
 
+- introduce lens like interfaces to liquidation and collateral engines, already started this process in the collateral engine
 - parametrisation smth like RiskConfiguration.sol
 
 minor
 - add settlement token checks
 - can we cache margin requirement calculations and only apply deltas (trickier with annualization of notionals in case of irs)
 - consider breaking down account.sol into further instances beyond just rbac, e.g. one for just margin requirements, etc
-
-Liquidation Engine
-
-- liquidate --> also check the liquidation deposit logic (consider removing or simplifying the logic to avoid the need for a separate storage for liquidation deposits)
 
 minor
 - introduce LiquidationData
