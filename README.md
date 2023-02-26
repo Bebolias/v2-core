@@ -5,12 +5,13 @@ Math
 - PRB Math V3
 - User Defined Types
 
-Products
-
-- BaseDatedProduct.sol (1)
-- DatedIRSProduct.sol (2)
-
-- add bases, market = product + base + maturity (optional, i.e. not all products are dated)
+Products - IRS
+- initiateTakerOrder
+- initiateMakerOrder
+- settle 
+- unrealized pnl
+- annualized exposures
+- close account
 
 minor
 - within each product an account has a portfolio
