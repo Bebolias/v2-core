@@ -17,6 +17,7 @@ contract CollateralEngine is ICollateralEngine {
     using Account for Account.Data;
     using AccountRBAC for AccountRBAC.Data;
     using Collateral for Collateral.Data;
+    using SafeCastI256 for int256;
 
     /**
      * @inheritdoc ICollateralEngine
@@ -89,5 +90,18 @@ contract CollateralEngine is ICollateralEngine {
     /**
      * @inheritdoc ICollateralEngine
      */
-    function cashflowPropagation(uint128 accountId, address collateralType, int256 tokenAmount) external {}
+    function cashflowPropagation(uint128 accountId, address collateralType, int256 tokenAmount) external {
+        Account.Data storage account = Account.load(accountId);
+        // todo: needs a feature flag since since this function can only be called by [...]
+        // todo: check if tokenAmount == 0, don't do anything
+        if (tokenAmount > 0) {
+            account.collaterals[collateralType].increaseCollateralBalance(
+                CollateralConfiguration.load(collateralType).convertTokenToSystemAmount(tokenAmount.toUint())
+            );
+        } else {
+            account.collaterals[collateralType].decreaseCollateralBalance(
+                CollateralConfiguration.load(collateralType).convertTokenToSystemAmount((-tokenAmount).toUint())
+            );
+        }
+    }
 }
