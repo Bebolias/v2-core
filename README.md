@@ -13,6 +13,7 @@ Products
 - add bases, market = product + base + maturity (optional, i.e. not all products are dated)
 
 minor
+- within each product an account has a portfolio
 - check how these base products can represent pools, maturities and markets (bases) as ids, define these in the base dated product contract
 - a product can act similar to a manager where it is managing maturities and pools and bases, the product is also a pool manager 
 - do a single pool for now

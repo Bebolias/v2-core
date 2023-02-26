@@ -28,10 +28,6 @@ library Product {
          */
         address productAddress;
         /**
-         * @dev Address of the quote token in which this product settles
-         */
-        address quoteAddress;
-        /**
          * @dev Text identifier for the product.
          *
          * Not required to be unique.

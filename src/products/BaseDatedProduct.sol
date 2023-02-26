@@ -21,7 +21,8 @@ contract BaseDatedProduct is IBaseDatedProduct {
         // check if account exists
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         Account.Data storage account = Account.load(accountId);
-        (int256 executedBaseAmount, int256 executedQuoteAmount) = pool.executeTakerOrder(marketId, maturityTimestamp);
+        // (int256 executedBaseAmount, int256 executedQuoteAmount) = pool.executeTakerOrder(marketId, maturityTimestamp);
+        // the storage position object can execute this
     }
     /**
      * @inheritdoc IBaseDatedProduct
