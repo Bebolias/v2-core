@@ -11,20 +11,20 @@ library Collateral {
         /**
          * @dev The net amount that is deposited in this collateral
          */
-        uint256 balanceD18;
+        int256 balanceD18;
     }
 
     /**
      * @dev Increments the entry's balance.
      */
-    function increaseCollateralBalance(Data storage self, uint256 amountD18) internal {
+    function increaseCollateralBalance(Data storage self, int256 amountD18) internal {
         self.balanceD18 += amountD18;
     }
 
     /**
      * @dev Decrements the entry's balance.
      */
-    function decreaseCollateralBalance(Data storage self, uint256 amountD18) internal {
+    function decreaseCollateralBalance(Data storage self, int256 amountD18) internal {
         self.balanceD18 -= amountD18;
     }
 }

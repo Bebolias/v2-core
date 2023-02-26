@@ -7,24 +7,25 @@ Math
 
 Account
 
-- consider breaking down account.sol into further instances beyond just rbac, e.g. one for just margin requirements, etc
 - isAccountLiquidatable --> (1) --> consider putting this into the account
 - isAccountIMSatisfied --> (2) --> consider putting this into the account
+- getTotalAccountValue (where does this live in python?)
 
 minor
 - add settlement token checks
-
-Oracles
-
-- Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
+- can we cache margin requirement calculations and only apply deltas (trickier with annualization of notionals in case of irs)
+- consider breaking down account.sol into further instances beyond just rbac, e.g. one for just margin requirements, etc
 
 Collateral Engine
 
 - deposit
 - withdraw
 - getAccountCollateralBalanceAvailable
-- getTotalAccountValue (where does this live in python?)
 - cashflowPropagation
+
+Oracles
+
+- Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
 
 Liquidation Engine
 

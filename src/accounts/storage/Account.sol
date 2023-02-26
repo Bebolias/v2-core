@@ -133,7 +133,7 @@ library Account {
     function getCollateralBalance(Data storage self, address collateralType)
         internal
         view
-        returns (uint256 collateralBalanceD18)
+        returns (int256 collateralBalanceD18)
     {
         collateralBalanceD18 = self.collaterals[collateralType].balanceD18;
         return collateralBalanceD18;
@@ -178,6 +178,15 @@ library Account {
             Product.Data storage _product = Product.load(productIndex);
             unrealizedPnL += _product.getAccountUnrealizedPnL(self.id);
         }
+    }
+
+    /**
+     * @dev Returns the total account value in terms of the quote token of the (single token) account
+     */
+
+    function getTotalAccountValue(Data storage self) internal view returns (int256 totalAccountValue) {
+        int256 unrealizedPnL = self.getUnrealizedPnL();
+        int256 collateralBalance = self.getCollateralBalance(self.settlementToken);
     }
 
     function getRiskParameter(uint128 productId, uint128 marketId) internal pure returns (int256 riskParameter) {
