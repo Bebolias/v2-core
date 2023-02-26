@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 import "../../utils/helpers/SetUtil.sol";
 
 /**
- * @title Object for tracking dated positions, e.g. locked dated interest rate swap contracts
+ * @title Object for tracking a portfolio of dated interest rate swap positions
  */
 library DatedIRSPortfolio {
     struct Data {
