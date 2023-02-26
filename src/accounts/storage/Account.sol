@@ -193,6 +193,13 @@ library Account {
         // todo: prb, user defined type
         return 2;
     }
+
+    /**
+     * @dev Comes out as true if a given account initial margin requirement is satisfied
+     * i.e. account value (collateral + unrealized pnl) >= initial margin requirement
+     */
+    function isIMSatisfied() internal view returns (bool imSatisfied) {}
+
     /**
      * @dev Comes out as true if a given account is liquidatable, i.e. account value (collateral + unrealized pnl) < lm
      */

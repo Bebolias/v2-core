@@ -7,6 +7,7 @@ Math
 
 Account
 
+- consider breaking down account.sol into further instances beyond just rbac, e.g. one for just margin requirements, etc
 - isAccountLiquidatable --> (1) --> consider putting this into the account
 - isAccountIMSatisfied --> (2) --> consider putting this into the account
 
