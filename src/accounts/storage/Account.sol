@@ -193,13 +193,18 @@ library Account {
         // todo: prb, user defined type
         return 2;
     }
+    /**
+     * @dev Comes out as true if a given account is liquidatable, i.e. account value (collateral + unrealized pnl) < lm
+     */
 
+    function isLiquidatable(Data storage self) internal view returns (bool liquidatable) {}
     /**
      * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
      * todo: add user defined types
      * todo: consider representing im and lm as uint256 with casting in the function body
      * when summations with int256 need to take place
      */
+
     function getMarginRequirements(Data storage self) internal view returns (int256 im, int256 lm) {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
         for (uint256 i = 1; i < _activeProducts.length(); i++) {
