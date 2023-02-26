@@ -148,8 +148,11 @@ library Account {
         view
         returns (uint256 collateralBalanceAvailableD18)
     {
-        (int256 im,) = self.getMarginRequirements();
-        collateralBalanceAvailableD18 = self.getCollateralBalance(collateralType);
+        (uint256 im,) = self.getMarginRequirements();
+        uint256 collateralBalance = self.getCollateralBalance(collateralType);
+        if (collateralBalance > im) {
+            collateralBalanceAvailableD18 = collateralBalance - im;
+        }
     }
 
     /**
