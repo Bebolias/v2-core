@@ -5,20 +5,41 @@ Math
 - PRB Math V3
 - User Defined Types
 
-Collateral Engine
+Products
 
-- cashflowPropagation
+- BaseDatedProduct.sol (1)
+- DatedIRSProduct.sol (2)
 
-minor 
-- introduce liquidator deposit logic or propose an alternative
+- add bases, market = product + base + maturity (optional, i.e. not all products are dated)
+
+minor
+- check how these base products can represent pools, maturities and markets (bases) as ids, define these in the base dated product contract
+- a product can act similar to a manager where it is managing maturities and pools and bases, the product is also a pool manager 
+- do a single pool for now
+- what if pools propagated locked trades to the product instead of the product having to request them, similar to a notify transfer in the account object
+-  glp as a service = composability = lp token wars
+
+Pools
+
+- introduce a Pool.sol object, should share similarities with the product object
 
 Oracles
 
+- introduce a rate oracle manager (external)
+- introduce gwap oracle manager (internal)
+
 - Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
+
 
 Liquidation Engine
 
 - liquidate --> also check the liquidation deposit logic (consider removing or simplifying the logic to avoid the need for a separate storage for liquidation deposits)
+
+
+Collateral Engine
+
+minor 
+- introduce liquidator deposit logic or propose an alternative
 
 Account
 
@@ -34,25 +55,6 @@ minor
 - introduce LiquidationData
 - introduce ERC20Helper
 
-Products
-
-- BaseDatedProduct.sol
-- DatedIRSProduct.sol
-
-- add bases, market = product + base + maturity (optional, i.e. not all products are dated)
-
-minor
-- check how these base products can represent pools and maturities as ids, define these in the base dated product contract
-- glp as a service = composability = lp token wars
-- a product can act similar to a manager where it is managing maturities and pools and bases.., the market contract is basically also the pool manager
-- unique productId -> product address mapping and then within a given product there may be a few active maturities or a single one, but that's abstracted from the rest of the architecture
-- all the maturities of a given account are stored in the product object itself, each product has a single risk parameter, the product abstracts away maturities and pools from the rest of the architecture (mainly the margining system)
-- anything else that should be present in IProduct interface?
-- what if pools propagated locked trades to the market instead of the market having to request them, similar to a notify transfer in the account object
-
-Pools
-
-- introduce a Pool.sol object, should share similarities with the product object
 
 Feature Flags
 
