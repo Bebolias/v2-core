@@ -187,6 +187,7 @@ library Account {
     function getTotalAccountValue(Data storage self) internal view returns (int256 totalAccountValue) {
         int256 unrealizedPnL = self.getUnrealizedPnL();
         int256 collateralBalance = self.getCollateralBalance(self.settlementToken);
+        totalAccountValue = unrealizedPnL + collateralBalance;
     }
 
     function getRiskParameter(uint128 productId, uint128 marketId) internal pure returns (int256 riskParameter) {
@@ -213,7 +214,10 @@ library Account {
      * @dev Comes out as true if a given account is liquidatable, i.e. account value (collateral + unrealized pnl) < lm
      */
 
-    function isLiquidatable(Data storage self) internal view returns (bool liquidatable) {}
+    function isLiquidatable(Data storage self) internal view returns (bool liquidatable, int256 im, int256 lm) {
+        (im, lm) = self.getMarginRequirements();
+        liquidatable = self.getTotalAccountValue() < lm;
+    }
     /**
      * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
      * todo: add user defined types
