@@ -18,6 +18,7 @@ minor
 - do a single pool for now
 - what if pools propagated locked trades to the product instead of the product having to request them, similar to a notify transfer in the account object
 -  glp as a service = composability = lp token wars
+-  permissonless product creation with isolated pool of collateral
 
 Pools
 
