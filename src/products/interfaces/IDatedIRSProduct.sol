@@ -46,6 +46,7 @@ interface IDatedIRSProduct is IProduct {
         uint128 marketId,
         uint256 maturityTimestamp,
         uint256 priceLower,
-        uint256 priceUpper
-    ) external;
+        uint256 priceUpper,
+        int256 notionalAmount
+    ) external returns (int256 executedBaseAmount);
 }

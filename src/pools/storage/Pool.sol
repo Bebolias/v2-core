@@ -70,4 +70,17 @@ library Pool {
     {
         return IPool(self.poolAddress).executeTakerOrder(marketId, maturityTimestamp, notionalAmount);
     }
+
+    function executeMakerOrder(
+        Data storage self,
+        uint128 marketId,
+        uint256 maturityTimestamp,
+        uint256 priceLower,
+        uint256 priceUpper,
+        int256 notionalAmount
+    ) internal returns (int256 executedBaseAmount) {
+        return IPool(self.poolAddress).executeMakerOrder(
+            marketId, maturityTimestamp, priceLower, priceUpper, notionalAmount
+        );
+    }
 }
