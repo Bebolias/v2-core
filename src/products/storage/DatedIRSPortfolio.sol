@@ -3,7 +3,7 @@ pragma solidity >=0.8.13;
 
 import "../../utils/helpers/SetUtil.sol";
 import "./DatedIRSPosition.sol";
-import "../../oracles/storage/OracleManager.sol";
+import "../../oracles/storage/OracleManagerStorage.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions
@@ -74,9 +74,9 @@ library DatedIRSPortfolio {
     {
         DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
 
-        OracleManager.Data memory oracleManager = OracleManager.load();
+        OracleManager.Data memory oracleManager = OracleManagerStorage.load();
         int256 liquidityIndexMaturity =
-            IOracleManager(oracleManager.oracleManagerAddress).snapshotRateIndex(marketId, maturityTimestamp);
+            IOracleManager(oracleManager.oracleManagerAddress).rateIndexSnapshot(marketId, maturityTimestamp);
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();
