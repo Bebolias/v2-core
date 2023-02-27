@@ -2,6 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "../../utils/errors/AccessError.sol";
+import "../../interfaces/IPool.sol";
 
 /**
  * @title Connects external contracts that implement the `IPool` interface to the protocol.
