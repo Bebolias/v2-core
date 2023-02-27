@@ -11,5 +11,5 @@ contract OracleManager is IOracleManager {
     /**
      * @inheritdoc IOracleManager
      */
-    function snapshotRateIndex(uint128 marketId, uint256 maturityTimestamp) external view returns (int256 rateIndex) {}
+    function rateIndexSnapshot(uint128 marketId, uint256 maturityTimestamp) external view returns (int256 rateIndex) {}
 }

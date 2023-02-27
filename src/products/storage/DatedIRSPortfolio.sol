@@ -10,6 +10,8 @@ import "../../interfaces/IOracleManager.sol";
  * @title Object for tracking a portfolio of dated interest rate swap positions
  */
 library DatedIRSPortfolio {
+    using DatedIRSPosition for DatedIRSPosition.Data;
+
     struct Data {
         /**
          * @dev Numeric identifier for the account that owns the portfolio.

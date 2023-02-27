@@ -35,6 +35,7 @@ Pools
 
 Oracles
 
+- oracle registraion
 - introduce a rate oracle manager (external)
 - introduce gwap oracle manager (internal)
 
