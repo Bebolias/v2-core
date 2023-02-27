@@ -2,6 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "../../utils/helpers/SetUtil.sol";
+import "./DatedIRSPosition.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions
@@ -66,8 +67,13 @@ library DatedIRSPortfolio {
     /**
      * @dev create, edit or close an irs position for a given marketId (e.g. aUSDC lend) and maturityTimestamp (e.g. 31st Dec 2023)
      */
-    function settle(Data storage self, uint128 marketId, uint256 maturityTimestamp) internal {
+    function settle(Data storage self, uint128 marketId, uint256 maturityTimestamp)
+        internal
+        returns (int256 settlementCashflow)
+    {
         DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
+        settlementCashflow =
+            position.baseBalance * self.getRateOracle(marketId).snapshot(maturityTimestamp) + position.quoteBalance;
         position.settle();
     }
 }

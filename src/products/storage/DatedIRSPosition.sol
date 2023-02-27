@@ -17,7 +17,7 @@ library DatedIRSPosition {
     }
 
     function settle(Data storage self) internal {
-        // todo: for now assuming no pools, but need to include pools asap
+        // todo: for now assuming no pools, but need to include pools asap)
         self.baseBalance = 0;
         self.quoteBalance = 0;
     }

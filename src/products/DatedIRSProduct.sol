@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 import "./interfaces/IBaseDatedProduct.sol";
 import "../accounts/storage/Account.sol";
 import "./storage/DatedIRSPortfolio.sol";
-import "../utils/contracts/SafeCast.sol";
+import "../utils/helpers/SafeCast.sol";
 
 // todo: no need for base for no since not doing dated futures in the near future
 
@@ -44,6 +44,8 @@ contract DatedIRSProduct is IBaseDatedProduct {
         Account.Data storage account = Account.load(accountId);
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
         int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp);
+
+        // todo: need an irs market configuration library (up next)
 
         if (settlementCashflowInQuote > 0) {
             account.collaterals[quoteToken].increaseCollateralBalance(settlementCashflowInQuote.toUint());
