@@ -14,7 +14,6 @@ Products - IRS
 - layer in pool logic and think about how it'd impact the gas costs
 - don't think we need cashflow propagation in the collateral engine
 
-- initiateMakerOrder
 - unrealized pnl
 - annualized exposures
 - close account
@@ -30,7 +29,7 @@ minor
 
 Pools
 
-- introduce a Pool.sol object, should share similarities with the product object
+- [...]
 
 Oracles
 
