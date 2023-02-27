@@ -1,27 +1,30 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "./interfaces/IBaseDatedProduct.sol";
+import "./interfaces/IDatedIRSProduct.sol";
 import "../accounts/storage/Account.sol";
 import "./storage/DatedIRSPortfolio.sol";
 import "./storage/DatedIRSMarketConfiguration.sol";
 import "../utils/helpers/SafeCast.sol";
+import "../pools/storage/Pool.sol";
+import "../margin-engine/storage/Collateral.sol";
 
 // todo: no need for base for no since not doing dated futures in the near future
 
 /**
  * @title BaseDatedProduct abstract contract
- * @dev See IBaseDatedProduct
+ * @dev See IDatedIRSProduct
  */
 
-contract DatedIRSProduct is IBaseDatedProduct {
+contract DatedIRSProduct is IDatedIRSProduct {
     using Pool for Pool.Data;
     using Account for Account.Data;
     using DatedIRSPortfolio for DatedIRSPortfolio.Data;
     using SafeCastI256 for int256;
+    using Collateral for Collateral.Data;
 
     /**
-     * @inheritdoc IBaseDatedProduct
+     * @inheritdoc IDatedIRSProduct
      */
     function initiateTakerOrder(
         uint128 poolId,
@@ -44,7 +47,7 @@ contract DatedIRSProduct is IBaseDatedProduct {
         account.imCheck();
     }
     /**
-     * @inheritdoc IBaseDatedProduct
+     * @inheritdoc IDatedIRSProduct
      */
 
     function settle(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external override {
@@ -62,7 +65,7 @@ contract DatedIRSProduct is IBaseDatedProduct {
     }
 
     /**
-     * @inheritdoc IBaseDatedProduct
+     * @inheritdoc IDatedIRSProduct
      */
     function initiateMakerOrder(
         uint128 poolId,
