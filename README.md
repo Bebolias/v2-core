@@ -10,6 +10,7 @@ Math
 
 Products - IRS
 
+- note, pool ids are no a much broader concept, this needs to be elaborated in the architecture diagram and docs
 - layer in pool logic and think about how it'd impact the gas costs
 - don't think we need cashflow propagation in the collateral engine
 

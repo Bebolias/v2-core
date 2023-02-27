@@ -46,6 +46,26 @@ contract DatedIRSProduct is IDatedIRSProduct {
         // todo: process taker fees (these should also be returned)
         account.imCheck();
     }
+
+    /**
+     * @inheritdoc IDatedIRSProduct
+     */
+    function initiateMakerOrder(
+        uint128 poolId,
+        uint128 accountId,
+        uint128 marketId,
+        uint256 maturityTimestamp,
+        uint256 priceLower,
+        uint256 priceUpper,
+        int256 notionalAmount
+    ) external override returns (int256 executedBaseAmount) {
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
+        Pool.Data storage pool = Pool.load(poolId);
+        executedBaseAmount = pool.executeMakerOrder(marketId, maturityTimestamp, priceLower, priceUpper, notionalAmount);
+        // todo: mark product
+        // todo: process maker fees (these should also be returned)
+        account.imCheck();
+    }
     /**
      * @inheritdoc IDatedIRSProduct
      */
@@ -63,18 +83,6 @@ contract DatedIRSProduct is IDatedIRSProduct {
             account.collaterals[quoteToken].decreaseCollateralBalance((-settlementCashflowInQuote).toUint());
         }
     }
-
-    /**
-     * @inheritdoc IDatedIRSProduct
-     */
-    function initiateMakerOrder(
-        uint128 poolId,
-        uint128 accountId,
-        uint128 marketId,
-        uint256 maturityTimestamp,
-        uint256 priceLower,
-        uint256 priceUpper
-    ) external override {}
 
     /**
      * @inheritdoc IProduct
