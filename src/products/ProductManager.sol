@@ -63,6 +63,7 @@ contract ProductManager is IProductManager {
 
     function closeAccount(uint128 productId, uint128 accountId) external override {
         // todo: consider returning data that might be useful in the future
+        // why should this function be exposed in here?
         Product.load(productId).closeAccount(accountId);
     }
 }
