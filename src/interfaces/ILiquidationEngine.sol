@@ -40,25 +40,11 @@ interface ILiquidationEngine {
 
     /**
      * @notice Liquidates an account
-     * @param accountId The id of the account that is being liquidated
-     * @param liquidateAsAccountId Account id that will receive the rewards from the liquidation.
-     * @return liquidationData Information about the position that was liquidated.
+     * @param liquidatedAccountId The id of the account that is being liquidated
+     * @param liquidatorAccountId Account id that will receive the rewards from the liquidation.
+     * @return liquidatorRewardAmount Liquidator reward amount in terms of the account's settlement token
      */
-    function liquidate(uint128 accountId, uint128 liquidateAsAccountId)
+    function liquidate(uint128 liquidatedAccountId, uint128 liquidatorAccountId)
         external
-        returns (LiquidationData memory liquidationData);
-
-    /**
-     * @notice Determines whether a specified account is liquidatable
-     * @param accountId The id of the account that is being queried for liquidation.
-     * @return canLiquidate A boolean with the response to the query.
-     */
-    function isAccountLiquidatable(uint128 accountId) external returns (bool canLiquidate);
-
-    function getAccountMarginRequirements(uint128 accountId)
-        external
-        view
-        returns (uint256 initialMarginRequirementD18, uint256 liquidationMarginRequirementD18);
-
-    function isAccountIMSatisfied(uint128 accountID) external view returns (bool isIMSatisfied);
+        returns (uint256 liquidatorRewardAmount);
 }

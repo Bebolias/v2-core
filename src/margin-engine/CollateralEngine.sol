@@ -43,7 +43,7 @@ contract CollateralEngine is ICollateralEngine {
      * @inheritdoc ICollateralEngine
      */
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external override {
-        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId);
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, msg.sender);
 
         uint256 tokenAmountD18 = CollateralConfiguration.load(collateralType).convertTokenToSystemAmount(tokenAmount);
 

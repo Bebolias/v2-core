@@ -7,7 +7,7 @@ import "../accounts/storage/Account.sol";
 /// @title Interface a Product needs to adhere.
 interface IProduct is IERC165 {
     /// @notice returns a human-readable name for a given product
-    function name(uint128 productId) external view returns (string memory);
+    function name() external view returns (string memory);
 
     /// @notice returns the unrealized pnl in quote token terms for account
     function getAccountUnrealizedPnL(uint128 accountId) external view returns (int256 unrealizedPnL);

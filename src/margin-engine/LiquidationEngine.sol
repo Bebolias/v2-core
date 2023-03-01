@@ -2,8 +2,11 @@
 pragma solidity >=0.8.13;
 
 import "../accounts/storage/Account.sol";
+import "../accounts/storage/ProtocolRiskConfiguration.sol";
 import "../utils/errors/ParameterError.sol";
 import "../interfaces/ILiquidationEngine.sol";
+import "../utils/helpers/SafeCast.sol";
+import "./storage/Collateral.sol";
 
 /**
  * @title Module for liquidated accounts
@@ -11,35 +14,41 @@ import "../interfaces/ILiquidationEngine.sol";
  */
 
 contract LiquidationEngine is ILiquidationEngine {
-    /**
-     * @inheritdoc ILiquidationEngine
-     */
-    function liquidate(uint128 accountId, uint128 liquidateAsAccountId)
-        external
-        returns (LiquidationData memory liquidationData)
-    {}
+    using ProtocolRiskConfiguration for ProtocolRiskConfiguration.Data;
+    using Account for Account.Data;
+    using SafeCastU256 for uint256;
+    using SafeCastI256 for int256;
+    using Collateral for Collateral.Data;
 
     /**
      * @inheritdoc ILiquidationEngine
      */
-    function isAccountLiquidatable(uint128 accountId) external returns (bool canLiquidate) {
-        // todo: consider moving it away from here into the account manager given that this is calculated by Account.sol now
-    }
-    /**
-     * @inheritdoc ILiquidationEngine
-     */
-
-    function getAccountMarginRequirements(uint128 accountId)
+    function liquidate(uint128 liquidatedAccountId, uint128 liquidatorAccountId)
         external
-        view
-        returns (uint256 initialMarginRequirementD18, uint256 liquidationMarginRequirementD18)
+        returns (uint256 liquidatorRewardAmount)
     {
-        // todo: consider moving it away from here into the account manager given that this is calculated by Account.sol now
-    }
-    /**
-     * @inheritdoc ILiquidationEngine
-     */
-    function isAccountIMSatisfied(uint128 accountID) external view returns (bool isIMSatisfied) {
-        // todo: consider moving it away from here into the account manager given that this is calculated by Account.sol now
+        Account.exists(liquidatedAccountId);
+        Account.Data storage account = Account.load(liquidatedAccountId);
+        address liquidatorRewardToken = account.settlementToken;
+        (bool liquidatable, uint256 imPreClose,) = account.isLiquidatable();
+
+        if (!liquidatable) {
+            // todo: revert
+        }
+        account.closeAccount();
+        (uint256 imPostClose,) = account.getMarginRequirements();
+        int256 deltaIM = imPostClose.toInt() - imPreClose.toInt();
+
+        if (deltaIM <= 0) {
+            // todo: revert
+        }
+
+        // todo: liquidator deposit logic vs. alternatives (P1)
+
+        liquidatorRewardAmount = deltaIM.toUint() * ProtocolRiskConfiguration.load().liquidatorRewardParameter;
+        Account.Data storage liquidatorAccount = Account.load(liquidatorAccountId);
+
+        account.collaterals[liquidatorRewardToken].decreaseCollateralBalance(liquidatorRewardAmount);
+        liquidatorAccount.collaterals[liquidatorRewardToken].increaseCollateralBalance(liquidatorRewardAmount);
     }
 }

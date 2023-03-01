@@ -1,5 +1,41 @@
 # TODOs
 
+Distributions of tasks below
+
+Rate Oracle Manager
+
+- implement aave v3 rate index getters (2)
+
+Account
+
+- check out https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/UtilsModule.sol
+- what do they mean by "system wide config for anything" https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/storage/Config.sol
+
+- Market and risk configuration setting process (1)
+- Add settlement token related logic (setting, checks, etc) (3)
+- Introduce liquidator deposit logic or propose an alternative
+
+Liquidation Engine
+
+- reverts and liquidator deposits (4)
+- introduce LiquidationData (5)
+
+IRS Product & Pool
+- create a new repo for vamms (Ioana)
+
+Fee Logic
+- product implementation needs to include fee distribution logic, must be smth the interface supports
+
+Deployment
+- sooner rather than later
+
+Macro
+- reshuffle files: storage into one folder, core modules into another, external into another, etc
+
+Associated Systems Manager
+
+- [...]
+
 CI
 - initial unit tests
 - github flows
@@ -8,15 +44,17 @@ Math
 - PRB Math V3
 - User Defined Types
 
-Products - IRS
+Feature Flags
 
-- note, pool ids are no a much broader concept, this needs to be elaborated in the architecture diagram and docs
-- layer in pool logic and think about how it'd impact the gas costs
-- don't think we need cashflow propagation in the collateral engine
+- FeatureFlag.ensureAccessToFeature(_MARKET_FEATURE_FLAG); -> register a new market
+- https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/MarketManagerModule.sol
 
-- unrealized pnl
-- annualized exposures
-- close account
+Notes on Associated System
+
+- Associated systems become available to all system modules for communication and interaction, but as opposed to inter-modular communications, interactions with associated systems will require the use of `CALL`.
+-  Managed systems are connected via a proxy, which means that their implementation can be updated, and the system controls the execution context of the associated system. Example, an snxUSD token connected to the system, and controlled by the system.
+- Unmanaged systems are just addresses tracked by the system, for which it has no control whatsoever. Example, Uniswap v3, Curve, etc.
+
 
 minor
 - within each product an account has a portfolio
@@ -26,55 +64,17 @@ minor
 - what if pools propagated locked trades to the product instead of the product having to request them, similar to a notify transfer in the account object
 -  glp as a service = composability = lp token wars
 -  permissonless product creation with isolated pool of collateral
-
-Pools
-
-- [...]
-
-Oracles
-
-- oracle registraion
-- introduce a rate oracle manager (external)
-- introduce gwap oracle manager (internal)
-
-- Oracle Manager -> https://github.com/Synthetixio/synthetix-v3/blob/main/protocol/synthetix/contracts/storage/OracleManager.sol
-
-
-Liquidation Engine
-
-- liquidate --> also check the liquidation deposit logic (consider removing or simplifying the logic to avoid the need for a separate storage for liquidation deposits)
-
-
-Collateral Engine
-
-minor 
-- introduce liquidator deposit logic or propose an alternative
-
-Account
-
-- introduce lens like interfaces to liquidation and collateral engines, already started this process in the collateral engine
-- parametrisation smth like RiskConfiguration.sol
-
-minor
-- add settlement token checks
 - can we cache margin requirement calculations and only apply deltas (trickier with annualization of notionals in case of irs)
 - consider breaking down account.sol into further instances beyond just rbac, e.g. one for just margin requirements, etc
-
-minor
-- introduce LiquidationData
-- introduce ERC20Helper
-
-
-Feature Flags
-
-- FeatureFlag.ensureAccessToFeature(_MARKET_FEATURE_FLAG); -> register a new market
-
-Notes on Associated System
-
-- Associated systems become available to all system modules for communication and interaction, but as opposed to inter-modular communications, interactions with associated systems will require the use of `CALL`.
--  Managed systems are connected via a proxy, which means that their implementation can be updated, and the system controls the execution context of the associated system. Example, an snxUSD token connected to the system, and controlled by the system.
-- Unmanaged systems are just addresses tracked by the system, for which it has no control whatsoever. Example, Uniswap v3, Curve, etc.
-
+- note, pool ids are no a much broader concept, this needs to be elaborated in the architecture diagram and docs
+- layer in pool logic and think about how it'd impact the gas costs
+- don't think we need cashflow propagation in the collateral engine
+- generalise the signature for pools to also include the productId -> creates the ability to have many to many relationships
+- because we still haven't fully figured out pools, consider descoping them from mvp
+- create a diagram of alternatives for how pools could work vs. mvp
+- a product is free to choose what exchange / exchanges to use
+- keep products in the core because of the tight dependency with account? -> need to assess pros and cons in more detail
+- consider storing the pool address independently in the product contract as a private var or smth and, do we need a pool manager in that instance or just a simple setter within the product  will do -> worth thinking this through.
 
 # Summary
 This project uses foundry. Licensing is not finalised yet, as a placeholder using MIT in a few places to keep the linter happy.

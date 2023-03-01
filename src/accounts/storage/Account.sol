@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
+import "./MarketRiskConfiguration.sol";
+import "./ProtocolRiskConfiguration.sol";
 import "./AccountRBAC.sol";
 import "../../utils/helpers/SafeCast.sol";
 import "../../utils/helpers/SetUtil.sol";
@@ -11,7 +13,8 @@ import "../../products/storage/Product.sol";
  * @title Object for tracking accounts with access control and collateral tracking.
  */
 library Account {
-    // todo: this seems circular, having to use Account within the Account library, is there a cleaner way?
+    using MarketRiskConfiguration for MarketRiskConfiguration.Data;
+    using ProtocolRiskConfiguration for ProtocolRiskConfiguration.Data;
     using Account for Account.Data;
     using AccountRBAC for AccountRBAC.Data;
     using Product for Product.Data;
@@ -82,6 +85,7 @@ library Account {
         uint128 marketId;
         int256 filled;
         // this value should technically be uint256, however using int256 to minimise need for casting
+        // todo: consider using uint256 for the below values since they should never be negative
         int256 unfilledLong;
         int256 unfilledShort;
     }
@@ -167,10 +171,14 @@ library Account {
      * because loading an account and checking for ownership is a very
      * common use case in other parts of the code.
      */
-    function loadAccountAndValidateOwnership(uint128 accountId) internal view returns (Data storage account) {
+    function loadAccountAndValidateOwnership(uint128 accountId, address senderAddress)
+        internal
+        view
+        returns (Data storage account)
+    {
         account = Account.load(accountId);
-        if (!account.rbac.authorized(msg.sender)) {
-            revert PermissionDenied(accountId, msg.sender);
+        if (!account.rbac.authorized(senderAddress)) {
+            revert PermissionDenied(accountId, senderAddress);
         }
     }
 
@@ -211,18 +219,15 @@ library Account {
         totalAccountValue = unrealizedPnL + collateralBalance;
     }
 
-    function getRiskParameter(uint128 productId, uint128 marketId) internal pure returns (int256 riskParameter) {
-        // todo: add implementation with the RiskConfiguration.sol storage migrated into the accounts storage
-        return 1;
+    function getRiskParameter(uint128 productId, uint128 marketId) internal view returns (int256 riskParameter) {
+        return MarketRiskConfiguration.load(productId, marketId).riskParameter;
     }
 
     /**
      * @dev Note, im multiplier is assumed to be the same across all products, markets and maturities
      */
-    function getIMMultiplier() internal pure returns (uint256 imMultiplier) {
-        // todo: add implementation with the RiskConfiguration.sol storage migrated into the accounts storage
-        // todo: prb, user defined type
-        return 2;
+    function getIMMultiplier() internal view returns (uint256 imMultiplier) {
+        return ProtocolRiskConfiguration.load().imMultiplier;
     }
 
     function imCheck(Data storage self) internal view {
@@ -284,6 +289,7 @@ library Account {
         im = lm * getIMMultiplier();
     }
 
+    // todo: consider replacing with prb math
     function max(int256 a, int256 b) internal pure returns (int256) {
         return a >= b ? a : b;
     }

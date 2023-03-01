@@ -18,17 +18,18 @@ interface IDatedIRSProduct is IProduct {
     /**
      * @notice Initiates a taker order for a given account by consuming liquidity provided by the pool connected to this product
      * @dev Initially a single pool is connected to a single product, however, that doesn't need to be the case in the future
+     * @param poolAddress Address of the pool implementation that acts as the counterparty and pricer to the taker order initiated by accountId
      * @param accountId Id of the account that wants to initiate a taker order
      * @param marketId Id of the market in which the account wants to initiate a taker order (e.g. 1 for aUSDC lend)
      * @param maturityTimestamp Maturity timestamp of the market in which the account wants to initiate a taker order
-     * @param notionalAmount Amount of notional that the account wants to trade in either long (+) or short (-) direction depending on sign
+     * @param baseAmount Amount of notional that the account wants to trade in either long (+) or short (-) direction depending on sign
      */
     function initiateTakerOrder(
-        uint128 poolId,
+        address poolAddress,
         uint128 accountId,
         uint128 marketId,
         uint256 maturityTimestamp,
-        int256 notionalAmount
+        int256 baseAmount
     ) external returns (int256 executedBaseAmount, int256 executedQuoteAmount);
 
     /**
@@ -41,7 +42,7 @@ interface IDatedIRSProduct is IProduct {
      * @param priceUpper Upper price associated with the maker order (e.g. in context of a vamm, upper price of a range liquidity order)
      */
     function initiateMakerOrder(
-        uint128 poolId,
+        address poolAddress,
         uint128 accountId,
         uint128 marketId,
         uint256 maturityTimestamp,

@@ -7,14 +7,18 @@ import "./storage/Product.sol";
 import "./storage/ProductCreator.sol";
 import "../utils/storage/AssociatedSystem.sol";
 import "../utils/helpers/ERC165Helper.sol";
+import "../utils/helpers/SafeCast.sol";
 
 /**
  * @title Protocol-wide entry point for the management of products connected to the protocol.
  * @dev See IProductManager
  */
 contract ProductManager is IProductManager {
+    using Account for Account.Data;
     using Product for Product.Data;
+    using SafeCastI256 for int256;
     using AssociatedSystem for AssociatedSystem.Data;
+    using Collateral for Collateral.Data;
 
     /**
      * @inheritdoc IProductManager
@@ -65,5 +69,31 @@ contract ProductManager is IProductManager {
         // todo: consider returning data that might be useful in the future
         // why should this function be exposed in here?
         Product.load(productId).closeAccount(accountId);
+    }
+
+    // check if account exists
+    // or consider calling the product maneger once to do all the checks and updates
+    // todo: mark product in the account object (see python implementation for more details, solidity uses setutil though)
+    // todo: interesting but account is external to this product
+    // todo: process taker fees (these should also be returned)
+    function propagateTakerOrder(uint128 accountId, address takerAddress) external override {
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, takerAddress);
+        account.imCheck();
+    }
+
+    // todo: mark product
+    // todo: process maker fees (these should also be returned)
+    function propagateMakerOrder(uint128 accountId, address makerAddress) external override {
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, makerAddress);
+        account.imCheck();
+    }
+
+    function propagateCashflow(uint128 accountId, address quoteToken, int256 amount) external override {
+        Account.Data storage account = Account.load(accountId);
+        if (amount > 0) {
+            account.collaterals[quoteToken].increaseCollateralBalance(amount.toUint());
+        } else {
+            account.collaterals[quoteToken].decreaseCollateralBalance((-amount).toUint());
+        }
     }
 }
