@@ -4,26 +4,27 @@ pragma solidity >=0.8.13;
 /// @title Interface for the module for managing rate oracles connected to the Dated IRS Product
 interface IRateOracleManager {
     /**
-     * @notice Thrown when the specified marketId has not been registered in the system
+     * @notice Emitted when attempting to register a rate oracle with an invalid oracle address
+     * @param oracleAddress Invalid oracle address
      */
-    error RateOracleNotRegistered(bytes32 marketId);
+    error InvalidVariableOracleAddress(address oracleAddress);
 
     /**
      * @notice Emitted when `registerRateOracle` is called.
      * @param marketId The id of the market (e.g. aUSDC lend) associated with the rate oracle
+     * @param oracleAddress Address of the variable rate oracle contract
      */
-    event RateOracleNodeRegistered(bytes32 marketId);
+    event VariableRateOracleRegistered(uint128 marketId, address oracleAddress);
 
     /**
      * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC lend)
      * @param marketId Id of the market (e.g. aUSDC lend) for which we're requesting a rate index value
      * @param maturityTimestamp Maturity Timestamp of a given irs market that's requesting the index value for settlement purposes
-     * @return rateIndexAtMaturity Rate index at the requested maturityTimestamp
+     * @return rateIndexMaturity Rate index at the requested maturityTimestamp
      */
-    function getRateIndexAtMaturity(uint128 marketId, uint256 maturityTimestamp)
+    function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp)
         external
-        view
-        returns (uint256 rateIndexAtMaturity);
+        returns (uint256 rateIndexMaturity);
 
     /**
      * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC borrow)
@@ -42,4 +43,11 @@ interface IRateOracleManager {
         external
         view
         returns (uint256 datedIRSGwap);
+
+    /**
+     * @notice Register a variable rate oralce
+     * @param marketId Market Id
+     * @param oracleAddress Oracle Address
+     */
+    function registerVariableOracle(uint128 marketId, address oracleAddress) external;
 }

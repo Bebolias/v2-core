@@ -50,20 +50,12 @@ contract ExposedAccounts {
         Account.load(id).closeAccount();
     }
 
-    function getCollateralBalance(uint128 id, address collateralType)
-        external
-        view
-        returns (uint256)
-    {
+    function getCollateralBalance(uint128 id, address collateralType) external view returns (uint256) {
         Account.Data storage account = Account.load(id);
         return account.getCollateralBalance(collateralType);
     }
 
-    function getCollateralBalanceAvailable(uint128 id, address collateralType)
-        external
-        view
-        returns (uint256)
-    {
+    function getCollateralBalanceAvailable(uint128 id, address collateralType) external view returns (uint256) {
         Account.Data storage account = Account.load(id);
         return account.getCollateralBalanceAvailable(collateralType);
     }
@@ -84,71 +76,40 @@ contract ExposedAccounts {
         return account.getAnnualizedProductExposures(productId);
     }
 
-    function getUnrealizedPnL(uint128 id)
-        external
-        view
-        returns (int256)
-    {
+    function getUnrealizedPnL(uint128 id) external view returns (int256) {
         Account.Data storage account = Account.load(id);
         return account.getUnrealizedPnL();
     }
 
-    function getTotalAccountValue(uint128 id)
-        external
-        view
-        returns (int256)
-    {
+    function getTotalAccountValue(uint128 id) external view returns (int256) {
         Account.Data storage account = Account.load(id);
         return account.getTotalAccountValue();
     }
 
-    function getRiskParameter(uint128 productId, uint128 marketId)
-        external
-        view
-        returns (int256)
-    {
+    function getRiskParameter(uint128 productId, uint128 marketId) external view returns (int256) {
         return Account.getRiskParameter(productId, marketId);
     }
 
-    function getIMMultiplier()
-        external
-        view
-        returns (uint256)
-    {
+    function getIMMultiplier() external view returns (uint256) {
         return Account.getIMMultiplier();
     }
 
-    function imCheck(uint128 id)
-        external
-        view
-    {
+    function imCheck(uint128 id) external view {
         Account.Data storage account = Account.load(id);
         account.imCheck();
     }
 
-    function isIMSatisfied(uint128 id)
-        external
-        view
-        returns (bool, uint256)
-    {
+    function isIMSatisfied(uint128 id) external view returns (bool, uint256) {
         Account.Data storage account = Account.load(id);
         return account.isIMSatisfied();
     }
 
-    function isLiquidatable(uint128 id)
-        external
-        view
-        returns (bool, uint256, uint256)
-    {
+    function isLiquidatable(uint128 id) external view returns (bool, uint256, uint256) {
         Account.Data storage account = Account.load(id);
         return account.isLiquidatable();
     }
 
-    function getMarginRequirements(uint128 id)
-        external
-        view
-        returns (uint256, uint256)
-    {
+    function getMarginRequirements(uint128 id) external view returns (uint256, uint256) {
         Account.Data storage account = Account.load(id);
         return account.getMarginRequirements();
     }
@@ -186,27 +147,15 @@ contract AccountTest is Test {
         assembly {
             productSlot := add(productSlot, 1)
         }
-        vm.store(
-            address(accounts),
-            productSlot,
-            bytes32(uint256(uint160(mockProductAddress1)))
-        );
+        vm.store(address(accounts), productSlot, bytes32(uint256(uint160(mockProductAddress1))));
 
         // Mock account exposures to product ID 1 and markets IDs 10, 11
         Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
-        mockExposures[0] = Account.Exposure({
-            marketId: 10,
-            filled: 100e18,
-            unfilledLong: 200e18,
-            unfilledShort: -200e18
-        });
+        mockExposures[0] =
+            Account.Exposure({marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: -200e18});
 
-        mockExposures[1] = Account.Exposure({
-            marketId: 11,
-            filled: 200e18,
-            unfilledLong: 300e18,
-            unfilledShort: -400e18
-        });
+        mockExposures[1] =
+            Account.Exposure({marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18});
 
         vm.mockCall(
             mockProductAddress1,
@@ -215,17 +164,11 @@ contract AccountTest is Test {
         );
 
         // Mock account closure to product ID 1
-        vm.mockCall(
-            mockProductAddress1,
-            abi.encodeWithSelector(IProduct.closeAccount.selector),
-            abi.encode()
-        );
+        vm.mockCall(mockProductAddress1, abi.encodeWithSelector(IProduct.closeAccount.selector), abi.encode());
 
         // Mock account uPnL in product ID 1
         vm.mockCall(
-            mockProductAddress1,
-            abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector),
-            abi.encode(100e18)
+            mockProductAddress1, abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector), abi.encode(100e18)
         );
 
         // Add Product with product ID 2 and address mockProductAddress1
@@ -234,20 +177,12 @@ contract AccountTest is Test {
         assembly {
             productSlot := add(productSlot, 1)
         }
-        vm.store(
-            address(accounts),
-            productSlot,
-            bytes32(uint256(uint160(mockProductAddress2)))
-        );
+        vm.store(address(accounts), productSlot, bytes32(uint256(uint160(mockProductAddress2))));
 
         // Mock account exposures to product ID 2 and markets IDs 20
         mockExposures = new Account.Exposure[](1);
-        mockExposures[0] = Account.Exposure({
-            marketId: 20,
-            filled: -50e18,
-            unfilledLong: 150e18,
-            unfilledShort: -150e18
-        });
+        mockExposures[0] =
+            Account.Exposure({marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18});
 
         vm.mockCall(
             mockProductAddress2,
@@ -256,17 +191,11 @@ contract AccountTest is Test {
         );
 
         // Mock account closure to product ID 2
-        vm.mockCall(
-            mockProductAddress2,
-            abi.encodeWithSelector(IProduct.closeAccount.selector),
-            abi.encode()
-        );
+        vm.mockCall(mockProductAddress2, abi.encodeWithSelector(IProduct.closeAccount.selector), abi.encode());
 
         // Mock account uPnL in product ID 2
         vm.mockCall(
-            mockProductAddress2,
-            abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector),
-            abi.encode(-200e18)
+            mockProductAddress2, abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector), abi.encode(-200e18)
         );
     }
 
@@ -276,42 +205,26 @@ contract AccountTest is Test {
         assembly {
             slot := add(slot, 1)
         }
-        vm.store(
-            address(accounts),
-            slot,
-            bytes32(abi.encode(1e18))
-        );
+        vm.store(address(accounts), slot, bytes32(abi.encode(1e18)));
 
         // Mock risk parameter for product ID 1 and market ID 11
         slot = keccak256(abi.encode("xyz.voltz.MarketRiskConfiguration", 1, 11));
         assembly {
             slot := add(slot, 1)
         }
-        vm.store(
-            address(accounts),
-            slot,
-            bytes32(abi.encode(1e18))
-        );
+        vm.store(address(accounts), slot, bytes32(abi.encode(1e18)));
 
         // Mock risk parameter for product ID 2 and market ID 20
         slot = keccak256(abi.encode("xyz.voltz.MarketRiskConfiguration", 2, 20));
         assembly {
             slot := add(slot, 1)
         }
-        vm.store(
-            address(accounts),
-            slot,
-            bytes32(abi.encode(1e18))
-        );
+        vm.store(address(accounts), slot, bytes32(abi.encode(1e18)));
     }
 
     function setupProtocolRiskConfigurations() public {
         bytes32 slot = keccak256(abi.encode("xyz.voltz.ProtocolRiskConfiguration"));
-        vm.store(
-            address(accounts),
-            slot,
-            bytes32(abi.encode(2e18))
-        );
+        vm.store(address(accounts), slot, bytes32(abi.encode(2e18)));
     }
 
     function test_Exists() public {
@@ -402,7 +315,7 @@ contract AccountTest is Test {
         vm.assume(balance < 1000e18);
         accounts.setCollateralBalance(accountId, token, balance);
 
-        (bool liquidatable, uint256 im, uint256 lm)  = accounts.isLiquidatable(accountId);
+        (bool liquidatable, uint256 im, uint256 lm) = accounts.isLiquidatable(accountId);
 
         assertEq(liquidatable, true);
         assertEq(lm, 900e18);
@@ -413,7 +326,7 @@ contract AccountTest is Test {
         balance = bound(balance, 1000e18, 1000e27);
         accounts.setCollateralBalance(accountId, token, balance);
 
-        (bool liquidatable, uint256 im, uint256 lm)  = accounts.isLiquidatable(accountId);
+        (bool liquidatable, uint256 im, uint256 lm) = accounts.isLiquidatable(accountId);
 
         assertEq(liquidatable, false);
         assertEq(lm, 900e18);
@@ -424,7 +337,7 @@ contract AccountTest is Test {
         vm.assume(balance < 1900e18);
         accounts.setCollateralBalance(accountId, token, balance);
 
-        (bool imSatisfied, uint256 im)  = accounts.isIMSatisfied(accountId);
+        (bool imSatisfied, uint256 im) = accounts.isIMSatisfied(accountId);
 
         assertEq(imSatisfied, false);
         assertEq(im, 1800e18);
@@ -434,7 +347,7 @@ contract AccountTest is Test {
         balance = bound(balance, 1900e18, 1000e27);
         accounts.setCollateralBalance(accountId, token, balance);
 
-        (bool imSatisfied, uint256 im)  = accounts.isIMSatisfied(accountId);
+        (bool imSatisfied, uint256 im) = accounts.isIMSatisfied(accountId);
 
         assertEq(imSatisfied, true);
         assertEq(im, 1800e18);
@@ -460,7 +373,7 @@ contract AccountTest is Test {
         balance = bound(balance, 1900e18, 1000e27);
         accounts.setCollateralBalance(accountId, token, balance);
 
-        uint256 collateralBalanceAvailableD18  = accounts.getCollateralBalanceAvailable(accountId, token);
+        uint256 collateralBalanceAvailableD18 = accounts.getCollateralBalanceAvailable(accountId, token);
 
         assertEq(collateralBalanceAvailableD18, balance - 1900e18);
     }
@@ -469,7 +382,7 @@ contract AccountTest is Test {
         vm.assume(balance <= 1900e18);
         accounts.setCollateralBalance(accountId, token, balance);
 
-        uint256 collateralBalanceAvailableD18  = accounts.getCollateralBalanceAvailable(accountId, token);
+        uint256 collateralBalanceAvailableD18 = accounts.getCollateralBalanceAvailable(accountId, token);
 
         assertEq(collateralBalanceAvailableD18, 0);
     }
@@ -479,7 +392,7 @@ contract AccountTest is Test {
 
         accounts.setCollateralBalance(accountId, otherToken, 100e18);
 
-        uint256 collateralBalanceAvailableD18  = accounts.getCollateralBalanceAvailable(accountId, otherToken);
+        uint256 collateralBalanceAvailableD18 = accounts.getCollateralBalanceAvailable(accountId, otherToken);
 
         assertEq(collateralBalanceAvailableD18, 100e18);
     }
