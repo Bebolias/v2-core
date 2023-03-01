@@ -75,18 +75,15 @@ library DatedIRSPortfolio {
         view
         returns (int256 unrealizedPnL)
     {
-        SetUtil.UintSet storage _activeMarkets = self.activeMarkets;
-        for (uint256 i = 1; i < _activeMarkets.length(); i++) {
-            uint128 marketId = _activeMarkets.valueAt(i).to128();
-            SetUtil.UintSet storage _activeMaturities = self.activeMaturitiesPerMarket[marketId];
-            for (uint256 j = 1; i < _activeMaturities.length(); i++) {
-                uint256 maturityTimestamp = _activeMaturities.valueAt(j);
-                DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
-
-                IPool pool = IPool(poolAddress);
+        for (uint256 i = 1; i <= self.activeMarkets.length(); i++) {
+            uint128 marketId = self.activeMarkets.valueAt(i).to128();
+            for (uint256 j = 1; j <= self.activeMaturitiesPerMarket[marketId].length(); i++) {
+                uint256 maturityTimestamp = self.activeMaturitiesPerMarket[marketId].valueAt(j);
+                int256 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
+                int256 quoteBalance = self.positions[marketId][maturityTimestamp].quoteBalance;
 
                 (int256 baseBalancePool, int256 quoteBalancePool) =
-                    pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
+                    IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
 
                 int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
@@ -99,8 +96,8 @@ library DatedIRSPortfolio {
                 ).toInt();
 
                 int256 unwindQuote =
-                    (position.baseBalance + baseBalancePool) * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
-                unrealizedPnL += (unwindQuote + position.quoteBalance + quoteBalancePool);
+                    (baseBalance + baseBalancePool) * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
+                unrealizedPnL += (unwindQuote + quoteBalance + quoteBalancePool);
             }
         }
     }
@@ -111,16 +108,19 @@ library DatedIRSPortfolio {
      * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
-    function baseToAnnualizedExposure(int256 baseAmount, uint128 marketId, uint256 maturityTimestamp)
+    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint256 maturityTimestamp)
         internal
         view
-        returns (int256 exposure)
+        returns (int256[] memory exposures)
     {
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
         int256 currentLiquidityIndex =
             IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
-        exposure = baseAmount * currentLiquidityIndex * timeDeltaAnnualized;
+
+        for (uint256 i = 0; i < baseAmounts.length; ++i) {
+            exposures[i] = baseAmounts[i] * currentLiquidityIndex * timeDeltaAnnualized;
+        }
     }
 
     /**
@@ -132,27 +132,33 @@ library DatedIRSPortfolio {
         view
         returns (Account.Exposure[] memory exposures)
     {
-        SetUtil.UintSet storage _activeMarkets = self.activeMarkets;
         uint256 counter = 0;
-        for (uint256 i = 1; i < _activeMarkets.length(); i++) {
-            uint128 marketId = _activeMarkets.valueAt(i).to128();
-            SetUtil.UintSet storage _activeMaturities = self.activeMaturitiesPerMarket[marketId];
-            for (uint256 j = 1; i < _activeMaturities.length(); j++) {
-                uint256 maturityTimestamp = _activeMaturities.valueAt(j);
-                DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
+        for (uint256 i = 1; i <= self.activeMarkets.length(); i++) {
+            uint128 marketId = self.activeMarkets.valueAt(i).to128();
+            for (uint256 j = 1; i <= self.activeMaturitiesPerMarket[marketId].length(); j++) {
+                uint256 maturityTimestamp = self.activeMaturitiesPerMarket[marketId].valueAt(j);
+                int256 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
 
-                IPool pool = IPool(poolAddress);
-
-                (int256 baseBalancePool,) = pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
+                (int256 baseBalancePool,) = IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
                 (int256 unfilledBaseLong, int256 unfilledBaseShort) =
-                    pool.getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
+                    IPool(poolAddress).getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
 
-                exposures[counter] = Account.Exposure({
-                    marketId: marketId,
-                    filled: baseToAnnualizedExposure((position.baseBalance + baseBalancePool), marketId, maturityTimestamp),
-                    unfilledLong: baseToAnnualizedExposure(unfilledBaseLong, marketId, maturityTimestamp),
-                    unfilledShort: baseToAnnualizedExposure(unfilledBaseShort, marketId, maturityTimestamp)
-                });
+                {
+                    int256[] memory baseAmounts = new int256[](3);
+                    baseAmounts[0] = (baseBalance + baseBalancePool);
+                    baseAmounts[1] = unfilledBaseLong;
+                    baseAmounts[2] = unfilledBaseShort;
+
+                    int256[] memory annualizedExposures = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
+
+                    exposures[counter] = Account.Exposure({
+                        marketId: marketId,
+                        filled: annualizedExposures[0],
+                        unfilledLong: annualizedExposures[1],
+                        unfilledShort: annualizedExposures[2]
+                    });
+                }
+
                 counter++;
             }
         }
@@ -168,10 +174,10 @@ library DatedIRSPortfolio {
     function closeAccount(Data storage self, address poolAddress) internal {
         SetUtil.UintSet storage _activeMarkets = self.activeMarkets;
         IPool pool = IPool(poolAddress);
-        for (uint256 i = 1; i < _activeMarkets.length(); i++) {
+        for (uint256 i = 1; i <= _activeMarkets.length(); i++) {
             uint128 marketId = _activeMarkets.valueAt(i).to128();
             SetUtil.UintSet storage _activeMaturities = self.activeMaturitiesPerMarket[marketId];
-            for (uint256 j = 1; i < _activeMaturities.length(); j++) {
+            for (uint256 j = 1; j <= _activeMaturities.length(); j++) {
                 uint256 maturityTimestamp = _activeMaturities.valueAt(j);
 
                 DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];

@@ -159,9 +159,9 @@ library Account {
     {
         if (collateralType == self.settlementToken) {
             (uint256 im,) = self.getMarginRequirements();
-            int256 collateralBalance = self.getTotalAccountValue();
-            if (collateralBalance > im.toInt()) {
-                collateralBalanceAvailableD18 = collateralBalance.toUint() - im;
+            int256 totalAccountValue = self.getTotalAccountValue();
+            if (totalAccountValue > im.toInt()) {
+                collateralBalanceAvailableD18 = totalAccountValue.toUint() - im;
             }
         }
         else {

@@ -17,9 +17,11 @@ interface IPool is IERC165 {
 
     function getAccountFilledBalances(uint128 marketId, uint256 maturityTimestamp, uint128 accountId)
         external
+        view
         returns (int256 baseBalancePool, int256 quoteBalancePool);
 
     function getAccountUnfilledBases(uint128 marketId, uint256 maturityTimestamp, uint128 accountId)
         external
+        view
         returns (int256 unfilledBaseLong, int256 unfilledBaseShort);
 }
