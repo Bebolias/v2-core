@@ -6,13 +6,11 @@ import "../../src/accounts/storage/AccountRBAC.sol";
 
 contract ExposedAccountRBAC {
     using AccountRBAC for AccountRBAC.Data;
-    
-    AccountRBAC.Data item;
+
+    AccountRBAC.Data internal item;
 
     constructor(address owner) {
-        item = AccountRBAC.Data({
-                owner: owner
-            });
+        item = AccountRBAC.Data({ owner: owner });
     }
 
     // Mock functions

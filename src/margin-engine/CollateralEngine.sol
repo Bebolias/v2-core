@@ -59,7 +59,10 @@ contract CollateralEngine is ICollateralEngine {
     /**
      * @inheritdoc ICollateralEngine
      */
-    function getAccountCollateralBalance(uint128 accountId, address collateralType)
+    function getAccountCollateralBalance(
+        uint128 accountId,
+        address collateralType
+    )
         external
         view
         override
@@ -71,7 +74,10 @@ contract CollateralEngine is ICollateralEngine {
      * @inheritdoc ICollateralEngine
      */
 
-    function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
+    function getAccountCollateralBalanceAvailable(
+        uint128 accountId,
+        address collateralType
+    )
         external
         view
         override

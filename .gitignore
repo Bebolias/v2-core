@@ -19,4 +19,8 @@ docs/
 # VS Code
 /.vscode
 
+# Coverage Files
+/lcov.info
+
 bin/
+/yarn-error.log

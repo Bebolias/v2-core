@@ -17,8 +17,10 @@ interface IDatedIRSVAMMPool is IPool {
      * @param maturityTimestamp Timestamp at which a given market matures
      * @param fixedRateLower Lower Fixed Rate of the range order
      * @param fixedRateUpper Upper Fixed Rate of the range order
-     * @param requestedBaseAmount Requested amount of notional provided to a given vamm in terms of the virtual base tokens of the market
-     * @param executedBaseAmount Executed amount of notional provided to a given vamm in terms of the virtual base tokens of the market
+     * @param requestedBaseAmount Requested amount of notional provided to a given vamm in terms of the virtual base tokens of the
+     * market
+     * @param executedBaseAmount Executed amount of notional provided to a given vamm in terms of the virtual base tokens of the
+     * market
      */
     function executeDatedMakerOrder(
         uint128 marketId,
@@ -26,5 +28,7 @@ interface IDatedIRSVAMMPool is IPool {
         uint256 fixedRateLower,
         uint256 fixedRateUpper,
         int256 requestedBaseAmount
-    ) external returns (int256 executedBaseAmount);
+    )
+        external
+        returns (int256 executedBaseAmount);
 }

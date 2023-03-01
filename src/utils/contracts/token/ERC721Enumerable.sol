@@ -9,7 +9,8 @@ import "../../interfaces/IERC721Enumerable.sol";
  * See IERC721Enumerable
  *
  * Reference implementations:
- * - OpenZeppelin - https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/extensions/ERC721EnumerableStorage.sol
+* - OpenZeppelin -
+https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/extensions/ERC721EnumerableStorage.sol
  */
 
 abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
@@ -94,7 +95,8 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
         if (tokenIndex != lastTokenIndex) {
             uint256 lastTokenId = ERC721EnumerableStorage.load().ownedTokens[from][lastTokenIndex];
 
-            ERC721EnumerableStorage.load().ownedTokens[from][tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
+            ERC721EnumerableStorage.load().ownedTokens[from][tokenIndex] = lastTokenId; // Move the last token to the slot of the
+                // to-delete token
             ERC721EnumerableStorage.load().ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
         }
 
@@ -120,7 +122,8 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
         // an 'if' statement (like in _removeTokenFromOwnerEnumeration)
         uint256 lastTokenId = ERC721EnumerableStorage.load().allTokens[lastTokenIndex];
 
-        ERC721EnumerableStorage.load().allTokens[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
+        ERC721EnumerableStorage.load().allTokens[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete
+            // token
         ERC721EnumerableStorage.load().allTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
 
         // This also deletes the contents at the last position of the array
@@ -128,7 +131,11 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
         ERC721EnumerableStorage.load().allTokens.pop();
     }
 
-    function _initialize(string memory tokenName, string memory tokenSymbol, string memory baseTokenURI)
+    function _initialize(
+        string memory tokenName,
+        string memory tokenSymbol,
+        string memory baseTokenURI
+    )
         internal
         virtual
         override

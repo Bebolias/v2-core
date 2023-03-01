@@ -44,7 +44,10 @@ interface ILiquidationEngine {
      * @param liquidatorAccountId Account id that will receive the rewards from the liquidation.
      * @return liquidatorRewardAmount Liquidator reward amount in terms of the account's settlement token
      */
-    function liquidate(uint128 liquidatedAccountId, uint128 liquidatorAccountId)
+    function liquidate(
+        uint128 liquidatedAccountId,
+        uint128 liquidatorAccountId
+    )
         external
         returns (uint256 liquidatorRewardAmount);
 }

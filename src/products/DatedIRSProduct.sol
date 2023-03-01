@@ -38,7 +38,11 @@ contract DatedIRSProduct is IDatedIRSProduct {
         uint128 marketId,
         uint256 maturityTimestamp,
         int256 baseAmount
-    ) external override returns (int256 executedBaseAmount, int256 executedQuoteAmount) {
+    )
+        external
+        override
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount)
+    {
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         DatedIRSPortfolio.Data storage portfolio = DatedIRSPortfolio.load(accountId);
         IDatedIRSVAMMPool pool = IDatedIRSVAMMPool(poolAddress);
@@ -58,10 +62,13 @@ contract DatedIRSProduct is IDatedIRSProduct {
         uint256 priceLower,
         uint256 priceUpper,
         int256 requestedBaseAmount
-    ) external override returns (int256 executedBaseAmount) {
+    )
+        external
+        override
+        returns (int256 executedBaseAmount)
+    {
         IDatedIRSVAMMPool pool = IDatedIRSVAMMPool(poolAddress);
-        executedBaseAmount =
-            pool.executeDatedMakerOrder(marketId, maturityTimestamp, priceLower, priceUpper, requestedBaseAmount);
+        executedBaseAmount = pool.executeDatedMakerOrder(marketId, maturityTimestamp, priceLower, priceUpper, requestedBaseAmount);
 
         IProductManager(_proxy).propagateMakerOrder(accountId, msg.sender);
     }

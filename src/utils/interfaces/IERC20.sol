@@ -23,7 +23,8 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 amount);
 
     /**
-     * @notice Thrown when the address interacting with the contract does not have sufficient allowance to transfer tokens from another contract.
+     * @notice Thrown when the address interacting with the contract does not have sufficient allowance to transfer tokens from
+     * another contract.
      * @param required The necessary allowance.
      * @param existing The current allowance.
      */

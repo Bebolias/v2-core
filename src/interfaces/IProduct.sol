@@ -13,10 +13,7 @@ interface IProduct is IERC165 {
     function getAccountUnrealizedPnL(uint128 accountId) external view returns (int256 unrealizedPnL);
 
     /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
-    function getAccountAnnualizedExposures(uint128 accountId)
-        external
-        view
-        returns (Account.Exposure[] memory exposures);
+    function getAccountAnnualizedExposures(uint128 accountId) external view returns (Account.Exposure[] memory exposures);
 
     // state-changing functions
 

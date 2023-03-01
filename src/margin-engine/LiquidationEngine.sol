@@ -23,7 +23,10 @@ contract LiquidationEngine is ILiquidationEngine {
     /**
      * @inheritdoc ILiquidationEngine
      */
-    function liquidate(uint128 liquidatedAccountId, uint128 liquidatorAccountId)
+    function liquidate(
+        uint128 liquidatedAccountId,
+        uint128 liquidatorAccountId
+    )
         external
         returns (uint256 liquidatorRewardAmount)
     {

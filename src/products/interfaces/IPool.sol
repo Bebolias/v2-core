@@ -11,16 +11,28 @@ interface IPool is IERC165 {
     /// @dev note, a pool needs to have this interface to enable account closures initiated by products
     /// @dev in the future -> executePerpetualTakerOrder(uint128 marketId, int256 baseAmount)
     /// for products that don't have maturities
-    function executeDatedTakerOrder(uint128 marketId, uint256 maturityTimestamp, int256 baseAmount)
+    function executeDatedTakerOrder(
+        uint128 marketId,
+        uint256 maturityTimestamp,
+        int256 baseAmount
+    )
         external
         returns (int256 executedBaseAmount, int256 executedQuoteAmount);
 
-    function getAccountFilledBalances(uint128 marketId, uint256 maturityTimestamp, uint128 accountId)
+    function getAccountFilledBalances(
+        uint128 marketId,
+        uint256 maturityTimestamp,
+        uint128 accountId
+    )
         external
         view
         returns (int256 baseBalancePool, int256 quoteBalancePool);
 
-    function getAccountUnfilledBases(uint128 marketId, uint256 maturityTimestamp, uint128 accountId)
+    function getAccountUnfilledBases(
+        uint128 marketId,
+        uint256 maturityTimestamp,
+        uint128 accountId
+    )
         external
         view
         returns (int256 unfilledBaseLong, int256 unfilledBaseShort);

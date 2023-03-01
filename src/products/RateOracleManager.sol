@@ -22,7 +22,10 @@ contract RateOracleManager is IRateOracleManager {
     /**
      * @inheritdoc IRateOracleManager
      */
-    function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp)
+    function getRateIndexMaturity(
+        uint128 marketId,
+        uint256 maturityTimestamp
+    )
         external
         override
         returns (uint256 rateIndexMaturity)
@@ -35,12 +38,7 @@ contract RateOracleManager is IRateOracleManager {
      * @dev this function will likely need the poolAddress as its input since the gwap comes from the vamms
      * todo: needs implementation
      */
-    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp)
-        external
-        view
-        override
-        returns (uint256 datedIRSGwap)
-    {}
+    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp) external view override returns (uint256 datedIRSGwap) { }
 
     // todo: do we want this function to return something?
     // todo: needs a feature flag to check for permission to register new variable rate oracles
@@ -59,11 +57,7 @@ contract RateOracleManager is IRateOracleManager {
         emit VariableRateOracleRegistered(marketId, oracleAddress);
     }
 
-    function _isVariableOracleRegistered(uint128 marketId) internal returns (bool isRegistered) { 
+    function _isVariableOracleRegistered(uint128 marketId) internal returns (bool isRegistered) { }
 
-    }
-
-    function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {
-        
-    }
+    function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) { }
 }

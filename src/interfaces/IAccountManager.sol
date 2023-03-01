@@ -3,7 +3,8 @@ pragma solidity >=0.8.13;
 
 /**
  * @title Account Manager Interface.
- * @notice Manages the system's account token NFT. Every user will need to register an account before being able to interact with the protocol..
+ * @notice Manages the system's account token NFT. Every user will need to register an account before being able to interact with
+ * the protocol..
  */
 interface IAccountManager {
     /**

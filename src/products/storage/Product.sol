@@ -24,7 +24,8 @@ library Product {
         /**
          * @dev Address for the external contract that implements the `IProduct` interface, which this Product objects connects to.
          *
-         * Note: This object is how the system tracks the product. The actual product is external to the system, i.e. its own contract.
+         * Note: This object is how the system tracks the product. The actual product is external to the system, i.e. its own
+         * contract.
          */
         address productAddress;
         /**
@@ -66,11 +67,7 @@ library Product {
      * settlement token of the account, i.e. all the positions used in the unrealised pnl calculation should settle/quote in a token
      * that matches the settlement token of the account.
      */
-    function getAccountUnrealizedPnL(Data storage self, uint128 accountId)
-        internal
-        view
-        returns (int256 accountUnrealizedPnL)
-    {
+    function getAccountUnrealizedPnL(Data storage self, uint128 accountId) internal view returns (int256 accountUnrealizedPnL) {
         return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId);
     }
 
@@ -78,7 +75,10 @@ library Product {
      * @dev The product at self.productAddress is expected to aggregate filled and unfilled notionals for all maturities and pools
      * note: needs to be in terms of the settlement token of the accunt given currently only supporting single-token mode
      */
-    function getAccountAnnualizedExposures(Data storage self, uint128 accountId)
+    function getAccountAnnualizedExposures(
+        Data storage self,
+        uint128 accountId
+    )
         internal
         view
         returns (Account.Exposure[] memory exposures)

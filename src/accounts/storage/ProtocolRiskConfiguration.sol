@@ -12,7 +12,8 @@ library ProtocolRiskConfiguration {
          */
         uint256 imMultiplier;
         /**
-         * @dev Liquidator reward parameters are multiplied by the im delta caused by the liquidation to get the liquidator reward amount
+         * @dev Liquidator reward parameters are multiplied by the im delta caused by the liquidation to get the liquidator reward
+         * amount
          */
         uint256 liquidatorRewardParameter;
     }

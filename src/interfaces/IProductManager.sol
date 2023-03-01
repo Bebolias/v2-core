@@ -24,7 +24,10 @@ interface IProductManager {
     function getAccountUnrealizedPnL(uint128 productId, uint128 accountId) external view returns (int256);
 
     /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
-    function getAccountAnnualizedExposures(uint128 productId, uint128 accountId)
+    function getAccountAnnualizedExposures(
+        uint128 productId,
+        uint128 accountId
+    )
         external
         view
         returns (Account.Exposure[] memory exposures);

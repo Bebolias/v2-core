@@ -6,13 +6,11 @@ import "../../src/margin-engine/storage/Collateral.sol";
 
 contract ExposedCollateral {
     using Collateral for Collateral.Data;
-    
-    Collateral.Data item;
+
+    Collateral.Data internal item;
 
     constructor(uint256 balanceD18) {
-        item = Collateral.Data({
-                balanceD18: balanceD18
-            });
+        item = Collateral.Data({ balanceD18: balanceD18 });
     }
 
     // Mock functions
@@ -63,7 +61,7 @@ contract CollateralTest is Test {
         vm.assume(amount <= balance);
         ExposedCollateral collateral = new ExposedCollateral(balance);
         collateral.decreaseCollateralBalance(amount);
-        
+
         assertEq(collateral.get().balanceD18, balance - amount);
     }
 

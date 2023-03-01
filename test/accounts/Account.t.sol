@@ -67,11 +67,7 @@ contract ExposedAccounts {
         }
     }
 
-    function getAnnualizedProductExposures(uint128 id, uint128 productId)
-        external
-        view
-        returns (Account.Exposure[] memory)
-    {
+    function getAnnualizedProductExposures(uint128 id, uint128 productId) external view returns (Account.Exposure[] memory) {
         Account.Data storage account = Account.load(id);
         return account.getAnnualizedProductExposures(productId);
     }
@@ -116,16 +112,16 @@ contract ExposedAccounts {
 }
 
 contract AccountTest is Test {
-    ExposedAccounts accounts;
+    ExposedAccounts internal accounts;
 
-    address token = vm.addr(1);
-    address owner = vm.addr(3);
+    address internal token = vm.addr(1);
+    address internal owner = vm.addr(3);
 
-    uint128 constant accountId = 100;
-    bytes32 constant accountSlot = keccak256(abi.encode("xyz.voltz.Account", accountId));
+    uint128 internal constant accountId = 100;
+    bytes32 internal constant accountSlot = keccak256(abi.encode("xyz.voltz.Account", accountId));
 
-    address mockProductAddress1 = vm.addr(4);
-    address mockProductAddress2 = vm.addr(5);
+    address internal mockProductAddress1 = vm.addr(4);
+    address internal mockProductAddress2 = vm.addr(5);
 
     function setUp() public {
         accounts = new ExposedAccounts();
@@ -151,25 +147,19 @@ contract AccountTest is Test {
 
         // Mock account exposures to product ID 1 and markets IDs 10, 11
         Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
-        mockExposures[0] =
-            Account.Exposure({marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: -200e18});
+        mockExposures[0] = Account.Exposure({ marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: -200e18 });
 
-        mockExposures[1] =
-            Account.Exposure({marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18});
+        mockExposures[1] = Account.Exposure({ marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18 });
 
         vm.mockCall(
-            mockProductAddress1,
-            abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector),
-            abi.encode(mockExposures)
+            mockProductAddress1, abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector), abi.encode(mockExposures)
         );
 
         // Mock account closure to product ID 1
         vm.mockCall(mockProductAddress1, abi.encodeWithSelector(IProduct.closeAccount.selector), abi.encode());
 
         // Mock account uPnL in product ID 1
-        vm.mockCall(
-            mockProductAddress1, abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector), abi.encode(100e18)
-        );
+        vm.mockCall(mockProductAddress1, abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector), abi.encode(100e18));
 
         // Add Product with product ID 2 and address mockProductAddress1
         accounts.addProduct(accountId, 2);
@@ -181,22 +171,17 @@ contract AccountTest is Test {
 
         // Mock account exposures to product ID 2 and markets IDs 20
         mockExposures = new Account.Exposure[](1);
-        mockExposures[0] =
-            Account.Exposure({marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18});
+        mockExposures[0] = Account.Exposure({ marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18 });
 
         vm.mockCall(
-            mockProductAddress2,
-            abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector),
-            abi.encode(mockExposures)
+            mockProductAddress2, abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector), abi.encode(mockExposures)
         );
 
         // Mock account closure to product ID 2
         vm.mockCall(mockProductAddress2, abi.encodeWithSelector(IProduct.closeAccount.selector), abi.encode());
 
         // Mock account uPnL in product ID 2
-        vm.mockCall(
-            mockProductAddress2, abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector), abi.encode(-200e18)
-        );
+        vm.mockCall(mockProductAddress2, abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector), abi.encode(-200e18));
     }
 
     function setupRiskConfigurations() public {

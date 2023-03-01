@@ -4,7 +4,8 @@ pragma solidity >=0.8.13;
 import "../../utils/helpers/SetUtil.sol";
 
 /**
- * @title Tracks protocol-wide settings for each collateral type, as well as helper functions for it, such as retrieving its current price from the oracle manager -> relevant for multi-collateral.
+ * @title Tracks protocol-wide settings for each collateral type, as well as helper functions for it, such as retrieving its current
+ * price from the oracle manager -> relevant for multi-collateral.
  */
 library CollateralConfiguration {
     using SetUtil for SetUtil.AddressSet;
@@ -37,7 +38,8 @@ library CollateralConfiguration {
         bool depositingEnabled;
         /**
          * @dev Amount of tokens to award when an account is liquidated.
-         * @dev todo: consider having a minimum amount that accounts need to have deposited to help prevent spamming on the protocol.
+         * @dev todo: consider having a minimum amount that accounts need to have deposited to help prevent spamming on the
+         * protocol.
          * @dev could be -> if zero, set it to be equal to the liquidationRewardD18
          */
         uint256 liquidationRewardD18;
@@ -111,11 +113,7 @@ library CollateralConfiguration {
      * @param tokenAmount The token amount, denominated in its native decimal precision.
      * @return amountD18 The converted amount, denominated in the system's 18 decimal precision.
      */
-    function convertTokenToSystemAmount(Data storage self, uint256 tokenAmount)
-        internal
-        view
-        returns (uint256 amountD18)
-    {
+    function convertTokenToSystemAmount(Data storage self, uint256 tokenAmount) internal view returns (uint256 amountD18) {
         return tokenAmount;
         // todo: needs implementation with PRB Math, below is logic from synthetix for reference
         // // this extra condition is to prevent potentially malicious untrusted code from being executed on the next statement

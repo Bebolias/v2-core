@@ -4,7 +4,8 @@ pragma solidity >=0.8.13;
 import "../errors/AccessError.sol";
 
 library OwnableStorage {
-    bytes32 private constant _SLOT_OWNABLE_STORAGE = keccak256(abi.encode("xyz.voltz.OwnableStorage")); // would xyz.voltz.Ownable create a clash?
+    bytes32 private constant _SLOT_OWNABLE_STORAGE = keccak256(abi.encode("xyz.voltz.OwnableStorage")); // would xyz.voltz.Ownable
+        // create a clash?
 
     struct Data {
         address owner;

@@ -22,9 +22,7 @@ interface IRateOracleManager {
      * @param maturityTimestamp Maturity Timestamp of a given irs market that's requesting the index value for settlement purposes
      * @return rateIndexMaturity Rate index at the requested maturityTimestamp
      */
-    function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp)
-        external
-        returns (uint256 rateIndexMaturity);
+    function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp) external returns (uint256 rateIndexMaturity);
 
     /**
      * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC borrow)
@@ -39,10 +37,7 @@ interface IRateOracleManager {
      * @param maturityTimestamp The timestamp at which the dated irs market matures
      * @return datedIRSGwap Geometric time weightred average fixed rate
      */
-    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp)
-        external
-        view
-        returns (uint256 datedIRSGwap);
+    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp) external view returns (uint256 datedIRSGwap);
 
     /**
      * @notice Register a variable rate oralce

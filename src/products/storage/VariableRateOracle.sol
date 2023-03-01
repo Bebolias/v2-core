@@ -27,10 +27,7 @@ library VariableRateOracle {
         return IVariableRateOracle(self.oracleAddress).getRateIndexCurrent();
     }
 
-    function getRateIndexMaturity(Data storage self, uint256 maturityTimestamp)
-        internal
-        returns (uint256 rateIndexMaturity)
-    {
+    function getRateIndexMaturity(Data storage self, uint256 maturityTimestamp) internal returns (uint256 rateIndexMaturity) {
         // worth having a view and non-view versions of this function?
 
         if (block.timestamp < maturityTimestamp) {

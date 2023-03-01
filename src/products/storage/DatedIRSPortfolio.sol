@@ -27,7 +27,8 @@ library DatedIRSPortfolio {
          */
         uint128 accountId;
         /**
-         * @dev marketId (e.g. aUSDC lend) --> maturityTimestamp (e.g. 31st Dec 2023) --> DatedIRSPosition object with filled balances
+         * @dev marketId (e.g. aUSDC lend) --> maturityTimestamp (e.g. 31st Dec 2023) --> DatedIRSPosition object with filled
+         * balances
          */
         mapping(uint128 => mapping(uint256 => DatedIRSPosition.Data)) positions;
         /**
@@ -70,11 +71,7 @@ library DatedIRSPortfolio {
      * consider avoiding pool if account is purely taker to save gas?
      * todo: this function looks expesive and feels like there's room for optimisations
      */
-    function getAccountUnrealizedPnL(Data storage self, address poolAddress)
-        internal
-        view
-        returns (int256 unrealizedPnL)
-    {
+    function getAccountUnrealizedPnL(Data storage self, address poolAddress) internal view returns (int256 unrealizedPnL) {
         for (uint256 i = 1; i <= self.activeMarkets.length(); i++) {
             uint128 marketId = self.activeMarkets.valueAt(i).to128();
             for (uint256 j = 1; j <= self.activeMaturitiesPerMarket[marketId].length(); i++) {
@@ -91,12 +88,10 @@ library DatedIRSPortfolio {
                 int256 currentLiquidityIndex =
                     IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
 
-                int256 gwap = IRateOracleManager(oracleManager.oracleManagerAddress).getDatedIRSGwap(
-                    marketId, maturityTimestamp
-                ).toInt();
+                int256 gwap =
+                    IRateOracleManager(oracleManager.oracleManagerAddress).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
 
-                int256 unwindQuote =
-                    (baseBalance + baseBalancePool) * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
+                int256 unwindQuote = (baseBalance + baseBalancePool) * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
                 unrealizedPnL += (unwindQuote + quoteBalance + quoteBalancePool);
             }
         }
@@ -108,15 +103,18 @@ library DatedIRSPortfolio {
      * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
-    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint256 maturityTimestamp)
+    function baseToAnnualizedExposure(
+        int256[] memory baseAmounts,
+        uint128 marketId,
+        uint256 maturityTimestamp
+    )
         internal
         view
         returns (int256[] memory exposures)
     {
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
-        int256 currentLiquidityIndex =
-            IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
-        int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
+        int256 currentLiquidityIndex = IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
+        int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31536000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
             exposures[i] = baseAmounts[i] * currentLiquidityIndex * timeDeltaAnnualized;
@@ -127,7 +125,10 @@ library DatedIRSPortfolio {
      * @dev note: given that all the accounts are single-token, annualized exposures for a given account are in terms
      * of the settlement token of that account
      */
-    function getAccountAnnualizedExposures(Data storage self, address poolAddress)
+    function getAccountAnnualizedExposures(
+        Data storage self,
+        address poolAddress
+    )
         internal
         view
         returns (Account.Exposure[] memory exposures)
@@ -139,8 +140,7 @@ library DatedIRSPortfolio {
                 uint256 maturityTimestamp = self.activeMaturitiesPerMarket[marketId].valueAt(j);
                 int256 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
 
-                (int256 baseBalancePool,) =
-                    IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
+                (int256 baseBalancePool,) = IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
                 (int256 unfilledBaseLong, int256 unfilledBaseShort) =
                     IPool(poolAddress).getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
 
@@ -150,8 +150,7 @@ library DatedIRSPortfolio {
                     baseAmounts[1] = unfilledBaseLong;
                     baseAmounts[2] = unfilledBaseShort;
 
-                    int256[] memory annualizedExposures =
-                        baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
+                    int256[] memory annualizedExposures = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
 
                     exposures[counter] = Account.Exposure({
                         marketId: marketId,
@@ -197,7 +196,9 @@ library DatedIRSPortfolio {
         uint256 maturityTimestamp,
         int256 baseDelta,
         int256 quoteDelta
-    ) internal {
+    )
+        internal
+    {
         DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
         position.update(baseDelta, quoteDelta);
     }
@@ -205,16 +206,12 @@ library DatedIRSPortfolio {
     /**
      * @dev create, edit or close an irs position for a given marketId (e.g. aUSDC lend) and maturityTimestamp (e.g. 31st Dec 2023)
      */
-    function settle(Data storage self, uint128 marketId, uint256 maturityTimestamp)
-        internal
-        returns (int256 settlementCashflow)
-    {
+    function settle(Data storage self, uint128 marketId, uint256 maturityTimestamp) internal returns (int256 settlementCashflow) {
         DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
 
         RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
-        int256 liquidityIndexMaturity = IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexMaturity(
-            marketId, maturityTimestamp
-        ).toInt();
+        int256 liquidityIndexMaturity =
+            IRateOracleManager(oracleManager.oracleManagerAddress).getRateIndexMaturity(marketId, maturityTimestamp).toInt();
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();

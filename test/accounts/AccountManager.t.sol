@@ -1,26 +1,26 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity =0.8.17;
+pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
 import { console2 } from "forge-std/console2.sol";
 import { StdCheats, StdStorage } from "forge-std/StdCheats.sol";
-import  "oz/mocks/ERC721EnumerableMock.sol";
-import  "oz/mocks/ERC721ReceiverMock.sol";
-import  "oz/interfaces/IERC721Receiver.sol";
-import  "oz/interfaces/IERC721.sol";
-
+import "oz/mocks/ERC721EnumerableMock.sol";
+import "oz/mocks/ERC721ReceiverMock.sol";
+import "oz/interfaces/IERC721Receiver.sol";
+import "oz/interfaces/IERC721.sol";
 
 // OZ mocks above already include something called AccountManager so we rename the contract under test to avoid a clash
-import {AccountManager as VoltzAccountManager} from "../../src/accounts/AccountManager.sol";
+import { AccountManager as VoltzAccountManager } from "../../src/accounts/AccountManager.sol";
 
 /// @dev We must make our test contract signal that it can receive ERC721 tokens if it is to be able to create accounts
-contract AccountManagerTest is Test, ERC721ReceiverMock(IERC721Receiver.onERC721Received.selector, ERC721ReceiverMock.Error.None) {
-
+contract AccountManagerTest is
+    Test,
+    ERC721ReceiverMock(IERC721Receiver.onERC721Received.selector, ERC721ReceiverMock.Error.None)
+{
     /**
      * @dev ERC721 Transfer event. Emitted when `tokenId` token is transferred from `from` to `to`.
      */
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-
 
     using stdStorage for StdStorage;
 
@@ -46,7 +46,7 @@ contract AccountManagerTest is Test, ERC721ReceiverMock(IERC721Receiver.onERC721
     function test_CreateAccount() external {
         vm.expectEmit(true, true, true, true, address(mockNft));
 
-        // We expect an event showing that the new NFT was minted 
+        // We expect an event showing that the new NFT was minted
         emit Transfer(address(0), address(this), TEST_ACCOUNT_ID);
         accountManager.createAccount(TEST_ACCOUNT_ID);
     }
@@ -68,7 +68,8 @@ contract AccountManagerTest is Test, ERC721ReceiverMock(IERC721Receiver.onERC721
     function test_CannotCreateSameAccountTwice() external {
         accountManager.createAccount(TEST_ACCOUNT_ID);
         vm.expectRevert("ERC721: token already minted");
-        accountManager.createAccount(TEST_ACCOUNT_ID);    }
+        accountManager.createAccount(TEST_ACCOUNT_ID);
+    }
 
     /// @dev Fuzz account creation failing if already exists
     function testFuzz_CannotCreateSameAccountTwice(uint128 x) public {
