@@ -9,8 +9,8 @@ import "oz/mocks/ERC721ReceiverMock.sol";
 import "oz/interfaces/IERC721Receiver.sol";
 import "oz/interfaces/IERC721.sol";
 
-// OZ mocks above already include something called AccountManager so we rename the contract under test to avoid a clash
-import { AccountManager as VoltzAccountManager } from "../../src/accounts/AccountManager.sol";
+// OZ mocks above already include something called AccountModule so we rename the contract under test to avoid a clash
+import { AccountModule as VoltzAccountManager } from "../../src/core/modules/AccountModule.sol";
 
 /// @dev We must make our test contract signal that it can receive ERC721 tokens if it is to be able to create accounts
 contract AccountManagerTest is
@@ -24,22 +24,22 @@ contract AccountManagerTest is
 
     using stdStorage for StdStorage;
 
-    VoltzAccountManager public accountManager;
+    VoltzAccountManager public accountModule;
     ERC721EnumerableMock public mockNft;
 
     uint128 constant TEST_ACCOUNT_ID = 100;
 
     /// @dev Invoked before each test case is run
     function setUp() public {
-        accountManager = new VoltzAccountManager();
+        accountModule = new VoltzAccountManager();
         mockNft = new ERC721EnumerableMock("Mock", "VLTZMCK");
-        // uint256 accountTokenSlot = stdstore.target(address(accountManager)).sig("getAccountTokenAddress()").find();
-        stdstore.target(address(accountManager)).sig("getAccountTokenAddress()").checked_write(address(mockNft));
+        // uint256 accountTokenSlot = stdstore.target(address(accountModule)).sig("getAccountTokenAddress()").find();
+        stdstore.target(address(accountModule)).sig("getAccountTokenAddress()").checked_write(address(mockNft));
     }
 
     /// @dev Test account creation
     function test_TokenAddress() external {
-        assertEq(accountManager.getAccountTokenAddress(), address(mockNft));
+        assertEq(accountModule.getAccountTokenAddress(), address(mockNft));
     }
 
     /// @dev Test account creation
@@ -48,39 +48,39 @@ contract AccountManagerTest is
 
         // We expect an event showing that the new NFT was minted
         emit Transfer(address(0), address(this), TEST_ACCOUNT_ID);
-        accountManager.createAccount(TEST_ACCOUNT_ID);
+        accountModule.createAccount(TEST_ACCOUNT_ID);
     }
 
     /// @dev Test account creation
     function test_GetAccountOwner() external {
-        accountManager.createAccount(TEST_ACCOUNT_ID);
-        assertEq(accountManager.getAccountOwner(TEST_ACCOUNT_ID), address(this));
+        accountModule.createAccount(TEST_ACCOUNT_ID);
+        assertEq(accountModule.getAccountOwner(TEST_ACCOUNT_ID), address(this));
     }
 
     /// @dev Test account authorisation
     function test_IsAuthorized() external {
-        assertEq(accountManager.isAuthorized(TEST_ACCOUNT_ID, address(this)), false);
-        accountManager.createAccount(TEST_ACCOUNT_ID);
-        assertEq(accountManager.isAuthorized(TEST_ACCOUNT_ID, address(this)), true);
+        assertEq(accountModule.isAuthorized(TEST_ACCOUNT_ID, address(this)), false);
+        accountModule.createAccount(TEST_ACCOUNT_ID);
+        assertEq(accountModule.isAuthorized(TEST_ACCOUNT_ID, address(this)), true);
     }
 
     /// @dev Each account can only be created once
     function test_CannotCreateSameAccountTwice() external {
-        accountManager.createAccount(TEST_ACCOUNT_ID);
+        accountModule.createAccount(TEST_ACCOUNT_ID);
         vm.expectRevert("ERC721: token already minted");
-        accountManager.createAccount(TEST_ACCOUNT_ID);
+        accountModule.createAccount(TEST_ACCOUNT_ID);
     }
 
     /// @dev Fuzz account creation failing if already exists
     function testFuzz_CannotCreateSameAccountTwice(uint128 x) public {
-        accountManager.createAccount(x);
+        accountModule.createAccount(x);
         vm.expectRevert("ERC721: token already minted");
-        accountManager.createAccount(x);
+        accountModule.createAccount(x);
     }
 
     /// @dev Fuzzes account creation succeeding.
     function testFuzz_CreateAccount(uint128 x) external {
-        accountManager.createAccount(x);
+        accountModule.createAccount(x);
     }
 
     /// @dev Test that runs against a fork of Ethereum Mainnet. You need to set `ALCHEMY_API_KEY` in your environment

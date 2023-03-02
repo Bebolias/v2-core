@@ -8,20 +8,14 @@
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
 [coverage-badge]: ./coverage.svg
 
-Distributions of tasks below
-
-Rate Oracle Manager
-
-- implement aave v3 rate index getters (2)
-
 Account
-
-- check out https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/UtilsModule.sol
-- what do they mean by "system wide config for anything" https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/storage/Config.sol
 
 - Market and risk configuration setting process (1)
 - Add settlement token related logic (setting, checks, etc) (3)
 - Introduce liquidator deposit logic or propose an alternative
+
+- check out https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/UtilsModule.sol
+- what do they mean by "system wide config for anything" https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/storage/Config.sol
 
 Liquidation Engine
 
