@@ -6,5 +6,5 @@
  *   'ERC20Token' => '_ERC20_TOKEN'
  */
 export function toPrivateConstantCase(name: string) {
-    return name.replace(/(?<![A-Z])[A-Z]/g, '_$&').toUpperCase();
-  }
+  return name.replace(/(?<![A-Z])[A-Z]/g, '_$&').toUpperCase();
+}

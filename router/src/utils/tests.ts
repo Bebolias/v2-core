@@ -1,6 +1,7 @@
 /* eslint-env mocha */
 
 import path from 'node:path';
+
 import { ChainBuilderContext } from '@usecannon/builder';
 import { ethers } from 'ethers';
 import hre from 'hardhat';
@@ -21,7 +22,7 @@ declare module 'hardhat/types/config' {
 
 export function coreBootstrap<Contracts>(params: Params = { cannonfile: 'cannonfile.toml' }) {
   let outputs: ChainBuilderContext;
-  let provider: ethers.providers.JsonRpcProvider;
+  let provider: ethers.JsonRpcProvider;
   let signers: ethers.Signer[];
 
   before(async function prepareNode() {
@@ -50,7 +51,7 @@ export function coreBootstrap<Contracts>(params: Params = { cannonfile: 'cannonf
     });
 
     outputs = cannonInfo.outputs;
-    provider = cannonInfo.provider as ethers.providers.JsonRpcProvider;
+    provider = cannonInfo.provider as ethers.JsonRpcProvider;
     signers = cannonInfo.signers as ethers.Signer[];
 
     for (const signer of signers) {
@@ -110,8 +111,8 @@ export function coreBootstrap<Contracts>(params: Params = { cannonfile: 'cannonf
 function _getContractFromOutputs(
   contractName: string,
   outputs: ChainBuilderContext,
-  provider: ethers.providers.JsonRpcProvider,
-  address?: string
+  provider: ethers.JsonRpcProvider,
+  address?: string,
 ) {
   let contract;
 

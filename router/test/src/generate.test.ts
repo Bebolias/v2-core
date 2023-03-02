@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+
 import { deepEqual, throws } from 'assert/strict';
+
 import { generateRouter } from '../../src/generate';
 import { ContractValidationError } from '../../src/internal/errors';
 import abi from '../fixtures/SampleABI.json';

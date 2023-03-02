@@ -1,0 +1,64 @@
+{
+  "env": {
+    "mocha": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended",
+    "prettier",
+    "plugin:import/recommended",
+    "plugin:import/typescript"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["unused-imports", "@typescript-eslint", "prettier", "simple-import-sort"],
+  "rules": {
+    "@typescript-eslint/indent": "off",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-shadow": [
+      "error"
+    ],
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-use-before-define": [
+      "warn"
+    ],
+    "eqeqeq": "error",
+    "import/extensions": "off",
+    "import/no-default-export": [
+      "warn"
+    ],
+    "import/no-unresolved": "off",
+    "import/prefer-default-export": "off",
+    "no-console": [
+      "error",
+      {
+        "allow": [
+          "debug",
+          "warn",
+          "error"
+        ]
+      }
+    ],
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": [
+              "src/**"
+            ],
+            "message": "Don't import from 'src' directory! Use relative paths instead!"
+          }
+        ]
+      }
+    ],
+    "no-shadow": "off",
+    "no-unused-vars": "off",
+    "no-use-before-define": "off",
+    "prefer-template": "error",
+    "simple-import-sort/exports": "error",
+    "simple-import-sort/imports": "error",
+    "unused-imports/no-unused-imports-ts": "error",
+    "no-debugger": "error"
+  }
+}

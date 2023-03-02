@@ -1,6 +1,8 @@
 import path from 'node:path';
+
 import { JsonFragment } from '@ethersproject/abi';
 import { ethers } from 'ethers';
+
 import { ContractValidationError } from './errors';
 import { renderTemplate } from './render-template';
 import { routerFunctionFilter } from './router-function-filter';
@@ -61,14 +63,14 @@ export function renderRouter({
 
 function _getAllSelectors(
   contracts: ContractData[],
-  functionFilter: Props['functionFilter']
+  functionFilter: Props['functionFilter'],
 ): FunctionSelector[] {
   return contracts
     .flatMap(({ contractName, abi }) =>
       getSelectors(abi, functionFilter).map((s) => ({
         contractName,
         ...s,
-      }))
+      })),
     )
     .sort((a, b) => {
       return Number.parseInt(a.selector, 16) - Number.parseInt(b.selector, 16);
@@ -85,6 +87,14 @@ function _renderReceive(canReceivePlainETH: boolean) {
   return receiveStr;
 }
 
+function findMidSelector(node: BinaryData): FunctionSelector {
+  if (node.selectors.length > 0) {
+    return node.selectors[0];
+  } else {
+    return findMidSelector(node.children[0]);
+  }
+}
+
 function _renderSelectors(binaryData: BinaryData) {
   let selectorsStr = '';
 
@@ -92,14 +102,6 @@ function _renderSelectors(binaryData: BinaryData) {
     if (node.children.length > 0) {
       const childA = node.children[0];
       const childB = node.children[1];
-
-      function findMidSelector(node: BinaryData): FunctionSelector {
-        if (node.selectors.length > 0) {
-          return node.selectors[0];
-        } else {
-          return findMidSelector(node.children[0]);
-        }
-      }
 
       const midSelector = findMidSelector(childB);
 
@@ -178,7 +180,7 @@ function _buildBinaryData(selectors: FunctionSelector[]) {
 
 export function getSelectors(
   contractAbi: ethers.ContractInterface,
-  functionFilter: (fnName: string) => boolean = () => true
+  functionFilter: (fnName: string) => boolean = () => true,
 ) {
   const contract = new ethers.Contract('0x0000000000000000000000000000000000000001', contractAbi);
 
@@ -205,7 +207,7 @@ function _validateSelectors(selectors: FunctionSelector[]) {
     .join('\n');
 
   throw new ContractValidationError(
-    `The following contracts have repeated function selectors behind the same Router:\n${list}\n`
+    `The following contracts have repeated function selectors behind the same Router:\n${list}\n`,
   );
 }
 
