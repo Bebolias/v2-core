@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import "../../src/core/storage/Collateral.sol";
+import "../../../src/core/storage/Collateral.sol";
 
 contract ExposedCollateral {
     using Collateral for Collateral.Data;

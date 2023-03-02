@@ -10,13 +10,10 @@ import "oz/interfaces/IERC721Receiver.sol";
 import "oz/interfaces/IERC721.sol";
 
 // OZ mocks above already include something called AccountModule so we rename the contract under test to avoid a clash
-import { AccountModule as VoltzAccountManager } from "../../src/core/modules/AccountModule.sol";
+import { AccountModule as VoltzAccountModule } from "../../../src/core/modules/AccountModule.sol";
 
 /// @dev We must make our test contract signal that it can receive ERC721 tokens if it is to be able to create accounts
-contract AccountManagerTest is
-    Test,
-    ERC721ReceiverMock(IERC721Receiver.onERC721Received.selector, ERC721ReceiverMock.Error.None)
-{
+contract AccountModuleTest is Test, ERC721ReceiverMock(IERC721Receiver.onERC721Received.selector, ERC721ReceiverMock.Error.None) {
     /**
      * @dev ERC721 Transfer event. Emitted when `tokenId` token is transferred from `from` to `to`.
      */
@@ -24,14 +21,14 @@ contract AccountManagerTest is
 
     using stdStorage for StdStorage;
 
-    VoltzAccountManager public accountModule;
+    VoltzAccountModule public accountModule;
     ERC721EnumerableMock public mockNft;
 
     uint128 constant TEST_ACCOUNT_ID = 100;
 
     /// @dev Invoked before each test case is run
     function setUp() public {
-        accountModule = new VoltzAccountManager();
+        accountModule = new VoltzAccountModule();
         mockNft = new ERC721EnumerableMock("Mock", "VLTZMCK");
         // uint256 accountTokenSlot = stdstore.target(address(accountModule)).sig("getAccountTokenAddress()").find();
         stdstore.target(address(accountModule)).sig("getAccountTokenAddress()").checked_write(address(mockNft));
