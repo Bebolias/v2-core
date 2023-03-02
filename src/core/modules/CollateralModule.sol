@@ -33,9 +33,7 @@ contract CollateralModule is ICollateralModule {
             revert IERC20.InsufficientAllowance(tokenAmount, allowance);
         }
         collateralType.safeTransferFrom(depositFrom, self, tokenAmount);
-        account.collaterals[collateralType].increaseCollateralBalance(
-            CollateralConfiguration.load(collateralType).convertTokenToSystemAmount(tokenAmount)
-        );
+        account.collaterals[collateralType].increaseCollateralBalance(tokenAmount);
         emit Deposited(accountId, collateralType, tokenAmount, msg.sender);
     }
 
@@ -45,9 +43,7 @@ contract CollateralModule is ICollateralModule {
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external override {
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, msg.sender);
 
-        uint256 tokenAmountD18 = CollateralConfiguration.load(collateralType).convertTokenToSystemAmount(tokenAmount);
-
-        account.collaterals[collateralType].decreaseCollateralBalance(tokenAmountD18);
+        account.collaterals[collateralType].decreaseCollateralBalance(tokenAmount);
 
         account.imCheck();
 

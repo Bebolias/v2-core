@@ -1,22 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../utils/helpers/SetUtil.sol";
-import "../../utils/helpers/SafeCast.sol";
-import "./DatedIRSPosition.sol";
-import "./RateOracleManagerStorage.sol";
-import "../interfaces/IRateOracleModule.sol";
+import "../../../utils/helpers/SetUtil.sol";
+import "../../../utils/helpers/SafeCast.sol";
+import "./Position.sol";
+import "./VariableRateOracle.sol";
+import "./PoolConfiguration.sol";
 import "../interfaces/IPool.sol";
 // todo: consider migrating Exposures from Account.sol to more relevant place (e.g. interface) -> think definitely worth doing that
-import "../../core/storage/Account.sol";
+import "../../../core/storage/Account.sol";
+import "../interfaces/IVAMMPoolModule.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions
  */
-library DatedIRSPortfolio {
-    using DatedIRSPosition for DatedIRSPosition.Data;
+library Portfolio {
+    using Position for Position.Data;
     using SetUtil for SetUtil.UintSet;
     using SafeCastU256 for uint256;
+    using VariableRateOracle for VariableRateOracle.Data;
+    using PoolConfiguration for PoolConfiguration.Data;
 
     struct Data {
         /**
@@ -27,10 +30,10 @@ library DatedIRSPortfolio {
          */
         uint128 accountId;
         /**
-         * @dev marketId (e.g. aUSDC lend) --> maturityTimestamp (e.g. 31st Dec 2023) --> DatedIRSPosition object with filled
+         * @dev marketId (e.g. aUSDC lend) --> maturityTimestamp (e.g. 31st Dec 2023) --> Position object with filled
          * balances
          */
-        mapping(uint128 => mapping(uint256 => DatedIRSPosition.Data)) positions;
+        mapping(uint128 => mapping(uint256 => Position.Data)) positions;
         /**
          * @dev Ids of all the markets in which the account has active positions
          * todo: needs logic to mark active markets
@@ -50,7 +53,7 @@ library DatedIRSPortfolio {
      * @dev Same as account id of the account that owns the portfolio of dated irs positions
      */
     function load(uint128 accountId) internal pure returns (Data storage portfolio) {
-        bytes32 s = keccak256(abi.encode("xyz.voltz.DatedIRSPortfolio", accountId));
+        bytes32 s = keccak256(abi.encode("xyz.voltz.Portfolio", accountId));
         assembly {
             portfolio.slot := s
         }
@@ -84,12 +87,10 @@ library DatedIRSPortfolio {
 
                 int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
-                RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
-                int256 currentLiquidityIndex =
-                    IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
+                int256 currentLiquidityIndex = VariableRateOracle.load(marketId).getRateIndexCurrent().toInt();
 
                 int256 gwap =
-                    IRateOracleModule(oracleManager.oracleManagerAddress).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
+                    IVAMMPoolModule(PoolConfiguration.getPoolAddress()).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
 
                 int256 unwindQuote = (baseBalance + baseBalancePool) * currentLiquidityIndex * (gwap * timeDeltaAnnualized + 1);
                 unrealizedPnL += (unwindQuote + quoteBalance + quoteBalancePool);
@@ -112,8 +113,7 @@ library DatedIRSPortfolio {
         view
         returns (int256[] memory exposures)
     {
-        RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
-        int256 currentLiquidityIndex = IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexCurrent(marketId).toInt();
+        int256 currentLiquidityIndex = VariableRateOracle.load(marketId).getRateIndexCurrent().toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
@@ -181,7 +181,7 @@ library DatedIRSPortfolio {
             for (uint256 j = 1; j <= _activeMaturities.length(); j++) {
                 uint256 maturityTimestamp = _activeMaturities.valueAt(j);
 
-                DatedIRSPosition.Data memory position = self.positions[marketId][maturityTimestamp];
+                Position.Data memory position = self.positions[marketId][maturityTimestamp];
                 pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance);
             }
         }
@@ -199,7 +199,7 @@ library DatedIRSPortfolio {
     )
         internal
     {
-        DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
+        Position.Data storage position = self.positions[marketId][maturityTimestamp];
         position.update(baseDelta, quoteDelta);
     }
 
@@ -207,11 +207,9 @@ library DatedIRSPortfolio {
      * @dev create, edit or close an irs position for a given marketId (e.g. aUSDC lend) and maturityTimestamp (e.g. 31st Dec 2023)
      */
     function settle(Data storage self, uint128 marketId, uint256 maturityTimestamp) internal returns (int256 settlementCashflow) {
-        DatedIRSPosition.Data storage position = self.positions[marketId][maturityTimestamp];
+        Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
-        RateOracleManagerStorage.Data memory oracleManager = RateOracleManagerStorage.load();
-        int256 liquidityIndexMaturity =
-            IRateOracleModule(oracleManager.oracleManagerAddress).getRateIndexMaturity(marketId, maturityTimestamp).toInt();
+        int256 liquidityIndexMaturity = VariableRateOracle.load(marketId).getRateIndexMaturity(maturityTimestamp).toInt();
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();

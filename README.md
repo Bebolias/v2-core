@@ -8,54 +8,25 @@
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
 [coverage-badge]: ./coverage.svg
 
-Account
+**P1**
 
-- Market and risk configuration setting process (1)
-- Add settlement token related logic (setting, checks, etc) (3)
-- Introduce liquidator deposit logic or propose an alternative
+- Dated IRS VAMM Pool Implementation in v2-periphery (Ioana)
+- G-TWAP Integration with Rate Oracle Module (Cyclops Rex)
+- Variable Rate Oracles (Cyclops Rex)
+- Dated IRS Market Configuration Module (AB)
+- Pool Configuration Module (AB)
+- Account -> settlement token checks (Costin)
+- Account -> liquidator deposit logic (Costin)
+- PRB Math & User Defined Types (Costin)
+- Owner Module & Upgrade Module (Initial Module Bundle) (AB)
 
-- check out https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/UtilsModule.sol
-- what do they mean by "system wide config for anything" https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/storage/Config.sol
+**P2**
 
-Liquidation Engine
-
-- reverts and liquidator deposits (4)
-- introduce LiquidationData (5)
-
-IRS Product & Pool
-
-- create a new repo for vamms (Ioana)
-
-Fee Logic
-
-- product implementation needs to include fee distribution logic, must be smth the interface supports
-
-Deployment
-
-- sooner rather than later
-
-Macro
-
-- reshuffle files: storage into one folder, core modules into another, external into another, etc
-
-Associated Systems Manager
-
-- [...]
-
-CI
-
-- initial unit tests
-- github flows
-
-Math
-
-- PRB Math V3
-- User Defined Types
-
-Feature Flags
-
-- FeatureFlag.ensureAccessToFeature(\_MARKET_FEATURE_FLAG); -> register a new market
-- https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/MarketManagerModule.sol
+- Fee Module
+- Deployment & Upgradability
+- Feature Flag Module
+- Associated Systems Module
+- Multicall Module
 
 Notes on Associated System
 
@@ -65,11 +36,6 @@ Notes on Associated System
 
 minor
 
-- within each product an account has a portfolio
-- check how these base products can represent pools, maturities and markets (bases) as ids, define these in the base dated product contract
-- a product can act similar to a manager where it is managing maturities and pools and bases, the product is also a pool manager
-- do a single pool for now
-- what if pools propagated locked trades to the product instead of the product having to request them, similar to a notify transfer in the account object
 - glp as a service = composability = lp token wars
 - permissonless product creation with isolated pool of collateral
 - can we cache margin requirement calculations and only apply deltas (trickier with annualization of notionals in case of irs)
@@ -83,6 +49,10 @@ minor
 - a product is free to choose what exchange / exchanges to use
 - keep products in the core because of the tight dependency with account? -> need to assess pros and cons in more detail
 - consider storing the pool address independently in the product contract as a private var or smth and, do we need a pool manager in that instance or just a simple setter within the product will do -> worth thinking this through.
+- check out https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/UtilsModule.sol
+- what do they mean by "system wide config for anything" https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/storage/Config.sol
+- FeatureFlag.ensureAccessToFeature(\_MARKET_FEATURE_FLAG); -> register a new market
+- https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/MarketManagerModule.sol
 
 # Summary
 

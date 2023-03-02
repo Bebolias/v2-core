@@ -147,9 +147,9 @@ contract AccountTest is Test {
 
         // Mock account exposures to product ID 1 and markets IDs 10, 11
         Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
-        mockExposures[0] = Account.Exposure({ marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: -200e18 });
+        mockExposures[0] = Account.Exposure({marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: -200e18});
 
-        mockExposures[1] = Account.Exposure({ marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18 });
+        mockExposures[1] = Account.Exposure({marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18});
 
         vm.mockCall(
             mockProductAddress1, abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector), abi.encode(mockExposures)
@@ -171,7 +171,7 @@ contract AccountTest is Test {
 
         // Mock account exposures to product ID 2 and markets IDs 20
         mockExposures = new Account.Exposure[](1);
-        mockExposures[0] = Account.Exposure({ marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18 });
+        mockExposures[0] = Account.Exposure({marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18});
 
         vm.mockCall(
             mockProductAddress2, abi.encodeWithSelector(IProduct.getAccountAnnualizedExposures.selector), abi.encode(mockExposures)

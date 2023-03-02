@@ -7,10 +7,10 @@ import "./IPool.sol";
  * @title Dated Interest Rate Swap VAMM Pool
  * @dev Implementation of DatedIRSVAMMPool is in a separate repo
  * @dev Can be thought of as a vamm router that can take marketId + maturityTimestamp pair and route the order via the relevant vamm
- * @dev See IDatedIRSVAMMPool
+ * @dev See IVAMMPoolModule
  */
 
-interface IDatedIRSVAMMPool is IPool {
+interface IVAMMPoolModule is IPool {
     /**
      * @notice Executes a dated maker order against a vamm that provided liquidity to a given marketId & maturityTimestamp pair
      * @param marketId Id of the market in which the lp wants to provide liqudiity
@@ -31,4 +31,16 @@ interface IDatedIRSVAMMPool is IPool {
     )
         external
         returns (int256 executedBaseAmount);
+
+    /**
+     * @notice Get dated irs gwap for the purposes of unrealized pnl calculation in the portfolio (see Portfolio.sol)
+     * @param marketId Id of the market for which we want to retrieve the dated irs gwap
+     * @param maturityTimestamp Timestamp at which a given market matures
+     * @return datedIRSGwap Geometric Time Weighted Average Fixed Rate
+     *  // todo: note, currently the product (and the core) are offloading the twap lookback widnow setting to the vamm pool
+     *  // however, intuitively it feels like the twap lookback window is quite an important risk parameter that arguably
+     *  // should sit in the MarketRiskConfiguration.sol within the core where it is made possible for the owner
+     *  // to specify custom twap lookback windows for different productId/marketId combinations
+     */
+    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp) external view returns (uint256 datedIRSGwap);
 }

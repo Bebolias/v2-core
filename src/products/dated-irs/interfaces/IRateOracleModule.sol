@@ -32,14 +32,6 @@ interface IRateOracleModule {
     function getRateIndexCurrent(uint128 marketId) external view returns (uint256 rateIndexCurrent);
 
     /**
-     * @notice Requests the geometric time weighted average fixed rate for a given marketId + maturityTimestamp pai
-     * @param marketId Id of the interest rate swap market (e.g. aUSDC lend) for which we're requesting the gwap
-     * @param maturityTimestamp The timestamp at which the dated irs market matures
-     * @return datedIRSGwap Geometric time weightred average fixed rate
-     */
-    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp) external view returns (uint256 datedIRSGwap);
-
-    /**
      * @notice Register a variable rate oralce
      * @param marketId Market Id
      * @param oracleAddress Oracle Address

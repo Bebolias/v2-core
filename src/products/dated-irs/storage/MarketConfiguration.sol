@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 /**
  * @title Tracks configurations for dated irs markets
  */
-library DatedIRSMarketConfiguration {
+library MarketConfiguration {
     struct Data {
         // todo: new market ids should be created here
         /**
@@ -20,12 +20,12 @@ library DatedIRSMarketConfiguration {
     }
 
     /**
-     * @dev Loads the DatedIRSMarketConfiguration object for the given dated irs market id
+     * @dev Loads the MarketConfiguration object for the given dated irs market id
      * @param irsMarketId Id of the IRS market that we want to load the configurations for
      * @return datedIRSMarketConfig The CollateralConfiguration object.
      */
     function load(uint128 irsMarketId) internal pure returns (Data storage datedIRSMarketConfig) {
-        bytes32 s = keccak256(abi.encode("xyz.voltz.DatedIRSMarketConfiguration", irsMarketId));
+        bytes32 s = keccak256(abi.encode("xyz.voltz.MarketConfiguration", irsMarketId));
         assembly {
             datedIRSMarketConfig.slot := s
         }
@@ -33,7 +33,7 @@ library DatedIRSMarketConfiguration {
 
     /**
      * @dev Configures a dated interest rate swap market
-     * @param config The DatedIRSMarketConfiguration object with all the settings for the irs market being configured.
+     * @param config The MarketConfiguration object with all the settings for the irs market being configured.
      */
     function set(Data memory config) internal {
         Data storage storedConfig = load(config.marketId);

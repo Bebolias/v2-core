@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../core/interfaces/external/IProduct.sol";
+import "../../../core/interfaces/external/IProduct.sol";
 
 /// @title Interface of a dated irs product
-interface IDatedIRSProductModule is IProduct {
+interface IProductIRSModule is IProduct {
     // process taker and maker orders & single pool
 
     /**
@@ -18,8 +18,6 @@ interface IDatedIRSProductModule is IProduct {
     /**
      * @notice Initiates a taker order for a given account by consuming liquidity provided by the pool connected to this product
      * @dev Initially a single pool is connected to a single product, however, that doesn't need to be the case in the future
-     * @param poolAddress Address of the pool implementation that acts as the counterparty and pricer to the taker order initiated
-     * by accountId
      * @param accountId Id of the account that wants to initiate a taker order
      * @param marketId Id of the market in which the account wants to initiate a taker order (e.g. 1 for aUSDC lend)
      * @param maturityTimestamp Maturity timestamp of the market in which the account wants to initiate a taker order
@@ -27,7 +25,6 @@ interface IDatedIRSProductModule is IProduct {
      * sign
      */
     function initiateTakerOrder(
-        address poolAddress,
         uint128 accountId,
         uint128 marketId,
         uint256 maturityTimestamp,
@@ -48,7 +45,6 @@ interface IDatedIRSProductModule is IProduct {
      * order)
      */
     function initiateMakerOrder(
-        address poolAddress,
         uint128 accountId,
         uint128 marketId,
         uint256 maturityTimestamp,

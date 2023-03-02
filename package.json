@@ -1,7 +1,5 @@
 {
-  "dependencies": {
-    "@synthetixio/core-contracts": "1.1.1"
-  },
+  "dependencies": {},
   "scripts": {
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",
