@@ -75,3 +75,51 @@ jobs:
         run: |
           echo "## Tests result" >> $GITHUB_STEP_SUMMARY
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
+
+  coverage:
+    needs: ["lint", "build"]
+    runs-on: ubuntu-latest
+    env:
+      CI_COMMIT_MESSAGE: Code Coverage Artifacts
+      CI_COMMIT_AUTHOR: ${{ github.event.repository.name }} Voltz Bot
+    steps:
+      # Checkout that works with "push" and "pull_request" trigger event
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      # Set environment variables based on the last commit
+      - name: Set environment variable "commit-message"
+        run: echo "commit-message=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
+      - name: Display environment variable "commit-message"
+        run: echo "commit-message=${{ env.commit-message }}"
+
+      - name: Set environment variable "commit-author"
+        run: echo "commit-author=$(git log -1 --pretty=format:'%an')" >> $GITHUB_ENV
+      - name: Display environment variable "commit-author"
+        run: echo "commit-author=${{ env.commit-author }}"
+
+      - name: Set environment variable "is-auto-commit"
+        if: env.commit-message == env.CI_COMMIT_MESSAGE && env.commit-author == env.CI_COMMIT_AUTHOR
+        run: echo "is-auto-commit=true" >> $GITHUB_ENV
+      - name: Display environment variable "is-auto-commit"
+        run: echo "is-auto-commit=${{ env.is-auto-commit }}"
+
+      # Test and add coverage
+      - name: "Install Foundry"
+        uses: "foundry-rs/foundry-toolchain@v1"
+
+      - name: "Run the tests"
+        run: "forge coverage --report lcov"
+
+      # Commit generated and commit files
+      - name: Display event name
+        run: echo "github.event_name=${{ github.event_name }}"
+      - name: Commit build artifacts .coverage.svg
+        # Don't run again on already pushed auto commit. Don't run on pull request events.
+        if: env.is-auto-commit == false && github.event_name != 'pull_request'
+        run: |
+          git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+          git config --global user.email "devcold@voltz.xyz"
+          git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+          git push
