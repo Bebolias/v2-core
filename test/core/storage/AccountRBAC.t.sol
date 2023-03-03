@@ -10,7 +10,7 @@ contract ExposedAccountRBAC {
     AccountRBAC.Data internal item;
 
     constructor(address owner) {
-        item = AccountRBAC.Data({ owner: owner });
+        item = AccountRBAC.Data({owner: owner});
     }
 
     // Mock functions

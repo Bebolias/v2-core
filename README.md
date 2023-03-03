@@ -10,6 +10,7 @@
 
 **P1**
 
+- initiate maker order goes into the pool (Ioana)
 - Dated IRS VAMM Pool Implementation in v2-periphery (Ioana)
 - G-TWAP Integration with Rate Oracle Module (Cyclops Rex)
 - Variable Rate Oracles (Cyclops Rex)
@@ -17,15 +18,24 @@
 - Account -> settlement token checks (Costin)
 - Account -> liquidator deposit logic (Costin)
 - PRB Math & User Defined Types (Costin)
-- Initial Module Bundle (AB)
+- Fee Module and associated maker/taker fee logic (AB)
+- Feature Flag Module
+- Associated Systems Module
+- Periphery & Multicall Module
 
 **P2**
 
-- Fee Module
-- Feature Flag Module
 - Deployment & Upgradability
-- Associated Systems Module
-- Multicall Module
+- Subgraph
+- SDK
+- Fuzzing
+- E2E Testing
+- Gas Cost Reduction
+- Community Deployer
+
+**P3**
+
+- Differential fuzzing against python repo
 
 Notes on Associated System
 
