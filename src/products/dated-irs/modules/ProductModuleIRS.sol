@@ -104,12 +104,7 @@ contract DatedIRSProductModule is IProductIRSModule {
     /**
      * @inheritdoc IProduct
      */
-    function getAccountAnnualizedExposures(uint128 accountId)
-        external
-        view
-        override
-        returns (Account.Exposure[] memory exposures)
-    {
+    function getAccountAnnualizedExposures(uint128 accountId) external override returns (Account.Exposure[] memory exposures) {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address _poolAddress = PoolConfiguration.getPoolAddress();
         return portfolio.getAccountAnnualizedExposures(_poolAddress);

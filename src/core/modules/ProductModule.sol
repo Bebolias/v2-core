@@ -28,7 +28,6 @@ contract ProductModule is IProductModule {
         uint128 accountId
     )
         external
-        view
         override
         returns (int256 accountUnrealizedPnL)
     {
@@ -43,7 +42,6 @@ contract ProductModule is IProductModule {
         uint128 accountId
     )
         external
-        view
         override
         returns (Account.Exposure[] memory exposures)
     {

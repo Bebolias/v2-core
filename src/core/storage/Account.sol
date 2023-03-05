@@ -150,7 +150,6 @@ library Account {
         address collateralType
     )
         internal
-        view
         returns (uint256 collateralBalanceAvailableD18)
     {
         if (collateralType == self.settlementToken) {
@@ -197,7 +196,6 @@ library Account {
         uint128 productId
     )
         internal
-        view
         returns (Exposure[] memory productExposures)
     {
         Product.Data storage _product = Product.load(productId);
@@ -235,11 +233,11 @@ library Account {
     /**
      * @dev Note, im multiplier is assumed to be the same across all products, markets and maturities
      */
-    function getIMMultiplier() internal view returns (uint256 imMultiplier) {
+    function getIMMultiplier() internal returns (uint256 imMultiplier) {
         return ProtocolRiskConfiguration.load().imMultiplier;
     }
 
-    function imCheck(Data storage self) internal view {
+    function imCheck(Data storage self) internal {
         (bool isSatisfied,) = self.isIMSatisfied();
         if (!isSatisfied) {
             revert AccountBelowIM(self.id);
@@ -250,7 +248,7 @@ library Account {
      * @dev Comes out as true if a given account initial margin requirement is satisfied
      * i.e. account value (collateral + unrealized pnl) >= initial margin requirement
      */
-    function isIMSatisfied(Data storage self) internal view returns (bool imSatisfied, uint256 im) {
+    function isIMSatisfied(Data storage self) internal returns (bool imSatisfied, uint256 im) {
         (im,) = self.getMarginRequirements();
         imSatisfied = self.getTotalAccountValue() >= im.toInt();
     }
@@ -259,7 +257,7 @@ library Account {
      * @dev Comes out as true if a given account is liquidatable, i.e. account value (collateral + unrealized pnl) < lm
      */
 
-    function isLiquidatable(Data storage self) internal view returns (bool liquidatable, uint256 im, uint256 lm) {
+    function isLiquidatable(Data storage self) internal returns (bool liquidatable, uint256 im, uint256 lm) {
         (im, lm) = self.getMarginRequirements();
         liquidatable = self.getTotalAccountValue() < lm.toInt();
     }
@@ -270,7 +268,7 @@ library Account {
      * when summations with int256 need to take place
      */
 
-    function getMarginRequirements(Data storage self) internal view returns (uint256 im, uint256 lm) {
+    function getMarginRequirements(Data storage self) internal returns (uint256 im, uint256 lm) {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
 
         int256 worstCashflowUp;

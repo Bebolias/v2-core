@@ -45,13 +45,7 @@ interface ICollateralModule {
      * @return amountD18 The amount of collateral that is available for withdrawal (difference between balance and IM), denominated
      * with 18 decimals of precision.
      */
-    function getAccountCollateralBalanceAvailable(
-        uint128 accountId,
-        address collateralType
-    )
-        external
-        view
-        returns (uint256 amountD18);
+    function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType) external returns (uint256 amountD18);
 
     /**
      * @notice Returns the total account value pertaining to account `accountId` in terms of the quote token of the (single token)

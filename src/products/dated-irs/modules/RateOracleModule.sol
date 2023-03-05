@@ -2,8 +2,8 @@
 pragma solidity >=0.8.13;
 
 import "../interfaces/IRateOracleModule.sol";
-import "../storage/VariableRateOracle.sol";
-import "../interfaces/IVAMMPoolModule.sol";
+import "../storage/RateOracleReader.sol";
+import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 /**
  * @title Module for managing rate oracles connected to the Dated IRS Product
@@ -11,13 +11,20 @@ import "../interfaces/IVAMMPoolModule.sol";
  *  // todo: register a new rate oracle
  */
 contract RateOracleManager is IRateOracleModule {
-    using VariableRateOracle for VariableRateOracle.Data;
+    using RateOracleReader for RateOracleReader.Data;
     /**
      * @inheritdoc IRateOracleModule
      */
 
-    function getRateIndexCurrent(uint128 marketId) external view override returns (uint256 rateIndexCurrent) {
-        return VariableRateOracle.load(marketId).getRateIndexCurrent();
+    function getRateIndexCurrent(
+        uint128 marketId,
+        uint256 maturityTimestamp
+    )
+        external
+        override
+        returns (UD60x18 rateIndexCurrent)
+    {
+        return RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp);
     }
 
     /**
@@ -29,9 +36,9 @@ contract RateOracleManager is IRateOracleModule {
     )
         external
         override
-        returns (uint256 rateIndexMaturity)
+        returns (UD60x18 rateIndexMaturity)
     {
-        return VariableRateOracle.load(marketId).getRateIndexMaturity(maturityTimestamp);
+        return RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp);
     }
 
     // todo: do we want this function to return something?
@@ -47,8 +54,8 @@ contract RateOracleManager is IRateOracleModule {
         }
 
         // register the variable rate oracle
-        VariableRateOracle.create(marketId, oracleAddress);
-        emit VariableRateOracleRegistered(marketId, oracleAddress);
+        RateOracleReader.create(marketId, oracleAddress);
+        emit RateOracleRegistered(marketId, oracleAddress);
     }
 
     function _isVariableOracleRegistered(uint128 marketId) internal returns (bool isRegistered) { }

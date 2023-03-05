@@ -21,7 +21,7 @@ interface IProductModule {
     event ProductRegistered(address indexed product, uint128 indexed productId, address indexed sender);
 
     /// @notice returns the unrealized pnl in quote token terms for account
-    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId) external view returns (int256);
+    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId) external returns (int256);
 
     /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
     function getAccountAnnualizedExposures(
@@ -29,7 +29,6 @@ interface IProductModule {
         uint128 accountId
     )
         external
-        view
         returns (Account.Exposure[] memory exposures);
 
     // state changing functions

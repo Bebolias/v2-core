@@ -80,7 +80,6 @@ library Product {
         uint128 accountId
     )
         internal
-        view
         returns (Account.Exposure[] memory exposures)
     {
         return IProduct(self.productAddress).getAccountAnnualizedExposures(accountId);

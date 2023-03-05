@@ -39,7 +39,7 @@ contract ExposedAccounts is MockCoreState {
         return account.getCollateralBalance(collateralType);
     }
 
-    function getCollateralBalanceAvailable(uint128 id, address collateralType) external view returns (uint256) {
+    function getCollateralBalanceAvailable(uint128 id, address collateralType) external returns (uint256) {
         Account.Data storage account = Account.load(id);
         return account.getCollateralBalanceAvailable(collateralType);
     }
@@ -51,17 +51,17 @@ contract ExposedAccounts is MockCoreState {
         }
     }
 
-    function getAnnualizedProductExposures(uint128 id, uint128 productId) external view returns (Account.Exposure[] memory) {
+    function getAnnualizedProductExposures(uint128 id, uint128 productId) external returns (Account.Exposure[] memory) {
         Account.Data storage account = Account.load(id);
         return account.getAnnualizedProductExposures(productId);
     }
 
-    function getUnrealizedPnL(uint128 id) external view returns (int256) {
+    function getUnrealizedPnL(uint128 id) external returns (int256) {
         Account.Data storage account = Account.load(id);
         return account.getUnrealizedPnL();
     }
 
-    function getTotalAccountValue(uint128 id) external view returns (int256) {
+    function getTotalAccountValue(uint128 id) external returns (int256) {
         Account.Data storage account = Account.load(id);
         return account.getTotalAccountValue();
     }
@@ -70,26 +70,26 @@ contract ExposedAccounts is MockCoreState {
         return Account.getRiskParameter(productId, marketId);
     }
 
-    function getIMMultiplier() external view returns (uint256) {
+    function getIMMultiplier() external returns (uint256) {
         return Account.getIMMultiplier();
     }
 
-    function imCheck(uint128 id) external view {
+    function imCheck(uint128 id) external {
         Account.Data storage account = Account.load(id);
         account.imCheck();
     }
 
-    function isIMSatisfied(uint128 id) external view returns (bool, uint256) {
+    function isIMSatisfied(uint128 id) external returns (bool, uint256) {
         Account.Data storage account = Account.load(id);
         return account.isIMSatisfied();
     }
 
-    function isLiquidatable(uint128 id) external view returns (bool, uint256, uint256) {
+    function isLiquidatable(uint128 id) external returns (bool, uint256, uint256) {
         Account.Data storage account = Account.load(id);
         return account.isLiquidatable();
     }
 
-    function getMarginRequirements(uint128 id) external view returns (uint256, uint256) {
+    function getMarginRequirements(uint128 id) external returns (uint256, uint256) {
         Account.Data storage account = Account.load(id);
         return account.getMarginRequirements();
     }
@@ -124,7 +124,7 @@ contract AccountTest is Test {
         if (low) balanceD18 = LOW_COLLATERAL;
         if (medium) balanceD18 = MEDIUM_COLLATERAL;
         if (high) balanceD18 = HIGH_COLLATERAL;
-
+        
         // Set up the balance of token 0
         accounts.changeAccountBalance(
             accountId, MockAccount.CollateralBalance({ token: Constants.TOKEN_0, balanceD18: balanceD18 })

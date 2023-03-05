@@ -74,7 +74,6 @@ contract CollateralModule is ICollateralModule {
         address collateralType
     )
         external
-        view
         override
         returns (uint256 collateralBalanceAvailable)
     {

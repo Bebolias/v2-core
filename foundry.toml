@@ -10,6 +10,7 @@
   solc = "0.8.17"
   src = "src"
   test = "test"
+  auto_detect_remappings = false
 
 [profile.ci]
   fuzz = { runs = 1_000 }

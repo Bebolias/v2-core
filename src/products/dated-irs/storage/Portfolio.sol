@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 import "../../../utils/helpers/SetUtil.sol";
 import "../../../utils/helpers/SafeCast.sol";
 import "./Position.sol";
-import "./VariableRateOracle.sol";
+import "./RateOracleReader.sol";
 import "./PoolConfiguration.sol";
 import "../interfaces/IPool.sol";
 // todo: consider migrating Exposures from Account.sol to more relevant place (e.g. interface) -> think definitely worth doing that
@@ -18,7 +18,7 @@ library Portfolio {
     using Position for Position.Data;
     using SetUtil for SetUtil.UintSet;
     using SafeCastU256 for uint256;
-    using VariableRateOracle for VariableRateOracle.Data;
+    using RateOracleReader for RateOracleReader.Data;
     using PoolConfiguration for PoolConfiguration.Data;
 
     struct Data {
@@ -75,6 +75,7 @@ library Portfolio {
      * todo: this function looks expesive and feels like there's room for optimisations
      */
     function getAccountUnrealizedPnL(Data storage self, address poolAddress) internal view returns (int256 unrealizedPnL) {
+        // TODO: looks expensive - need to place limits on number of allowed markets and allowed maturities?
         for (uint256 i = 1; i <= self.activeMarkets.length(); i++) {
             uint128 marketId = self.activeMarkets.valueAt(i).to128();
             for (uint256 j = 1; j <= self.activeMaturitiesPerMarket[marketId].length(); i++) {
@@ -87,7 +88,9 @@ library Portfolio {
 
                 int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
-                int256 currentLiquidityIndex = VariableRateOracle.load(marketId).getRateIndexCurrent().toInt();
+                // TODO: use PRB math
+                int256 currentLiquidityIndex =
+                    RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).intoUint256().toInt();
 
                 int256 gwap =
                     IVAMMPoolModule(PoolConfiguration.getPoolAddress()).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
@@ -110,10 +113,10 @@ library Portfolio {
         uint256 maturityTimestamp
     )
         internal
-        view
         returns (int256[] memory exposures)
     {
-        int256 currentLiquidityIndex = VariableRateOracle.load(marketId).getRateIndexCurrent().toInt();
+        // TODO: use PRB math
+        int256 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).intoUint256().toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
@@ -130,7 +133,6 @@ library Portfolio {
         address poolAddress
     )
         internal
-        view
         returns (Account.Exposure[] memory exposures)
     {
         uint256 counter = 0;
@@ -209,7 +211,9 @@ library Portfolio {
     function settle(Data storage self, uint128 marketId, uint256 maturityTimestamp) internal returns (int256 settlementCashflow) {
         Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
-        int256 liquidityIndexMaturity = VariableRateOracle.load(marketId).getRateIndexMaturity(maturityTimestamp).toInt();
+        // TODO: use PRB math
+        int256 liquidityIndexMaturity =
+            RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp).intoUint256().toInt();
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();
