@@ -10,7 +10,7 @@ contract ExposedAccountRBAC {
     AccountRBAC.Data internal item;
 
     constructor(address owner) {
-        item = AccountRBAC.Data({owner: owner});
+        item = AccountRBAC.Data({ owner: owner });
     }
 
     // Mock functions
@@ -20,49 +20,35 @@ contract ExposedAccountRBAC {
 
     // Exposed functions
     function setOwner(address owner) external {
-        item.owner = owner;
+        AccountRBAC.setOwner(item, owner);
     }
 
     function authorized(address target) external view returns (bool) {
-        return target == item.owner;
+        return AccountRBAC.authorized(item, target);
     }
 }
 
 contract AccountRBACTest is Test {
-    function test_SetOwner() public {
-        address owner = vm.addr(1);
+    function testFuzz_Initiation(address owner) public {
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(owner);
 
-        address newOwner = vm.addr(2);
+        assertEq(accountRBAC.get().owner, owner);
+    }
+
+    function testFuzz_SetOwner(address owner, address newOwner) public {
+        ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(owner);
+
         accountRBAC.setOwner(newOwner);
 
         assertEq(accountRBAC.get().owner, newOwner);
     }
 
-    function test_Authorized_True() public {
-        address owner = vm.addr(1);
+    function testFuzz_Authorized_True(address owner) public {
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(owner);
 
         bool authorized = accountRBAC.authorized(owner);
 
         assertEq(authorized, true);
-    }
-
-    function test_Authorized_False() public {
-        address owner = vm.addr(1);
-        ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(owner);
-
-        address target = vm.addr(2);
-        bool authorized = accountRBAC.authorized(target);
-
-        assertEq(authorized, false);
-    }
-
-    function testFuzz_SetOwner(address owner, address newOwner) public {
-        ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(owner);
-        accountRBAC.setOwner(newOwner);
-
-        assertEq(accountRBAC.get().owner, newOwner);
     }
 
     function testFuzz_Authorized_False(address owner, address target) public {
@@ -71,6 +57,7 @@ contract AccountRBACTest is Test {
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(owner);
 
         bool authorized = accountRBAC.authorized(target);
+
         assertEq(authorized, false);
     }
 }

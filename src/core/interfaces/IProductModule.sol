@@ -40,7 +40,7 @@ interface IProductModule {
      * @param product The address of the product that is to be registered in the system.
      * @return newProductId The id with which the product will be registered in the system.
      */
-    function registerProduct(address product) external returns (uint128 newProductId);
+    function registerProduct(address product, string memory name) external returns (uint128 newProductId);
 
     /// @notice attempts to close all the unfilled and filled positions of a given account in a given product (productId)
     function closeAccount(uint128 productId, uint128 accountId) external;

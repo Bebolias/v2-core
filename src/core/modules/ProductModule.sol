@@ -53,14 +53,14 @@ contract ProductModule is IProductModule {
     /**
      * @inheritdoc IProductModule
      */
-    function registerProduct(address product) external override returns (uint128 productId) {
+    function registerProduct(address product, string memory name) external override returns (uint128 productId) {
         // todo: ensure acces to feature flag check
 
         if (!ERC165Helper.safeSupportsInterface(product, type(IProduct).interfaceId)) {
             revert IncorrectProductInterface(product);
         }
 
-        productId = ProductCreator.create(product, msg.sender).id;
+        productId = ProductCreator.create(product, name, msg.sender).id;
 
         emit ProductRegistered(product, productId, msg.sender);
 

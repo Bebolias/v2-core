@@ -38,11 +38,6 @@ library Account {
      */
     error AccountNotFound(uint128 accountId);
 
-    /**
-     * @dev Thrown when an account does not have sufficient collateral for a particular operation in the protocol.
-     */
-    error InsufficientAccountCollateral(uint256 requestedAmount);
-
     struct Data {
         /**
          * @dev Numeric identifier for the account. Must be unique.

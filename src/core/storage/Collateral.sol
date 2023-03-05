@@ -7,6 +7,11 @@ pragma solidity >=0.8.13;
  * Each account will have one of these objects for each type of collateral it deposited in the system.
  */
 library Collateral {
+    /**
+     * @dev Thrown when an account does not have sufficient collateral.
+     */
+    error InsufficientCollateral(uint256 requestedAmount);
+
     struct Data {
         /**
          * @dev The net amount that is deposited in this collateral
@@ -25,6 +30,10 @@ library Collateral {
      * @dev Decrements the entry's balance.
      */
     function decreaseCollateralBalance(Data storage self, uint256 amountD18) internal {
+        if (self.balanceD18 < amountD18) {
+            revert InsufficientCollateral(amountD18);
+        }
+
         self.balanceD18 -= amountD18;
     }
 }

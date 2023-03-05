@@ -24,8 +24,7 @@ contract CollateralModule is ICollateralModule {
      */
     function deposit(uint128 accountId, address collateralType, uint256 tokenAmount) external override {
         CollateralConfiguration.collateralEnabled(collateralType);
-        Account.exists(accountId);
-        Account.Data storage account = Account.load(accountId);
+        Account.Data storage account = Account.exists(accountId);
         address depositFrom = msg.sender;
         address self = address(this);
         uint256 allowance = IERC20(collateralType).allowance(depositFrom, self);
@@ -66,10 +65,10 @@ contract CollateralModule is ICollateralModule {
     {
         return Account.load(accountId).getCollateralBalance(collateralType);
     }
+
     /**
      * @inheritdoc ICollateralModule
      */
-
     function getAccountCollateralBalanceAvailable(
         uint128 accountId,
         address collateralType
