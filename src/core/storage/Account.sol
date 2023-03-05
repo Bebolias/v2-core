@@ -233,7 +233,7 @@ library Account {
     /**
      * @dev Note, im multiplier is assumed to be the same across all products, markets and maturities
      */
-    function getIMMultiplier() internal returns (uint256 imMultiplier) {
+    function getIMMultiplier() internal view returns (uint256 imMultiplier) {
         return ProtocolRiskConfiguration.load().imMultiplier;
     }
 

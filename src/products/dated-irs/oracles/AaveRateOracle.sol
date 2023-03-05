@@ -15,8 +15,6 @@ contract AaveRateOracle is IRateOracle {
 
     using PRBMathCastingUint256 for uint256;
 
-    // uint8 public constant override UNDERLYING_YIELD_BEARING_PROTOCOL_ID = 1; // id of aave v2 is 1
-
     constructor(IAaveV3LendingPool _aaveLendingPool, address _underlying) {
         require(address(_aaveLendingPool) != address(0), "aave pool must exist");
 

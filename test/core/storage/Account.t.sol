@@ -56,12 +56,12 @@ contract ExposedAccounts is MockCoreState {
         return account.getAnnualizedProductExposures(productId);
     }
 
-    function getUnrealizedPnL(uint128 id) external returns (int256) {
+    function getUnrealizedPnL(uint128 id) external view returns (int256) {
         Account.Data storage account = Account.load(id);
         return account.getUnrealizedPnL();
     }
 
-    function getTotalAccountValue(uint128 id) external returns (int256) {
+    function getTotalAccountValue(uint128 id) external view returns (int256) {
         Account.Data storage account = Account.load(id);
         return account.getTotalAccountValue();
     }
@@ -70,7 +70,7 @@ contract ExposedAccounts is MockCoreState {
         return Account.getRiskParameter(productId, marketId);
     }
 
-    function getIMMultiplier() external returns (uint256) {
+    function getIMMultiplier() external view returns (uint256) {
         return Account.getIMMultiplier();
     }
 
@@ -124,11 +124,9 @@ contract AccountTest is Test {
         if (low) balanceD18 = LOW_COLLATERAL;
         if (medium) balanceD18 = MEDIUM_COLLATERAL;
         if (high) balanceD18 = HIGH_COLLATERAL;
-        
+
         // Set up the balance of token 0
-        accounts.changeAccountBalance(
-            accountId, MockAccount.CollateralBalance({ token: Constants.TOKEN_0, balanceD18: balanceD18 })
-        );
+        accounts.changeAccountBalance(accountId, MockAccount.CollateralBalance({token: Constants.TOKEN_0, balanceD18: balanceD18}));
     }
 
     function test_Exists() public {
@@ -308,7 +306,7 @@ contract AccountTest is Test {
         vm.assume(otherToken != Constants.TOKEN_0);
         vm.assume(otherToken != Constants.TOKEN_1);
 
-        accounts.changeAccountBalance(accountId, MockAccount.CollateralBalance({ token: otherToken, balanceD18: 1e18 }));
+        accounts.changeAccountBalance(accountId, MockAccount.CollateralBalance({token: otherToken, balanceD18: 1e18}));
 
         uint256 collateralBalanceAvailableD18 = accounts.getCollateralBalanceAvailable(accountId, otherToken);
 

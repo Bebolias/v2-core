@@ -28,6 +28,7 @@ contract ProductModule is IProductModule {
         uint128 accountId
     )
         external
+        view
         override
         returns (int256 accountUnrealizedPnL)
     {

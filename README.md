@@ -10,6 +10,7 @@
 
 **P1**
 
+- Rate Oracle View
 - initiate maker order goes into the pool (Ioana)
 - Dated IRS VAMM Pool Implementation in v2-periphery (Ioana)
 - G-TWAP Integration with Rate Oracle Module (Cyclops Rex)

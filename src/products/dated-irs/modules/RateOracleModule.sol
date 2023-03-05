@@ -21,6 +21,7 @@ contract RateOracleManager is IRateOracleModule {
         uint256 maturityTimestamp
     )
         external
+        view
         override
         returns (UD60x18 rateIndexCurrent)
     {
@@ -35,6 +36,7 @@ contract RateOracleManager is IRateOracleModule {
         uint256 maturityTimestamp
     )
         external
+        view
         override
         returns (UD60x18 rateIndexMaturity)
     {
