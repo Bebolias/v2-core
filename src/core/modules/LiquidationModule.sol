@@ -21,6 +21,16 @@ contract LiquidationModule is ILiquidationModule {
     using Collateral for Collateral.Data;
 
     /**
+     * @dev Thrown when an account is not liquidatable but liquidation is triggered on it.
+     */
+    error AccountNotLiquidatable(uint128 accountId);
+
+    /**
+     * @dev Thrown when an account exposure is not reduced when liquidated.
+     */
+    error AccountExposureNotReduced(uint128 accountId, uint256 imPreClose, uint256 imPostClose);
+
+    /**
      * @inheritdoc ILiquidationModule
      */
     function liquidate(
@@ -30,26 +40,25 @@ contract LiquidationModule is ILiquidationModule {
         external
         returns (uint256 liquidatorRewardAmount)
     {
-        Account.exists(liquidatedAccountId);
-        Account.Data storage account = Account.load(liquidatedAccountId);
+        Account.Data storage account = Account.exists(liquidatedAccountId);
         address liquidatorRewardToken = account.settlementToken;
         (bool liquidatable, uint256 imPreClose,) = account.isLiquidatable();
 
         if (!liquidatable) {
-            // todo: revert
+            revert AccountNotLiquidatable(liquidatedAccountId);
         }
+
         account.closeAccount();
         (uint256 imPostClose,) = account.getMarginRequirements();
-        int256 deltaIM = imPostClose.toInt() - imPreClose.toInt();
 
-        if (deltaIM <= 0) {
-            // todo: revert
+        if (imPreClose <= imPostClose) {
+            revert AccountExposureNotReduced(liquidatedAccountId, imPreClose, imPostClose);
         }
 
         // todo: liquidator deposit logic vs. alternatives (P1)
 
-        liquidatorRewardAmount = deltaIM.toUint() * ProtocolRiskConfiguration.load().liquidatorRewardParameter;
-        Account.Data storage liquidatorAccount = Account.load(liquidatorAccountId);
+        liquidatorRewardAmount = (imPreClose - imPostClose) * ProtocolRiskConfiguration.load().liquidatorRewardParameter / 1e18;
+        Account.Data storage liquidatorAccount = Account.exists(liquidatorAccountId);
 
         account.collaterals[liquidatorRewardToken].decreaseCollateralBalance(liquidatorRewardAmount);
         liquidatorAccount.collaterals[liquidatorRewardToken].increaseCollateralBalance(liquidatorRewardAmount);

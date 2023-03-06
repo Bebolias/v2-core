@@ -6,8 +6,9 @@ import "../../../src/core/storage/Account.sol";
 /**
  * @title Object for mocking account storage
  */
-contract MockAccount {
+contract MockAccountStorage {
     using SetUtil for SetUtil.UintSet;
+    using Account for Account.Data;
 
     struct CollateralBalance {
         address token;
@@ -53,5 +54,10 @@ contract MockAccount {
     function removeActiveProduct(uint128 accountId, uint128 productId) public {
         Account.Data storage account = Account.exists(accountId);
         account.activeProducts.remove(productId);
+    }
+
+    function getCollateralBalance(uint128 accountId, address collateralType) external view returns (uint256) {
+        Account.Data storage account = Account.load(accountId);
+        return account.getCollateralBalance(collateralType);
     }
 }

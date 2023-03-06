@@ -3,9 +3,9 @@ pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
 import "../../../src/core/modules/CollateralModule.sol";
-import "../test-utils/MockCore.sol";
+import "../test-utils/MockCoreStorage.sol";
 
-contract EnhancedCollateralModule is CollateralModule, MockCoreState { }
+contract EnhancedCollateralModule is CollateralModule, CoreState { }
 
 contract CollateralModuleTest is Test {
     using SafeCastU256 for uint256;

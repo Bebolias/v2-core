@@ -10,7 +10,7 @@ contract ExposedCollateral {
     Collateral.Data internal item;
 
     constructor(uint256 balanceD18) {
-        item = Collateral.Data({balanceD18: balanceD18});
+        item = Collateral.Data({ balanceD18: balanceD18 });
     }
 
     // Mock functions

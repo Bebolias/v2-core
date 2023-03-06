@@ -3,9 +3,9 @@ pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
 import "../../../src/core/storage/Account.sol";
-import "../test-utils/MockCore.sol";
+import "../test-utils/MockCoreStorage.sol";
 
-contract ExposedAccounts is MockCoreState {
+contract ExposedAccounts is CoreState {
     using Account for Account.Data;
 
     // Exposed functions
@@ -32,11 +32,6 @@ contract ExposedAccounts is MockCoreState {
 
     function closeAccount(uint128 id) external {
         Account.load(id).closeAccount();
-    }
-
-    function getCollateralBalance(uint128 id, address collateralType) external view returns (uint256) {
-        Account.Data storage account = Account.load(id);
-        return account.getCollateralBalance(collateralType);
     }
 
     function getCollateralBalanceAvailable(uint128 id, address collateralType) external returns (uint256) {
@@ -126,7 +121,9 @@ contract AccountTest is Test {
         if (high) balanceD18 = HIGH_COLLATERAL;
 
         // Set up the balance of token 0
-        accounts.changeAccountBalance(accountId, MockAccount.CollateralBalance({token: Constants.TOKEN_0, balanceD18: balanceD18}));
+        accounts.changeAccountBalance(
+            accountId, MockAccountStorage.CollateralBalance({ token: Constants.TOKEN_0, balanceD18: balanceD18 })
+        );
     }
 
     function test_Exists() public {
@@ -306,7 +303,7 @@ contract AccountTest is Test {
         vm.assume(otherToken != Constants.TOKEN_0);
         vm.assume(otherToken != Constants.TOKEN_1);
 
-        accounts.changeAccountBalance(accountId, MockAccount.CollateralBalance({token: otherToken, balanceD18: 1e18}));
+        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({ token: otherToken, balanceD18: 1e18 }));
 
         uint256 collateralBalanceAvailableD18 = accounts.getCollateralBalanceAvailable(accountId, otherToken);
 
