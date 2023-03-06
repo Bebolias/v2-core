@@ -31,14 +31,14 @@ contract LiquidationModuleTest is Test {
 
         require(low || medium || high, "Unkwown collateral profile type");
 
-        uint256 balanceD18 = 0;
-        if (low) balanceD18 = LOW_COLLATERAL;
-        if (medium) balanceD18 = MEDIUM_COLLATERAL;
-        if (high) balanceD18 = HIGH_COLLATERAL;
+        uint256 balance = 0;
+        if (low) balance = LOW_COLLATERAL;
+        if (medium) balance = MEDIUM_COLLATERAL;
+        if (high) balance = HIGH_COLLATERAL;
 
         // Set up the balance of token 0
         liquidationModule.changeAccountBalance(
-            accountId, MockAccountStorage.CollateralBalance({ token: Constants.TOKEN_0, balanceD18: balanceD18 })
+            accountId, MockAccountStorage.CollateralBalance({ token: Constants.TOKEN_0, balance: balance })
         );
     }
 

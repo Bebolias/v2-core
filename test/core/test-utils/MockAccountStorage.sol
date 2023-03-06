@@ -12,7 +12,7 @@ contract MockAccountStorage {
 
     struct CollateralBalance {
         address token;
-        uint256 balanceD18;
+        uint256 balance;
     }
 
     function mockAccount(
@@ -41,9 +41,9 @@ contract MockAccountStorage {
         Account.Data storage account = Account.exists(accountId);
 
         address token = balance.token;
-        uint256 balanceD18 = balance.balanceD18;
+        uint256 balance = balance.balance;
 
-        account.collaterals[token].balanceD18 = balanceD18;
+        account.collaterals[token].balance = balance;
     }
 
     function addActiveProduct(uint128 accountId, uint128 productId) public {

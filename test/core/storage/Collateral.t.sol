@@ -9,8 +9,8 @@ contract ExposedCollateral {
 
     Collateral.Data internal item;
 
-    constructor(uint256 balanceD18) {
-        item = Collateral.Data({ balanceD18: balanceD18 });
+    constructor(uint256 balance) {
+        item = Collateral.Data({ balance: balance });
     }
 
     // Mock functions
@@ -19,12 +19,12 @@ contract ExposedCollateral {
     }
 
     // Exposed functions
-    function increaseCollateralBalance(uint256 amountD18) external {
-        item.increaseCollateralBalance(amountD18);
+    function increaseCollateralBalance(uint256 amount) external {
+        item.increaseCollateralBalance(amount);
     }
 
-    function decreaseCollateralBalance(uint256 amountD18) external {
-        item.decreaseCollateralBalance(amountD18);
+    function decreaseCollateralBalance(uint256 amount) external {
+        item.decreaseCollateralBalance(amount);
     }
 }
 
@@ -37,7 +37,7 @@ contract CollateralTest is Test {
         collateral.increaseCollateralBalance(200e18);
 
         // Expect balance of 300
-        assertEq(collateral.get().balanceD18, 300e18);
+        assertEq(collateral.get().balance, 300e18);
     }
 
     function test_DecreaseCollateralBalance() public {
@@ -48,7 +48,7 @@ contract CollateralTest is Test {
         collateral.decreaseCollateralBalance(200e18);
 
         // Expect balance of 100
-        assertEq(collateral.get().balanceD18, 100e18);
+        assertEq(collateral.get().balance, 100e18);
     }
 
     function test_revertWhen_NotEnoughBalanceToDecrease() public {
@@ -66,7 +66,7 @@ contract CollateralTest is Test {
 
         collateral.increaseCollateralBalance(amount);
 
-        assertEq(collateral.get().balanceD18, balance + amount);
+        assertEq(collateral.get().balance, balance + amount);
     }
 
     function testFuzz_DecreaseCollateralBalance(uint256 balance, uint256 amount) public {
@@ -75,7 +75,7 @@ contract CollateralTest is Test {
 
         collateral.decreaseCollateralBalance(amount);
 
-        assertEq(collateral.get().balanceD18, balance - amount);
+        assertEq(collateral.get().balance, balance - amount);
     }
 
     function testFuzz_revertWhen_NotEnoughBalanceToDecrease(uint256 balance, uint256 amount) public {
