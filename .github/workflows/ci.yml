@@ -110,7 +110,7 @@ jobs:
         uses: "foundry-rs/foundry-toolchain@v1"
 
       - name: "Run the tests"
-        run: "forge coverage --report lcov"
+        run: "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
 
       # Commit generated and commit files
       - name: Display event name
