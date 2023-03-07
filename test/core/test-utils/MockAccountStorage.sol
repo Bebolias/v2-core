@@ -41,9 +41,9 @@ contract MockAccountStorage {
         Account.Data storage account = Account.exists(accountId);
 
         address token = balance.token;
-        uint256 balance = balance.balance;
+        uint256 tokenBalance = balance.balance;
 
-        account.collaterals[token].balance = balance;
+        account.collaterals[token].balance = tokenBalance;
     }
 
     function addActiveProduct(uint128 accountId, uint128 productId) public {

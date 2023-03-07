@@ -13,4 +13,8 @@ contract MockProductStorage {
         Product.Data storage product = ProductCreator.create(productAddress, name, owner);
         return product.id;
     }
+
+    function getProduct(uint128 id) external pure returns (Product.Data memory product) {
+        product = Product.load(id);
+    }
 }

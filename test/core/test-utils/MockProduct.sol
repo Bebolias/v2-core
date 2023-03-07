@@ -6,8 +6,8 @@ import "../../../src/core/interfaces/external/IProduct.sol";
 contract MockProduct is IProduct {
     string internal _name;
 
-    constructor(string memory name) {
-        _name = name;
+    constructor(string memory productName) {
+        _name = productName;
     }
 
     function name() public view override returns (string memory) {

@@ -5,8 +5,6 @@ import "forge-std/Test.sol";
 import "../../../src/core/storage/Collateral.sol";
 
 contract ExposedCollateral {
-    using Collateral for Collateral.Data;
-
     Collateral.Data internal item;
 
     constructor(uint256 balance) {
@@ -20,11 +18,11 @@ contract ExposedCollateral {
 
     // Exposed functions
     function increaseCollateralBalance(uint256 amount) external {
-        item.increaseCollateralBalance(amount);
+        Collateral.increaseCollateralBalance(item, amount);
     }
 
     function decreaseCollateralBalance(uint256 amount) external {
-        item.decreaseCollateralBalance(amount);
+        Collateral.decreaseCollateralBalance(item, amount);
     }
 }
 

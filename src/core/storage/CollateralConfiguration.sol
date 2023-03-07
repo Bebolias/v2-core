@@ -14,22 +14,10 @@ library CollateralConfiguration {
         keccak256(abi.encode("xyz.voltz.CollateralConfiguration_availableCollaterals"));
 
     /**
-     * @dev Thrown when the token address of a collateral cannot be found.
-     */
-    error CollateralNotFound();
-
-    /**
      * @dev Thrown when deposits are disabled for the given collateral type.
      * @param collateralType The address of the collateral type for which depositing was disabled.
      */
     error CollateralDepositDisabled(address collateralType);
-
-    /**
-     * @dev Thrown when attempting to convert a token to the protocol amount and the conversion results in a loss of precision.
-     * @param tokenAmount The amount of tokens that were attempted to be converted.
-     * @param decimals The number of decimals of the token that was attempted to be converted.
-     */
-    error PrecisionLost(uint256 tokenAmount, uint8 decimals);
 
     struct Data {
         /**

@@ -10,11 +10,6 @@ import "./Account.sol";
  *
  */
 library Product {
-    /**
-     * @dev Thrown when a specified product is not found.
-     */
-    error ProductNotFound(uint128 productId);
-
     struct Data {
         /**
          * @dev Numeric identifier for the product. Must be unique.
