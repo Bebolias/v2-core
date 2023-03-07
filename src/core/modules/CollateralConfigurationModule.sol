@@ -56,10 +56,9 @@ contract CollateralConfigurationModule is ICollateralConfigurationModule {
     /**
      * @inheritdoc ICollateralConfigurationModule
      */
-    // solc-ignore-next-line func-mutability
     function getCollateralConfiguration(address collateralType)
         external
-        view
+        pure
         override
         returns (CollateralConfiguration.Data memory)
     {
