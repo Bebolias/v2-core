@@ -121,5 +121,5 @@ jobs:
         run: |
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "devcold@voltz.xyz"
-          git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
-          git push
+          git add -A
+          git diff-index --quiet HEAD || (git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}" && git push)
