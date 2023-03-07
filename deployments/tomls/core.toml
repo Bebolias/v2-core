@@ -1,0 +1,12 @@
+[setting.voltz_package]
+defaultValue = "voltz:1.0.0"
+
+[setting.owner]
+
+[setting.salt]
+defaultValue = "vltz"
+
+[provision.system]
+source = "<%= settings.voltz_package %>"
+options.owner = "<%= settings.owner %>"
+options.salt = "<%= settings.salt %>"

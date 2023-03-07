@@ -1,0 +1,13 @@
+name = "core-omnibus"
+version = "1.0.0"
+description = "Includes the full voltz protocol core with configurations applied"
+include = [
+    "tomls/core.toml",
+    "tomls/collaterals/usdc.toml",
+]
+
+[setting.owner]
+defaultValue = ""
+
+[setting.deployer]
+defaultValue = ""

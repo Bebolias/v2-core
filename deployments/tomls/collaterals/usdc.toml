@@ -1,0 +1,10 @@
+[setting.usdc_address]
+
+
+[invoke.configureUsdcCollateral]
+target = ["system.CoreProxy"]
+fromCall.func = "owner"
+func = "configureCollateral"
+args = [
+  { tokenAddress = "<%= settings.usdc_address %>", liquidationReward = "<%= settings.usdc_liquidation_reward %>", depositingEnabled = true }
+]

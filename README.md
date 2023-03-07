@@ -1,4 +1,3 @@
-# TODOs
 
 [![GitHub Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] ![Coverage][coverage-badge]
 
@@ -8,35 +7,138 @@
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
 [coverage-badge]: ./coverage.svg
 
+# Package Structure
+
+This is a monorepo with the following folder structure and packages:
+
+```
+.
+├── products                     // Standalone products that extend the core Voltz protocol with new instruments
+│   ├── dated-irs                // Dated Interest Rate Swap Product
+│
+├── core                         // Core Voltz Protocol (to be extended by products)
+│
+└── utils                        // Utilities, plugins, tooling
+    ├── contracts                // Standard contract implementations like ERC20, adapted for custom router storage. 
+    ├── modules                  // Modules that are reused between multiple router based projects
+    └── router                   // Cannon plugin that merges multiple modules into a router contract.
+```
+
+
+# Priorities
+
 **P1**
 
-- Rate Oracle View
-- initiate maker order goes into the pool (Ioana)
-- Dated IRS VAMM Pool Implementation in v2-periphery (Ioana)
+
+- Community Deployer (separate module), hmm can we have that for all deployments?
+- Deployment Cannon (AB)
+- Dated IRS VAMM Pool Implementation in v2-periphery (Cyclops Rex)
 - G-TWAP Integration with Rate Oracle Module (Cyclops Rex)
-- Variable Rate Oracles (Cyclops Rex)
 - Dated IRS Market Configuration Module (AB)
-- Account -> settlement token checks (Costin)
-- Account -> liquidator deposit logic (Costin)
-- PRB Math & User Defined Types (Costin)
 - Fee Module and associated maker/taker fee logic (AB)
-- Feature Flag Module
-- Associated Systems Module
-- Periphery & Multicall Module
+- Account -> settlement token checks (AB)
+- Account -> liquidator deposit logic (AB)
+- PRB Math & User Defined Types (Costin)
+
+
 
 **P2**
 
-- Deployment & Upgradability
-- Subgraph
-- SDK
+- Consider bringing the .ts tests from https://github.com/Synthetixio/synthetix-v3/tree/main/utils/core-contracts/test/contracts
+- Subgraph Setup (AB)
+- SDK Setup (AB)
+- Community Deployer (AB)
+- Feature Flag Module
+- Associated Systems Module
+- Periphery & Multicall Module
 - Fuzzing
 - E2E Testing
 - Gas Cost Reduction
-- Community Deployer
 
 **P3**
 
 - Differential fuzzing against python repo
+
+# Summary
+
+This project uses foundry. Licensing is not finalised yet, as a placeholder using MIT in a few places to keep the linter happy.
+
+# Router Proxy
+
+Proxy architecture developed by Synthetix referred to as the "Router Proxy".
+It is effectively a way to merge several contracts, into a single implementation contract which is the router itself. This router is used as the implementation of the main proxy of the system.
+
+# Comments
+
+For public or external methods and variables, use NatSpec comments.
+
+Forge doc will parse these to autogenerate documentation. Etherscan will display them in the contract UI.
+
+For simple NatSpec comments, consider just documenting params in the docstring, such as
+/// @notice Returns the sum of `x` and `y`., instead of using @param tags.
+
+For complex NatSpec comments, consider using a tool like PlantUML (https://plantuml.com/ascii-art) to generate ASCII art diagrams to help explain complex aspects of the codebase.
+
+Any markdown in your comments will carry over properly when generating docs with forge doc, so structure comments with markdown when useful.
+
+Good: /// @notice Returns the sum of `x` and `y`.
+Bad: /// @notice Returns the sum of x and y.
+
+
+# Deployment Guide
+
+To prepare for system upgrades, this repository is used to release new versions of the voltz protocol (core) and products.
+
+## Preparing a release
+
+- Ensure you have the latest version of [Cannon](https://usecannon.com) installed: `npm i -g @usecannon/cli` and `hardhat-cannon` is upgraded to the latest through the repository.
+- After installing for the first time, run `cannon setup` to configure IPFS and a reliable RPC endpoint to communicate with the Cannon package registry.
+- Run `npm i` and `npm run build` in the root directory of the repository.
+- From the directory of the package you're releasing, run `npx hardhat cannon:build`.
+  - If you're upgrading the voltz package, also run `npm run build && npx hardhat cannon:build cannonfile.test.toml` to generate the testable package.
+  - Confirm the private key that owns the corresponding namespace in the package registry is set in the `.env` file as `DEPLOYER_PRIVATE_KEY`.
+  - Publish the release to Cannon package registry with `npx hardhat cannon:publish --network mainnet`.
+- Increment the version in the relevant `package.json` files. _The repositories should always contain the version number of the next release.
+- If you've upgraded voltz, also increment the version of the `package.json` file in the root directory. Also upgrade the version in [...]
+- Run `npm i` in the root directory.
+- Commit and push the change to this repository.
+- Then follow the instructions below:
+
+## Specify Upgrade
+
+- After publishing any new versions of the provisioned packages (core, dated irs product), bump the versions throughout the cannonfiles to match.
+- Add new settings and invoke actions as necessary
+- Update the default values in the network-specific omnibus cannonfiles as desired
+- asdf
+
+## Execute Upgrade
+
+Conduct the following process for each network:
+
+- Perform a dry-run and confirm that the actions that would be executed by Cannon are expected:
+
+```
+cannon build omnibus-<NETWORK_NAME>.toml --upgrade-from voltz-omnibus:latest --network <RPC_URL_FOR_NETWORK_NAME>  --private-key <DEPLOYER_PRIVATE_KEY> --dry-run
+```
+
+- Remove the dry-run option to execute the upgrade:
+```
+cannon build omnibus-<NETWORK_NAME>.toml --upgrade-from voltz-omnibus:latest --network <RPC_URL_FOR_NETWORK_NAME> --private-key <DEPLOYER_PRIVATE_KEY>
+```
+
+### Finalize Release
+
+- Publish your new packages on the Cannon registry:
+  - If you upgraded voltz core, `cannon publish voltz:<VERSION_NUMBER> --private-key <KEY_THAT_HAS_ETH_ON_MAINNET> --tags latest,3`
+  - `cannon publish synthetix-omnibus:<VERSION_NUMBER> --private-key <KEY_THAT_HAS_ETH_ON_MAINNET> --tags latest,3`
+- Increment the version number in each of the omnibus toml files in the root of the repository. (The version in the repository should always be the next version.)
+- Commit and merge the change.
+- After the new version of the voltz-omnibus package has been published, the previously published packages can be verified on Etherscan.
+- From the relevant package's directory, run the following command for each network it was deployed on:  `npx hardhat cannon:verify <PACKAGE_NAME>:<VERSION> --network <NETWORK_NAME>`
+
+
+
+# Draft Notes
 
 Notes on Associated System
 
@@ -63,28 +165,3 @@ minor
 - what do they mean by "system wide config for anything" https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/storage/Config.sol
 - FeatureFlag.ensureAccessToFeature(\_MARKET_FEATURE_FLAG); -> register a new market
 - https://github.com/Synthetixio/synthetix-v3/blob/adf3f1f5c2c0967cf68d1489522db87d454f9d78/protocol/synthetix/contracts/modules/core/MarketManagerModule.sol
-
-# Summary
-
-This project uses foundry. Licensing is not finalised yet, as a placeholder using MIT in a few places to keep the linter happy.
-
-# Router Proxy
-
-Proxy architecture developed by Synthetix referred to as the "Router Proxy".
-It is effectively a way to merge several contracts, into a single implementation contract which is the router itself. This router is used as the implementation of the main proxy of the system.
-
-# Comments
-
-For public or external methods and variables, use NatSpec comments.
-
-Forge doc will parse these to autogenerate documentation. Etherscan will display them in the contract UI.
-
-For simple NatSpec comments, consider just documenting params in the docstring, such as
-/// @notice Returns the sum of `x` and `y`., instead of using @param tags.
-
-For complex NatSpec comments, consider using a tool like PlantUML (https://plantuml.com/ascii-art) to generate ASCII art diagrams to help explain complex aspects of the codebase.
-
-Any markdown in your comments will carry over properly when generating docs with forge doc, so structure comments with markdown when useful.
-
-Good: /// @notice Returns the sum of `x` and `y`.
-Bad: /// @notice Returns the sum of x and y.

@@ -1,0 +1,10 @@
+[setting.weth_address]
+
+
+[invoke.configureWethCollateral]
+target = ["system.CoreProxy"]
+fromCall.func = "owner"
+func = "configureCollateral"
+args = [
+  { tokenAddress = "<%= settings.weth_address %>", liquidationReward = "<%= settings.weth_liquidation_reward %>", depositingEnabled = true }
+]
