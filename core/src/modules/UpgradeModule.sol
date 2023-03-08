@@ -7,4 +7,4 @@ import "../utils/modules/modules/BaseUpgradeModule.sol";
  * @title Module UUPS type upgradeability.
  */
 // solhint-disable-next-line no-empty-blocks
-contract UpgradeModule is BaseUpgradeModule {}
+contract UpgradeModule is BaseUpgradeModule { }

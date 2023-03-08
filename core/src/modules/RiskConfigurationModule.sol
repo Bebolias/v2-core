@@ -33,7 +33,10 @@ contract RiskConfigurationModule is IRiskConfigurationModule {
      */
     // solc-ignore-next-line func-mutability
 
-    function getMarketRiskConfiguration(uint128 productId, uint128 marketId)
+    function getMarketRiskConfiguration(
+        uint128 productId,
+        uint128 marketId
+    )
         external
         view
         override

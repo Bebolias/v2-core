@@ -49,7 +49,7 @@ jobs:
         uses: "foundry-rs/foundry-toolchain@v1"
 
       - name: "Build the contracts and print their size"
-        run: "forge build --sizes"
+        run: "yarn build"
 
       - name: "Add build summary"
         run: |
@@ -69,7 +69,7 @@ jobs:
         uses: "foundry-rs/foundry-toolchain@v1"
 
       - name: "Run the tests"
-        run: "forge test"
+        run: "yarn test"
 
       - name: "Add test summary"
         run: |
@@ -110,7 +110,7 @@ jobs:
         uses: "foundry-rs/foundry-toolchain@v1"
 
       - name: "Run the tests"
-        run: "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
+        run: "yarn coverage"
 
       # Commit generated and commit files
       - name: Display event name

@@ -14,13 +14,10 @@ docs/
 .env
 
 # Node modules
-/node_modules
-
-# VS Code
-/.vscode
+node_modules
 
 # Coverage Files
-/lcov.info
+lcov.info
 
 bin/
-/yarn-error.log
+yarn-error.log

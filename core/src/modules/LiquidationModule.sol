@@ -33,7 +33,10 @@ contract LiquidationModule is ILiquidationModule {
     /**
      * @inheritdoc ILiquidationModule
      */
-    function liquidate(uint128 liquidatedAccountId, uint128 liquidatorAccountId)
+    function liquidate(
+        uint128 liquidatedAccountId,
+        uint128 liquidatorAccountId
+    )
         external
         returns (uint256 liquidatorRewardAmount)
     {

@@ -73,11 +73,7 @@ contract MockProduct is IProduct {
         }
     }
 
-    function getAccountAnnualizedExposures(uint128 accountId)
-        public
-        view
-        returns (Account.Exposure[] memory exposures)
-    {
+    function getAccountAnnualizedExposures(uint128 accountId) public view returns (Account.Exposure[] memory exposures) {
         MockAccountAnnualizedExposure storage tmp = mockAccountAnnualizedExposures[accountId];
 
         if (tmp.start >= tmp.end) {

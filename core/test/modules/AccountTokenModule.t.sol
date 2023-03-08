@@ -15,9 +15,7 @@ contract AccountTokenModuleTest is Test, IERC721Receiver {
     function setUp() public {
         accountTokenModule = new AccountTokenModule();
 
-        vm.store(
-            address(accountTokenModule), keccak256(abi.encode("xyz.voltz.OwnableStorage")), bytes32(abi.encode(owner))
-        );
+        vm.store(address(accountTokenModule), keccak256(abi.encode("xyz.voltz.OwnableStorage")), bytes32(abi.encode(owner)));
 
         vm.prank(owner);
         accountTokenModule.initialize("Voltz", "VLTZ", "");
@@ -28,9 +26,7 @@ contract AccountTokenModuleTest is Test, IERC721Receiver {
         uint128 accountId = 100;
 
         vm.mockCall(
-            address(owner),
-            abi.encodeWithSelector(IAccountModule.notifyAccountTransfer.selector, user, accountId),
-            abi.encode()
+            address(owner), abi.encodeWithSelector(IAccountModule.notifyAccountTransfer.selector, user, accountId), abi.encode()
         );
 
         vm.prank(owner);

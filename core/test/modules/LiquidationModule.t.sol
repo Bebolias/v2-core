@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../../src/modules/LiquidationModule.sol";
 import "../test-utils/MockCoreStorage.sol";
 
-contract EnhancedLiquidationModule is LiquidationModule, CoreState {}
+contract EnhancedLiquidationModule is LiquidationModule, CoreState { }
 
 contract LiquidationModuleTest is Test {
     using SafeCastU256 for uint256;
@@ -38,7 +38,7 @@ contract LiquidationModuleTest is Test {
 
         // Set up the balance of token 0
         liquidationModule.changeAccountBalance(
-            accountId, MockAccountStorage.CollateralBalance({token: Constants.TOKEN_0, balance: balance})
+            accountId, MockAccountStorage.CollateralBalance({ token: Constants.TOKEN_0, balance: balance })
         );
     }
 
@@ -51,8 +51,8 @@ contract LiquidationModuleTest is Test {
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
 
-                mockExposures[0] = Account.Exposure({marketId: 10, filled: 0, unfilledLong: 0, unfilledShort: -0});
-                mockExposures[1] = Account.Exposure({marketId: 11, filled: 0, unfilledLong: 0, unfilledShort: 0});
+                mockExposures[0] = Account.Exposure({ marketId: 10, filled: 0, unfilledLong: 0, unfilledShort: -0 });
+                mockExposures[1] = Account.Exposure({ marketId: 11, filled: 0, unfilledLong: 0, unfilledShort: 0 });
 
                 products[0].mockGetAccountAnnualizedExposures(100, mockExposures);
             }
@@ -64,7 +64,7 @@ contract LiquidationModuleTest is Test {
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
 
-                mockExposures[0] = Account.Exposure({marketId: 20, filled: 0, unfilledLong: 0, unfilledShort: 0});
+                mockExposures[0] = Account.Exposure({ marketId: 20, filled: 0, unfilledLong: 0, unfilledShort: 0 });
 
                 products[1].mockGetAccountAnnualizedExposures(100, mockExposures);
             }
@@ -132,9 +132,7 @@ contract LiquidationModuleTest is Test {
         mockLiquidatorAccount();
 
         // Trigger liquidation
-        vm.expectRevert(
-            abi.encodeWithSelector(LiquidationModule.AccountExposureNotReduced.selector, 100, 1800e18, 1800e18)
-        );
+        vm.expectRevert(abi.encodeWithSelector(LiquidationModule.AccountExposureNotReduced.selector, 100, 1800e18, 1800e18));
         liquidationModule.liquidate(100, 101);
     }
 

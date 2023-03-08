@@ -10,7 +10,5 @@ import "./utils/contracts/proxy/UUPSProxyWithOwner.sol";
  */
 contract CoreProxy is UUPSProxyWithOwner {
     // solhint-disable-next-line no-empty-blocks
-    constructor(address firstImplementation, address initialOwner)
-        UUPSProxyWithOwner(firstImplementation, initialOwner)
-    {}
+    constructor(address firstImplementation, address initialOwner) UUPSProxyWithOwner(firstImplementation, initialOwner) { }
 }

@@ -19,8 +19,7 @@ abstract contract UUPSImplementation is IUUPSImplementation, ProxyStorage {
         address currentImplementation = store.implementation;
         store.implementation = newImplementation;
 
-        (bool rollbackSuccessful,) =
-            newImplementation.delegatecall(abi.encodeCall(this.upgradeTo, (currentImplementation)));
+        (bool rollbackSuccessful,) = newImplementation.delegatecall(abi.encodeCall(this.upgradeTo, (currentImplementation)));
 
         if (!rollbackSuccessful || _proxyStore().implementation != currentImplementation) {
             revert UpgradeSimulationFailed();
@@ -68,7 +67,6 @@ abstract contract UUPSImplementation is IUUPSImplementation, ProxyStorage {
             address(this).delegatecall(abi.encodeCall(this.simulateUpgradeTo, (candidateImplementation)));
 
         return !simulationReverted
-            && keccak256(abi.encodePacked(simulationResponse))
-                == keccak256(abi.encodePacked(UpgradeSimulationFailed.selector));
+            && keccak256(abi.encodePacked(simulationResponse)) == keccak256(abi.encodePacked(UpgradeSimulationFailed.selector));
     }
 }

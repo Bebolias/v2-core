@@ -137,11 +137,7 @@ library Account {
     /**
      * @dev Given a collateral type, returns information about the total balance of the account
      */
-    function getCollateralBalance(Data storage self, address collateralType)
-        internal
-        view
-        returns (uint256 collateralBalanceD18)
-    {
+    function getCollateralBalance(Data storage self, address collateralType) internal view returns (uint256 collateralBalanceD18) {
         collateralBalanceD18 = self.collaterals[collateralType].balance;
         return collateralBalanceD18;
     }
@@ -149,7 +145,10 @@ library Account {
     /**
      * @dev Given a collateral type, returns information about the total balance of the account that's available to withdraw
      */
-    function getCollateralBalanceAvailable(Data storage self, address collateralType)
+    function getCollateralBalanceAvailable(
+        Data storage self,
+        address collateralType
+    )
         internal
         returns (uint256 collateralBalanceAvailableD18)
     {
@@ -171,7 +170,10 @@ library Account {
      * because loading an account and checking for ownership is a very
      * common use case in other parts of the code.
      */
-    function loadAccountAndValidateOwnership(uint128 accountId, address senderAddress)
+    function loadAccountAndValidateOwnership(
+        uint128 accountId,
+        address senderAddress
+    )
         internal
         view
         returns (Data storage account)
@@ -189,7 +191,10 @@ library Account {
      * what if we do margin calculations per product for now, that'd help with bringing down the gas costs (since atm we're doing no
      * correlations)
      */
-    function getAnnualizedProductExposures(Data storage self, uint128 productId)
+    function getAnnualizedProductExposures(
+        Data storage self,
+        uint128 productId
+    )
         internal
         returns (Exposure[] memory productExposures)
     {

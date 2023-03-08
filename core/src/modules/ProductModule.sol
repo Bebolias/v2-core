@@ -23,7 +23,10 @@ contract ProductModule is IProductModule {
     /**
      * @inheritdoc IProductModule
      */
-    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId)
+    function getAccountUnrealizedPnL(
+        uint128 productId,
+        uint128 accountId
+    )
         external
         view
         override
@@ -35,7 +38,10 @@ contract ProductModule is IProductModule {
     /**
      * @inheritdoc IProductModule
      */
-    function getAccountAnnualizedExposures(uint128 productId, uint128 accountId)
+    function getAccountAnnualizedExposures(
+        uint128 productId,
+        uint128 accountId
+    )
         external
         override
         returns (Account.Exposure[] memory exposures)

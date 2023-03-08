@@ -20,7 +20,11 @@ contract AccountTokenModule is IAccountTokenModule, NFT {
         address, // from (unused)
         address to,
         uint256 tokenId
-    ) internal virtual override {
+    )
+        internal
+        virtual
+        override
+    {
         IAccountModule(OwnableStorage.getOwner()).notifyAccountTransfer(to, tokenId.to128());
     }
 }
