@@ -35,18 +35,27 @@ contract CollateralConfigurationModule is ICollateralConfigurationModule {
         returns (CollateralConfiguration.Data[] memory)
     {
         SetUtil.AddressSet storage collateralTypes = CollateralConfiguration.loadAvailableCollaterals();
-
         uint256 numCollaterals = collateralTypes.length();
-        CollateralConfiguration.Data[] memory filteredCollaterals = new CollateralConfiguration.Data[](numCollaterals);
 
-        uint256 collateralsIdx;
+        uint256 returningConfig = 0;
         for (uint256 i = 1; i <= numCollaterals; i++) {
             address collateralType = collateralTypes.valueAt(i);
-
             CollateralConfiguration.Data storage collateral = CollateralConfiguration.load(collateralType);
 
             if (!hideDisabled || collateral.depositingEnabled) {
-                filteredCollaterals[collateralsIdx++] = collateral;
+                returningConfig++;
+            }
+        }
+
+        CollateralConfiguration.Data[] memory filteredCollaterals = new CollateralConfiguration.Data[](returningConfig);
+
+        returningConfig = 0;
+        for (uint256 i = 1; i <= numCollaterals; i++) {
+            address collateralType = collateralTypes.valueAt(i);
+            CollateralConfiguration.Data storage collateral = CollateralConfiguration.load(collateralType);
+
+            if (!hideDisabled || collateral.depositingEnabled) {
+                filteredCollaterals[returningConfig++] = collateral;
             }
         }
 

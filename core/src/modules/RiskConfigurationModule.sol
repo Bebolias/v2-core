@@ -31,14 +31,13 @@ contract RiskConfigurationModule is IRiskConfigurationModule {
     /**
      * @inheritdoc IRiskConfigurationModule
      */
-    // solc-ignore-next-line func-mutability
 
     function getMarketRiskConfiguration(
         uint128 productId,
         uint128 marketId
     )
         external
-        view
+        pure
         override
         returns (MarketRiskConfiguration.Data memory config)
     {
@@ -48,8 +47,7 @@ contract RiskConfigurationModule is IRiskConfigurationModule {
     /**
      * @inheritdoc IRiskConfigurationModule
      */
-    // solc-ignore-next-line func-mutability
-    function getProtocolRiskConfiguration() external view returns (ProtocolRiskConfiguration.Data memory config) {
+    function getProtocolRiskConfiguration() external pure returns (ProtocolRiskConfiguration.Data memory config) {
         return ProtocolRiskConfiguration.load();
     }
 }
