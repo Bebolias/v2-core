@@ -81,6 +81,7 @@ contract ProductModule is IProductModule {
     // todo: mark product in the account object (see python implementation for more details, solidity uses setutil though)
     // todo: interesting but account is external to this product
     // todo: process taker fees (these should also be returned)
+    // todo: check if the settlement token of the new order product matches the settlement token of the account
     function propagateTakerOrder(uint128 accountId, address takerAddress) external override {
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, takerAddress);
         account.imCheck();
@@ -88,6 +89,7 @@ contract ProductModule is IProductModule {
 
     // todo: mark product
     // todo: process maker fees (these should also be returned)
+    // todo: check if the settlement token of the new order product matches the settlement token of the account
     function propagateMakerOrder(uint128 accountId, address makerAddress) external override {
         Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, makerAddress);
         account.imCheck();
