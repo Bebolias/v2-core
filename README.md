@@ -37,6 +37,7 @@ This is a monorepo with the following folder structure and packages:
 
 **P2**
 
+- Semantic Versioning
 - Community Deployer (separate module?) -> need to outline the flow in figjam (AB)
 - Cannon Tests (AB)
 - Fee Module and associated maker/taker fee logic (AB)
