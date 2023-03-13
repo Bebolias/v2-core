@@ -38,7 +38,7 @@ contract LiquidationModuleTest is Test {
 
         // Set up the balance of token 0
         liquidationModule.changeAccountBalance(
-            accountId, MockAccountStorage.CollateralBalance({ token: Constants.TOKEN_0, balance: balance })
+            accountId, MockAccountStorage.CollateralBalance({token: Constants.TOKEN_0, balance: balance})
         );
     }
 
@@ -51,8 +51,8 @@ contract LiquidationModuleTest is Test {
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
 
-                mockExposures[0] = Account.Exposure({ marketId: 10, filled: 0, unfilledLong: 0, unfilledShort: -0 });
-                mockExposures[1] = Account.Exposure({ marketId: 11, filled: 0, unfilledLong: 0, unfilledShort: 0 });
+                mockExposures[0] = Account.Exposure({marketId: 10, filled: 0, unfilledLong: 0, unfilledShort: -0});
+                mockExposures[1] = Account.Exposure({marketId: 11, filled: 0, unfilledLong: 0, unfilledShort: 0});
 
                 products[0].mockGetAccountAnnualizedExposures(100, mockExposures);
             }
@@ -64,7 +64,7 @@ contract LiquidationModuleTest is Test {
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
 
-                mockExposures[0] = Account.Exposure({ marketId: 20, filled: 0, unfilledLong: 0, unfilledShort: 0 });
+                mockExposures[0] = Account.Exposure({marketId: 20, filled: 0, unfilledLong: 0, unfilledShort: 0});
 
                 products[1].mockGetAccountAnnualizedExposures(100, mockExposures);
             }

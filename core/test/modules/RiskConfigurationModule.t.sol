@@ -19,8 +19,7 @@ contract RiskConfigurationModuleTest is Test {
     }
 
     function test_ConfigureMarketRisk() public {
-        MarketRiskConfiguration.Data memory config =
-            MarketRiskConfiguration.Data({ productId: 1, marketId: 10, riskParameter: 1e16 });
+        MarketRiskConfiguration.Data memory config = MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e16});
 
         // Expect MarketRiskConfigured event
         vm.expectEmit(true, true, true, true, address(riskConfigurationModule));
@@ -39,8 +38,7 @@ contract RiskConfigurationModuleTest is Test {
     function testFuzz_revertWhen_ConfigureMarketRisk_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
-        MarketRiskConfiguration.Data memory config =
-            MarketRiskConfiguration.Data({ productId: 1, marketId: 10, riskParameter: 1e16 });
+        MarketRiskConfiguration.Data memory config = MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e16});
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
         vm.prank(otherAddress);
@@ -49,14 +47,10 @@ contract RiskConfigurationModuleTest is Test {
 
     function test_GetMarketRiskConfiguration() public {
         vm.prank(owner);
-        riskConfigurationModule.configureMarketRisk(
-            MarketRiskConfiguration.Data({ productId: 1, marketId: 10, riskParameter: 1e16 })
-        );
+        riskConfigurationModule.configureMarketRisk(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e16}));
 
         vm.prank(owner);
-        riskConfigurationModule.configureMarketRisk(
-            MarketRiskConfiguration.Data({ productId: 2, marketId: 20, riskParameter: 2e16 })
-        );
+        riskConfigurationModule.configureMarketRisk(MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: 2e16}));
 
         MarketRiskConfiguration.Data memory existingConfig = riskConfigurationModule.getMarketRiskConfiguration(2, 20);
 
@@ -75,7 +69,7 @@ contract RiskConfigurationModuleTest is Test {
 
     function test_ConfigureProtocolRisk() public {
         ProtocolRiskConfiguration.Data memory config =
-            ProtocolRiskConfiguration.Data({ imMultiplier: 2e18, liquidatorRewardParameter: 5e16 });
+            ProtocolRiskConfiguration.Data({imMultiplier: 2e18, liquidatorRewardParameter: 5e16});
 
         // Expect ProtocolRiskConfigured event
         vm.expectEmit(true, true, true, true, address(riskConfigurationModule));
@@ -94,7 +88,7 @@ contract RiskConfigurationModuleTest is Test {
         vm.assume(otherAddress != owner);
 
         ProtocolRiskConfiguration.Data memory config =
-            ProtocolRiskConfiguration.Data({ imMultiplier: 2e18, liquidatorRewardParameter: 5e16 });
+            ProtocolRiskConfiguration.Data({imMultiplier: 2e18, liquidatorRewardParameter: 5e16});
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
         vm.prank(otherAddress);
@@ -104,12 +98,12 @@ contract RiskConfigurationModuleTest is Test {
     function test_GetProtocolRiskConfiguration() public {
         vm.prank(owner);
         riskConfigurationModule.configureProtocolRisk(
-            ProtocolRiskConfiguration.Data({ imMultiplier: 2e18, liquidatorRewardParameter: 5e16 })
+            ProtocolRiskConfiguration.Data({imMultiplier: 2e18, liquidatorRewardParameter: 5e16})
         );
 
         vm.prank(owner);
         riskConfigurationModule.configureProtocolRisk(
-            ProtocolRiskConfiguration.Data({ imMultiplier: 4e18, liquidatorRewardParameter: 10e16 })
+            ProtocolRiskConfiguration.Data({imMultiplier: 4e18, liquidatorRewardParameter: 10e16})
         );
 
         ProtocolRiskConfiguration.Data memory existingConfig = riskConfigurationModule.getProtocolRiskConfiguration();

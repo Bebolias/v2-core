@@ -21,7 +21,7 @@ contract CollateralConfigurationModuleTest is Test {
 
     function test_ConfigureCollateral() public {
         CollateralConfiguration.Data memory config =
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0 });
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0});
 
         // Expect CollateralConfigured event
         vm.expectEmit(true, true, true, true, address(collateralConfigurationModule));
@@ -42,7 +42,7 @@ contract CollateralConfigurationModuleTest is Test {
         vm.assume(otherAddress != owner);
 
         CollateralConfiguration.Data memory config =
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0 });
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0});
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
         vm.prank(otherAddress);
@@ -52,12 +52,12 @@ contract CollateralConfigurationModuleTest is Test {
     function test_GetCollateralConfiguration() public {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0 })
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0})
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({ depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1 })
+            CollateralConfiguration.Data({depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1})
         );
 
         CollateralConfiguration.Data memory existingConfig =
@@ -80,12 +80,12 @@ contract CollateralConfigurationModuleTest is Test {
     function test_GetCollateralConfigurations_All() public {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0 })
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0})
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({ depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1 })
+            CollateralConfiguration.Data({depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1})
         );
 
         CollateralConfiguration.Data[] memory configs = collateralConfigurationModule.getCollateralConfigurations(false);
@@ -104,12 +104,12 @@ contract CollateralConfigurationModuleTest is Test {
     function test_GetCollateralConfigurations_OnlyEnabled() public {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0 })
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0})
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({ depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1 })
+            CollateralConfiguration.Data({depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1})
         );
 
         CollateralConfiguration.Data[] memory configs = collateralConfigurationModule.getCollateralConfigurations(true);

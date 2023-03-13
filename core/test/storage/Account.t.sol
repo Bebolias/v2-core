@@ -121,9 +121,7 @@ contract AccountTest is Test {
         if (high) balance = HIGH_COLLATERAL;
 
         // Set up the balance of token 0
-        accounts.changeAccountBalance(
-            accountId, MockAccountStorage.CollateralBalance({ token: Constants.TOKEN_0, balance: balance })
-        );
+        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({token: Constants.TOKEN_0, balance: balance}));
     }
 
     function test_Exists() public {
@@ -303,7 +301,7 @@ contract AccountTest is Test {
         vm.assume(otherToken != Constants.TOKEN_0);
         vm.assume(otherToken != Constants.TOKEN_1);
 
-        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({ token: otherToken, balance: 1e18 }));
+        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({token: otherToken, balance: 1e18}));
 
         uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, otherToken);
 

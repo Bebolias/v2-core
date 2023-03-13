@@ -37,7 +37,7 @@ contract ProtocolRiskConfigurationTest is Test {
     }
 
     function test_Set() public {
-        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({ imMultiplier: 2e18, liquidatorRewardParameter: 5e16 }));
+        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({imMultiplier: 2e18, liquidatorRewardParameter: 5e16}));
 
         ProtocolRiskConfiguration.Data memory config = protocolRiskConfiguration.getProtocolRiskConfiguration();
 
@@ -46,9 +46,9 @@ contract ProtocolRiskConfigurationTest is Test {
     }
 
     function test_Set_Twice() public {
-        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({ imMultiplier: 2e18, liquidatorRewardParameter: 5e16 }));
+        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({imMultiplier: 2e18, liquidatorRewardParameter: 5e16}));
 
-        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({ imMultiplier: 4e18, liquidatorRewardParameter: 10e16 }));
+        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({imMultiplier: 4e18, liquidatorRewardParameter: 10e16}));
 
         ProtocolRiskConfiguration.Data memory config = protocolRiskConfiguration.getProtocolRiskConfiguration();
 

@@ -20,4 +20,5 @@ node_modules
 lcov.info
 
 bin/
+.DS_Store
 yarn-error.log

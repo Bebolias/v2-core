@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../interfaces/ITokenModule.sol";
 import "../interfaces/INftModule.sol";
 
 library AssociatedSystem {
@@ -20,17 +19,10 @@ library AssociatedSystem {
         }
     }
 
-    bytes32 public constant KIND_ERC20 = "erc20";
     bytes32 public constant KIND_ERC721 = "erc721";
-    bytes32 public constant KIND_UNMANAGED = "unmanaged";
 
     function getAddress(Data storage self) internal view returns (address) {
         return self.proxy;
-    }
-
-    function asToken(Data storage self) internal view returns (ITokenModule) {
-        expectKind(self, KIND_ERC20);
-        return ITokenModule(self.proxy);
     }
 
     function asNft(Data storage self) internal view returns (INftModule) {
@@ -47,7 +39,7 @@ library AssociatedSystem {
     function expectKind(Data storage self, bytes32 kind) internal view {
         bytes32 actualKind = self.kind;
 
-        if (actualKind != kind && actualKind != KIND_UNMANAGED) {
+        if (actualKind != kind) {
             revert MismatchAssociatedSystemKind(kind, actualKind);
         }
     }

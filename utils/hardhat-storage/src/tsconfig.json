@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "../dist",
+    "composite": true
+  },
+  "include": ["./**/*.ts", "../../core-utils/src/utils/**/*.ts"],
+  "exclude": []
+}

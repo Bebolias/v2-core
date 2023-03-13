@@ -132,6 +132,7 @@ import {
         sourceName: `${contractName}.sol`,
         abi: routableAbi,
         bytecode: solidityInfo.bytecode,
+        deployedBytecode: solidityInfo.bytecode,
         linkReferences: {},
         source: {
           solcVersion: solc.version().match(/(^.*commit\.[0-9a-f]*)\..*/)[1],

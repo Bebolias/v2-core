@@ -43,7 +43,7 @@ contract MarketRiskConfigurationTest is Test {
     }
 
     function test_Set() public {
-        marketRiskConfiguration.set(MarketRiskConfiguration.Data({ productId: 1, marketId: 10, riskParameter: 1e18 }));
+        marketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e18}));
 
         MarketRiskConfiguration.Data memory data = marketRiskConfiguration.getMarketRiskConfiguration(1, 10);
 
@@ -53,9 +53,9 @@ contract MarketRiskConfigurationTest is Test {
     }
 
     function test_Set_Twice() public {
-        marketRiskConfiguration.set(MarketRiskConfiguration.Data({ productId: 1, marketId: 10, riskParameter: 1e18 }));
+        marketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e18}));
 
-        marketRiskConfiguration.set(MarketRiskConfiguration.Data({ productId: 1, marketId: 10, riskParameter: 2e18 }));
+        marketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 2e18}));
 
         MarketRiskConfiguration.Data memory data = marketRiskConfiguration.getMarketRiskConfiguration(1, 10);
 
@@ -65,9 +65,9 @@ contract MarketRiskConfigurationTest is Test {
     }
 
     function test_Set_MoreConfigurations() public {
-        marketRiskConfiguration.set(MarketRiskConfiguration.Data({ productId: 1, marketId: 10, riskParameter: 1e18 }));
+        marketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e18}));
 
-        marketRiskConfiguration.set(MarketRiskConfiguration.Data({ productId: 2, marketId: 20, riskParameter: 2e18 }));
+        marketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: 2e18}));
 
         {
             MarketRiskConfiguration.Data memory data = marketRiskConfiguration.getMarketRiskConfiguration(1, 10);

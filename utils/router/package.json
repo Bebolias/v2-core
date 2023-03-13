@@ -1,6 +1,7 @@
 {
-  "name": "@voltz-protocol/router",
+  "name": "voltz-router",
   "version": "1.0.0",
+  "private": true,
   "description": "Voltz Router Proxy Architecture Manager",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -43,7 +44,7 @@
     "debug": "4.3.4",
     "lodash": "4.17.21",
     "mustache": "4.2.0",
-    "solc": "^0.8.17"
+    "solc": "^0.8.13"
   },
   "peerDependenciesMeta": {
     "@usecannon/builder": {

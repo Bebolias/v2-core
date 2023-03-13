@@ -90,9 +90,9 @@ contract CoreState is MockCoreStorage {
         // Create account (id: 100)
         {
             CollateralBalance[] memory balances = new CollateralBalance[](2);
-            balances[0] = CollateralBalance({ token: Constants.TOKEN_0, balance: Constants.DEFAULT_TOKEN_0_BALANCE });
+            balances[0] = CollateralBalance({token: Constants.TOKEN_0, balance: Constants.DEFAULT_TOKEN_0_BALANCE});
 
-            balances[1] = CollateralBalance({ token: Constants.TOKEN_1, balance: Constants.DEFAULT_TOKEN_1_BALANCE });
+            balances[1] = CollateralBalance({token: Constants.TOKEN_1, balance: Constants.DEFAULT_TOKEN_1_BALANCE});
 
             uint128[] memory activeProductIds = new uint128[](2);
             activeProductIds[0] = 1;
@@ -105,25 +105,25 @@ contract CoreState is MockCoreStorage {
         mockAliceCalls();
 
         // Set market risk configuration
-        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({ productId: 1, marketId: 10, riskParameter: 1e18 }));
+        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: 1e18}));
 
         // Set market risk configuration
-        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({ productId: 1, marketId: 11, riskParameter: 1e18 }));
+        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 11, riskParameter: 1e18}));
 
         // Set market risk configuration
-        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({ productId: 2, marketId: 20, riskParameter: 1e18 }));
+        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: 1e18}));
 
         // Set protocol risk configuration
-        ProtocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({ imMultiplier: 2e18, liquidatorRewardParameter: 5e16 }));
+        ProtocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({imMultiplier: 2e18, liquidatorRewardParameter: 5e16}));
 
         // Mock collateral configuration (token 0)
         CollateralConfiguration.set(
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 0, tokenAddress: Constants.TOKEN_0 })
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 0, tokenAddress: Constants.TOKEN_0})
         );
 
         // Mock collateral configuration (token 1)
         CollateralConfiguration.set(
-            CollateralConfiguration.Data({ depositingEnabled: false, liquidationReward: 0, tokenAddress: Constants.TOKEN_1 })
+            CollateralConfiguration.Data({depositingEnabled: false, liquidationReward: 0, tokenAddress: Constants.TOKEN_1})
         );
     }
 
@@ -136,8 +136,8 @@ contract CoreState is MockCoreStorage {
         {
             Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
 
-            mockExposures[0] = Account.Exposure({ marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: -200e18 });
-            mockExposures[1] = Account.Exposure({ marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18 });
+            mockExposures[0] = Account.Exposure({marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: -200e18});
+            mockExposures[1] = Account.Exposure({marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18});
 
             products[0].mockGetAccountAnnualizedExposures(100, mockExposures);
         }
@@ -149,7 +149,7 @@ contract CoreState is MockCoreStorage {
         {
             Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
 
-            mockExposures[0] = Account.Exposure({ marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18 });
+            mockExposures[0] = Account.Exposure({marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18});
 
             products[1].mockGetAccountAnnualizedExposures(100, mockExposures);
         }

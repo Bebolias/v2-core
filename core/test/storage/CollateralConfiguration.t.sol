@@ -62,7 +62,7 @@ contract CollateralConfigurationTest is Test {
 
     function test_Set() public {
         collateralConfiguration.set(
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 5e16, tokenAddress: Constants.TOKEN_0 })
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 5e16, tokenAddress: Constants.TOKEN_0})
         );
 
         {
@@ -84,11 +84,11 @@ contract CollateralConfigurationTest is Test {
 
     function test_Set_Twice() public {
         collateralConfiguration.set(
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 5e16, tokenAddress: Constants.TOKEN_0 })
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 5e16, tokenAddress: Constants.TOKEN_0})
         );
 
         collateralConfiguration.set(
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_0 })
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_0})
         );
 
         {
@@ -110,11 +110,11 @@ contract CollateralConfigurationTest is Test {
 
     function test_Set_MoreConfigurations() public {
         collateralConfiguration.set(
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 5e16, tokenAddress: Constants.TOKEN_0 })
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 5e16, tokenAddress: Constants.TOKEN_0})
         );
 
         collateralConfiguration.set(
-            CollateralConfiguration.Data({ depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1 })
+            CollateralConfiguration.Data({depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1})
         );
 
         {
@@ -154,11 +154,11 @@ contract CollateralConfigurationTest is Test {
         }
 
         collateralConfiguration.set(
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 5e16, tokenAddress: Constants.TOKEN_0 })
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 5e16, tokenAddress: Constants.TOKEN_0})
         );
 
         collateralConfiguration.set(
-            CollateralConfiguration.Data({ depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1 })
+            CollateralConfiguration.Data({depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1})
         );
 
         {
@@ -169,11 +169,11 @@ contract CollateralConfigurationTest is Test {
         }
 
         collateralConfiguration.set(
-            CollateralConfiguration.Data({ depositingEnabled: false, liquidationReward: 5e16, tokenAddress: Constants.TOKEN_0 })
+            CollateralConfiguration.Data({depositingEnabled: false, liquidationReward: 5e16, tokenAddress: Constants.TOKEN_0})
         );
 
         collateralConfiguration.set(
-            CollateralConfiguration.Data({ depositingEnabled: true, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1 })
+            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1})
         );
 
         {

@@ -27,31 +27,34 @@ This is a monorepo with the following folder structure and packages:
 
 **P1**
 
-- Community Deployer (separate module), hmm can we have that for all deployments?
-- Deployment Cannon (AB)
+- Router Generation Process (AB) -> TODO: Need to replace with an example that's relevant to Voltz V2 Router
+- Core Deployment (toml syntax) (AB)
+- Dated IRS Deployment (AB)
+- Dated IRS Market Configuration Module (AB)
 - Dated IRS VAMM Pool Implementation in v2-periphery (Cyclops Rex)
 - G-TWAP Integration with Rate Oracle Module (Cyclops Rex)
-- Dated IRS Market Configuration Module (AB)
-- Fee Module and associated maker/taker fee logic (AB)
-- Account -> settlement token checks (AB)
-- Account -> liquidator deposit logic (AB)
 - PRB Math & User Defined Types (Costin)
 
 **P2**
 
+- Community Deployer (separate module?) -> need to outline the flow in figjam (AB)
+- Cannon Tests (AB)
+- Fee Module and associated maker/taker fee logic (AB)
+- Feature Flag Module (AB)
+- Account -> settlement token checks (AB)
+- Account -> liquidator deposit logic (AB)
 - Consider bringing the .ts tests from https://github.com/Synthetixio/synthetix-v3/tree/main/utils/core-contracts/test/contracts
+- Periphery across repos (AB)
 - Subgraph Setup (AB)
 - SDK Setup (AB)
 - Community Deployer (AB)
-- Feature Flag Module
-- Associated Systems Module
-- Periphery & Multicall Module
 - Fuzzing
 - E2E Testing
 - Gas Cost Reduction
 
 **P3**
 
+- Multicall Module
 - Differential fuzzing against python repo
 
 # Summary
@@ -129,7 +132,45 @@ cannon build omnibus-<NETWORK_NAME>.toml --upgrade-from voltz-omnibus:latest --n
 - Increment the version number in each of the omnibus toml files in the root of the repository. (The version in the repository should always be the next version.)
 - Commit and merge the change.
 - After the new version of the voltz-omnibus package has been published, the previously published packages can be verified on Etherscan.
+<<<<<<< HEAD
+- From the relevant package's directory, run the following command for each network it was deployed on:  `npx hardhat cannon:verify <PACKAGE_NAME>:<VERSION> --network <NETWORK_NAME>`
+
+# Cannon
+
+From cannon gh (https://github.com/usecannon/cannon): "cannon is under active development. While the interface and functionality are generally stable, use the tool with caution when conducting high-risk deployments".
+
+In order to setup cannon run the following command:
+
+➜ `npx cannon setup `
+
+# Cannon Build
+
+Make sure cannonfile.toml is in the root directory of the project. In order to build the cannon-file for local development and testing run the following command:
+
+➜ `npx cannon build `
+example output: `package voltz-core:1.0.0 (ipfs://QmcEaDzQsPdDVrfDi1HaSGTJ9ZXNQexEAbfkecUrT59Xoi)`
+
+The above command creates a local deployment of the core. At this point you should be able to run this package locally using the command-line tool:
+
+➜ `npx cannon voltz-core `
+example output: `package voltz-core:latest (ipfs://QmNSntXpk9aueviEVqQDgZ4TNSaYodSMpkQY4uaLQLVViS) voltz-core:latest has been deployed to a local node running at localhost:8545`
+
+# Cannon Deploy
+
+Deploying is effectively just building on a remote network.
+
+`npx cannon build --network REPLACE_WITH_RPC_ENDPOINT --private-key REPLACE_WITH_KEY_THAT_HAS_GAS_TOKENS`
+
+Verify your project’s contracts on Etherscan:
+
+`cannon verify voltz-core --api-key REPLACE_WITH_ETHERSCAN_API_KEY --chain-id REPLACE_WITH_CHAIN_ID`
+
+Finally publish the project to a registry. [...]
+
+
+=======
 - From the relevant package's directory, run the following command for each network it was deployed on: `npx hardhat cannon:verify <PACKAGE_NAME>:<VERSION> --network <NETWORK_NAME>`
+>>>>>>> 0c873ca7d6453be5626dd093f4b6a53f46433c40
 
 # Draft Notes
 
