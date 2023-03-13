@@ -2,6 +2,7 @@ name: "CI"
 
 env:
   FOUNDRY_PROFILE: "ci"
+  REGISTRY: ghcr.io
 
 on:
   workflow_dispatch:
@@ -55,6 +56,24 @@ jobs:
         run: |
           echo "## Build result" >> $GITHUB_STEP_SUMMARY
           echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
+
+  publish:
+    needs: build
+    runs-on: "ubuntu-latest"
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          always-auth: true
+          node-version: 18
+          registry-url: https://npm.pkg.github.com/
+      - run: yarn install
+      - run: yarn publish:all
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
   test:
     needs: ["lint", "build"]

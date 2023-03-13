@@ -1,10 +1,15 @@
 {
-  "name": "core",
-  "version": "1.0.0",
+  "name": "@voltz-protocol/core",
+  "version": "2.0.2",
+  "publishConfig": {
+    "access": "restricted",
+    "@voltz-protocol:registry": "https://npm.pkg.github.com"
+  },
   "dependencies": {
     "@usecannon/cli": "^2.1.7"
   },
   "scripts": {
+    "publish:all": "yarn publish",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",
     "lint:sol:check": "yarn solhint \"{src,test}/**/*.sol\"",
