@@ -62,7 +62,9 @@ jobs:
     runs-on: "ubuntu-latest"
     permissions:
       packages: write
-      contents: read
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -71,6 +73,10 @@ jobs:
           node-version: 18
           registry-url: https://npm.pkg.github.com/
       - run: yarn install
+      - run: yarn build
+      - run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - run: yarn publish:all
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
