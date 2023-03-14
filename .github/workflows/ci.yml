@@ -73,7 +73,6 @@ jobs:
           node-version: 18
           registry-url: https://npm.pkg.github.com/
       - run: yarn install
-      - run: yarn build
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
