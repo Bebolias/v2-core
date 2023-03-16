@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "../../src/interfaces/IRateOracle.sol";
-import "utils/contracts/src/helpers/Time.sol";
+import "../../src/utils/contracts/src/helpers/Time.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 contract MockRateOracleReader {

@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.17;
 
-import "../interfaces/IRateOracle.sol";
+import "../../src/interfaces/IRateOracle.sol";
 
 contract MockRateOracle is IRateOracle {
     IAaveV3LendingPool public aaveLendingPool;

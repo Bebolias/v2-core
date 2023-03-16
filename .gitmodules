@@ -1,3 +1,30 @@
 [submodule "core/lib/cannon-std"]
 	path = core/lib/cannon-std
 	url = https://github.com/usecannon/cannon-std
+[submodule "core/lib/forge-std"]
+	path = core/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "core/lib/openzeppelin-contracts"]
+	path = core/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "core/lib/prb-math"]
+	path = core/lib/prb-math
+	url = https://github.com/PaulRBerg/prb-math
+[submodule "core/lib/prb-test"]
+	path = core/lib/prb-test
+	url = https://github.com/PaulRBerg/prb-test
+[submodule "products/dated-irs/lib/prb-math"]
+	path = products/dated-irs/lib/prb-math
+	url = https://github.com/PaulRBerg/prb-math
+[submodule "products/dated-irs/lib/prb-test"]
+	path = products/dated-irs/lib/prb-test
+	url = https://github.com/PaulRBerg/prb-test
+[submodule "products/dated-irs/lib/openzeppelin-contracts"]
+	path = products/dated-irs/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "products/dated-irs/lib/forge-std"]
+	path = products/dated-irs/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "lib/prb-test"]
+	path = products/dated-irs/lib/prb-test
+	url = https://github.com/PaulRBerg/prb-test

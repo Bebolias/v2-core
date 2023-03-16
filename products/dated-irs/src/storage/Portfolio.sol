@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../utils/contracts//helpers/SetUtil.sol";
-import "../utils/contracts//helpers/SafeCast.sol";
+import "../utils/contracts/src/helpers/SetUtil.sol";
+import "../utils/contracts/src/helpers/SafeCast.sol";
 import "./Position.sol";
 import "./RateOracleReader.sol";
 import "./PoolConfiguration.sol";
 import "../interfaces/IPool.sol";
 // todo: consider migrating Exposures from Account.sol to more relevant place (e.g. interface) -> think definitely worth doing that
-import "../../../core/storage/Account.sol";
+import "../../../../core/src/storage/Account.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions

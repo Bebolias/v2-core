@@ -2,7 +2,7 @@ pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 import "./mocks/MockAaveLendingPool.sol";
-import "src/products/dated-irs/oracles/AaveRateOracle.sol";
+import "../src/oracles/AaveRateOracle.sol";
 import "oz/interfaces/IERC20.sol";
 import { UD60x18, convert, ud } from "@prb/math/UD60x18.sol";
 import { PRBMathAssertions } from "@prb/math/test/Assertions.sol";

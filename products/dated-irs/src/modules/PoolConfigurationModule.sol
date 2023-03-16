@@ -3,7 +3,7 @@ pragma solidity >=0.8.13;
 
 import "../interfaces/IPoolConfigurationModule.sol";
 import "../storage/PoolConfiguration.sol";
-import "../utils/contracts//storage/OwnableStorage.sol";
+import "../utils/contracts/src/storage/OwnableStorage.sol";
 
 /**
  * @title Module for configuring the pool linked to the dated irs product

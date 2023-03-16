@@ -1,0 +1,42 @@
+{
+  "name": "@voltz-protocol/core-utils",
+  "version": "1.0.1",
+  "publishConfig": {
+    "access": "restricted",
+    "@voltz-protocol:registry": "https://npm.pkg.github.com"
+  },
+  "description": "Common JS utils for Voltz",
+  "files": [
+    "utils/**/*.js",
+    "utils/**/*.js.map",
+    "utils/**/*.d.ts",
+    "utils/**/*.d.ts.map"
+  ],
+  "scripts": {
+    "publish:all": "yarn publish",
+    "build": "tsc --project src/tsconfig.json",
+    "watch": "npm run build -- --watch",
+    "test": "mocha --require ts-node/register",
+    "coverage": "nyc npm run test",
+    "test:watch": "npm run test -- --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "1.0.2",
+    "@types/prompts": "2.0.14",
+    "ethers": "5.7.2",
+    "hardhat": "2.12.3",
+    "mocha": "9.1.1",
+    "multimatch": "6.0.0",
+    "nyc": "15.1.0",
+    "sinon": "11.1.2"
+  },
+  "dependencies": {
+    "chalk": "4.1.2",
+    "ethers": "5.7.2",
+    "fast-glob": "3.2.12",
+    "prompts": "2.4.2",
+    "rfdc": "1.3.0",
+    "solidity-ast": "^0.4.0"
+  }
+}

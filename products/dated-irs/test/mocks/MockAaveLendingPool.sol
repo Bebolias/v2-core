@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.17;
 
-import "src/products/dated-irs/externalInterfaces/IAaveV3LendingPool.sol";
+import "../../src/externalInterfaces/IAaveV3LendingPool.sol";
 import "oz/interfaces/IERC20.sol";
 import { UD60x18, ud } from "@prb/math/UD60x18.sol";
 
