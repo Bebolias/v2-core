@@ -22,6 +22,8 @@ contract AaveRateOracle_Test_Base is Test, PRBMathAssertions {
     }
 }
 
+// TODO: test when index gets smaller -> shold fail
+
 contract AaveRateOracle_Test1 is AaveRateOracle_Test_Base {
     function setUp() public override {
         super.setUp();
@@ -92,6 +94,7 @@ contract AaveRateOracle_Test1 is AaveRateOracle_Test_Base {
         uint256 atOrAfterTimestamp,
         uint256 queryTimestamp
     ) public {
+        vm.expectRevert();
         vm.assume(
             beforeIndex > atOrAfterIndex ||
             beforeTimestamp > atOrAfterTimestamp ||
@@ -150,7 +153,7 @@ contract AaveRateOracle_Test2 is AaveRateOracle_Test_Base {
         );
     }
 
-    function testFuzz_InitialIndex(uint256 factorPerSecond, uint16 timePassed) public {
+    function testFuzz_CurrentIndex(uint256 factorPerSecond, uint16 timePassed) public {
         vm.assume(factorPerSecond >= 1e18);
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
         vm.skip(timePassed);
