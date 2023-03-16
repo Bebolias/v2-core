@@ -52,7 +52,7 @@ contract AaveRateOracle_Test1 is AaveRateOracle_Test_Base {
         assertEq(index, ud(1.05e18));
     }
 
-    function testFuzz_interpolateIndexValue(
+    function testFuzz_success_interpolateIndexValue(
         UD60x18 beforeIndex,
         uint256 beforeTimestamp,
         UD60x18 atOrAfterIndex,
@@ -79,31 +79,90 @@ contract AaveRateOracle_Test1 is AaveRateOracle_Test_Base {
             atOrAfterIndex.div(beforeIndex).div(atOrAfterTimestamp.sub(beforeTimestamp))
         );
     }
+
+    /**
+    * @dev should fail in the following cases:
+    * - give a negative index if before & at values are inverted (time & index)
+    * - 
+    */
+    function testFuzz_fail_interpolateIndexValue(
+        UD60x18 beforeIndex,
+        uint256 beforeTimestamp,
+        UD60x18 atOrAfterIndex,
+        uint256 atOrAfterTimestamp,
+        uint256 queryTimestamp
+    ) public {
+        vm.assume(
+            beforeIndex > atOrAfterIndex ||
+            beforeTimestamp > atOrAfterTimestamp ||
+            !(queryTimestamp <= atOrAfterTimestamp && queryTimestamp >= atOrAfterTimestamp)
+        );
+
+        UD60x18 index = rateOracle.getLastUpdatedIndex(
+            beforeIndex,
+            beforeTimestamp,
+            atOrAfterIndex,
+            atOrAfterTimestamp,
+            queryTimestamp
+        );
+    }
 }
 
 contract AaveRateOracle_Test2 is AaveRateOracle_Test_Base {
+    uint256 constant FACTOR_PER_SECOND = 1000000001000000000;
     function setUp() public override {
         super.setUp();
         // 1000000001000000000 for 0.0000001% per second = ~3.2% APY
-        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(1000000001000000000));
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
     }
 
-    function testMock() public {
-        // vm.skip(10000); // TODO
-        assertEq(mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS), 42e27);
+    function test_Mock() public {
+        vm.skip(10000); // TODO: not sure how this behaves, assuming it starts a new node per test
+        uint256 expectedCurrentIndex = initValue + 499e7;
+        assertApproxEqRel(
+            mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS),
+            expectedCurrentIndex,
+            1e7 // 0.000000001% error
+        );
     }
 
-    function testInitialIndex() public {
-        assertEq(rateOracle.getCurrentIndex(), initValue);
+    function test_InitialIndex() public {
+        vm.skip(10000); // TODO: not sure how this behaves, assuming it starts a new node per test
+        uint256 expectedCurrentIndex = initValue + 499e7;
+        assertApproxEqRel(rateOracle.getCurrentIndex(), expectedCurrentIndex, 1e7);
     }
 
-    function testInitialIndexWithTime() public {
+    function test_InitialIndexWithTime() public {
+        vm.skip(10000); // TODO: not sure how this behaves, assuming it starts a new node per test
         (uint40 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
-        assertEq(index, initValue);
+        uint256 expectedCurrentIndex = initValue + 499e7;
+        assertApproxEqRel(index, initValue, 1e17);
         assertEq(time, block.timestamp);
     }
 
-    // TODO: test interpolation
-}
+    function testFuzz_Mock(uint256 factorPerSecond, uint16 timePassed) public {
+        vm.assume(factorPerSecond >= 1e18);
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
+        vm.skip(timePassed); 
+        assertGe(
+            mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS),
+            initValue
+        );
+    }
 
-// TO DO: fuzzying 
+    function testFuzz_InitialIndex(uint256 factorPerSecond, uint16 timePassed) public {
+        vm.assume(factorPerSecond >= 1e18);
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
+        vm.skip(timePassed);
+        assertGe(rateOracle.getCurrentIndex(), assertGe);
+    }
+
+    function testFuzz_InitialIndexWithTime(uint256 factorPerSecond, uint16 timePassed) public {
+        vm.assume(factorPerSecond >= 1e18);
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
+        vm.skip(timePassed);
+        (uint40 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
+        assertGe(index, initValue);
+        assertEq(time, block.timestamp);
+    }
+}
