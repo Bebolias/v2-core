@@ -45,7 +45,8 @@
       "typescript": "4.9.3"
     },
     "workspaces": [
-      "core"
+      "core", 
+      "utils/contracts"
     ],
     "engines": {
       "node": "^18.14.0",

@@ -1,6 +1,13 @@
 {
+  "name": "@voltz-protocol/util-contracts",
+  "version": "1.0.0",
+  "publishConfig": {
+    "access": "restricted",
+    "@voltz-protocol:registry": "https://npm.pkg.github.com"
+  },
   "dependencies": {},
   "scripts": {
+    "publish:all": "yarn publish",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",
     "lint:sol:check": "forge fmt --check && yarn solhint \"{src,test}/**/*.sol\"",
