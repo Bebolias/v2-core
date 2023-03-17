@@ -2,8 +2,8 @@
 pragma solidity >=0.8.13;
 
 import "./ERC721.sol";
-import "../../storage/ERC721EnumerableStorage.sol";
-import "../../interfaces/IERC721Enumerable.sol";
+import "../storage/ERC721EnumerableStorage.sol";
+import "../interfaces/IERC721Enumerable.sol";
 /*
  * @title ERC721 extension with helper functions that allow the enumeration of NFT tokens.
  * See IERC721Enumerable
@@ -131,11 +131,7 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
         ERC721EnumerableStorage.load().allTokens.pop();
     }
 
-    function _initialize(
-        string memory tokenName,
-        string memory tokenSymbol,
-        string memory baseTokenURI
-    )
+    function _initialize(string memory tokenName, string memory tokenSymbol, string memory baseTokenURI)
         internal
         virtual
         override

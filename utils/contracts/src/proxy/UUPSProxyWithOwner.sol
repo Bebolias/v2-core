@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "./UUPSProxy.sol";
-import "../../storage/OwnableStorage.sol";
+import "../storage/OwnableStorage.sol";
 
 contract UUPSProxyWithOwner is UUPSProxy {
     // solhint-disable-next-line no-empty-blocks

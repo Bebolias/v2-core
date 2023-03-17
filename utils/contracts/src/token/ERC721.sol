@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../interfaces/IERC721.sol";
-import "../../interfaces/IERC721Metadata.sol";
-import "../../interfaces/IERC721Receiver.sol";
-import "../../errors/AddressError.sol";
-import "../../errors/AccessError.sol";
-import "../../errors/InitError.sol";
-import "../../errors/ParameterError.sol";
-import "../../storage/ERC721Storage.sol";
-import "../../helpers/AddressUtil.sol";
-import "../../helpers/StringUtil.sol";
+import "../interfaces/IERC721.sol";
+import "../interfaces/IERC721Metadata.sol";
+import "../interfaces/IERC721Receiver.sol";
+import "../errors/AddressError.sol";
+import "../errors/AccessError.sol";
+import "../errors/InitError.sol";
+import "../errors/ParameterError.sol";
+import "../storage/ERC721Storage.sol";
+import "../helpers/AddressUtil.sol";
+import "../helpers/StringUtil.sol";
 /*
  * @title ERC721 non-fungible token (NFT) contract.
  * See IERC721.
@@ -240,7 +240,10 @@ contract ERC721 is IERC721, IERC721Metadata {
         emit Approval(ERC721.ownerOf(tokenId), to, tokenId);
     }
 
-    function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory data) internal returns (bool) {
+    function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory data)
+        internal
+        returns (bool)
+    {
         if (AddressUtil.isContract(to)) {
             try IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, data) returns (bytes4 retval) {
                 return retval == IERC721Receiver.onERC721Received.selector;
@@ -256,21 +259,18 @@ contract ERC721 is IERC721, IERC721Metadata {
         address from,
         address to,
         uint256 tokenId // solhint-disable-next-line no-empty-blocks
-    )
-        internal
-        virtual
-    { }
+    ) internal virtual {}
 
     function _postTransfer(
         address from,
         address to,
         uint256 tokenId // solhint-disable-next-line no-empty-blocks
-    )
+    ) internal virtual {}
+
+    function _initialize(string memory tokenName, string memory tokenSymbol, string memory baseTokenURI)
         internal
         virtual
-    { }
-
-    function _initialize(string memory tokenName, string memory tokenSymbol, string memory baseTokenURI) internal virtual {
+    {
         ERC721Storage.Data storage store = ERC721Storage.load();
         if (bytes(store.name).length > 0 || bytes(store.symbol).length > 0 || bytes(store.baseTokenURI).length > 0) {
             revert InitError.AlreadyInitialized();

@@ -8,7 +8,7 @@
   "dependencies": {},
   "scripts": {
     "publish:all": "yarn publish",
-    "build": ""
+    "build": "forge build --sizes"
   },
   "devDependencies": {
     

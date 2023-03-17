@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../errors/InitError.sol";
+import "../errors/InitError.sol";
 
 /**
  * @title Mixin for contracts that require initialization.

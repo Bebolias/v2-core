@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../storage/OwnableStorage.sol";
-import "../../interfaces/IOwnable.sol";
-import "../../errors/AddressError.sol";
-import "../../errors/ChangeError.sol";
+import "../storage/OwnableStorage.sol";
+import "../interfaces/IOwnable.sol";
+import "../errors/AddressError.sol";
+import "../errors/ChangeError.sol";
 
 /**
  * @title Contract for facilitating ownership by a single address.

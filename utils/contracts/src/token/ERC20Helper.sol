@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../interfaces/IERC20.sol";
+import "../interfaces/IERC20.sol";
 
 library ERC20Helper {
     error FailedTransfer(address from, address to, uint256 value);
@@ -14,7 +14,8 @@ library ERC20Helper {
     }
 
     function safeTransferFrom(address token, address from, address to, uint256 value) internal {
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, value));
+        (bool success, bytes memory data) =
+            token.call(abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, value));
         if (!success || (data.length != 0 && !abi.decode(data, (bool)))) {
             revert FailedTransfer(from, to, value);
         }

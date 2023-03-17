@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../interfaces/IUUPSImplementation.sol";
-import "../../errors/AddressError.sol";
-import "../../errors/ChangeError.sol";
-import "../../helpers/AddressUtil.sol";
-import "../../storage/ProxyStorage.sol";
+import "../interfaces/IUUPSImplementation.sol";
+import "../errors/AddressError.sol";
+import "../errors/ChangeError.sol";
+import "../helpers/AddressUtil.sol";
+import "../storage/ProxyStorage.sol";
 
 abstract contract UUPSImplementation is IUUPSImplementation, ProxyStorage {
     /**
@@ -19,7 +19,8 @@ abstract contract UUPSImplementation is IUUPSImplementation, ProxyStorage {
         address currentImplementation = store.implementation;
         store.implementation = newImplementation;
 
-        (bool rollbackSuccessful,) = newImplementation.delegatecall(abi.encodeCall(this.upgradeTo, (currentImplementation)));
+        (bool rollbackSuccessful,) =
+            newImplementation.delegatecall(abi.encodeCall(this.upgradeTo, (currentImplementation)));
 
         if (!rollbackSuccessful || _proxyStore().implementation != currentImplementation) {
             revert UpgradeSimulationFailed();
@@ -67,6 +68,7 @@ abstract contract UUPSImplementation is IUUPSImplementation, ProxyStorage {
             address(this).delegatecall(abi.encodeCall(this.simulateUpgradeTo, (candidateImplementation)));
 
         return !simulationReverted
-            && keccak256(abi.encodePacked(simulationResponse)) == keccak256(abi.encodePacked(UpgradeSimulationFailed.selector));
+            && keccak256(abi.encodePacked(simulationResponse))
+                == keccak256(abi.encodePacked(UpgradeSimulationFailed.selector));
     }
 }
