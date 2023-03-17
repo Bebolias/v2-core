@@ -8,7 +8,8 @@ import "./RateOracleReader.sol";
 import "./PoolConfiguration.sol";
 import "../interfaces/IPool.sol";
 // todo: consider migrating Exposures from Account.sol to more relevant place (e.g. interface) -> think definitely worth doing that
-import "../../../../core/src/storage/Account.sol";
+// todo: for now can import core workspace
+import "@voltz-protocol/core/src/storage/Account.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions

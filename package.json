@@ -27,7 +27,8 @@
       "lint:sol:fix": "prettier --write '(protocol|utils|products)/**/*.sol' && solhint --fix utils/contracts/src/**/*.sol core/src/**/*.sol",
       "lint:quick": "pretty-quick --check --staged --pattern '**/*.(js|ts|sol)'",
       "lint": "npm run lint:js && npm run lint:sol",
-      "check-packages": "node .github/check-packages.js"
+      "check-packages": "node .github/check-packages.js",
+      "version": "yarn install && git stage yarn.lock"
     },
     "devDependencies": {
       "@types/mocha": "10.0.1",
