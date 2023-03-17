@@ -8,15 +8,9 @@
   "dependencies": {},
   "scripts": {
     "publish:all": "yarn publish",
-    "lint:check": "yarn lint:sol:check && yarn prettier:check",
-    "lint:write": "yarn lint:sol:write && yarn prettier:write",
-    "lint:sol:check": "forge fmt --check && yarn solhint \"{src,test}/**/*.sol\"",
-    "lint:sol:write": "forge fmt && yarn solhint --fix",
-    "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
-    "prettier:write": "prettier --write \"**/*.{json,md,yml}\""
+    "build": ""
   },
   "devDependencies": {
-    "prettier": "2.8.4",
-    "solhint": "3.4.0"
+    
   }
 }
