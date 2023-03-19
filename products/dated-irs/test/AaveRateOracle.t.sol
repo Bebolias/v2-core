@@ -4,14 +4,13 @@ import "forge-std/Test.sol";
 import "./mocks/MockAaveLendingPool.sol";
 import "../src/oracles/AaveRateOracle.sol";
 import "oz/interfaces/IERC20.sol";
-import { UD60x18, convert, ud } from "@prb/math/UD60x18.sol";
-import { PRBMathAssertions } from "@prb/math/test/Assertions.sol";
+import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 import { console2 } from "forge-std/console2.sol";
 
-contract AaveRateOracle_Test_Base is Test, PRBMathAssertions {
+contract AaveRateOracle_Test_Base is Test {
     address constant TEST_UNDERLYING_ADDRESS = 0x1122334455667788990011223344556677889900;
     IERC20 constant TEST_UNDERLYING = IERC20(TEST_UNDERLYING_ADDRESS);
-    UD60x18 initValue = convert(42);
+    UD60x18 initValue = ud(1e18);
     MockAaveLendingPool mockLendingPool;
     AaveRateOracle rateOracle;
 
@@ -34,24 +33,24 @@ contract AaveRateOracle_Test1 is AaveRateOracle_Test_Base {
     }
 
     function test_initialIndex() public {
-        assertEq(rateOracle.getCurrentIndex(), initValue);
+        assertEq(unwrap(rateOracle.getCurrentIndex()), unwrap(initValue));
     }
 
     function test_initialIndexWithTime() public {
         (uint40 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
-        assertEq(index, initValue);
+        assertEq(unwrap(index), unwrap(initValue));
         assertEq(time, block.timestamp);
     }
 
     function test_interpolateIndexValue() public {
-        UD60x18 index = rateOracle.getLastUpdatedIndex(
+        UD60x18 index = rateOracle.interpolateIndexValue(
             ud(1e18), // UD60x18 beforeIndex
             0, // uint256 beforeTimestamp
             ud(1.1e18), // UD60x18 atOrAfterIndex
             100, // uint256 atOrAfterTimestamp
             50 // uint256 queryTimestamp
         );
-        assertEq(index, ud(1.05e18));
+        assertEq(unwrap(index), 1.05e18);
     }
 
     function testFuzz_success_interpolateIndexValue(
@@ -61,24 +60,24 @@ contract AaveRateOracle_Test1 is AaveRateOracle_Test_Base {
         uint256 atOrAfterTimestamp,
         uint256 queryTimestamp
     ) public {
-        vm.assume(beforeIndex <= atOrAfterIndex); // can it be equal? (affects below too)
+        vm.assume(beforeIndex.lt(atOrAfterIndex)); // can it be equal? (affects below too)
         vm.assume(beforeTimestamp <= atOrAfterTimestamp);
         vm.assume(queryTimestamp <= atOrAfterTimestamp && queryTimestamp >= atOrAfterTimestamp);
 
-        UD60x18 index = rateOracle.getLastUpdatedIndex(
+        UD60x18 index = rateOracle.interpolateIndexValue(
             beforeIndex,
             beforeTimestamp,
             atOrAfterIndex,
             atOrAfterTimestamp,
             queryTimestamp
         );
-        assertTrue(index >= beforeIndex); // does it need library for comparison?
-        assertTrue(index <= atOrAfterIndex);
+        assertTrue(index.gte(beforeIndex)); // does it need library for comparison?
+        assertTrue(index.lte(atOrAfterIndex));
 
         // slopes should be equal
         assertEq(
-            index.div(beforeIndex).div(queryTimestamp.sub(beforeTimestamp)),
-            atOrAfterIndex.div(beforeIndex).div(atOrAfterTimestamp.sub(beforeTimestamp))
+            unwrap(index.div(beforeIndex).div(ud(queryTimestamp - beforeTimestamp))),
+            unwrap(atOrAfterIndex.div(beforeIndex).div(ud(atOrAfterTimestamp - beforeTimestamp)))
         );
     }
 
@@ -96,12 +95,12 @@ contract AaveRateOracle_Test1 is AaveRateOracle_Test_Base {
     ) public {
         vm.expectRevert();
         vm.assume(
-            beforeIndex > atOrAfterIndex ||
+            beforeIndex.gte(atOrAfterIndex) ||
             beforeTimestamp > atOrAfterTimestamp ||
             !(queryTimestamp <= atOrAfterTimestamp && queryTimestamp >= atOrAfterTimestamp)
         );
 
-        UD60x18 index = rateOracle.getLastUpdatedIndex(
+        UD60x18 index = rateOracle.interpolateIndexValue(
             beforeIndex,
             beforeTimestamp,
             atOrAfterIndex,
@@ -120,8 +119,8 @@ contract AaveRateOracle_Test2 is AaveRateOracle_Test_Base {
     }
 
     function test_Mock() public {
-        vm.skip(10000); // TODO: not sure how this behaves, assuming it starts a new node per test
-        uint256 expectedCurrentIndex = initValue + 499e7;
+        ////vm.skip(10000); // TODO: not sure how this behaves, assuming it starts a new node per test
+        uint256 expectedCurrentIndex = unwrap(initValue) + 499e7;
         assertApproxEqRel(
             mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS),
             expectedCurrentIndex,
@@ -130,42 +129,41 @@ contract AaveRateOracle_Test2 is AaveRateOracle_Test_Base {
     }
 
     function test_InitialIndex() public {
-        vm.skip(10000); // TODO: not sure how this behaves, assuming it starts a new node per test
-        uint256 expectedCurrentIndex = initValue + 499e7;
-        assertApproxEqRel(rateOracle.getCurrentIndex(), expectedCurrentIndex, 1e7);
+        //vm.skip(10000); // TODO: not sure how this behaves, assuming it starts a new node per test
+        uint256 expectedCurrentIndex = unwrap(initValue) + 499e7;
+        assertApproxEqRel(unwrap(rateOracle.getCurrentIndex()), expectedCurrentIndex, 1e7);
     }
 
     function test_InitialIndexWithTime() public {
-        vm.skip(10000); // TODO: not sure how this behaves, assuming it starts a new node per test
+        //vm.skip(10000); // TODO: not sure how this behaves, assuming it starts a new node per test
         (uint40 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
-        uint256 expectedCurrentIndex = initValue + 499e7;
-        assertApproxEqRel(index, initValue, 1e17);
+        uint256 expectedCurrentIndex = unwrap(initValue) + 499e7;
+        assertApproxEqRel(unwrap(index), unwrap(initValue), 1e17);
         assertEq(time, block.timestamp);
     }
 
     function testFuzz_Mock(uint256 factorPerSecond, uint16 timePassed) public {
         vm.assume(factorPerSecond >= 1e18);
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
-        vm.skip(timePassed); 
-        assertGe(
-            mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS),
-            initValue
+        //vm.skip(timePassed); 
+        assertTrue(
+            mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS) >= unwrap(initValue)
         );
     }
 
     function testFuzz_CurrentIndex(uint256 factorPerSecond, uint16 timePassed) public {
         vm.assume(factorPerSecond >= 1e18);
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
-        vm.skip(timePassed);
-        assertGe(rateOracle.getCurrentIndex(), assertGe);
+        //vm.skip(timePassed);
+        assertTrue(rateOracle.getCurrentIndex().gte(initValue));
     }
 
     function testFuzz_InitialIndexWithTime(uint256 factorPerSecond, uint16 timePassed) public {
         vm.assume(factorPerSecond >= 1e18);
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
-        vm.skip(timePassed);
+        //vm.skip(timePassed);
         (uint40 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
-        assertGe(index, initValue);
+        assertTrue(index.gte(initValue));
         assertEq(time, block.timestamp);
     }
 }

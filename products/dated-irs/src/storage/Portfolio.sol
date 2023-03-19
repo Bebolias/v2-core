@@ -7,7 +7,6 @@ import "./Position.sol";
 import "./RateOracleReader.sol";
 import "./PoolConfiguration.sol";
 import "../interfaces/IPool.sol";
-// todo: consider migrating Exposures from Account.sol to more relevant place (e.g. interface) -> think definitely worth doing that
 // todo: for now can import core workspace
 import "@voltz-protocol/core/src/storage/Account.sol";
 

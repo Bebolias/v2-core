@@ -2,20 +2,21 @@ pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 import "./mocks/MockAaveLendingPool.sol";
+import "./mocks/MockRateOracleReader.sol";
 import "../src/oracles/AaveRateOracle.sol";
+import "../src/modules/RateOracleManager.sol";
 import "oz/interfaces/IERC20.sol";
-import { UD60x18, convert, ud } from "@prb/math/UD60x18.sol";
-import { PRBMathAssertions } from "@prb/math/test/Assertions.sol";
+import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 import { console2 } from "forge-std/console2.sol";
 
-contract RateOracleManagerTestBase is Test, PRBMathAssertions {
+contract RateOracleManagerTestBase is Test {
     RateOracleManager rateOracleManager;
     using RateOracleReader for RateOracleReader.Data;
 
     function setUp() public virtual {
         rateOracleManager = new RateOracleManager();
-        mockRateOracleReader = new MockRateOracleReader(); // how to initialise mock library
-        rateOracleManager.registerVariableOracle(100, address(mockRateOracleReader));
+        //MockRateOracleReader mockRateOracleReader = new MockRateOracleReader(); // how to initialise mock library
+        //rateOracleManager.registerVariableOracle(100, address(mockRateOracleReader));
         // set rate index
     }
 }
@@ -27,8 +28,8 @@ contract RateOracleManagerTest is RateOracleManagerTestBase {
     }
 
     function test_getRateIndexCurrent() public {
-        UD60x18 rateIndexCurrent = rateOracleManager.getRateIndexCurrent(marketId, block.timestamp - 1);
-        assertEq(rateIndexCurrent, 0);
+        UD60x18 rateIndexCurrent = rateOracleManager.getRateIndexCurrent(10, block.timestamp - 1);
+        assertEq(unwrap(rateIndexCurrent), 0);
     }
 
     function test_getRateIndexMaturity() public {

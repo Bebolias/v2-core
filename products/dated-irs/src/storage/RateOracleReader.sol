@@ -3,7 +3,7 @@ pragma solidity >=0.8.13;
 
 import "../interfaces/IRateOracle.sol";
 import "../utils/contracts/src/helpers/Time.sol";
-import { UD60x18 } from "@prb/math/UD60x18.sol";
+import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
 
 library RateOracleReader {
     /**
@@ -41,7 +41,7 @@ library RateOracleReader {
         if (block.timestamp >= maturityTimestamp) {
             // maturity timestamp has passed
             UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
-            if (rateIndexMaturity.unwrap() == 0) {
+            if (unwrap(rateIndexMaturity) == 0) {
                 // cache not yet populated - populate it now
                 UD60x18 currentIndex = IRateOracle(self.oracleAddress).getCurrentIndex();
                 PreMaturityData memory cache = self.rateIndexPreMaturity[maturityTimestamp];
@@ -92,7 +92,7 @@ library RateOracleReader {
             // maturity timestamp has passed
             UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
 
-            if (rateIndexMaturity.unwrap() == 0) {
+            if (unwrap(rateIndexMaturity) == 0) {
                 UD60x18 currentIndex = IRateOracle(self.oracleAddress).getCurrentIndex();
 
                 PreMaturityData memory cache = self.rateIndexPreMaturity[maturityTimestamp];

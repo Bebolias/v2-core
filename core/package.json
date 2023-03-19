@@ -104,5 +104,8 @@
         }
       ]
     ]
+  },
+  "exports": {
+    "./src/storage/Account.sol": "./src/storage/Account.sol"
   }
 }

@@ -7,13 +7,10 @@ import "../externalInterfaces/IAaveV3LendingPool.sol";
 import "../utils/contracts/src/helpers/Time.sol";
 // import "../rate_oracles/CompoundingRateOracle.sol";
 import {UD60x18, ud} from "@prb/math/UD60x18.sol";
-import {PRBMathCastingUint256} from "@prb/math/casting/Uint256.sol";
 
 contract AaveRateOracle is IRateOracle {
     IAaveV3LendingPool public aaveLendingPool;
     address public immutable underlying;
-
-    using PRBMathCastingUint256 for uint256;
 
     constructor(IAaveV3LendingPool _aaveLendingPool, address _underlying) {
         require(address(_aaveLendingPool) != address(0), "aave pool must exist");
@@ -59,8 +56,8 @@ contract AaveRateOracle is IRateOracle {
 
         // TODO: fix calculation to account for compounding (is there a better way than calculating an APY and applying it?)
         UD60x18 totalDelta = atOrAfterIndex.sub(beforeIndex);
-        UD60x18 proportionOfPeriodElapsed = (atOrAfterTimestamp - queryTimestamp).intoUD60x18().div(
-            (atOrAfterTimestamp - beforeTimestamp).intoUD60x18()
+        UD60x18 proportionOfPeriodElapsed = ud(atOrAfterTimestamp - queryTimestamp).div(
+            ud(atOrAfterTimestamp - beforeTimestamp)
         );
         return proportionOfPeriodElapsed.mul(totalDelta).add(beforeIndex);
     }

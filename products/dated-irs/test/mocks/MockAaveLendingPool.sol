@@ -4,7 +4,7 @@ pragma solidity =0.8.17;
 
 import "../../src/externalInterfaces/IAaveV3LendingPool.sol";
 import "oz/interfaces/IERC20.sol";
-import { UD60x18, ud } from "@prb/math/UD60x18.sol";
+import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
 /// @notice This Mock Aave pool can be used in 3 ways
 /// - change the rate to a fixed value (`setReserveNormalizedIncome`)
@@ -18,13 +18,13 @@ contract MockAaveLendingPool is IAaveV3LendingPool {
     function getReserveNormalizedIncome(address _underlyingAsset) public view override returns (uint256) {
         UD60x18 factor = factorPerSecond[_underlyingAsset];
         UD60x18 currentIndex = reserveNormalizedIncome[_underlyingAsset];
-        if (factor.unwrap() > 0) {
+        if (unwrap(factor) > 0) {
             uint256 secondsSinceNormalizedIncomeSet = block.timestamp - startTime[_underlyingAsset];
             currentIndex = reserveNormalizedIncome[_underlyingAsset].mul(factor.powu(secondsSinceNormalizedIncomeSet));
         }
 
         // Convert from UD60x18 to Aave's "Ray" (decmimal scaled by 10^27) to confrom to Aave interface
-        return currentIndex.intoUint256() * 1e9;
+        return unwrap(currentIndex) * 1e9;
     }
 
     function setReserveNormalizedIncome(IERC20 _underlyingAsset, UD60x18 _reserveNormalizedIncomeInWeiNotRay) public {

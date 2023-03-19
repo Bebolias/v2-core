@@ -2,13 +2,13 @@
 pragma solidity >=0.8.13;
 
 import "../interfaces/IProductIRSModule.sol";
-import "../../../../core/src/storage/Account.sol";
+import "../externalInterfaces/Account.sol";
 import "../storage/Portfolio.sol";
 import "../storage/MarketConfiguration.sol";
 import "../storage/PoolConfiguration.sol";
 import "../storage/RateOracleReader.sol";
 import "../utils/contracts/src/helpers/SafeCast.sol";
-import "../../../../core/src/interfaces/IProductModule.sol";
+import "../externalInterfaces/IProductModule.sol";
 
 /**
  * @title Dated Interest Rate Swap Product
