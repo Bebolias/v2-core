@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../externalInterfaces/IProduct.sol";
+import "@voltz-protocol/core/src/interfaces/external/IProduct.sol";
 
 /// @title Interface of a dated irs product
 interface IProductIRSModule is IProduct {
