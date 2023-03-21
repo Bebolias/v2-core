@@ -2,7 +2,7 @@
   auto_detect_solc = false
   bytecode_hash = "none"
   cbor_metadata = false
-  fuzz = { runs = 256 }
+  fuzz = { runs = 256, max_test_rejects = 1_000_000 }
   libs = ["lib"]
   optimizer = true
   optimizer_runs = 10_000
@@ -13,7 +13,7 @@
   auto_detect_remappings = false
 
 [profile.ci]
-  fuzz = { runs = 1_000 }
+  fuzz = { runs = 1_000, max_test_rejects = 100_000 }
   verbosity = 4
 
 [fmt]
@@ -25,3 +25,5 @@
   quote_style = "double"
   tab_width = 4
   wrap_comments = true
+
+allow_paths = ["../../node_modules"]

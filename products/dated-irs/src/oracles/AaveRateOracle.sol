@@ -6,7 +6,7 @@ import "../interfaces/IRateOracle.sol";
 import "../externalInterfaces/IAaveV3LendingPool.sol";
 import "../utils/contracts/src/helpers/Time.sol";
 // import "../rate_oracles/CompoundingRateOracle.sol";
-import {UD60x18, ud} from "@prb/math/UD60x18.sol";
+import {UD60x18, ud, unwrap} from "@prb/math/UD60x18.sol";
 
 contract AaveRateOracle is IRateOracle {
     IAaveV3LendingPool public aaveLendingPool;
@@ -45,19 +45,25 @@ contract AaveRateOracle is IRateOracle {
     /// @inheritdoc IRateOracle
     function interpolateIndexValue(
         UD60x18 beforeIndex,
-        uint256 beforeTimestamp,
+        uint256 beforeTimestampWad,
         UD60x18 atOrAfterIndex,
-        uint256 atOrAfterTimestamp,
-        uint256 queryTimestamp
+        uint256 atOrAfterTimestampWad,
+        uint256 queryTimestampWad
     ) public pure returns (UD60x18 interpolatedIndex) {
-        if (atOrAfterTimestamp == queryTimestamp) {
+
+        require(queryTimestampWad > beforeTimestampWad, "Unordered timestamps");
+
+        if (atOrAfterTimestampWad == queryTimestampWad) {
             return atOrAfterIndex;
         }
 
+        require(queryTimestampWad < atOrAfterTimestampWad, "Unordered timestamps");
+
         // TODO: fix calculation to account for compounding (is there a better way than calculating an APY and applying it?)
-        UD60x18 totalDelta = atOrAfterIndex.sub(beforeIndex);
-        UD60x18 proportionOfPeriodElapsed = ud(atOrAfterTimestamp - queryTimestamp).div(
-            ud(atOrAfterTimestamp - beforeTimestamp)
+        UD60x18 totalDelta = atOrAfterIndex.sub(beforeIndex); // this does not allow negative rates
+        
+        UD60x18 proportionOfPeriodElapsed = ud(queryTimestampWad - beforeTimestampWad).div(
+            ud(atOrAfterTimestampWad - beforeTimestampWad)
         );
         return proportionOfPeriodElapsed.mul(totalDelta).add(beforeIndex);
     }
