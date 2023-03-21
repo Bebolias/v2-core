@@ -4,7 +4,6 @@ pragma solidity >=0.8.13;
 import "../interfaces/IRateOracle.sol";
 import "../utils/contracts/src/helpers/Time.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
-import { console2 } from "forge-std/console2.sol";
 
 library RateOracleReader {
     /**
@@ -59,7 +58,6 @@ library RateOracleReader {
                         atOrAfterTimestamp: block.timestamp,
                         queryTimestamp: maturityTimestamp
                     });
-
                     self.rateIndexAtMaturity[maturityTimestamp] = rateIndexMaturity;
                 }
             }
@@ -99,9 +97,9 @@ library RateOracleReader {
                 PreMaturityData memory cache = self.rateIndexPreMaturity[maturityTimestamp];
 
                 if (cache.lastKnownTimestamp == 0) {
-                    // todo: revert
+                    // todo: add custom error
+                    revert();
                 }
-                console2.log("interpol");
                 rateIndexMaturity = IRateOracle(self.oracleAddress).interpolateIndexValue({
                     beforeIndex: cache.lastKnownIndex,
                     beforeTimestamp: cache.lastKnownTimestamp,

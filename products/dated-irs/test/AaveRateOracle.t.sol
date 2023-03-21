@@ -5,7 +5,6 @@ import "./mocks/MockAaveLendingPool.sol";
 import "../src/oracles/AaveRateOracle.sol";
 import "oz/interfaces/IERC20.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
-import { console2 } from "forge-std/console2.sol";
 
 contract AaveRateOracle_Test_Base is Test {
     address constant TEST_UNDERLYING_ADDRESS = 0x1122334455667788990011223344556677889900;

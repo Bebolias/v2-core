@@ -2,12 +2,13 @@
 
 pragma solidity =0.8.17;
 
+import "../../src/oracles/AaveRateOracle.sol";
 import "../../src/interfaces/IRateOracle.sol";
+import "./MockAaveLendingPool.sol";
 import "../../src/externalInterfaces/IAaveV3LendingPool.sol";
 import { UD60x18, ud } from "@prb/math/UD60x18.sol";
 
 contract MockRateOracle is IRateOracle {
-    IAaveV3LendingPool public aaveLendingPool;
 
     uint40 public lastUpdatedTimestamp;
     uint256 public lastUpdatedLiquidityIndex;
@@ -27,7 +28,6 @@ contract MockRateOracle is IRateOracle {
     }
 
     // why is this public?
-    /// @inheritdoc IRateOracle
     function interpolateIndexValue(
         UD60x18 beforeIndex,
         uint256 beforeTimestamp,
@@ -35,6 +35,6 @@ contract MockRateOracle is IRateOracle {
         uint256 atOrAfterTimestamp,
         uint256 queryTimestamp
     ) public pure returns (UD60x18 interpolatedIndex) {
-        return ud(0);
+        interpolatedIndex = beforeIndex.add(atOrAfterIndex).div(ud(2e18));
     }
 }

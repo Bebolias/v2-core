@@ -7,7 +7,6 @@ import "../src/modules/RateOracleManager.sol";
 import "../src/storage/RateOracleReader.sol";
 import "oz/interfaces/IERC20.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
-import { console2 } from "forge-std/console2.sol";
 
 contract RateOracleManagerTestBase is Test {
     RateOracleManager rateOracleManager;
@@ -20,6 +19,8 @@ contract RateOracleManagerTestBase is Test {
 
     function setUp() public virtual {
         rateOracleManager = new RateOracleManager();
+        MockAaveLendingPool lendingPool = new MockAaveLendingPool();
+        AaveRateOracle aaveOracle = new AaveRateOracle(lendingPool, address(0));
         mockRateOracle = new MockRateOracle();
         maturityTimestamp = block.timestamp + 3139000;
         rateOracleManager.registerVariableOracle(100, address(mockRateOracle));
@@ -45,18 +46,17 @@ contract RateOracleManagerTest is RateOracleManagerTestBase {
         assertEq(unwrap(rateIndexCurrent), 0);
     }
 
-    function test_getRateIndexCurrent_afterMaturity() public {
+    function test_getRateIndexCurrent_beforeMaturity() public {
         mockRateOracle.setLastUpdatedIndex(1.001e18 * 1e9);
         UD60x18 rateIndexCurrent = rateOracleManager.getRateIndexCurrent(100, maturityTimestamp);
         assertEq(unwrap(rateIndexCurrent), 1.001e18);
     }
 
-    // TODO: when should module call updateCache?
-    function test_getRateIndexCurrent_beforeMaturity() public {
-        mockRateOracle.setLastUpdatedIndex(1.001e18 * 1e9);
+    function test_fail_getRateIndexCurrent_afterMaturity() public {
         vm.warp(maturityTimestamp + 1);
-        UD60x18 index = rateOracleManager.getRateIndexCurrent(100, maturityTimestamp);
-        console2.log(unwrap(index));
+        vm.expectRevert();
+        UD60x18 rateIndexCurrent = rateOracleManager.getRateIndexCurrent(100, maturityTimestamp);
+        // fails because of no cache update
     }
 
     function test_fail_getRateIndexMaturity_afterMaturity() public {

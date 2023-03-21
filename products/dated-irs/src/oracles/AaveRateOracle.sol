@@ -41,7 +41,6 @@ contract AaveRateOracle is IRateOracle {
         return ud(liquidityIndexInRay / 1e9);
     }
 
-    // why is this public?
     /// @inheritdoc IRateOracle
     function interpolateIndexValue(
         UD60x18 beforeIndex,
