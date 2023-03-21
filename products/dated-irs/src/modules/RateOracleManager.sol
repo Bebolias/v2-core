@@ -61,7 +61,13 @@ contract RateOracleManager is IRateOracleModule {
         emit RateOracleRegistered(marketId, oracleAddress);
     }
 
-    function _isVariableOracleRegistered(uint128 marketId) internal returns (bool isRegistered) { }
+    // TODO: implement
+    function _isVariableOracleRegistered(uint128 marketId) internal returns (bool isRegistered) {
+        return false;
+    }
 
-    function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) { }
+    // TODO: implement
+    function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {
+        return true;
+    }
 }

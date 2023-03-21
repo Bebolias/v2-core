@@ -177,16 +177,19 @@ contract AaveRateOracle_Test2 is AaveRateOracle_Test_Base {
     }
 
     function testFuzz_CurrentIndex(uint256 factorPerSecond, uint16 timePassed) public {
-        vm.assume(factorPerSecond >= 1e18);
+        // not bigger than 72% apy per year
+        vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
-        //vm.skip(timePassed);
-        assertTrue(rateOracle.getCurrentIndex().gte(initValue));
+        vm.warp(block.timestamp + timePassed);
+        UD60x18 index = rateOracle.getCurrentIndex();
+        assertTrue(index.gte(initValue));
     }
 
     function testFuzz_InitialIndexWithTime(uint256 factorPerSecond, uint16 timePassed) public {
-        vm.assume(factorPerSecond >= 1e18);
+        // not bigger than 72% apy per year
+        vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
-        //vm.skip(timePassed);
+        vm.warp(block.timestamp + timePassed);
         (uint40 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
         assertTrue(index.gte(initValue));
         assertEq(time, block.timestamp);
