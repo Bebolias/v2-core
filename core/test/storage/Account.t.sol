@@ -130,10 +130,14 @@ contract AccountTest is Test {
         assertEq(slot, accountSlot);
     }
 
-    function test_revertWhen_AccountDoesNotExist() public {
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 0));
-
+    function testFail_ZeroAccount() public {
         accounts.exists(0);
+    }
+
+    function test_revertWhen_AccountDoesNotExist() public {
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 1));
+
+        accounts.exists(1);
     }
 
     function test_GetCollateralBalance() public {

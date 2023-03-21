@@ -90,6 +90,7 @@ library Account {
      * @dev Returns the account stored at the specified account id.
      */
     function load(uint128 id) internal pure returns (Data storage account) {
+        require(id != 0);
         bytes32 s = keccak256(abi.encode("xyz.voltz.Account", id));
         assembly {
             account.slot := s
@@ -103,6 +104,8 @@ library Account {
      *  Whatever calls this internal function must first check that the account doesn't exist before re-creating it.
      */
     function create(uint128 id, address owner) internal returns (Data storage account) {
+        // Disallowing account ID 0 means we can use a non-zero accountId as an existence flag in structs like Position
+        require(id != 0);
         account = load(id);
 
         account.id = id;
