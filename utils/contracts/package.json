@@ -13,7 +13,9 @@
     "lint:sol:check": "yarn solhint \"{src}/**/*.sol\"",
     "lint:sol:write": "yarn solhint --fix \"{src,test}/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
-    "prettier:write": "prettier --write \"**/*.{json,md,yml}\""
+    "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",
+    "test": "forge test",
+    "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
   },
   "devDependencies": {}
 }

@@ -25,6 +25,3 @@
 [submodule "products/dated-irs/lib/forge-std"]
 	path = products/dated-irs/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
-[submodule "lib/prb-test"]
-	path = products/dated-irs/lib/prb-test
-	url = https://github.com/PaulRBerg/prb-test
