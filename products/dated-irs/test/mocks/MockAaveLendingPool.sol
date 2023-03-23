@@ -10,6 +10,8 @@ import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 /// - change the rate to a fixed value (`setReserveNormalizedIncome`)
 /// - configure the rate to alter over time (`setFactorPerSecondInRay`) for more dynamic testing
 contract MockAaveLendingPool is IAaveV3LendingPool {
+    using { unwrap } for UD60x18;
+
     mapping(address => UD60x18) internal reserveNormalizedIncome;
     // mapping(IERC20 => uint256) internal reserveNormalizedVariableDebt;
     mapping(address => uint40) internal startTime;
@@ -18,13 +20,13 @@ contract MockAaveLendingPool is IAaveV3LendingPool {
     function getReserveNormalizedIncome(address _underlyingAsset) public view override returns (uint256) {
         UD60x18 factor = factorPerSecond[_underlyingAsset];
         UD60x18 currentIndex = reserveNormalizedIncome[_underlyingAsset];
-        if (unwrap(factor) > 0) {
+        if (factor.unwrap() > 0) {
             uint256 secondsSinceNormalizedIncomeSet = block.timestamp - startTime[_underlyingAsset];
             currentIndex = reserveNormalizedIncome[_underlyingAsset].mul(factor.powu(secondsSinceNormalizedIncomeSet));
         }
 
         // Convert from UD60x18 to Aave's "Ray" (decmimal scaled by 10^27) to confrom to Aave interface
-        return unwrap(currentIndex) * 1e9;
+        return currentIndex.unwrap() * 1e9;
     }
 
     function setReserveNormalizedIncome(IERC20 _underlyingAsset, UD60x18 _reserveNormalizedIncomeInWeiNotRay) public {

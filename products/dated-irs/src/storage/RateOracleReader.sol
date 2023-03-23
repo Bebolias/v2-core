@@ -6,10 +6,13 @@ import "../utils/contracts/src/helpers/Time.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
 
 library RateOracleReader {
+
+    using { unwrap } for UD60x18;
     /**
      * @dev Thrown if the index-at-maturity is requested before maturity.
      */
     error MaturityNotReached();
+    error MissingRateIndexAtMaturity();
 
     struct PreMaturityData {
         uint40 lastKnownTimestamp;
@@ -41,7 +44,7 @@ library RateOracleReader {
         if (block.timestamp >= maturityTimestamp) {
             // maturity timestamp has passed
             UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
-            if (unwrap(rateIndexMaturity) == 0) {
+            if (rateIndexMaturity.unwrap() == 0) {
                 // cache not yet populated - populate it now
                 UD60x18 currentIndex = IRateOracle(self.oracleAddress).getCurrentIndex();
                 PreMaturityData memory cache = self.rateIndexPreMaturity[maturityTimestamp];
@@ -91,14 +94,13 @@ library RateOracleReader {
             // maturity timestamp has passed
             UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
 
-            if (unwrap(rateIndexMaturity) == 0) {
+            if (rateIndexMaturity.unwrap() == 0) {
                 UD60x18 currentIndex = IRateOracle(self.oracleAddress).getCurrentIndex();
 
                 PreMaturityData memory cache = self.rateIndexPreMaturity[maturityTimestamp];
 
                 if (cache.lastKnownTimestamp == 0) {
-                    // todo: add custom error
-                    revert();
+                    revert MissingRateIndexAtMaturity();
                 }
                 rateIndexMaturity = IRateOracle(self.oracleAddress).interpolateIndexValue({
                     beforeIndex: cache.lastKnownIndex,
