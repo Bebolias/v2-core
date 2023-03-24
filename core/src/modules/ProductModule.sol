@@ -82,16 +82,16 @@ contract ProductModule is IProductModule {
     // todo: interesting but account is external to this product
     // todo: process taker fees (these should also be returned)
     // todo: check if the settlement token of the new order product matches the settlement token of the account
-    function propagateTakerOrder(uint128 accountId, address takerAddress) external override {
-        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, takerAddress);
+    function propagateTakerOrder(uint128 accountId) external override {
+        Account.Data storage account = Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
         account.imCheck();
-    }
+}
 
     // todo: mark product
     // todo: process maker fees (these should also be returned)
     // todo: check if the settlement token of the new order product matches the settlement token of the account
-    function propagateMakerOrder(uint128 accountId, address makerAddress) external override {
-        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, makerAddress);
+    function propagateMakerOrder(uint128 accountId) external override {
+        Account.Data storage account = Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
         account.imCheck();
     }
 

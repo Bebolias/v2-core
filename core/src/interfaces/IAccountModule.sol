@@ -13,11 +13,67 @@ interface IAccountModule {
     error OnlyAccountTokenProxy(address origin);
 
     /**
+     * @notice Thrown when an account attempts to renounce a permission that it didn't have.
+     */
+    error PermissionNotGranted(uint128 accountId, bytes32 permission, address user);
+
+    /**
      * @notice Emitted when an account token with id `accountId` is minted to `owner`.
      * @param accountId The id of the account.
      * @param owner The address that owns the created account.
      */
     event AccountCreated(uint128 indexed accountId, address indexed owner);
+
+    /**
+     * @notice Emitted when `user` is granted `permission` by `sender` for account `accountId`.
+     * @param accountId The id of the account that granted the permission.
+     * @param permission The bytes32 identifier of the permission.
+     * @param user The target address to whom the permission was granted.
+     * @param sender The Address that granted the permission.
+     */
+    event PermissionGranted(
+        uint128 indexed accountId,
+        bytes32 indexed permission,
+        address indexed user,
+        address sender
+    );
+
+    /**
+     * @notice Emitted when `user` has `permission` renounced or revoked by `sender` for account `accountId`.
+     * @param accountId The id of the account that has had the permission revoked.
+     * @param permission The bytes32 identifier of the permission.
+     * @param user The target address for which the permission was revoked.
+     * @param sender The address that revoked the permission.
+     */
+    event PermissionRevoked(
+        uint128 indexed accountId,
+        bytes32 indexed permission,
+        address indexed user,
+        address sender
+    );
+
+    /**
+     * @dev Data structure for tracking each user's permissions.
+     */
+    struct AccountPermissions {
+        /**
+         * @dev The address for which all the permissions are granted.
+         */
+        address user;
+        /**
+         * @dev The array of permissions given to the associated address.
+         */
+        bytes32[] permissions;
+    }
+
+    /**
+     * @notice Returns an array of `AccountPermission` for the provided `accountId`.
+     * @param accountId The id of the account whose permissions are being retrieved.
+     * @return accountPerms An array of AccountPermission objects describing the permissions granted to the account.
+     */
+    function getAccountPermissions(
+        uint128 accountId
+    ) external view returns (AccountPermissions[] memory accountPerms);
 
     /**
      * @notice Mints an account token with id `requestedAccountId` to `msg.sender`.
@@ -44,6 +100,56 @@ interface IAccountModule {
     function notifyAccountTransfer(address to, uint128 accountId) external;
 
     /**
+     * @notice Grants `permission` to `user` for account `accountId`.
+     * @param accountId The id of the account that granted the permission.
+     * @param permission The bytes32 identifier of the permission.
+     * @param user The target address that received the permission.
+     *
+     * Requirements:
+     *
+     * - `msg.sender` must own the account token with ID `accountId` or have the "admin" permission.
+     *
+     * Emits a {PermissionGranted} event.
+     */
+    function grantPermission(uint128 accountId, bytes32 permission, address user) external;
+
+    /**
+     * @notice Revokes `permission` from `user` for account `accountId`.
+     * @param accountId The id of the account that revoked the permission.
+     * @param permission The bytes32 identifier of the permission.
+     * @param user The target address that no longer has the permission.
+     *
+     * Requirements:
+     *
+     * - `msg.sender` must own the account token with ID `accountId` or have the "admin" permission.
+     *
+     * Emits a {PermissionRevoked} event.
+     */
+    function revokePermission(uint128 accountId, bytes32 permission, address user) external;
+
+    /**
+     * @notice Revokes `permission` from `msg.sender` for account `accountId`.
+     * @param accountId The id of the account whose permission was renounced.
+     * @param permission The bytes32 identifier of the permission.
+     *
+     * Emits a {PermissionRevoked} event.
+     */
+    function renouncePermission(uint128 accountId, bytes32 permission) external;
+
+    /**
+     * @notice Returns `true` if `user` has been granted `permission` for account `accountId`.
+     * @param accountId The id of the account whose permission is being queried.
+     * @param permission The bytes32 identifier of the permission.
+     * @param user The target address whose permission is being queried.
+     * @return hasPermission A boolean with the response of the query.
+     */
+    function hasPermission(
+        uint128 accountId,
+        bytes32 permission,
+        address user
+    ) external view returns (bool hasPermission);
+
+    /**
      * @notice Returns the address for the account token used by the manager.
      * @return accountNftToken The address of the account token.
      */
@@ -57,10 +163,15 @@ interface IAccountModule {
     function getAccountOwner(uint128 accountId) external view returns (address owner);
 
     /**
-     * @notice Checks wether a given `user` addres owns a given account identified by its `accountId`
-     * @param accountId The account id whose ownership authority is being queried
-     * @param user The address checked to have authority over a given account
-     * @return _isAuthorized boolean value which is true only if the queried user owns a the account id
+     * @notice Returns `true` if `target` is authorized to `permission` for account `accountId`.
+     * @param accountId The id of the account whose permission is being queried.
+     * @param permission The bytes32 identifier of the permission.
+     * @param target The target address whose permission is being queried.
+     * @return isAuthorized A boolean with the response of the query.
      */
-    function isAuthorized(uint128 accountId, address user) external view returns (bool _isAuthorized);
+    function isAuthorized(
+        uint128 accountId,
+        bytes32 permission,
+        address target
+    ) external view returns (bool isAuthorized);
 }

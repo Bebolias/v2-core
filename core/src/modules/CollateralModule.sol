@@ -40,7 +40,7 @@ contract CollateralModule is ICollateralModule {
      * @inheritdoc ICollateralModule
      */
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external override {
-        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, msg.sender);
+        Account.Data storage account = Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
 
         account.collaterals[collateralType].decreaseCollateralBalance(tokenAmount);
 

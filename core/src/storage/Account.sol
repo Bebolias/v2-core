@@ -75,7 +75,7 @@ library Account {
         // productId (IRS) -> marketID (aUSDC lend) -> maturity (30th December)
         // productId (Dated Future) -> marketID (BTC) -> maturity (30th December)
         // productId (Perp) -> marketID (ETH)
-        // note, we don't neeed to keep track of the maturity for the purposes of of IM, LM calc
+        // note, we don't need to keep track of the maturity for the purposes of IM, LM calc
         // because the risk parameter is shared across maturities for a given productId marketId pair
         // uint128 productId; -> since already have it in the exposures mapping
         uint128 marketId;
@@ -168,10 +168,10 @@ library Account {
 
     /**
      * @dev Loads the Account object for the specified accountId,
-     * and validates that sender has the ownership of the account id. These
-     * are different actions but they are merged in a single function
-     * because loading an account and checking for ownership is a very
-     * common use case in other parts of the code.
+     * and validates that sender has the specified permission. It also resets
+     * the interaction timeout. These are different actions but they are merged 
+     * in a single function because loading an account and checking for a 
+     * permission is a very common use case in other parts of the code.
      */
     function loadAccountAndValidateOwnership(
         uint128 accountId,
@@ -182,7 +182,29 @@ library Account {
         returns (Data storage account)
     {
         account = Account.load(accountId);
-        if (!account.rbac.authorized(senderAddress)) {
+        if (account.rbac.owner != senderAddress) {
+            revert PermissionDenied(accountId, senderAddress);
+        }
+    }
+
+    /**
+     * @dev Loads the Account object for the specified accountId,
+     * and validates that sender has the specified permission. It also resets
+     * the interaction timeout. These are different actions but they are merged 
+     * in a single function because loading an account and checking for a 
+     * permission is a very common use case in other parts of the code.
+     */
+    function loadAccountAndValidatePermission(
+        uint128 accountId,
+        bytes32 permission,
+        address senderAddress
+    )
+        internal
+        view
+        returns (Data storage account)
+    {
+        account = Account.load(accountId);
+        if (!account.rbac.authorized(permission, senderAddress)) {
             revert PermissionDenied(accountId, senderAddress);
         }
     }
