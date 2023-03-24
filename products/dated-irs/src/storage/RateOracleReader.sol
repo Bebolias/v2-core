@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "../interfaces/IRateOracle.sol";
-import "../utils/contracts/src/helpers/Time.sol";
+import "@voltz-protocol/core/src/utils/contracts/helpers/Time.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
 
 library RateOracleReader {

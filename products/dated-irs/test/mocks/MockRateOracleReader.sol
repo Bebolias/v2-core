@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 import "../../src/interfaces/IRateOracle.sol";
 import "../../src/storage/RateOracleReader.sol";
 import "./MockRateOracle.sol";
-import "../../src/utils/contracts/src/helpers/Time.sol";
+import "@voltz-protocol/core/src/utils/contracts/helpers/Time.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 contract MockRateOracleReader {

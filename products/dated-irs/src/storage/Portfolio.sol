@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../utils/contracts/src/helpers/SetUtil.sol";
-import "../utils/contracts/src/helpers/SafeCast.sol";
+import "@voltz-protocol/core/src/utils/contracts/helpers/SetUtil.sol";
+import "@voltz-protocol/core/src/utils/contracts/helpers/SafeCast.sol";
 import "./Position.sol";
 import "./RateOracleReader.sol";
 import "./PoolConfiguration.sol";
 import "../interfaces/IPool.sol";
 // todo: for now can import core workspace
 import "@voltz-protocol/core/src/storage/Account.sol";
+import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions
  */
 library Portfolio {
+    using { unwrap } for UD60x18;
     using Position for Position.Data;
     using SetUtil for SetUtil.UintSet;
     using SafeCastU256 for uint256;
@@ -93,7 +95,7 @@ library Portfolio {
 
                 // TODO: use PRB math
                 int256 currentLiquidityIndex =
-                    RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).intoUint256().toInt();
+                    RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).unwrap().toInt();
 
                 int256 gwap =
                     IPool(PoolConfiguration.getPoolAddress()).getDatedIRSGwap(marketId, maturityTimestamp).toInt();
@@ -118,7 +120,7 @@ library Portfolio {
     {
         // TODO: use PRB math
         int256 currentLiquidityIndex =
-            RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).intoUint256().toInt();
+            RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).unwrap().toInt();
         int256 timeDeltaAnnualized = max(0, ((maturityTimestamp - block.timestamp) / 31540000).toInt());
 
         for (uint256 i = 0; i < baseAmounts.length; ++i) {
@@ -216,7 +218,7 @@ library Portfolio {
 
         // TODO: use PRB math
         int256 liquidityIndexMaturity =
-            RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp).intoUint256().toInt();
+            RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp).unwrap().toInt();
 
         settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
         position.settle();

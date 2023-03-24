@@ -7,7 +7,7 @@ import "../storage/Portfolio.sol";
 import "../storage/MarketConfiguration.sol";
 import "../storage/PoolConfiguration.sol";
 import "../storage/RateOracleReader.sol";
-import "../utils/contracts/src/helpers/SafeCast.sol";
+import "@voltz-protocol/core/src/utils/contracts/helpers/SafeCast.sol";
 import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
 
 /**

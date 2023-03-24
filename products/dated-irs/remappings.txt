@@ -4,3 +4,4 @@ oz=lib/openzeppelin-contracts/contracts/
 @prb/math/=lib/prb-math/src/
 src=src
 @prb/test/=lib/prb-test/src/
+@voltz-protocol/core/=../../node_modules/@voltz-protocol/core/
