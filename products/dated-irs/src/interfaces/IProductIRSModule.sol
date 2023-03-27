@@ -13,7 +13,7 @@ interface IProductIRSModule is IProduct {
      * @param marketId Id of the market in which the account wants to settle (e.g. 1 for aUSDC lend)
      * @param maturityTimestamp Maturity timestamp of the market in which the account wants to settle
      */
-    function settle(uint128 accountId, uint128 marketId, uint256 maturityTimestamp) external;
+    function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) external;
 
     /**
      * @notice Initiates a taker order for a given account by consuming liquidity provided by the pool connected to this product
@@ -27,7 +27,7 @@ interface IProductIRSModule is IProduct {
     function initiateTakerOrder(
         uint128 accountId,
         uint128 marketId,
-        uint256 maturityTimestamp,
+        uint32 maturityTimestamp,
         int256 baseAmount
     )
         external

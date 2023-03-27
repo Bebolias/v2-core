@@ -13,7 +13,7 @@ interface IPool is IERC165 {
     /// for products that don't have maturities
     function executeDatedTakerOrder(
         uint128 marketId,
-        uint256 maturityTimestamp,
+        uint32 maturityTimestamp,
         int256 baseAmount
     )
         external
@@ -21,7 +21,7 @@ interface IPool is IERC165 {
 
     function getAccountFilledBalances(
         uint128 marketId,
-        uint256 maturityTimestamp,
+        uint32 maturityTimestamp,
         uint128 accountId
     )
         external
@@ -30,7 +30,7 @@ interface IPool is IERC165 {
 
     function getAccountUnfilledBases(
         uint128 marketId,
-        uint256 maturityTimestamp,
+        uint32 maturityTimestamp,
         uint128 accountId
     )
         external
@@ -47,5 +47,5 @@ interface IPool is IERC165 {
      *  // should sit in the MarketRiskConfiguration.sol within the core where it is made possible for the owner
      *  // to specify custom twap lookback windows for different productId/marketId combinations
      */
-    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp) external view returns (uint256 datedIRSGwap);
+    function getDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp) external view returns (uint256 datedIRSGwap);
 }

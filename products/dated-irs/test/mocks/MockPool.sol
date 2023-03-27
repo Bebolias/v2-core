@@ -5,17 +5,20 @@ import "@voltz-protocol/core/src/utils/contracts/interfaces/IERC165.sol";
 import "../../src/interfaces/IPool.sol";
 
 contract MockPool is IPool {
-    /// @notice returns a human-readable name for a given pool
+
+    int256 baseBalancePool;
+    int256 quoteBalancePool;
+    int256 unfilledBaseLong;
+    int256 unfilledBaseShort;
+    mapping(uint256 => uint256) datedIRSGwaps;
+
     function name(uint128 poolId) external view returns (string memory) {
         return "mockpool";
     }
 
-    /// @dev note, a pool needs to have this interface to enable account closures initiated by products
-    /// @dev in the future -> executePerpetualTakerOrder(uint128 marketId, int256 baseAmount)
-    /// for products that don't have maturities
     function executeDatedTakerOrder(
         uint128 marketId,
-        uint256 maturityTimestamp,
+        uint32 maturityTimestamp,
         int256 baseAmount
     )
         external
@@ -24,42 +27,46 @@ contract MockPool is IPool {
         executedQuoteAmount = 0;
     }
 
+    function setBalances(
+        int256 _baseBalancePool,
+        int256 _quoteBalancePool,
+        int256 _unfilledBaseLong,
+        int256 _unfilledBaseShort
+    ) external {
+        baseBalancePool = _baseBalancePool;
+        quoteBalancePool = _quoteBalancePool;
+        unfilledBaseLong = _unfilledBaseLong;
+        unfilledBaseShort = _unfilledBaseShort;
+    }
+
     function getAccountFilledBalances(
         uint128 marketId,
-        uint256 maturityTimestamp,
+        uint32 maturityTimestamp,
         uint128 accountId
     )
         external
         view
-        returns (int256 baseBalancePool, int256 quoteBalancePool) {
-            baseBalancePool = 0;
-            quoteBalancePool = 0;
+        returns (int256, int256) {
+            return (baseBalancePool, quoteBalancePool);
     }
 
     function getAccountUnfilledBases(
         uint128 marketId,
-        uint256 maturityTimestamp,
+        uint32 maturityTimestamp,
         uint128 accountId
     )
         external
         view
-        returns (int256 unfilledBaseLong, int256 unfilledBaseShort) {
-            unfilledBaseLong = 0;
-            unfilledBaseShort = 0;
+        returns (int256, int256) {
+            return (unfilledBaseLong, unfilledBaseShort);
     }
 
-    /**
-     * @notice Get dated irs gwap for the purposes of unrealized pnl calculation in the portfolio (see Portfolio.sol)
-     * @param marketId Id of the market for which we want to retrieve the dated irs gwap
-     * @param maturityTimestamp Timestamp at which a given market matures
-     * @return datedIRSGwap Geometric Time Weighted Average Fixed Rate
-     *  // todo: note, currently the product (and the core) are offloading the twap lookback widnow setting to the vamm pool
-     *  // however, intuitively it feels like the twap lookback window is quite an important risk parameter that arguably
-     *  // should sit in the MarketRiskConfiguration.sol within the core where it is made possible for the owner
-     *  // to specify custom twap lookback windows for different productId/marketId combinations
-     */
-    function getDatedIRSGwap(uint128 marketId, uint256 maturityTimestamp) external view returns (uint256 datedIRSGwap) {
-        datedIRSGwap = 0;
+    function getDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp) external view returns (uint256) {
+        return datedIRSGwaps[marketId << 32 | maturityTimestamp];
+    }
+
+    function setDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp, uint256 _datedIRSGwap) external {
+        datedIRSGwaps[marketId << 32 | maturityTimestamp] = _datedIRSGwap;
     }
 
     function supportsInterface(bytes4 interfaceID) external view returns (bool) {
