@@ -15,14 +15,17 @@ import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
  * @title Object for tracking a portfolio of dated interest rate swap positions
  */
 library Portfolio {
+    using Portfolio for Portfolio.Data;
     using { unwrap } for UD60x18;
     using Position for Position.Data;
     using SetUtil for SetUtil.UintSet;
     using SafeCastU256 for uint256;
     using RateOracleReader for RateOracleReader.Data;
 
-    // todo: do we need pool configuration here? currently only holding address
-    using PoolConfiguration for PoolConfiguration.Data;
+    /**
+     * @notice Emitted when attempting to settle before maturity
+     */
+    error NoSettlementsBeforeMaturity(uint128 marketId, uint32 maturityTimestamp, uint256 accountId);
 
     struct Data {
         /**
@@ -152,9 +155,6 @@ library Portfolio {
     /**
      * @dev Fully Close all the positions owned by the account within the dated irs portfolio
      * poolAddress in which to close the account, note in the beginning we'll only have a single pool
-     * todo: layer in position closing in the pool
-     * todo: pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance); -> consider passing a list of
-     * structs such that there is only a single external call done to the poolAddress?
      */
     function closeAccount(Data storage self, address poolAddress) internal {
         IPool pool = IPool(poolAddress);
@@ -162,8 +162,16 @@ library Portfolio {
             uint256 marketMaturityPacked = self.activeMarketsAndMaturities.valueAt(i);
             (uint128 marketId, uint32 maturityTimestamp) = unpack(marketMaturityPacked);
 
-            Position.Data memory position = self.positions[marketId][maturityTimestamp];
-            pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance);
+            Position.Data storage position = self.positions[marketId][maturityTimestamp];
+
+            (int256 executedBaseAmount, int256 executedQuoteAmount) = pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance);
+            position.update(executedBaseAmount, executedQuoteAmount);
+
+            pool.closePosition(marketId, maturityTimestamp, self.accountId);
+
+            if (position.baseBalance == 0 && position.quoteBalance == 0) {
+                self.deactivatePool(marketId, maturityTimestamp);
+            }
         }
     }
 
@@ -184,7 +192,7 @@ library Portfolio {
 
         // register active market
         if (position.baseBalance != 0 || position.quoteBalance != 0) {
-            activatePool(self, marketId, maturityTimestamp);
+            self.activatePool(marketId, maturityTimestamp);
         }
     }
 
@@ -192,15 +200,25 @@ library Portfolio {
      * @dev create, edit or close an irs position for a given marketId (e.g. aUSDC lend) and maturityTimestamp (e.g. 31st Dec 2023)
      */
     function settle(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal returns (int256 settlementCashflow) {
-        // todo: check for maturity? RateOracleReader would fail if not matured
+        if ( maturityTimestamp < uint32(block.timestamp)) {
+            revert NoSettlementsBeforeMaturity(marketId, maturityTimestamp, self.accountId);
+        }
 
         Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
         // TODO: use PRB math
         int256 liquidityIndexMaturity = RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp).unwrap().toInt();
 
-        settlementCashflow = position.baseBalance * liquidityIndexMaturity + position.quoteBalance;
+        self.deactivatePool(marketId, maturityTimestamp);
+
+        // todo: replace pool configuration
+        address _poolAddress = PoolConfiguration.getPoolAddress();
+        IPool pool = IPool(_poolAddress);
+
+        (int256 closedBasePool, int256 closedQuotePool) = pool.closePosition(marketId, maturityTimestamp, self.accountId);
         position.settle();
+        
+        settlementCashflow = (position.baseBalance + closedBasePool) * liquidityIndexMaturity + position.quoteBalance + closedQuotePool;
     }
 
     /**

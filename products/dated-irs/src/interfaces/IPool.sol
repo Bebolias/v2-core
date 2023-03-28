@@ -37,6 +37,15 @@ interface IPool is IERC165 {
         view
         returns (int256 unfilledBaseLong, int256 unfilledBaseShort);
 
+
+    function closePosition(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        uint128 accountId
+    )
+        external
+        returns (int256 closedBasePool, int256 closedQuotePool);
+
     /**
      * @notice Get dated irs gwap for the purposes of unrealized pnl calculation in the portfolio (see Portfolio.sol)
      * @param marketId Id of the market for which we want to retrieve the dated irs gwap
