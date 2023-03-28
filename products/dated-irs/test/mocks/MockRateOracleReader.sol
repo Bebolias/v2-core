@@ -8,16 +8,16 @@ import "@voltz-protocol/core/src/utils/contracts/helpers/Time.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 contract MockRateOracleReader {
-
     using RateOracleReader for RateOracleReader.Data;
 
     address oracleAddress;
 
-    constructor (address _oracleAddress) {
+    constructor(address _oracleAddress) {
         oracleAddress = _oracleAddress;
     }
 
-    // function setIndexCache(RateOracleReader.Data memory self, uint40 lastKnownTimestamp, UD60x18 lastKnownIndex, uint256 maturityTimestamp) public {
+    // function setIndexCache(RateOracleReader.Data memory self, uint40 lastKnownTimestamp, UD60x18 lastKnownIndex, uint256
+    // maturityTimestamp) public {
     //     self.rateIndexPreMaturity[maturityTimestamp].lastKnownTimestamp = lastKnownTimestamp;
     //     self.rateIndexPreMaturity[maturityTimestamp].lastKnownIndex = lastKnownIndex;
     // }

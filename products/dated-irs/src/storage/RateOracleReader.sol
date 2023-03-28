@@ -6,11 +6,11 @@ import "@voltz-protocol/core/src/utils/contracts/helpers/Time.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
 
 library RateOracleReader {
-
     using { unwrap } for UD60x18;
     /**
      * @dev Thrown if the index-at-maturity is requested before maturity.
      */
+
     error MaturityNotReached();
     error MissingRateIndexAtMaturity();
 

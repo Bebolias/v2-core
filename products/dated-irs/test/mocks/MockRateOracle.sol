@@ -9,7 +9,6 @@ import "../../src/externalInterfaces/IAaveV3LendingPool.sol";
 import { UD60x18, ud } from "@prb/math/UD60x18.sol";
 
 contract MockRateOracle is IRateOracle {
-
     uint40 public lastUpdatedTimestamp;
     uint256 public lastUpdatedLiquidityIndex;
 
@@ -34,7 +33,11 @@ contract MockRateOracle is IRateOracle {
         UD60x18 atOrAfterIndex,
         uint256 atOrAfterTimestamp,
         uint256 queryTimestamp
-    ) public pure returns (UD60x18 interpolatedIndex) {
+    )
+        public
+        pure
+        returns (UD60x18 interpolatedIndex)
+    {
         interpolatedIndex = beforeIndex.add(atOrAfterIndex).div(ud(2e18));
     }
 }

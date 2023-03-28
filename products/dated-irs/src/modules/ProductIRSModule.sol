@@ -33,7 +33,12 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProductIRSModule
      */
-    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint32 maturityTimestamp, int256 baseAmount)
+    function initiateTakerOrder(
+        uint128 accountId,
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        int256 baseAmount
+    )
         external
         override
         returns (int256 executedBaseAmount, int256 executedQuoteAmount)

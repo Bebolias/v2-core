@@ -37,68 +37,30 @@ contract ExposePortfolio {
         return Portfolio.load(id).getAccountUnrealizedPnL(poolAddress);
     }
 
-    function annualizedExposureFactor(
-        uint128 marketId,
-        uint32 maturityTimestamp
-    ) external returns (int256) {
-        return Portfolio.annualizedExposureFactor(
-            marketId,
-            maturityTimestamp
-        );
+    function annualizedExposureFactor(uint128 marketId, uint32 maturityTimestamp) external returns (int256) {
+        return Portfolio.annualizedExposureFactor(marketId, maturityTimestamp);
     }
 
-    function activatePool(
-        uint128 id,
-        uint128 marketId,
-        uint32 maturityTimestamp
-    ) external{
-        Portfolio.load(id).activatePool(
-            marketId,
-            maturityTimestamp
-        );
+    function activatePool(uint128 id, uint128 marketId, uint32 maturityTimestamp) external {
+        Portfolio.load(id).activatePool(marketId, maturityTimestamp);
     }
 
-    function deactivatePool(
-        uint128 id,
-        uint128 marketId,
-        uint32 maturityTimestamp
-    ) external {
-        Portfolio.load(id).deactivatePool(
-            marketId,
-            maturityTimestamp
-        );
+    function deactivatePool(uint128 id, uint128 marketId, uint32 maturityTimestamp) external {
+        Portfolio.load(id).deactivatePool(marketId, maturityTimestamp);
     }
 
     function closeAccount(uint128 id, address poolAddress) external {
         Portfolio.load(id).closeAccount(poolAddress);
     }
 
-    function updatePosition(
-        uint128 id,
-        uint128 marketId,
-        uint32 maturityTimestamp,
-        int256 baseDelta,
-        int256 quoteDelta
-    ) external {
+    function updatePosition(uint128 id, uint128 marketId, uint32 maturityTimestamp, int256 baseDelta, int256 quoteDelta) external {
         Portfolio.Data storage portfolio = Portfolio.load(id);
-        return portfolio.updatePosition(
-            marketId,
-            maturityTimestamp,
-            baseDelta,
-            quoteDelta
-        );
+        return portfolio.updatePosition(marketId, maturityTimestamp, baseDelta, quoteDelta);
     }
 
-    function settle(
-        uint128 id,
-        uint128 marketId,
-        uint32 maturityTimestamp
-    ) external returns (int256 settlementCashflow) {
+    function settle(uint128 id, uint128 marketId, uint32 maturityTimestamp) external returns (int256 settlementCashflow) {
         Portfolio.Data storage portfolio = Portfolio.load(id);
-        return portfolio.settle(
-            marketId,
-            maturityTimestamp
-        );
+        return portfolio.settle(marketId, maturityTimestamp);
     }
 
     function updateCache(uint128 marketId, uint32 maturityTimestamp) external {
@@ -115,20 +77,17 @@ contract ExposePortfolio {
         uint128 id,
         uint128 marketId,
         uint32 maturityTimestamp
-    ) external returns (Position.Data memory position){
+    )
+        external
+        returns (Position.Data memory position)
+    {
         Portfolio.Data storage portfolio = Portfolio.load(id);
         position = portfolio.positions[marketId][maturityTimestamp];
     }
 
-    function isActiveMarketAndMaturity(
-        uint128 id,
-        uint128 marketId,
-        uint32 maturityTimestamp
-    ) external returns (bool){
+    function isActiveMarketAndMaturity(uint128 id, uint128 marketId, uint32 maturityTimestamp) external returns (bool) {
         Portfolio.Data storage portfolio = Portfolio.load(id);
-        return portfolio.activeMarketsAndMaturities.contains(
-            ( marketId << 32 ) | maturityTimestamp
-        );
+        return portfolio.activeMarketsAndMaturities.contains((marketId << 32) | maturityTimestamp);
     }
 }
 
@@ -154,9 +113,7 @@ contract PortfolioTest is Test {
         mockPool = new MockPool();
         mockRateOracle = new MockRateOracle();
 
-        PoolConfiguration.set(
-            PoolConfiguration.Data({poolAddress: address(mockPool)})
-        );
+        PoolConfiguration.set(PoolConfiguration.Data({ poolAddress: address(mockPool) }));
         maturityTimestamp = currentTimestamp + ONE_YEAR;
 
         portfolio = new ExposePortfolio();
@@ -182,21 +139,9 @@ contract PortfolioTest is Test {
         uint256 gwap1 = 0.3e18; // 30% -> 1.3 * base
         uint256 gwap2 = 0.05e18; // 5% ->1 + (0.05 * 1/2) * base
 
-        portfolio.updatePosition(
-            accountId,
-            marketId,
-            maturityTimestamp1,
-            1000 * 1e18,
-            500 * 1e18
-        );
+        portfolio.updatePosition(accountId, marketId, maturityTimestamp1, 1000 * 1e18, 500 * 1e18);
 
-        portfolio.updatePosition(
-            accountId,
-            marketId,
-            maturityTimestamp2,
-            100 * 1e18,
-            20 * 1e18
-        );
+        portfolio.updatePosition(accountId, marketId, maturityTimestamp2, 100 * 1e18, 20 * 1e18);
         mockPool.setDatedIRSGwap(marketId, maturityTimestamp1, gwap1);
         mockPool.setDatedIRSGwap(marketId, maturityTimestamp2, gwap2);
 
@@ -212,7 +157,7 @@ contract PortfolioTest is Test {
         uint32 maturityTimestamp2 = currentTimestamp + 31540000 / 2;
         uint256 liqudityIndex = 1e27;
         uint256 gwap1 = 0.3e18;
-        uint256 gwap2 = 0.05e18; 
+        uint256 gwap2 = 0.05e18;
 
         portfolio.activatePool(accountId, marketId, maturityTimestamp1);
         portfolio.activatePool(accountId, marketId, maturityTimestamp2);
@@ -240,16 +185,10 @@ contract PortfolioTest is Test {
         uint32 maturityTimestamp2 = currentTimestamp + 31540000 / 2;
         uint256 liqudityIndex = 1e27;
         uint256 gwap1 = 0.3e18;
-        uint256 gwap2 = 0.05e18; 
+        uint256 gwap2 = 0.05e18;
 
         // trader position
-        portfolio.updatePosition(
-            accountId,
-            marketId,
-            maturityTimestamp1,
-            1000 * 1e18,
-            500 * 1e18
-        );
+        portfolio.updatePosition(accountId, marketId, maturityTimestamp1, 1000 * 1e18, 500 * 1e18);
 
         // LP position
         portfolio.activatePool(accountId, marketId, maturityTimestamp2);
@@ -275,13 +214,7 @@ contract PortfolioTest is Test {
 
     function test_CreateNewPosition() public {
         uint32 maturityTimestamp = currentTimestamp + 2;
-        portfolio.updatePosition(
-            accountId,
-            100,
-            maturityTimestamp,
-            10,
-            20
-        );
+        portfolio.updatePosition(accountId, 100, maturityTimestamp, 10, 20);
 
         Position.Data memory position = portfolio.getPositionData(accountId, marketId, maturityTimestamp);
 
@@ -295,13 +228,7 @@ contract PortfolioTest is Test {
         test_CreateNewPosition();
 
         uint32 maturityTimestamp = currentTimestamp + 2;
-        portfolio.updatePosition(
-            accountId,
-            100,
-            maturityTimestamp,
-            10,
-            20
-        );
+        portfolio.updatePosition(accountId, 100, maturityTimestamp, 10, 20);
 
         Position.Data memory position = portfolio.getPositionData(accountId, marketId, maturityTimestamp);
 
@@ -314,14 +241,7 @@ contract PortfolioTest is Test {
         test_CreateNewPosition();
         uint32 maturityTimestamp = currentTimestamp + 2;
         vm.expectCall(
-            address(mockPool),
-            0,
-            abi.encodeWithSelector(
-                mockPool.executeDatedTakerOrder.selector,
-                marketId,
-                maturityTimestamp,
-                -10
-            )
+            address(mockPool), 0, abi.encodeWithSelector(mockPool.executeDatedTakerOrder.selector, marketId, maturityTimestamp, -10)
         );
         portfolio.closeAccount(accountId, address(mockPool));
     }
@@ -331,7 +251,7 @@ contract PortfolioTest is Test {
         uint32 maturityTimestamp = currentTimestamp + 2;
 
         vm.warp(maturityTimestamp + 1);
-        
+
         mockRateOracle.setLastUpdatedIndex(1e27);
         portfolio.updateCache(marketId, maturityTimestamp);
 
@@ -364,15 +284,11 @@ contract PortfolioTest is Test {
 
         uint32 maturityTimestamp = currentTimestamp + 2;
         mockRateOracle.setLastUpdatedIndex(1e27);
-        
+
         vm.warp(maturityTimestamp + 1);
         portfolio.updateCache(marketId, maturityTimestamp);
 
-        int256 settlementCashflow = portfolio.settle(
-            accountId,
-            100,
-            maturityTimestamp
-        );
+        int256 settlementCashflow = portfolio.settle(accountId, 100, maturityTimestamp);
 
         Position.Data memory position = portfolio.getPositionData(accountId, marketId, maturityTimestamp);
 
@@ -384,11 +300,8 @@ contract PortfolioTest is Test {
     function test_AnnualizedExposureFactorBeforeMaturity() public {
         uint32 maturityTimestamp = currentTimestamp + 31540000;
         mockRateOracle.setLastUpdatedIndex(1e27);
-        
-        int256 factor = portfolio.annualizedExposureFactor(
-            marketId,
-            maturityTimestamp
-        );
+
+        int256 factor = portfolio.annualizedExposureFactor(marketId, maturityTimestamp);
 
         assertEq(factor, 1e18);
     }
@@ -397,11 +310,8 @@ contract PortfolioTest is Test {
         uint32 maturityTimestamp = currentTimestamp - 1;
         mockRateOracle.setLastUpdatedIndex(1e27);
         portfolio.updateCache(marketId, maturityTimestamp);
-        
-        int256 factor = portfolio.annualizedExposureFactor(
-            marketId,
-            maturityTimestamp
-        );
+
+        int256 factor = portfolio.annualizedExposureFactor(marketId, maturityTimestamp);
 
         assertEq(factor, 0);
     }
@@ -409,20 +319,11 @@ contract PortfolioTest is Test {
     function test_AccountAnnualizedExposureTaker() public {
         uint32 maturityTimestamp = currentTimestamp + 31540000;
 
-        portfolio.updatePosition(
-            accountId,
-            100,
-            maturityTimestamp,
-            10,
-            20
-        );
+        portfolio.updatePosition(accountId, 100, maturityTimestamp, 10, 20);
 
         mockRateOracle.setLastUpdatedIndex(1e27);
-        
-        Account.Exposure[] memory exposures = portfolio.getAccountAnnualizedExposures(
-            accountId,
-            address(mockPool)
-        );
+
+        Account.Exposure[] memory exposures = portfolio.getAccountAnnualizedExposures(accountId, address(mockPool));
 
         assertEq(exposures.length, 1);
         assertEq(exposures[0].marketId, marketId);
@@ -434,21 +335,12 @@ contract PortfolioTest is Test {
     function test_AccountAnnualizedWithPosition() public {
         uint32 maturityTimestamp = currentTimestamp + 31540000;
 
-        portfolio.updatePosition(
-            accountId,
-            100,
-            maturityTimestamp,
-            10,
-            20
-        );
+        portfolio.updatePosition(accountId, 100, maturityTimestamp, 10, 20);
         mockPool.setBalances(15, 21, 2, -3);
 
         mockRateOracle.setLastUpdatedIndex(1e27);
-        
-        Account.Exposure[] memory exposures = portfolio.getAccountAnnualizedExposures(
-            accountId,
-            address(mockPool)
-        );
+
+        Account.Exposure[] memory exposures = portfolio.getAccountAnnualizedExposures(accountId, address(mockPool));
 
         assertEq(exposures.length, 1);
         assertEq(exposures[0].marketId, marketId);

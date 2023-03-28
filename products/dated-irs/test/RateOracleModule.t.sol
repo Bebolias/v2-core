@@ -12,6 +12,7 @@ contract RateOracleManagerTest is Test {
     using { unwrap } for UD60x18;
 
     RateOracleManager rateOracleManager;
+
     using RateOracleReader for RateOracleReader.Data;
 
     event RateOracleRegistered(uint128 indexed marketId, address indexed oracleAddress);
@@ -27,7 +28,7 @@ contract RateOracleManagerTest is Test {
         maturityTimestamp = block.timestamp + 3139000;
         rateOracleManager.registerVariableOracle(100, address(mockRateOracle));
     }
-    
+
     function test_InitRegisterVariableOracle() public {
         // expect RateOracleRegistered event
         vm.expectEmit(true, true, false, true);

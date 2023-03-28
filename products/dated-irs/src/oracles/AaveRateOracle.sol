@@ -6,7 +6,7 @@ import "../interfaces/IRateOracle.sol";
 import "../externalInterfaces/IAaveV3LendingPool.sol";
 import "@voltz-protocol/core/src/utils/contracts/helpers/Time.sol";
 // import "../rate_oracles/CompoundingRateOracle.sol";
-import {UD60x18, ud, unwrap} from "@prb/math/UD60x18.sol";
+import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
 contract AaveRateOracle is IRateOracle {
     IAaveV3LendingPool public aaveLendingPool;
@@ -48,8 +48,11 @@ contract AaveRateOracle is IRateOracle {
         UD60x18 atOrAfterIndex,
         uint256 atOrAfterTimestampWad,
         uint256 queryTimestampWad
-    ) public pure returns (UD60x18 interpolatedIndex) {
-
+    )
+        public
+        pure
+        returns (UD60x18 interpolatedIndex)
+    {
         require(queryTimestampWad > beforeTimestampWad, "Unordered timestamps");
 
         if (atOrAfterTimestampWad == queryTimestampWad) {
@@ -60,10 +63,9 @@ contract AaveRateOracle is IRateOracle {
 
         // TODO: fix calculation to account for compounding (is there a better way than calculating an APY and applying it?)
         UD60x18 totalDelta = atOrAfterIndex.sub(beforeIndex); // this does not allow negative rates
-        
-        UD60x18 proportionOfPeriodElapsed = ud(queryTimestampWad - beforeTimestampWad).div(
-            ud(atOrAfterTimestampWad - beforeTimestampWad)
-        );
+
+        UD60x18 proportionOfPeriodElapsed =
+            ud(queryTimestampWad - beforeTimestampWad).div(ud(atOrAfterTimestampWad - beforeTimestampWad));
         return proportionOfPeriodElapsed.mul(totalDelta).add(beforeIndex);
     }
 }

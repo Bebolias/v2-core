@@ -21,7 +21,10 @@ contract AaveRateOracleTest is Test {
     function setUp() public virtual {
         mockLendingPool = new MockAaveLendingPool();
         mockLendingPool.setReserveNormalizedIncome(TEST_UNDERLYING, initValue);
-        rateOracle = new AaveRateOracle(mockLendingPool, TEST_UNDERLYING_ADDRESS);
+        rateOracle = new AaveRateOracle(
+            mockLendingPool,
+            TEST_UNDERLYING_ADDRESS
+        );
     }
 
     function test_SetIndexInMock() public {
@@ -99,44 +102,40 @@ contract AaveRateOracleTest is Test {
     //             5e16 // 5% error
     //         );
     //     }
-        
+
     // }
 
     /**
-    * @dev should fail in the following cases:
-    * - give a negative index if before & at values are inverted (time & index)
-    * - 
-    */
+     * @dev should fail in the following cases:
+     * - give a negative index if before & at values are inverted (time & index)
+     * -
+     */
     function testFuzz_RevertWhen_InterpolateIndexValueWithUnorderedValues(
         UD60x18 beforeIndex,
         uint256 beforeTimestamp,
         UD60x18 atOrAfterIndex,
         uint256 atOrAfterTimestamp,
         uint256 queryTimestamp
-    ) public {
+    )
+        public
+    {
         vm.expectRevert();
         vm.assume(atOrAfterTimestamp != queryTimestamp);
         vm.assume(
-            beforeIndex.gt(atOrAfterIndex) ||
-            beforeTimestamp >= atOrAfterTimestamp ||
-            (queryTimestamp > atOrAfterTimestamp || queryTimestamp <= beforeTimestamp)
+            beforeIndex.gt(atOrAfterIndex) || beforeTimestamp >= atOrAfterTimestamp
+                || (queryTimestamp > atOrAfterTimestamp || queryTimestamp <= beforeTimestamp)
         );
 
-        UD60x18 index = rateOracle.interpolateIndexValue(
-            beforeIndex,
-            beforeTimestamp,
-            atOrAfterIndex, 
-            atOrAfterTimestamp,
-            queryTimestamp
-        );
+        UD60x18 index =
+            rateOracle.interpolateIndexValue(beforeIndex, beforeTimestamp, atOrAfterIndex, atOrAfterTimestamp, queryTimestamp);
     }
 
     function test_SetNonZeroIndexInMock() public {
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        vm.warp(block.timestamp + 10000);// TODO: not sure how this behaves, assuming it starts a new node per test
+        vm.warp(block.timestamp + 10000); // TODO: not sure how this behaves, assuming it starts a new node per test
         assertApproxEqRel(
             mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS),
-            INDEX_AFTER_SET_TIME * 1e9, 
+            INDEX_AFTER_SET_TIME * 1e9,
             1e7 // 0.000000001% error
         );
     }
@@ -161,9 +160,7 @@ contract AaveRateOracleTest is Test {
         vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
         vm.warp(block.timestamp + timePassed);
-        assertTrue(
-            mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS) >= initValue.unwrap()
-        );
+        assertTrue(mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS) >= initValue.unwrap());
     }
 
     function testFuzz_NonZeroCurrentIndexAfterTimePasses(uint256 factorPerSecond, uint16 timePassed) public {
@@ -186,5 +183,4 @@ contract AaveRateOracleTest is Test {
         assertTrue(index.gte(initValue));
         assertEq(time, block.timestamp);
     }
-
 }

@@ -5,7 +5,6 @@ import "@voltz-protocol/core/src/utils/contracts/interfaces/IERC165.sol";
 import "../../src/interfaces/IPool.sol";
 
 contract MockPool is IPool {
-
     int256 baseBalancePool;
     int256 quoteBalancePool;
     int256 unfilledBaseLong;
@@ -22,7 +21,8 @@ contract MockPool is IPool {
         int256 baseAmount
     )
         external
-        returns (int256 executedBaseAmount, int256 executedQuoteAmount){
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount)
+    {
         executedBaseAmount = 0;
         executedQuoteAmount = 0;
     }
@@ -32,7 +32,9 @@ contract MockPool is IPool {
         int256 _quoteBalancePool,
         int256 _unfilledBaseLong,
         int256 _unfilledBaseShort
-    ) external {
+    )
+        external
+    {
         baseBalancePool = _baseBalancePool;
         quoteBalancePool = _quoteBalancePool;
         unfilledBaseLong = _unfilledBaseLong;
@@ -46,8 +48,9 @@ contract MockPool is IPool {
     )
         external
         view
-        returns (int256, int256) {
-            return (baseBalancePool, quoteBalancePool);
+        returns (int256, int256)
+    {
+        return (baseBalancePool, quoteBalancePool);
     }
 
     function getAccountUnfilledBases(
@@ -57,16 +60,17 @@ contract MockPool is IPool {
     )
         external
         view
-        returns (int256, int256) {
-            return (unfilledBaseLong, unfilledBaseShort);
+        returns (int256, int256)
+    {
+        return (unfilledBaseLong, unfilledBaseShort);
     }
 
     function getDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp) external view returns (uint256) {
-        return datedIRSGwaps[marketId << 32 | maturityTimestamp];
+        return datedIRSGwaps[(marketId << 32) | maturityTimestamp];
     }
 
     function setDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp, uint256 _datedIRSGwap) external {
-        datedIRSGwaps[marketId << 32 | maturityTimestamp] = _datedIRSGwap;
+        datedIRSGwaps[(marketId << 32) | maturityTimestamp] = _datedIRSGwap;
     }
 
     function supportsInterface(bytes4 interfaceID) external view returns (bool) {
