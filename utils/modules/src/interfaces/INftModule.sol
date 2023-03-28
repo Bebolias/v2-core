@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "./IERC721Enumerable.sol";
+import "@voltz-protocol/util-contracts/src/interfaces/IERC721Enumerable.sol";
 
 /**
  * @title Module wrapping an ERC721 token implementation.

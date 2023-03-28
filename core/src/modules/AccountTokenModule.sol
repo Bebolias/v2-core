@@ -3,8 +3,8 @@ pragma solidity >=0.8.13;
 
 import "../interfaces/IAccountTokenModule.sol";
 import "../interfaces/IAccountModule.sol";
-import "../utils/contracts/helpers/SafeCast.sol";
-import "../utils/modules/modules/NftModule.sol";
+import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
+import "@voltz-protocol/util-modules/src/modules/NftModule.sol";
 
 /**
  * @title Account Token

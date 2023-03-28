@@ -3,9 +3,9 @@ pragma solidity >=0.8.13;
 
 import "../storage/Account.sol";
 import "../storage/ProtocolRiskConfiguration.sol";
-import "../utils/contracts//errors/ParameterError.sol";
+import "@voltz-protocol/util-contracts/src/errors/ParameterError.sol";
 import "../interfaces/ILiquidationModule.sol";
-import "../utils/contracts//helpers/SafeCast.sol";
+import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "../storage/Collateral.sol";
 
 /**

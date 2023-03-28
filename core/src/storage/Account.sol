@@ -4,8 +4,8 @@ pragma solidity >=0.8.13;
 import "./MarketRiskConfiguration.sol";
 import "./ProtocolRiskConfiguration.sol";
 import "./AccountRBAC.sol";
-import "../utils/contracts//helpers/SafeCast.sol";
-import "../utils/contracts//helpers/SetUtil.sol";
+import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
+import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import "./Collateral.sol";
 import "./Product.sol";
 

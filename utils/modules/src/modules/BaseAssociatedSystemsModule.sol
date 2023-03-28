@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../../../contracts/src/errors/InitError.sol";
-import "../../../contracts/src/storage/OwnableStorage.sol";
-import "../../../contracts/src/proxy/UUPSProxyWithOwner.sol";
-import "../../../contracts/src/interfaces/IUUPSImplementation.sol";
+import "@voltz-protocol/util-contracts/src/errors/InitError.sol";
+import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
+import "@voltz-protocol/util-contracts/src/proxy/UUPSProxyWithOwner.sol";
+import "@voltz-protocol/util-contracts/src/interfaces/IUUPSImplementation.sol";
 import "../interfaces/IBaseAssociatedSystemsModule.sol";
 import "../interfaces/INftModule.sol";
 import "../storage/AssociatedSystem.sol";

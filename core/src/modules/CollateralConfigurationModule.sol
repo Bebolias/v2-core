@@ -2,9 +2,9 @@
 pragma solidity >=0.8.13;
 
 import "../interfaces/ICollateralConfigurationModule.sol";
-import "../utils/contracts//helpers/SetUtil.sol";
+import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import "../storage/CollateralConfiguration.sol";
-import "../utils/contracts//storage/OwnableStorage.sol";
+import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 
 /**
  * @title Module for configuring system wide collateral.

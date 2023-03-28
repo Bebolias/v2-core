@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 import "../interfaces/IRiskConfigurationModule.sol";
 import "../storage/MarketRiskConfiguration.sol";
 import "../storage/ProtocolRiskConfiguration.sol";
-import "../utils/contracts/storage/OwnableStorage.sol";
+import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 
 /**
  * @title Module for configuring protocol-wide and product+market level risk parameters

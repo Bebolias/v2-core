@@ -23,6 +23,9 @@ This is a monorepo with the following folder structure and packages:
     └── router                   // Cannon plugin that merges multiple modules into a router contract.
 ```
 
+# Useful Yarn Workspaces Commands
+- Example: how to add an workspace dependency into another: `yarn workspace @voltz-protocol/core add --dev @voltz-protocol/util-contracts`.
+
 # Priorities
 
 **P1**

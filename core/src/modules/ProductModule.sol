@@ -7,9 +7,9 @@ import "../interfaces/ICollateralModule.sol";
 import "../storage/Product.sol";
 import "../storage/ProductCreator.sol";
 import "../storage/MarketFeeConfiguration.sol";
-import "../utils/modules/storage/AssociatedSystem.sol";
-import "../utils/contracts//helpers/ERC165Helper.sol";
-import "../utils/contracts//helpers/SafeCast.sol";
+import "@voltz-protocol/util-modules/src/storage/AssociatedSystem.sol";
+import "@voltz-protocol/util-contracts/src/helpers/ERC165Helper.sol";
+import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 
 import { UD60x18, unwrap, mul } from "@prb/math/UD60x18.sol";
 

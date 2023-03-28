@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../utils/modules/modules/BaseAssociatedSystemsModule.sol";
+import "@voltz-protocol/util-modules/src/modules/BaseAssociatedSystemsModule.sol";
 
 /**
  * @title Module for connecting to other systems.

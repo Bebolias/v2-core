@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../utils/contracts//helpers/SetUtil.sol";
-import "../utils/contracts/errors/AddressError.sol";
+import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
+import "@voltz-protocol/util-contracts/src/errors/AddressError.sol";
 
 /**
  * @title Object for tracking an accounts permissions (role based access control).

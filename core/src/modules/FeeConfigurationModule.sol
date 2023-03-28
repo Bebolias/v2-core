@@ -1,6 +1,6 @@
 pragma solidity >=0.8.13;
 
-import "../utils/contracts/storage/OwnableStorage.sol";
+import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 import "../interfaces/IFeeConfigurationModule.sol";
 import "../storage/MarketFeeConfiguration.sol";
 

@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "../utils/modules/modules/BaseUpgradeModule.sol";
+import "@voltz-protocol/util-modules/src/modules/BaseUpgradeModule.sol";
 
 /**
  * @title Module UUPS type upgradeability.

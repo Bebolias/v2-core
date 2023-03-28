@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "./IERC20.sol";
+import "@voltz-protocol/util-contracts/src/interfaces/IERC20.sol";
 /**
  * @title Module wrapping an ERC20 token implementation.
  */

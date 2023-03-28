@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "./initializable/InitializableMixin.sol";
-import "../errors/AddressError.sol";
-import "../helpers/AddressUtil.sol";
-import "../storage/OwnableStorage.sol";
+import "@voltz-protocol/util-contracts/src/initializable/InitializableMixin.sol";
+import "@voltz-protocol/util-contracts/src/errors/AddressError.sol";
+import "@voltz-protocol/util-contracts/src/helpers/AddressUtil.sol";
+import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 import "../storage/Initialized.sol";
-import "./token/ERC721Enumerable.sol";
+import "@voltz-protocol/util-contracts/src/token/ERC721Enumerable.sol";
 import "../interfaces/INftModule.sol";
 
 /**

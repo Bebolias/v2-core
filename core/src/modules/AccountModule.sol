@@ -3,7 +3,7 @@ pragma solidity >=0.8.13;
 
 import "../interfaces/IAccountTokenModule.sol";
 import "../interfaces/IAccountModule.sol";
-import "../utils/modules/storage/AssociatedSystem.sol";
+import "@voltz-protocol/util-modules/src/storage/AssociatedSystem.sol";
 import "../storage/Account.sol";
 import "../storage/AccountRBAC.sol";
 
