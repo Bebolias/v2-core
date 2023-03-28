@@ -16,13 +16,25 @@ contract ExposedProduct is CoreState {
         }
     }
 
-    function onlyProductOwner(uint128 productId, address caller) external view {
-        Product.onlyProductOwner(productId, caller);
+    function getProductData(uint128 id) external pure returns (Product.Data memory) {
+        Product.Data memory product = Product.load(id);
+        return product;
+    }
+
+    function onlyProductAddress(uint128 productId, address caller) external view {
+        Product.onlyProductAddress(productId, caller);
     }
 
     function getAccountUnrealizedPnL(uint128 productId, uint128 accountId) external view returns (int256 accountUnrealizedPnL) {
         Product.Data storage product = Product.load(productId);
         return product.getAccountUnrealizedPnL(accountId);
+    }
+
+    function baseToAnnualizedExposure(uint128 productId, int256[] memory baseAmounts, uint128 marketId, uint256 maturityTimestamp) 
+        external view returns (int256[] memory) 
+    {
+        Product.Data storage product = Product.load(productId);
+        return product.baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
     }
 
     function getAccountAnnualizedExposures(
@@ -58,17 +70,33 @@ contract ProductTest is Test {
         assertEq(slot, keccak256(abi.encode("xyz.voltz.Product", productId)));
     }
 
-    function testFuzz_OnlyProductOwner(address otherAddress) public {
-        vm.assume(otherAddress != Constants.PRODUCT_OWNER);
+    function testFuzz_OnlyProductAddress(address otherAddress) public {
+        address productAddress = product.getProductData(productId).productAddress;
 
-        product.onlyProductOwner(productId, Constants.PRODUCT_OWNER);
+        vm.assume(otherAddress != productAddress);
+
+        product.onlyProductAddress(productId, productAddress);
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
-        product.onlyProductOwner(productId, otherAddress);
+        product.onlyProductAddress(productId, otherAddress);
     }
 
     function test_GetAccountUnrealizedPnL() public {
         assertEq(product.getAccountUnrealizedPnL(productId, accountId), 100e18);
+    }
+
+    function test_BaseToAnnualizedExposure() public {
+        int256[] memory baseAmounts = new int256[](1);
+        baseAmounts[0] = 100;
+
+        int256[] memory exposures = product.baseToAnnualizedExposure(productId, baseAmounts, 10, 123000);
+        assertEq(exposures.length, 1);
+        assertEq(exposures[0], 50);
+
+        baseAmounts[0] = 1000;
+        exposures = product.baseToAnnualizedExposure(productId, baseAmounts, 11, 120000);
+        assertEq(exposures.length, 1);
+        assertEq(exposures[0], 250);
     }
 
     function test_GetAnnualizedProductExposures() public {

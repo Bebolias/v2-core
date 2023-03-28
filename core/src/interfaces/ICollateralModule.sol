@@ -7,6 +7,15 @@ pragma solidity >=0.8.13;
  */
 interface ICollateralModule {
     /**
+     * @notice Thrown on deposit when the collateral cap would have been exceeded
+     * @param collateralType The address of the collateral of the unsuccessful deposit
+     * @param collateralCap The cap limit of the collateral
+     * @param currentBalance Protocol's total balance in the collateral type
+     * @param attemptedDeposit The deposit amount of the unsuccessful deposit
+     */
+    error CollateralCapExceeded(address collateralType, uint256 collateralCap, uint256 currentBalance, uint256 attemptedDeposit);
+
+    /**
      * @notice Emitted when `tokenAmount` of collateral of type `collateralType` is deposited to account `accountId` by `sender`.
      * @param accountId The id of the account that deposited collateral.
      * @param collateralType The address of the collateral that was deposited.
@@ -81,6 +90,4 @@ interface ICollateralModule {
      *
      */
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external;
-
-    // todo: distribute fees
 }

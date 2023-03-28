@@ -6,11 +6,11 @@ import "../storage/Account.sol";
 import "../storage/CollateralConfiguration.sol";
 import "../utils/contracts//token/ERC20Helper.sol";
 import "../storage/Collateral.sol";
+
 /**
  * @title Module for managing user collateral.
  * @dev See ICollateralModule.
  */
-
 contract CollateralModule is ICollateralModule {
     using ERC20Helper for address;
     using CollateralConfiguration for CollateralConfiguration.Data;
@@ -27,10 +27,18 @@ contract CollateralModule is ICollateralModule {
         Account.Data storage account = Account.exists(accountId);
         address depositFrom = msg.sender;
         address self = address(this);
+
         uint256 allowance = IERC20(collateralType).allowance(depositFrom, self);
         if (allowance < tokenAmount) {
             revert IERC20.InsufficientAllowance(tokenAmount, allowance);
         }
+
+        uint256 currentBalance = IERC20(collateralType).balanceOf(self);
+        uint256 collateralCap = CollateralConfiguration.load(collateralType).cap;
+        if (collateralCap < currentBalance + tokenAmount) {
+            revert CollateralCapExceeded(collateralType, collateralCap, currentBalance, tokenAmount);
+        }
+
         collateralType.safeTransferFrom(depositFrom, self, tokenAmount);
         account.collaterals[collateralType].increaseCollateralBalance(tokenAmount);
         emit Deposited(accountId, collateralType, tokenAmount, msg.sender);

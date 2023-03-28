@@ -47,6 +47,21 @@ contract MockProduct is IProduct {
         return tmp.returnValues[tmp.start];
     }
 
+    mapping(uint128 => mapping (uint256 => uint256)) internal mockBaseToAnnualizedFactor;
+
+    function mockBaseToAnnualizedExposure(uint128 marketId, uint256 maturityTimestamp, uint256 baseToAnnualizedFactor) public {
+        mockBaseToAnnualizedFactor[marketId][maturityTimestamp] = baseToAnnualizedFactor;
+    }
+
+    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint256 maturityTimestamp) 
+        external view returns (int256[] memory exposures) 
+    {
+        exposures = new int256[](baseAmounts.length);
+        for (uint256 i = 0; i < baseAmounts.length; i += 1) {
+            exposures[i] = baseAmounts[i] * int256(mockBaseToAnnualizedFactor[marketId][maturityTimestamp]) / 1e18;
+        }
+    }
+
     // getAccountAnnualizedExposures mock support
     struct MockAccountAnnualizedExposure {
         mapping(uint256 => Account.Exposure[]) returnValues;

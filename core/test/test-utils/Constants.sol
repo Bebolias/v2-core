@@ -11,4 +11,7 @@ library Constants {
 
     uint256 public constant DEFAULT_TOKEN_0_BALANCE = 10000e18;
     uint256 public constant DEFAULT_TOKEN_1_BALANCE = 10e18;
+
+    uint256 public constant TOKEN_0_CAP = 100000e18;
+    uint256 public constant TOKEN_1_CAP = 1000e18;
 }

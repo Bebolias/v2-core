@@ -143,7 +143,7 @@ contract AccountTest is Test {
         assertEq(slot, accountSlot);
     }
 
-    function testFail_ZeroAccount() public {
+    function testFail_ZeroAccount() public view {
         accounts.exists(0);
     }
 

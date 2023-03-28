@@ -21,7 +21,9 @@ contract CollateralConfigurationModuleTest is Test {
 
     function test_ConfigureCollateral() public {
         CollateralConfiguration.Data memory config =
-            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0});
+            CollateralConfiguration.Data({
+                depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+            });
 
         // Expect CollateralConfigured event
         vm.expectEmit(true, true, true, true, address(collateralConfigurationModule));
@@ -36,13 +38,16 @@ contract CollateralConfigurationModuleTest is Test {
         assertEq(existingConfig.depositingEnabled, config.depositingEnabled);
         assertEq(existingConfig.liquidationReward, config.liquidationReward);
         assertEq(existingConfig.tokenAddress, config.tokenAddress);
+        assertEq(existingConfig.cap, config.cap);
     }
 
     function testFuzz_revertWhen_ConfigureCollateral_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
         CollateralConfiguration.Data memory config =
-            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0});
+            CollateralConfiguration.Data({
+                depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+            });
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
         vm.prank(otherAddress);
@@ -52,12 +57,16 @@ contract CollateralConfigurationModuleTest is Test {
     function test_GetCollateralConfiguration() public {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0})
+            CollateralConfiguration.Data({
+                depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+            })
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1})
+            CollateralConfiguration.Data({
+                depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+            })
         );
 
         CollateralConfiguration.Data memory existingConfig =
@@ -66,6 +75,7 @@ contract CollateralConfigurationModuleTest is Test {
         assertEq(existingConfig.depositingEnabled, false);
         assertEq(existingConfig.liquidationReward, 1e16);
         assertEq(existingConfig.tokenAddress, Constants.TOKEN_1);
+        assertEq(existingConfig.cap, Constants.TOKEN_1_CAP);
     }
 
     function test_GetCollateralConfiguration_Empty() public {
@@ -80,12 +90,16 @@ contract CollateralConfigurationModuleTest is Test {
     function test_GetCollateralConfigurations_All() public {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0})
+            CollateralConfiguration.Data({
+                depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+            })
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1})
+            CollateralConfiguration.Data({
+                depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+            })
         );
 
         CollateralConfiguration.Data[] memory configs = collateralConfigurationModule.getCollateralConfigurations(false);
@@ -95,21 +109,27 @@ contract CollateralConfigurationModuleTest is Test {
         assertEq(configs[0].depositingEnabled, true);
         assertEq(configs[0].liquidationReward, 1e18);
         assertEq(configs[0].tokenAddress, Constants.TOKEN_0);
+        assertEq(configs[0].cap, Constants.TOKEN_0_CAP);
 
         assertEq(configs[1].depositingEnabled, false);
         assertEq(configs[1].liquidationReward, 1e16);
         assertEq(configs[1].tokenAddress, Constants.TOKEN_1);
+        assertEq(configs[1].cap, Constants.TOKEN_1_CAP);
     }
 
     function test_GetCollateralConfigurations_OnlyEnabled() public {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0})
+            CollateralConfiguration.Data({
+                depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+            })
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
-            CollateralConfiguration.Data({depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1})
+            CollateralConfiguration.Data({
+                depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+            })
         );
 
         CollateralConfiguration.Data[] memory configs = collateralConfigurationModule.getCollateralConfigurations(true);
@@ -119,5 +139,6 @@ contract CollateralConfigurationModuleTest is Test {
         assertEq(configs[0].depositingEnabled, true);
         assertEq(configs[0].liquidationReward, 1e18);
         assertEq(configs[0].tokenAddress, Constants.TOKEN_0);
+        assertEq(configs[0].cap, Constants.TOKEN_0_CAP);
     }
 }

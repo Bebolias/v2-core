@@ -58,12 +58,12 @@ interface IRiskConfigurationModule {
         uint128 marketId
     )
         external
-        view
+        pure
         returns (MarketRiskConfiguration.Data memory config);
 
     /**
      * @notice Returns detailed information on protocol-wide risk configuration
      * @return config The configuration object describing the protocol-wide risk configuration
      */
-    function getProtocolRiskConfiguration() external view returns (ProtocolRiskConfiguration.Data memory config);
+    function getProtocolRiskConfiguration() external pure returns (ProtocolRiskConfiguration.Data memory config);
 }

@@ -5,7 +5,7 @@ pragma solidity >=0.8.13;
  * @title Enables the owner of the ProductProxy to configure the pool address the product is linked to
  */
 library PoolConfiguration {
-    bytes32 private constant _SLOT_POOL_CONFIGURATION = keccak256(abi.encode("xyz.voltz.PoolConfigurationr"));
+    bytes32 private constant _SLOT_POOL_CONFIGURATION = keccak256(abi.encode("xyz.voltz.PoolConfiguration"));
 
     struct Data {
         /**

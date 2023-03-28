@@ -118,12 +118,16 @@ contract CoreState is MockCoreStorage {
 
         // Mock collateral configuration (token 0)
         CollateralConfiguration.set(
-            CollateralConfiguration.Data({depositingEnabled: true, liquidationReward: 0, tokenAddress: Constants.TOKEN_0})
+            CollateralConfiguration.Data({
+                depositingEnabled: true, liquidationReward: 0, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+            })
         );
 
         // Mock collateral configuration (token 1)
         CollateralConfiguration.set(
-            CollateralConfiguration.Data({depositingEnabled: false, liquidationReward: 0, tokenAddress: Constants.TOKEN_1})
+            CollateralConfiguration.Data({
+                depositingEnabled: false, liquidationReward: 0, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+            })
         );
     }
 
@@ -140,6 +144,9 @@ contract CoreState is MockCoreStorage {
             mockExposures[1] = Account.Exposure({marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: -400e18});
 
             products[0].mockGetAccountAnnualizedExposures(100, mockExposures);
+
+            products[0].mockBaseToAnnualizedExposure(10, 123000, 5e17);
+            products[0].mockBaseToAnnualizedExposure(11, 120000, 25e16);
         }
 
         // Mock account (id: 100) unrealized PnL in product (id: 1)
@@ -152,6 +159,8 @@ contract CoreState is MockCoreStorage {
             mockExposures[0] = Account.Exposure({marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: -150e18});
 
             products[1].mockGetAccountAnnualizedExposures(100, mockExposures);
+
+            products[1].mockBaseToAnnualizedExposure(20, 145000, 2e18);
         }
 
         // Mock account (id: 100) unrealized PnL in product (id: 2)

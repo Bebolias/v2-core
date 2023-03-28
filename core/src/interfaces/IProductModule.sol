@@ -44,9 +44,15 @@ interface IProductModule {
     /// @notice attempts to close all the unfilled and filled positions of a given account in a given product (productId)
     function closeAccount(uint128 productId, uint128 accountId) external;
 
-    function propagateTakerOrder(uint128 accountId) external;
+    function propagateTakerOrder(
+        uint128 accountId, uint128 productId, uint128 marketId, 
+        address settlementToken, uint256 annualizedNotional) 
+        external returns (uint256 fee);
 
-    function propagateMakerOrder(uint128 accountId) external;
+    function propagateMakerOrder(
+        uint128 accountId, uint128 productId, uint128 marketId, 
+        address settlementToken, uint256 annualizedNotional) 
+        external returns (uint256 fee);
 
-    function propagateCashflow(uint128 accountId, address quoteToken, int256 amount) external;
+    function propagateCashflow(uint128 accountId, address settlementToken, int256 amount) external;
 }

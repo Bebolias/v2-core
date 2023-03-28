@@ -47,7 +47,11 @@ contract ProductIRSModule is IProductIRSModule {
         IPool pool = IPool(_poolAddress);
         (executedBaseAmount, executedQuoteAmount) = pool.executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount);
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
-        IProductModule(_proxy).propagateTakerOrder(accountId, msg.sender);
+
+        // propagate order
+        address quoteToken = MarketConfiguration.load(marketId).quoteToken;
+        int256 annualizedBaseAmount = baseToAnnualizedExposure([executedBaseAmount], marketId, maturityTimestamp);
+        IProductModule(_proxy).propagateTakerOrder(accountId, _productId, marketId, quoteToken, abs(annualizedBaseAmount));
     }
 
     /**
@@ -77,6 +81,15 @@ contract ProductIRSModule is IProductIRSModule {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address _poolAddress = PoolConfiguration.getPoolAddress();
         return portfolio.getAccountUnrealizedPnL(_poolAddress);
+    }
+
+    /**
+     * @inheritdoc IProduct
+     */
+    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint256 maturityTimestamp) 
+        external view returns (int256[] memory exposures) 
+    {
+        Portfolio.baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
     }
 
     /**

@@ -40,6 +40,10 @@ library CollateralConfiguration {
          * @dev The token address for this collateral type.
          */
         address tokenAddress;
+        /**
+         * @dev Cap which limits the amount of tokens that can be deposited.
+         */
+        uint256 cap;
     }
 
     /**
@@ -81,6 +85,7 @@ library CollateralConfiguration {
         storedConfig.tokenAddress = config.tokenAddress;
         storedConfig.liquidationReward = config.liquidationReward;
         storedConfig.depositingEnabled = config.depositingEnabled;
+        storedConfig.cap = config.cap;
     }
 
     /**

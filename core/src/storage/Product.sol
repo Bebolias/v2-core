@@ -32,8 +32,6 @@ library Product {
         string name;
         /**
          * @dev Creator of the product, which has configuration access rights for the product.
-         *
-         * See onlyProductOwner.
          */
         address owner;
     }
@@ -49,10 +47,10 @@ library Product {
     }
 
     /**
-     * @dev Reverts if the caller is not the owner of the specified product
+     * @dev Reverts if the caller is not the product address of the specified product
      */
-    function onlyProductOwner(uint128 productId, address caller) internal view {
-        if (Product.load(productId).owner != caller) {
+    function onlyProductAddress(uint128 productId, address caller) internal view {
+        if (Product.load(productId).productAddress != caller) {
             revert AccessError.Unauthorized(caller);
         }
     }
@@ -65,6 +63,18 @@ library Product {
      */
     function getAccountUnrealizedPnL(Data storage self, uint128 accountId) internal view returns (int256 accountUnrealizedPnL) {
         return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId);
+    }
+
+    /**
+     * @dev in context of interest rate swaps, base refers to scaled variable tokens (e.g. scaled virtual aUSDC)
+     * @dev in order to derive the annualized exposure of base tokens in quote terms (i.e. USDC), we need to
+     * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
+     * underlying rate oracle (e.g. aUSDC lend rate oracle)
+     */
+    function baseToAnnualizedExposure(Data storage self, int256[] memory baseAmounts, uint128 marketId, uint256 maturityTimestamp) 
+        external view returns (int256[] memory exposures) 
+    {
+        return IProduct(self.productAddress).baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
     }
 
     /**

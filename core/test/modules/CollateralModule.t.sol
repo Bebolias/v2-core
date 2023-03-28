@@ -5,7 +5,16 @@ import "forge-std/Test.sol";
 import "../../src/modules/CollateralModule.sol";
 import "../test-utils/MockCoreStorage.sol";
 
-contract EnhancedCollateralModule is CollateralModule, CoreState { }
+contract EnhancedCollateralModule is CollateralModule, CoreState {
+    function enableDepositing(address tokenAddress) public {
+        CollateralConfiguration.Data memory config = CollateralConfiguration.load(tokenAddress);
+        CollateralConfiguration.set(
+            CollateralConfiguration.Data({
+                depositingEnabled: true, liquidationReward: config.liquidationReward, tokenAddress: tokenAddress, cap: config.cap
+            })
+        );
+    }
+ }
 
 contract CollateralModuleTest is Test {
     using SafeCastU256 for uint256;
@@ -59,6 +68,10 @@ contract CollateralModuleTest is Test {
         uint256 amount = 500e18;
 
         // Mock ERC20 external calls
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+
         vm.mockCall(
             Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), abi.encode(amount)
         );
@@ -169,5 +182,118 @@ contract CollateralModuleTest is Test {
         // Expect revert due to insufficient margin coverage
         vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100));
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
+    }
+
+    function test_revertWhen_CapExceeded_Deposit() public {
+        address depositor = address(1);
+        uint256 amount = Constants.TOKEN_0_CAP + 1;
+
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), abi.encode(amount)
+        );
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, amount),
+            abi.encode()
+        );        
+        vm.prank(depositor);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ICollateralModule.CollateralCapExceeded.selector, Constants.TOKEN_0, Constants.TOKEN_0_CAP, 0, amount
+            )
+        );
+        collateralModule.deposit(100, Constants.TOKEN_0, amount);
+    }
+
+    function test_revertWhen_CapExceeded_MultipleDeposits() public {
+        address depositor = address(1);
+        uint256 amount = Constants.TOKEN_0_CAP / 2;
+
+        // First Deposit
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), abi.encode(amount)
+        );
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, amount),
+            abi.encode()
+        );        
+        vm.prank(depositor);
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Deposited(100, Constants.TOKEN_0, amount, depositor);
+        collateralModule.deposit(100, Constants.TOKEN_0, amount);
+
+        // Second Deposit
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(amount)
+        );
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), abi.encode(amount+1)
+        );
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, amount+1),
+            abi.encode()
+        );        
+        vm.prank(depositor);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ICollateralModule.CollateralCapExceeded.selector, Constants.TOKEN_0, Constants.TOKEN_0_CAP, amount, amount + 1
+            )
+        );
+        collateralModule.deposit(100, Constants.TOKEN_0, amount + 1);
+    }
+
+    function test_Deposit_DifferentCaps() public {
+        address depositor = address(1);
+
+        // Deposit Token 0
+        uint256 amount = Constants.TOKEN_0_CAP;
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), abi.encode(amount)
+        );
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, amount),
+            abi.encode()
+        );
+
+        vm.prank(depositor);
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Deposited(100, Constants.TOKEN_0, amount, depositor);
+        collateralModule.deposit(100, Constants.TOKEN_0, amount);
+
+        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE + amount);
+
+        // Deposit Token 1
+        collateralModule.enableDepositing(Constants.TOKEN_1);
+        amount = Constants.TOKEN_1_CAP;
+        vm.mockCall(
+            Constants.TOKEN_1, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+        vm.mockCall(
+            Constants.TOKEN_1, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), abi.encode(amount)
+        );
+        vm.mockCall(
+            Constants.TOKEN_1,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, amount),
+            abi.encode()
+        );
+
+        vm.prank(depositor);
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Deposited(100, Constants.TOKEN_1, amount, depositor);
+        collateralModule.deposit(100, Constants.TOKEN_1, amount);
+
+        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_1), Constants.DEFAULT_TOKEN_1_BALANCE + amount);
     }
 }
