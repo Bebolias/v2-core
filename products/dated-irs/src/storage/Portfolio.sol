@@ -25,7 +25,7 @@ library Portfolio {
     /**
      * @notice Emitted when attempting to settle before maturity
      */
-    error NoSettlementsBeforeMaturity(uint128 marketId, uint32 maturityTimestamp, uint256 accountId);
+    error SettlementBeforeMaturity(uint128 marketId, uint32 maturityTimestamp, uint256 accountId);
 
     struct Data {
         /**
@@ -170,7 +170,7 @@ library Portfolio {
             pool.closePosition(marketId, maturityTimestamp, self.accountId);
 
             if (position.baseBalance == 0 && position.quoteBalance == 0) {
-                self.deactivatePool(marketId, maturityTimestamp);
+                self.deactivateMarketMaturity(marketId, maturityTimestamp);
             }
         }
     }
@@ -192,7 +192,7 @@ library Portfolio {
 
         // register active market
         if (position.baseBalance != 0 || position.quoteBalance != 0) {
-            self.activatePool(marketId, maturityTimestamp);
+            self.activateMarketMaturity(marketId, maturityTimestamp);
         }
     }
 
@@ -201,7 +201,7 @@ library Portfolio {
      */
     function settle(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal returns (int256 settlementCashflow) {
         if ( maturityTimestamp < uint32(block.timestamp)) {
-            revert NoSettlementsBeforeMaturity(marketId, maturityTimestamp, self.accountId);
+            revert SettlementBeforeMaturity(marketId, maturityTimestamp, self.accountId);
         }
 
         Position.Data storage position = self.positions[marketId][maturityTimestamp];
@@ -209,7 +209,7 @@ library Portfolio {
         // TODO: use PRB math
         int256 liquidityIndexMaturity = RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp).unwrap().toInt();
 
-        self.deactivatePool(marketId, maturityTimestamp);
+        self.deactivateMarketMaturity(marketId, maturityTimestamp);
 
         // todo: replace pool configuration
         address _poolAddress = PoolConfiguration.getPoolAddress();
@@ -225,7 +225,7 @@ library Portfolio {
      * @dev set market and maturity as active
      * note this can also be called by the pool when a position is intitalised
      */
-    function activatePool(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal {
+    function activateMarketMaturity(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal {
         // todo: check if market/maturity exist
         uint256 marketMaturityPacked = pack(marketId, maturityTimestamp);
         if (!self.activeMarketsAndMaturities.contains(marketMaturityPacked)) {
@@ -237,7 +237,7 @@ library Portfolio {
      * @dev set market and maturity as inactive
      * note this can also be called by the pool when a position is settled
      */
-    function deactivatePool(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal {
+    function deactivateMarketMaturity(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal {
         uint256 marketMaturityPacked = pack(marketId, maturityTimestamp);
         if (self.activeMarketsAndMaturities.contains(marketMaturityPacked)) {
             self.activeMarketsAndMaturities.remove(marketMaturityPacked);

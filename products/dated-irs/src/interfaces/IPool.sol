@@ -8,9 +8,6 @@ interface IPool is IERC165 {
     /// @notice returns a human-readable name for a given pool
     function name(uint128 poolId) external view returns (string memory);
 
-    /// @dev note, a pool needs to have this interface to enable account closures initiated by products
-    /// @dev in the future -> executePerpetualTakerOrder(uint128 marketId, int256 baseAmount)
-    /// for products that don't have maturities
     function executeDatedTakerOrder(
         uint128 marketId,
         uint32 maturityTimestamp,

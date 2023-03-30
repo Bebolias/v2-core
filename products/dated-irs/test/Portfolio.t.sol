@@ -41,12 +41,12 @@ contract ExposePortfolio {
         return Portfolio.annualizedExposureFactor(marketId, maturityTimestamp);
     }
 
-    function activatePool(uint128 id, uint128 marketId, uint32 maturityTimestamp) external {
-        Portfolio.load(id).activatePool(marketId, maturityTimestamp);
+    function activateMarketMaturity(uint128 id, uint128 marketId, uint32 maturityTimestamp) external {
+        Portfolio.load(id).activateMarketMaturity(marketId, maturityTimestamp);
     }
 
-    function deactivatePool(uint128 id, uint128 marketId, uint32 maturityTimestamp) external {
-        Portfolio.load(id).deactivatePool(marketId, maturityTimestamp);
+    function deactivateMarketMaturity(uint128 id, uint128 marketId, uint32 maturityTimestamp) external {
+        Portfolio.load(id).deactivateMarketMaturity(marketId, maturityTimestamp);
     }
 
     function closeAccount(uint128 id, address poolAddress) external {
@@ -159,8 +159,8 @@ contract PortfolioTest is Test {
         uint256 gwap1 = 0.3e18;
         uint256 gwap2 = 0.05e18;
 
-        portfolio.activatePool(accountId, marketId, maturityTimestamp1);
-        portfolio.activatePool(accountId, marketId, maturityTimestamp2);
+        portfolio.activateMarketMaturity(accountId, marketId, maturityTimestamp1);
+        portfolio.activateMarketMaturity(accountId, marketId, maturityTimestamp2);
 
         // same for both positions
         mockPool.setBalances(
@@ -191,7 +191,7 @@ contract PortfolioTest is Test {
         portfolio.updatePosition(accountId, marketId, maturityTimestamp1, 1000 * 1e18, 500 * 1e18);
 
         // LP position
-        portfolio.activatePool(accountId, marketId, maturityTimestamp2);
+        portfolio.activateMarketMaturity(accountId, marketId, maturityTimestamp2);
         // same for both positions
         mockPool.setBalances(
             1500 * 1e18, // _baseBalancePool
@@ -264,18 +264,18 @@ contract PortfolioTest is Test {
     }
 
     function test_ActivatePool() public {
-        portfolio.activatePool(accountId, marketId, 21988);
+        portfolio.activateMarketMaturity(accountId, marketId, 21988);
         assertTrue(portfolio.isActiveMarketAndMaturity(accountId, marketId, 21988));
     }
 
     function test_DeactivateActivePool() public {
-        portfolio.activatePool(accountId, marketId, 21988);
-        portfolio.deactivatePool(accountId, marketId, 21988);
+        portfolio.activateMarketMaturity(accountId, marketId, 21988);
+        portfolio.deactivateMarketMaturity(accountId, marketId, 21988);
         assertFalse(portfolio.isActiveMarketAndMaturity(accountId, marketId, 21988));
     }
 
     function test_DeactivateInactivePool() public {
-        portfolio.deactivatePool(accountId, marketId, 21988);
+        portfolio.deactivateMarketMaturity(accountId, marketId, 21988);
         assertFalse(portfolio.isActiveMarketAndMaturity(accountId, marketId, 21988));
     }
 
