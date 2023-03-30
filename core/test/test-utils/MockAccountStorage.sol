@@ -19,14 +19,12 @@ contract MockAccountStorage {
         uint128 accountId,
         address owner,
         CollateralBalance[] memory balances,
-        uint128[] memory activeProductIds,
-        address settlementToken
+        uint128[] memory activeProductIds
     )
         public
     {
         // Mock account
-        Account.Data storage account = Account.create(accountId, owner);
-        account.settlementToken = settlementToken;
+        Account.create(accountId, owner);
 
         for (uint256 i = 0; i < balances.length; i++) {
             changeAccountBalance(accountId, balances[i]);

@@ -52,7 +52,7 @@ contract CollateralModule is ICollateralModule {
 
         account.collaterals[collateralType].decreaseCollateralBalance(tokenAmount);
 
-        account.imCheck();
+        account.imCheck(collateralType);
 
         collateralType.safeTransfer(msg.sender, tokenAmount);
 
@@ -91,7 +91,9 @@ contract CollateralModule is ICollateralModule {
     /**
      * @inheritdoc ICollateralModule
      */
-    function getTotalAccountValue(uint128 accountId) external view override returns (int256 totalAccountValue) {
-        return Account.load(accountId).getTotalAccountValue();
+    function getTotalAccountValue(uint128 accountId, address collateralType) 
+        external view override returns (int256 totalAccountValue) 
+    {
+        return Account.load(accountId).getTotalAccountValue(collateralType);
     }
 }

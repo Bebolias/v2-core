@@ -21,12 +21,13 @@ interface IProductModule {
     event ProductRegistered(address indexed product, uint128 indexed productId, address indexed sender);
 
     /// @notice returns the unrealized pnl in quote token terms for account
-    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId) external returns (int256);
+    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType) external returns (int256);
 
     /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
     function getAccountAnnualizedExposures(
         uint128 productId,
-        uint128 accountId
+        uint128 accountId,
+        address collateralType
     )
         external
         returns (Account.Exposure[] memory exposures);
@@ -42,17 +43,17 @@ interface IProductModule {
     function registerProduct(address product, string memory name) external returns (uint128 newProductId);
 
     /// @notice attempts to close all the unfilled and filled positions of a given account in a given product (productId)
-    function closeAccount(uint128 productId, uint128 accountId) external;
+    function closeAccount(uint128 productId, uint128 accountId, address collateralType) external;
 
     function propagateTakerOrder(
         uint128 accountId, uint128 productId, uint128 marketId, 
-        address settlementToken, uint256 annualizedNotional) 
+        address collateralType, uint256 annualizedNotional) 
         external returns (uint256 fee);
 
     function propagateMakerOrder(
         uint128 accountId, uint128 productId, uint128 marketId, 
-        address settlementToken, uint256 annualizedNotional) 
+        address collateralType, uint256 annualizedNotional) 
         external returns (uint256 fee);
 
-    function propagateCashflow(uint128 accountId, address settlementToken, int256 amount) external;
+    function propagateCashflow(uint128 accountId, address collateralType, int256 amount) external;
 }

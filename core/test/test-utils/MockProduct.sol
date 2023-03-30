@@ -21,24 +21,24 @@ contract MockProduct is IProduct {
         uint256 end;
     }
 
-    mapping(uint128 => MockAccountUnrealizedPnL) internal mockAccountUnrealizedPnL;
+    mapping(uint128 => mapping(address => MockAccountUnrealizedPnL)) internal mockAccountUnrealizedPnL;
 
-    function mockGetAccountUnrealizedPnL(uint128 accountId, int256 returnValue) public {
-        MockAccountUnrealizedPnL storage tmp = mockAccountUnrealizedPnL[accountId];
+    function mockGetAccountUnrealizedPnL(uint128 accountId, address collateralType, int256 returnValue) public {
+        MockAccountUnrealizedPnL storage tmp = mockAccountUnrealizedPnL[accountId][collateralType];
         tmp.returnValues[tmp.end] = returnValue;
         tmp.end += 1;
     }
 
-    function skipGetAccountUnrealizedPnLMock(uint128 accountId) public {
-        MockAccountUnrealizedPnL storage tmp = mockAccountUnrealizedPnL[accountId];
+    function skipGetAccountUnrealizedPnLMock(uint128 accountId, address collateralType) public {
+        MockAccountUnrealizedPnL storage tmp = mockAccountUnrealizedPnL[accountId][collateralType];
 
         if (tmp.end - tmp.start >= 2) {
             tmp.start += 1;
         }
     }
 
-    function getAccountUnrealizedPnL(uint128 accountId) public view override returns (int256 unrealizedPnL) {
-        MockAccountUnrealizedPnL storage tmp = mockAccountUnrealizedPnL[accountId];
+    function getAccountUnrealizedPnL(uint128 accountId, address collateralType) public view override returns (int256 unrealizedPnL) {
+        MockAccountUnrealizedPnL storage tmp = mockAccountUnrealizedPnL[accountId][collateralType];
 
         if (tmp.start >= tmp.end) {
             revert("Unmocked call");
@@ -69,10 +69,12 @@ contract MockProduct is IProduct {
         uint256 end;
     }
 
-    mapping(uint128 => MockAccountAnnualizedExposure) internal mockAccountAnnualizedExposures;
+    mapping(uint128 => mapping(address => MockAccountAnnualizedExposure)) internal mockAccountAnnualizedExposures;
 
-    function mockGetAccountAnnualizedExposures(uint128 accountId, Account.Exposure[] memory returnValue) public {
-        MockAccountAnnualizedExposure storage tmp = mockAccountAnnualizedExposures[accountId];
+    function mockGetAccountAnnualizedExposures(
+        uint128 accountId, address colalteralType, Account.Exposure[] memory returnValue
+    ) public {
+        MockAccountAnnualizedExposure storage tmp = mockAccountAnnualizedExposures[accountId][colalteralType];
         for (uint256 i = 0; i < returnValue.length; i++) {
             tmp.returnValues[tmp.end].push(returnValue[i]);
         }
@@ -80,16 +82,18 @@ contract MockProduct is IProduct {
         tmp.end += 1;
     }
 
-    function skipGetAccountAnnualizedExposures(uint128 accountId) public {
-        MockAccountAnnualizedExposure storage tmp = mockAccountAnnualizedExposures[accountId];
+    function skipGetAccountAnnualizedExposures(uint128 accountId, address collateralType) public {
+        MockAccountAnnualizedExposure storage tmp = mockAccountAnnualizedExposures[accountId][collateralType];
 
         if (tmp.end - tmp.start >= 2) {
             tmp.start += 1;
         }
     }
 
-    function getAccountAnnualizedExposures(uint128 accountId) public view returns (Account.Exposure[] memory exposures) {
-        MockAccountAnnualizedExposure storage tmp = mockAccountAnnualizedExposures[accountId];
+    function getAccountAnnualizedExposures(uint128 accountId, address collateralType) 
+        public view returns (Account.Exposure[] memory exposures) 
+    {
+        MockAccountAnnualizedExposure storage tmp = mockAccountAnnualizedExposures[accountId][collateralType];
 
         if (tmp.start >= tmp.end) {
             revert("Unmocked call");
@@ -104,8 +108,8 @@ contract MockProduct is IProduct {
     }
 
     // closeAccount mock support
-    function closeAccount(uint128 accountId) public override {
-        skipGetAccountUnrealizedPnLMock(accountId);
-        skipGetAccountAnnualizedExposures(accountId);
+    function closeAccount(uint128 accountId, address collateralType) public override {
+        skipGetAccountUnrealizedPnLMock(accountId, collateralType);
+        skipGetAccountAnnualizedExposures(accountId, collateralType);
     }
 }

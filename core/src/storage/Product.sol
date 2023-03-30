@@ -57,12 +57,14 @@ library Product {
 
     /**
      * @dev The product at self.productAddress is expected to aggregate the pnl for a given account in all maturities and pools
-     * @dev note, given that the account only supports a single token, the unrealised pnl is expected to be in terms of the
+     * @dev note, given that the account only supports single-token mode, the unrealised pnl is expected to be in terms of the
      * settlement token of the account, i.e. all the positions used in the unrealised pnl calculation should settle/quote in a token
      * that matches the settlement token of the account.
      */
-    function getAccountUnrealizedPnL(Data storage self, uint128 accountId) internal view returns (int256 accountUnrealizedPnL) {
-        return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId);
+    function getAccountUnrealizedPnL(Data storage self, uint128 accountId, address collateralType) 
+        internal view returns (int256 accountUnrealizedPnL) 
+    {
+        return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId, collateralType);
     }
 
     /**
@@ -78,23 +80,26 @@ library Product {
     }
 
     /**
-     * @dev The product at self.productAddress is expected to aggregate filled and unfilled notionals for all maturities and pools
-     * note: needs to be in terms of the settlement token of the accunt given currently only supporting single-token mode
+     * @dev The product at self.productAddress is expected to aggregate filled and 
+     * @dev unfilled notionals for all maturities and pools
+     * note: needs to be in terms of the collateralType token of the account given currently 
+     * note only supporting single-token mode
      */
     function getAccountAnnualizedExposures(
         Data storage self,
-        uint128 accountId
+        uint128 accountId,
+        address collateralType
     )
         internal
         returns (Account.Exposure[] memory exposures)
     {
-        return IProduct(self.productAddress).getAccountAnnualizedExposures(accountId);
+        return IProduct(self.productAddress).getAccountAnnualizedExposures(accountId, collateralType);
     }
 
     /**
      * @dev The product at self.productAddress is expected to close filled and unfilled positions for all maturities and pools
      */
-    function closeAccount(Data storage self, uint128 accountId) internal {
-        IProduct(self.productAddress).closeAccount(accountId);
+    function closeAccount(Data storage self, uint128 accountId, address collateralType) internal {
+        IProduct(self.productAddress).closeAccount(accountId, collateralType);
     }
 }

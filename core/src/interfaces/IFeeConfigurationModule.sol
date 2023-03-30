@@ -3,7 +3,6 @@ pragma solidity >=0.8.13;
 
 import "../storage/MarketFeeConfiguration.sol";
 
-// todo: implement protocol fees as well
 /**
  * @title Module for configuring (protocol and) market wide risk parameters
  * @notice Allows the owner to configure risk parameters at (protocol and) market wide level

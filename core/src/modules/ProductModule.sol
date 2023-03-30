@@ -32,14 +32,15 @@ contract ProductModule is IProductModule {
      */
     function getAccountUnrealizedPnL(
         uint128 productId,
-        uint128 accountId
+        uint128 accountId,
+        address collateralType
     )
         external
         view
         override
         returns (int256 accountUnrealizedPnL)
     {
-        accountUnrealizedPnL = Product.load(productId).getAccountUnrealizedPnL(accountId);
+        accountUnrealizedPnL = Product.load(productId).getAccountUnrealizedPnL(accountId, collateralType);
     }
 
     /**
@@ -47,13 +48,14 @@ contract ProductModule is IProductModule {
      */
     function getAccountAnnualizedExposures(
         uint128 productId,
-        uint128 accountId
+        uint128 accountId,
+        address collateralType
     )
         external
         override
         returns (Account.Exposure[] memory exposures)
     {
-        exposures = Product.load(productId).getAccountAnnualizedExposures(accountId);
+        exposures = Product.load(productId).getAccountAnnualizedExposures(accountId, collateralType);
     }
 
     /**
@@ -77,37 +79,37 @@ contract ProductModule is IProductModule {
      * @inheritdoc IProductModule
      */
 
-    function closeAccount(uint128 productId, uint128 accountId) external override {
+    function closeAccount(uint128 productId, uint128 accountId, address collateralType) external override {
         // todo: consider returning data that might be useful in the future
         // why should this function be exposed in here?
-        Product.load(productId).closeAccount(accountId);
+        Product.load(productId).closeAccount(accountId, collateralType);
     }
 
     /**
      * @dev Internal function to distribute trade fees according to the market fee config
      * @param payingAccountId Account id of trade initiatior
      * @param receivingAccountId Account id of fee collector
-     * @param settlementToken Quote token used to pay fees in
+     * @param collateralType Quote token used to pay fees in
      * @param annualizedNotional Traded annualized notional
      */
     function distributeFees(
         uint128 payingAccountId, uint128 receivingAccountId, UD60x18 atomicFee, 
-        address settlementToken, uint256 annualizedNotional
+        address collateralType, uint256 annualizedNotional
     ) internal returns (uint256 fee) {
         fee = mul(UD60x18.wrap(annualizedNotional), atomicFee).unwrap();
 
         Account.Data storage payingAccount = Account.load(payingAccountId);
-        payingAccount.collaterals[settlementToken].decreaseCollateralBalance(fee);
+        payingAccount.collaterals[collateralType].decreaseCollateralBalance(fee);
 
         Account.Data storage receivingAccount = Account.load(receivingAccountId);
-        receivingAccount.collaterals[settlementToken].increaseCollateralBalance(fee);
+        receivingAccount.collaterals[collateralType].increaseCollateralBalance(fee);
     }
 
     // check if account exists
     // or consider calling the product maneger once to do all the checks and updates
     // todo: mark product in the account object (see python implementation for more details, solidity uses setutil though)
     function propagateTakerOrder(
-        uint128 accountId, uint128 productId, uint128 marketId, address settlementToken, uint256 annualizedNotional
+        uint128 accountId, uint128 productId, uint128 marketId, address collateralType, uint256 annualizedNotional
     ) 
         external override returns (uint256 fee)
     {
@@ -115,16 +117,16 @@ contract ProductModule is IProductModule {
 
         MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
         fee = distributeFees(
-            accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicTakerFee, settlementToken, annualizedNotional
+            accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicTakerFee, collateralType, annualizedNotional
         );
 
         Account.Data storage account = Account.load(accountId);
-        account.imCheck();
+        account.imCheck(collateralType);
     }
 
     // todo: mark product
     function propagateMakerOrder(
-        uint128 accountId, uint128 productId, uint128 marketId, address settlementToken, uint256 annualizedNotional
+        uint128 accountId, uint128 productId, uint128 marketId, address collateralType, uint256 annualizedNotional
     ) 
         external override returns (uint256 fee)
     {
@@ -132,19 +134,19 @@ contract ProductModule is IProductModule {
         
         MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
         fee = distributeFees(
-            accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicMakerFee, settlementToken, annualizedNotional
+            accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicMakerFee, collateralType, annualizedNotional
         );
         
         Account.Data storage account = Account.load(accountId);
-        account.imCheck();
+        account.imCheck(collateralType);
     }
 
-    function propagateCashflow(uint128 accountId, address settlementToken, int256 amount) external override {
+    function propagateCashflow(uint128 accountId, address collateralType, int256 amount) external override {
         Account.Data storage account = Account.load(accountId);
         if (amount > 0) {
-            account.collaterals[settlementToken].increaseCollateralBalance(amount.toUint());
+            account.collaterals[collateralType].increaseCollateralBalance(amount.toUint());
         } else {
-            account.collaterals[settlementToken].decreaseCollateralBalance((-amount).toUint());
+            account.collaterals[collateralType].decreaseCollateralBalance((-amount).toUint());
         }
     }
 }

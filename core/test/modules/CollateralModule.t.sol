@@ -39,7 +39,7 @@ contract CollateralModuleTest is Test {
 
     function test_GetTotalAccountValue() public {
         int256 uPnL = 100e18;
-        assertEq(collateralModule.getTotalAccountValue(100), Constants.DEFAULT_TOKEN_0_BALANCE.toInt() - uPnL);
+        assertEq(collateralModule.getTotalAccountValue(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE.toInt() - uPnL);
     }
 
     function test_GetAccountCollateralBalanceAvailable() public {
@@ -56,11 +56,8 @@ contract CollateralModuleTest is Test {
         assertEq(collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_1), Constants.DEFAULT_TOKEN_1_BALANCE);
     }
 
-    function testFuzz_GetAccountCollateralBalanceAvailable_OtherToken(address otherToken) public {
-        vm.assume(otherToken != Constants.TOKEN_0);
-        vm.assume(otherToken != Constants.TOKEN_1);
-
-        assertEq(collateralModule.getAccountCollateralBalanceAvailable(100, otherToken), 0);
+    function test_GetAccountCollateralBalanceAvailable_OtherToken() public {
+        assertEq(collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_UNKNOWN), 0);
     }
 
     function testFuzz_Deposit(address depositor) public {

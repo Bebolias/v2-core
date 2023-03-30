@@ -54,11 +54,11 @@ contract LiquidationModuleTest is Test {
                 mockExposures[0] = Account.Exposure({marketId: 10, filled: 0, unfilledLong: 0, unfilledShort: -0});
                 mockExposures[1] = Account.Exposure({marketId: 11, filled: 0, unfilledLong: 0, unfilledShort: 0});
 
-                products[0].mockGetAccountAnnualizedExposures(100, mockExposures);
+                products[0].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
             }
 
             // Mock account (id: 100) unrealized PnL in product (id: 1)
-            products[0].mockGetAccountUnrealizedPnL(100, 100e18);
+            products[0].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 100e18);
 
             // Mock account (id:100) exposures to product (id:2) and markets (ids: 20)
             {
@@ -66,11 +66,23 @@ contract LiquidationModuleTest is Test {
 
                 mockExposures[0] = Account.Exposure({marketId: 20, filled: 0, unfilledLong: 0, unfilledShort: 0});
 
-                products[1].mockGetAccountAnnualizedExposures(100, mockExposures);
+                products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
             }
-
             // Mock account (id: 100) unrealized PnL in product (id: 2)
-            products[1].mockGetAccountUnrealizedPnL(100, -200e18);
+            products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, -200e18);
+
+            // todo: test single account single-token mode
+            // Mock account (id:100) exposures to product (id:2) and markets (ids: 21)
+            // {
+            //     Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
+
+            //     mockExposures[0] = Account.Exposure({marketId: 21, filled: 0, unfilledLong: 0, unfilledShort: 0});
+
+            //     products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_1, mockExposures);
+            // }
+
+            // todo: test single account single-token mode
+            // products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_1, 1e17);
         }
     }
 
@@ -81,7 +93,7 @@ contract LiquidationModuleTest is Test {
             MockAccountStorage.CollateralBalance[] memory balances = new MockAccountStorage.CollateralBalance[](0);
             uint128[] memory activeProductIds = new uint128[](0);
 
-            liquidationModule.mockAccount(liquidatorId, vm.addr(1), balances, activeProductIds, Constants.TOKEN_1);
+            liquidationModule.mockAccount(liquidatorId, vm.addr(1), balances, activeProductIds);
         }
     }
 
@@ -90,7 +102,7 @@ contract LiquidationModuleTest is Test {
         mockLiquidatorAccount();
 
         // Trigger liquidation
-        liquidationModule.liquidate(100, 101);
+        liquidationModule.liquidate(100, 101, Constants.TOKEN_0);
 
         // Check balances after
         {
@@ -115,7 +127,7 @@ contract LiquidationModuleTest is Test {
 
         // Trigger liquidation
         vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 99));
-        liquidationModule.liquidate(99, 101);
+        liquidationModule.liquidate(99, 101, Constants.TOKEN_0);
     }
 
     function test_RevertWhen_Liquidate_AccountNonLiquidatable() public {
@@ -125,7 +137,7 @@ contract LiquidationModuleTest is Test {
 
         // Trigger liquidation
         vm.expectRevert(abi.encodeWithSelector(LiquidationModule.AccountNotLiquidatable.selector, 100));
-        liquidationModule.liquidate(100, 101);
+        liquidationModule.liquidate(100, 101, Constants.TOKEN_0);
     }
 
     function test_RevertWhen_Liquidate_NoEffect() public {
@@ -133,7 +145,7 @@ contract LiquidationModuleTest is Test {
 
         // Trigger liquidation
         vm.expectRevert(abi.encodeWithSelector(LiquidationModule.AccountExposureNotReduced.selector, 100, 1800e18, 1800e18));
-        liquidationModule.liquidate(100, 101);
+        liquidationModule.liquidate(100, 101, Constants.TOKEN_0);
     }
 
     function test_RevertWhen_Liquidate_NoLiquidatorAccount() public {
@@ -141,6 +153,6 @@ contract LiquidationModuleTest is Test {
 
         // Trigger liquidation
         vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 101));
-        liquidationModule.liquidate(100, 101);
+        liquidationModule.liquidate(100, 101, Constants.TOKEN_0);
     }
 }

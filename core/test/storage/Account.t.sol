@@ -30,8 +30,8 @@ contract ExposedAccounts is CoreState {
         }
     }
 
-    function closeAccount(uint128 id) external {
-        Account.load(id).closeAccount();
+    function closeAccount(uint128 id, address collateralType) external {
+        Account.load(id).closeAccount(collateralType);
     }
 
     function getCollateralBalanceAvailable(uint128 id, address collateralType) external returns (uint256) {
@@ -59,19 +59,21 @@ contract ExposedAccounts is CoreState {
         }
     }
 
-    function getAnnualizedProductExposures(uint128 id, uint128 productId) external returns (Account.Exposure[] memory) {
+    function getAnnualizedProductExposures(uint128 id, uint128 productId, address collateralType) 
+        external returns (Account.Exposure[] memory) 
+    {
         Account.Data storage account = Account.load(id);
-        return account.getAnnualizedProductExposures(productId);
+        return account.getAnnualizedProductExposures(productId, collateralType);
     }
 
-    function getUnrealizedPnL(uint128 id) external view returns (int256) {
+    function getUnrealizedPnL(uint128 id, address collateralType) external view returns (int256) {
         Account.Data storage account = Account.load(id);
-        return account.getUnrealizedPnL();
+        return account.getUnrealizedPnL(collateralType);
     }
 
-    function getTotalAccountValue(uint128 id) external view returns (int256) {
+    function getTotalAccountValue(uint128 id, address collateralType) external view returns (int256) {
         Account.Data storage account = Account.load(id);
-        return account.getTotalAccountValue();
+        return account.getTotalAccountValue(collateralType);
     }
 
     function getRiskParameter(uint128 productId, uint128 marketId) external view returns (int256) {
@@ -82,24 +84,24 @@ contract ExposedAccounts is CoreState {
         return Account.getIMMultiplier();
     }
 
-    function imCheck(uint128 id) external {
+    function imCheck(uint128 id, address collateralType) external {
         Account.Data storage account = Account.load(id);
-        account.imCheck();
+        account.imCheck(collateralType);
     }
 
-    function isIMSatisfied(uint128 id) external returns (bool, uint256) {
+    function isIMSatisfied(uint128 id, address collateralType) external returns (bool, uint256) {
         Account.Data storage account = Account.load(id);
-        return account.isIMSatisfied();
+        return account.isIMSatisfied(collateralType);
     }
 
-    function isLiquidatable(uint128 id) external returns (bool, uint256, uint256) {
+    function isLiquidatable(uint128 id, address collateralType) external returns (bool, uint256, uint256) {
         Account.Data storage account = Account.load(id);
-        return account.isLiquidatable();
+        return account.isLiquidatable(collateralType);
     }
 
-    function getMarginRequirements(uint128 id) external returns (uint256, uint256) {
+    function getMarginRequirements(uint128 id, address collateralType) external returns (uint256, uint256) {
         Account.Data storage account = Account.load(id);
-        return account.getMarginRequirements();
+        return account.getMarginRequirements(collateralType);
     }
 }
 
@@ -206,11 +208,12 @@ contract AccountTest is Test {
     }
 
     function test_CloseAccount() public {
-        accounts.closeAccount(accountId);
+        accounts.closeAccount(accountId, Constants.TOKEN_0);
+        accounts.closeAccount(accountId, Constants.TOKEN_1);
     }
 
     function test_GetAnnualizedProductExposures() public {
-        Account.Exposure[] memory exposures = accounts.getAnnualizedProductExposures(accountId, 1);
+        Account.Exposure[] memory exposures = accounts.getAnnualizedProductExposures(accountId, 1, Constants.TOKEN_0);
 
         assertEq(exposures.length, 2);
 
@@ -226,13 +229,13 @@ contract AccountTest is Test {
     }
 
     function test_GetUnrealizedPnL() public {
-        int256 uPnL = accounts.getUnrealizedPnL(accountId);
+        int256 uPnL = accounts.getUnrealizedPnL(accountId, Constants.TOKEN_0);
 
         assertEq(uPnL, -100e18);
     }
 
     function test_GetTotalAccountValue() public {
-        int256 totalAccountValue = accounts.getTotalAccountValue(accountId);
+        int256 totalAccountValue = accounts.getTotalAccountValue(accountId, Constants.TOKEN_0);
 
         assertEq(totalAccountValue, 400e18);
     }
@@ -250,7 +253,7 @@ contract AccountTest is Test {
     }
 
     function test_GetMarginRequirements() public {
-        (uint256 im, uint256 lm) = accounts.getMarginRequirements(accountId);
+        (uint256 im, uint256 lm) = accounts.getMarginRequirements(accountId, Constants.TOKEN_0);
 
         assertEq(lm, 900e18);
         assertEq(im, 1800e18);
@@ -259,7 +262,7 @@ contract AccountTest is Test {
     function test_IsLiquidatable_True() public {
         setCollateralProfile("low");
 
-        (bool liquidatable, uint256 im, uint256 lm) = accounts.isLiquidatable(accountId);
+        (bool liquidatable, uint256 im, uint256 lm) = accounts.isLiquidatable(accountId, Constants.TOKEN_0);
 
         assertEq(liquidatable, true);
         assertEq(lm, 900e18);
@@ -269,7 +272,7 @@ contract AccountTest is Test {
     function test_IsLiquidatable_False() public {
         setCollateralProfile("medium");
 
-        (bool liquidatable, uint256 im, uint256 lm) = accounts.isLiquidatable(accountId);
+        (bool liquidatable, uint256 im, uint256 lm) = accounts.isLiquidatable(accountId, Constants.TOKEN_0);
 
         assertEq(liquidatable, false);
         assertEq(lm, 900e18);
@@ -279,7 +282,7 @@ contract AccountTest is Test {
     function test_IsIMSatisfied_False() public {
         setCollateralProfile("medium");
 
-        (bool imSatisfied, uint256 im) = accounts.isIMSatisfied(accountId);
+        (bool imSatisfied, uint256 im) = accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
 
         assertEq(imSatisfied, false);
         assertEq(im, 1800e18);
@@ -288,7 +291,7 @@ contract AccountTest is Test {
     function test_IsIMSatisfied_True() public {
         setCollateralProfile("high");
 
-        (bool imSatisfied, uint256 im) = accounts.isIMSatisfied(accountId);
+        (bool imSatisfied, uint256 im) = accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
 
         assertEq(imSatisfied, true);
         assertEq(im, 1800e18);
@@ -298,13 +301,13 @@ contract AccountTest is Test {
         setCollateralProfile("medium");
 
         vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, accountId));
-        accounts.imCheck(accountId);
+        accounts.imCheck(accountId, Constants.TOKEN_0);
     }
 
     function test_ImCheck() public {
         setCollateralProfile("high");
 
-        accounts.imCheck(accountId);
+        accounts.imCheck(accountId, Constants.TOKEN_0);
     }
 
     function test_GetCollateralBalanceAvailable_Positive() public {
@@ -331,13 +334,12 @@ contract AccountTest is Test {
         assertEq(collateralBalanceAvailable, 0);
     }
 
-    function testFuzz_GetCollateralBalanceAvailable_NoSettlementToken(address otherToken) public {
-        vm.assume(otherToken != Constants.TOKEN_0);
-        vm.assume(otherToken != Constants.TOKEN_1);
+    function testFuzz_GetCollateralBalanceAvailable_NoSettlementToken() public {
+        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({
+            token: Constants.TOKEN_UNKNOWN, balance: 1e18
+        }));
 
-        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({token: otherToken, balance: 1e18}));
-
-        uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, otherToken);
+        uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_UNKNOWN);
 
         assertEq(collateralBalanceAvailable, 1e18);
     }

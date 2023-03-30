@@ -35,21 +35,21 @@ contract LiquidationModule is ILiquidationModule {
      */
     function liquidate(
         uint128 liquidatedAccountId,
-        uint128 liquidatorAccountId
+        uint128 liquidatorAccountId,
+        address collateralType
     )
         external
         returns (uint256 liquidatorRewardAmount)
     {
         Account.Data storage account = Account.exists(liquidatedAccountId);
-        address liquidatorRewardToken = account.settlementToken;
-        (bool liquidatable, uint256 imPreClose,) = account.isLiquidatable();
+        (bool liquidatable, uint256 imPreClose,) = account.isLiquidatable(collateralType);
 
         if (!liquidatable) {
             revert AccountNotLiquidatable(liquidatedAccountId);
         }
 
-        account.closeAccount();
-        (uint256 imPostClose,) = account.getMarginRequirements();
+        account.closeAccount(collateralType);
+        (uint256 imPostClose,) = account.getMarginRequirements(collateralType);
 
         if (imPreClose <= imPostClose) {
             revert AccountExposureNotReduced(liquidatedAccountId, imPreClose, imPostClose);
@@ -60,7 +60,7 @@ contract LiquidationModule is ILiquidationModule {
         liquidatorRewardAmount = (imPreClose - imPostClose) * ProtocolRiskConfiguration.load().liquidatorRewardParameter / 1e18;
         Account.Data storage liquidatorAccount = Account.exists(liquidatorAccountId);
 
-        account.collaterals[liquidatorRewardToken].decreaseCollateralBalance(liquidatorRewardAmount);
-        liquidatorAccount.collaterals[liquidatorRewardToken].increaseCollateralBalance(liquidatorRewardAmount);
+        account.collaterals[collateralType].decreaseCollateralBalance(liquidatorRewardAmount);
+        liquidatorAccount.collaterals[collateralType].increaseCollateralBalance(liquidatorRewardAmount);
     }
 }

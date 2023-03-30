@@ -58,17 +58,6 @@ library Account {
          * why they use sets vs. simple arrays
          */
         SetUtil.UintSet activeProducts;
-        /**
-         * @dev A single token account can only create positions that settle in the account's settlement token
-         * @dev A single token account can only deposit collateral type that's the same as the account's settlement token
-         * @dev If a user wants to engage in positions with a different settlement token, they can create a new account with a
-         * different settlement token
-         * @dev The settlement token of the account is defined as soon as the account makes its first deposit where the
-         * settlement token is set to the collateral type of the first deposit
-         * note, for the time being the settlement token cannot be changed for a given account as soon as it's initialised
-         * following the first deposit
-         */
-        address settlementToken;
     }
 
     struct Exposure {
@@ -116,12 +105,12 @@ library Account {
      * @dev Closes all account filled (i.e. attempts to fully unwind) and unfilled orders in all the products in which the account
      * is active
      */
-    function closeAccount(Data storage self) internal {
+    function closeAccount(Data storage self, address collateralType) internal {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
         for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productIndex = _activeProducts.valueAt(i).to128();
             Product.Data storage _product = Product.load(productIndex);
-            _product.closeAccount(self.id);
+            _product.closeAccount(self.id, collateralType);
         }
     }
 
@@ -155,14 +144,10 @@ library Account {
         internal
         returns (uint256 collateralBalanceAvailableD18)
     {
-        if (collateralType == self.settlementToken) {
-            (uint256 im,) = self.getMarginRequirements();
-            int256 totalAccountValue = self.getTotalAccountValue();
-            if (totalAccountValue > im.toInt()) {
-                collateralBalanceAvailableD18 = totalAccountValue.toUint() - im;
-            }
-        } else {
-            collateralBalanceAvailableD18 = self.getCollateralBalance(collateralType);
+        (uint256 im,) = self.getMarginRequirements(collateralType);
+        int256 totalAccountValue = self.getTotalAccountValue(collateralType);
+        if (totalAccountValue > im.toInt()) {
+            collateralBalanceAvailableD18 = totalAccountValue.toUint() - im;
         }
     }
 
@@ -218,13 +203,14 @@ library Account {
      */
     function getAnnualizedProductExposures(
         Data storage self,
-        uint128 productId
+        uint128 productId,
+        address collateralType
     )
         internal
         returns (Exposure[] memory productExposures)
     {
         Product.Data storage _product = Product.load(productId);
-        productExposures = _product.getAccountAnnualizedExposures(self.id);
+        productExposures = _product.getAccountAnnualizedExposures(self.id, collateralType);
     }
 
     /**
@@ -232,12 +218,12 @@ library Account {
      * pnl
      * note, the unrealized pnl is expected to be in terms of the settlement token of this account
      */
-    function getUnrealizedPnL(Data storage self) internal view returns (int256 unrealizedPnL) {
+    function getUnrealizedPnL(Data storage self, address collateralType) internal view returns (int256 unrealizedPnL) {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
         for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productIndex = _activeProducts.valueAt(i).to128();
             Product.Data storage _product = Product.load(productIndex);
-            unrealizedPnL += _product.getAccountUnrealizedPnL(self.id);
+            unrealizedPnL += _product.getAccountUnrealizedPnL(self.id, collateralType);
         }
     }
 
@@ -245,9 +231,9 @@ library Account {
      * @dev Returns the total account value in terms of the quote token of the (single token) account
      */
 
-    function getTotalAccountValue(Data storage self) internal view returns (int256 totalAccountValue) {
-        int256 unrealizedPnL = self.getUnrealizedPnL();
-        int256 collateralBalance = self.getCollateralBalance(self.settlementToken).toInt();
+    function getTotalAccountValue(Data storage self, address collateralType) internal view returns (int256 totalAccountValue) {
+        int256 unrealizedPnL = self.getUnrealizedPnL(collateralType);
+        int256 collateralBalance = self.getCollateralBalance(collateralType).toInt();
         totalAccountValue = unrealizedPnL + collateralBalance;
     }
 
@@ -262,8 +248,8 @@ library Account {
         return ProtocolRiskConfiguration.load().imMultiplier;
     }
 
-    function imCheck(Data storage self) internal {
-        (bool isSatisfied,) = self.isIMSatisfied();
+    function imCheck(Data storage self, address collateralType) internal {
+        (bool isSatisfied,) = self.isIMSatisfied(collateralType);
         if (!isSatisfied) {
             revert AccountBelowIM(self.id);
         }
@@ -273,34 +259,32 @@ library Account {
      * @dev Comes out as true if a given account initial margin requirement is satisfied
      * i.e. account value (collateral + unrealized pnl) >= initial margin requirement
      */
-    function isIMSatisfied(Data storage self) internal returns (bool imSatisfied, uint256 im) {
-        (im,) = self.getMarginRequirements();
-        imSatisfied = self.getTotalAccountValue() >= im.toInt();
+    function isIMSatisfied(Data storage self, address collateralType) internal returns (bool imSatisfied, uint256 im) {
+        (im,) = self.getMarginRequirements(collateralType);
+        imSatisfied = self.getTotalAccountValue(collateralType) >= im.toInt();
     }
 
     /**
      * @dev Comes out as true if a given account is liquidatable, i.e. account value (collateral + unrealized pnl) < lm
      */
 
-    function isLiquidatable(Data storage self) internal returns (bool liquidatable, uint256 im, uint256 lm) {
-        (im, lm) = self.getMarginRequirements();
-        liquidatable = self.getTotalAccountValue() < lm.toInt();
+    function isLiquidatable(Data storage self, address collateralType) internal returns (bool liquidatable, uint256 im, uint256 lm) {
+        (im, lm) = self.getMarginRequirements(collateralType);
+        liquidatable = self.getTotalAccountValue(collateralType) < lm.toInt();
     }
     /**
      * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
      * todo: add user defined types
-     * todo: consider representing im and lm as uint256 with casting in the function body
-     * when summations with int256 need to take place
      */
 
-    function getMarginRequirements(Data storage self) internal returns (uint256 im, uint256 lm) {
+    function getMarginRequirements(Data storage self, address collateralType) internal returns (uint256 im, uint256 lm) {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
 
         int256 worstCashflowUp;
         int256 worstCashflowDown;
         for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productId = _activeProducts.valueAt(i).to128();
-            Exposure[] memory annualizedProductMarketExposures = self.getAnnualizedProductExposures(productId);
+            Exposure[] memory annualizedProductMarketExposures = self.getAnnualizedProductExposures(productId, collateralType);
 
             for (uint256 j = 0; j < annualizedProductMarketExposures.length; j++) {
                 Exposure memory exposure = annualizedProductMarketExposures[j];

@@ -25,9 +25,11 @@ contract ExposedProduct is CoreState {
         Product.onlyProductAddress(productId, caller);
     }
 
-    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId) external view returns (int256 accountUnrealizedPnL) {
+    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType) 
+        external view returns (int256 accountUnrealizedPnL) 
+    {
         Product.Data storage product = Product.load(productId);
-        return product.getAccountUnrealizedPnL(accountId);
+        return product.getAccountUnrealizedPnL(accountId, collateralType);
     }
 
     function baseToAnnualizedExposure(uint128 productId, int256[] memory baseAmounts, uint128 marketId, uint256 maturityTimestamp) 
@@ -39,18 +41,19 @@ contract ExposedProduct is CoreState {
 
     function getAccountAnnualizedExposures(
         uint128 productId,
-        uint128 accountId
+        uint128 accountId,
+        address collateralType
     )
         external
         returns (Account.Exposure[] memory exposures)
     {
         Product.Data storage product = Product.load(productId);
-        return product.getAccountAnnualizedExposures(accountId);
+        return product.getAccountAnnualizedExposures(accountId, collateralType);
     }
 
-    function closeAccount(uint128 productId, uint128 accountId) external {
+    function closeAccount(uint128 productId, uint128 accountId, address collateralType) external {
         Product.Data storage product = Product.load(productId);
-        product.closeAccount(accountId);
+        product.closeAccount(accountId, collateralType);
     }
 }
 
@@ -82,7 +85,7 @@ contract ProductTest is Test {
     }
 
     function test_GetAccountUnrealizedPnL() public {
-        assertEq(product.getAccountUnrealizedPnL(productId, accountId), 100e18);
+        assertEq(product.getAccountUnrealizedPnL(productId, accountId, Constants.TOKEN_0), 100e18);
     }
 
     function test_BaseToAnnualizedExposure() public {
@@ -100,7 +103,7 @@ contract ProductTest is Test {
     }
 
     function test_GetAnnualizedProductExposures() public {
-        Account.Exposure[] memory exposures = product.getAccountAnnualizedExposures(productId, accountId);
+        Account.Exposure[] memory exposures = product.getAccountAnnualizedExposures(productId, accountId, Constants.TOKEN_0);
 
         assertEq(exposures.length, 2);
 
@@ -116,11 +119,11 @@ contract ProductTest is Test {
     }
 
     function test_CloseAccount() public {
-        product.closeAccount(productId, accountId);
+        product.closeAccount(productId, accountId, Constants.TOKEN_0);
     }
 
     function test_RevertWhen_CloseAccount_NoProduct() public {
         vm.expectRevert();
-        product.closeAccount(0, accountId);
+        product.closeAccount(0, accountId, Constants.TOKEN_0);
     }
 }

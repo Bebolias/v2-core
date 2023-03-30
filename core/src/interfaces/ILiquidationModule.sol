@@ -46,7 +46,8 @@ interface ILiquidationModule {
      */
     function liquidate(
         uint128 liquidatedAccountId,
-        uint128 liquidatorAccountId
+        uint128 liquidatorAccountId,
+        address collateralType
     )
         external
         returns (uint256 liquidatorRewardAmount);
