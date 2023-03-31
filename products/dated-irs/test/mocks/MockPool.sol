@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "@voltz-protocol/core/src/utils/contracts/interfaces/IERC165.sol";
+import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
 import "../../src/interfaces/IPool.sol";
+import { SD59x18, ZERO } from "@prb/math/SD59x18.sol";
 
 contract MockPool is IPool {
-    int256 baseBalancePool;
-    int256 quoteBalancePool;
-    int256 unfilledBaseLong;
-    int256 unfilledBaseShort;
-    mapping(uint256 => uint256) datedIRSGwaps;
+    SD59x18 baseBalancePool;
+    SD59x18 quoteBalancePool;
+    SD59x18 unfilledBaseLong;
+    SD59x18 unfilledBaseShort;
+    mapping(uint256 => UD60x18) datedIRSGwaps;
 
     function name(uint128 poolId) external view returns (string memory) {
         return "mockpool";
@@ -18,20 +19,20 @@ contract MockPool is IPool {
     function executeDatedTakerOrder(
         uint128 marketId,
         uint32 maturityTimestamp,
-        int256 baseAmount
+        SD59x18 baseAmount
     )
         external
-        returns (int256 executedBaseAmount, int256 executedQuoteAmount)
+        returns (SD59x18 executedBaseAmount, SD59x18 executedQuoteAmount)
     {
-        executedBaseAmount = 0;
-        executedQuoteAmount = 0;
+        executedBaseAmount = ZERO;
+        executedQuoteAmount = ZERO;
     }
 
     function setBalances(
-        int256 _baseBalancePool,
-        int256 _quoteBalancePool,
-        int256 _unfilledBaseLong,
-        int256 _unfilledBaseShort
+        SD59x18 _baseBalancePool,
+        SD59x18 _quoteBalancePool,
+        SD59x18 _unfilledBaseLong,
+        SD59x18 _unfilledBaseShort
     )
         external
     {
@@ -48,7 +49,7 @@ contract MockPool is IPool {
     )
         external
         view
-        returns (int256, int256)
+        returns (SD59x18, SD59x18)
     {
         return (baseBalancePool, quoteBalancePool);
     }
@@ -60,7 +61,7 @@ contract MockPool is IPool {
     )
         external
         view
-        returns (int256, int256)
+        returns (SD59x18, SD59x18)
     {
         return (unfilledBaseLong, unfilledBaseShort);
     }
@@ -71,19 +72,19 @@ contract MockPool is IPool {
         uint128 accountId
     )
         external
-        returns (int256 closedBasePool, int256 closedQuotePool) {
+        returns (SD59x18 closedBasePool, SD59x18 closedQuotePool) {
             closedBasePool = baseBalancePool;
             closedQuotePool = quoteBalancePool;
             
-            baseBalancePool = 0;
-            quoteBalancePool = 0;
+            baseBalancePool = ZERO;
+            quoteBalancePool = ZERO;
     }
 
-    function getDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp) external view returns (uint256) {
+    function getDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp) external view returns (UD60x18) {
         return datedIRSGwaps[(marketId << 32) | maturityTimestamp];
     }
 
-    function setDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp, uint256 _datedIRSGwap) external {
+    function setDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp, UD60x18 _datedIRSGwap) external {
         datedIRSGwaps[(marketId << 32) | maturityTimestamp] = _datedIRSGwap;
     }
 

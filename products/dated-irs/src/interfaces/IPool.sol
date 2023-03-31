@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "@voltz-protocol/core/src/utils/contracts/interfaces/IERC165.sol";
+import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
+import { UD60x18 } from "@prb/math/UD60x18.sol";
+import { SD59x18 } from "@prb/math/SD59x18.sol";
 
 /// @title Interface a Pool needs to adhere.
 interface IPool is IERC165 {
@@ -11,10 +13,10 @@ interface IPool is IERC165 {
     function executeDatedTakerOrder(
         uint128 marketId,
         uint32 maturityTimestamp,
-        int256 baseAmount
+        SD59x18 baseAmount
     )
         external
-        returns (int256 executedBaseAmount, int256 executedQuoteAmount);
+        returns (SD59x18 executedBaseAmount, SD59x18 executedQuoteAmount);
 
     function getAccountFilledBalances(
         uint128 marketId,
@@ -23,7 +25,7 @@ interface IPool is IERC165 {
     )
         external
         view
-        returns (int256 baseBalancePool, int256 quoteBalancePool);
+        returns (SD59x18 baseBalancePool, SD59x18 quoteBalancePool);
 
     function getAccountUnfilledBases(
         uint128 marketId,
@@ -32,7 +34,7 @@ interface IPool is IERC165 {
     )
         external
         view
-        returns (int256 unfilledBaseLong, int256 unfilledBaseShort);
+        returns (SD59x18 unfilledBaseLong, SD59x18 unfilledBaseShort);
 
 
     function closePosition(
@@ -41,7 +43,7 @@ interface IPool is IERC165 {
         uint128 accountId
     )
         external
-        returns (int256 closedBasePool, int256 closedQuotePool);
+        returns (SD59x18 closedBasePool, SD59x18 closedQuotePool);
 
     /**
      * @notice Get dated irs gwap for the purposes of unrealized pnl calculation in the portfolio (see Portfolio.sol)
@@ -53,5 +55,5 @@ interface IPool is IERC165 {
      *  // should sit in the MarketRiskConfiguration.sol within the core where it is made possible for the owner
      *  // to specify custom twap lookback windows for different productId/marketId combinations
      */
-    function getDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp) external view returns (uint256 datedIRSGwap);
+    function getDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp) external view returns (UD60x18 datedIRSGwap);
 }

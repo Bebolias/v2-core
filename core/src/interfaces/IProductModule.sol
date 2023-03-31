@@ -45,11 +45,13 @@ interface IProductModule {
     /// @notice attempts to close all the unfilled and filled positions of a given account in a given product (productId)
     function closeAccount(uint128 productId, uint128 accountId, address collateralType) external;
 
+    // todo: is annualizedNotional supposed to be unsigned?
     function propagateTakerOrder(
         uint128 accountId, uint128 productId, uint128 marketId, 
         address collateralType, uint256 annualizedNotional) 
         external returns (uint256 fee);
 
+    // todo: is annualizedNotional supposed to be unsigned?
     function propagateMakerOrder(
         uint128 accountId, uint128 productId, uint128 marketId, 
         address collateralType, uint256 annualizedNotional) 
