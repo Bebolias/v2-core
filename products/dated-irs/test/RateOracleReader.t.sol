@@ -1,6 +1,7 @@
 pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
+import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "../src/storage/RateOracleReader.sol";
 import "./mocks/MockRateOracle.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
@@ -18,11 +19,11 @@ contract ExposeRateOracleReader {
 
     function loadRateIndexPreMaturity(
         uint128 id,
-        uint256 maturityTimestamp
+        uint32 maturityTimestamp
     )
         external
         view
-        returns (uint40 timestamp, UD60x18 index)
+        returns (uint32 timestamp, UD60x18 index)
     {
         RateOracleReader.Data storage oracleData = RateOracleReader.load(id);
         RateOracleReader.PreMaturityData memory rateIndexOfMaturity = oracleData.rateIndexPreMaturity[maturityTimestamp];
@@ -30,7 +31,7 @@ contract ExposeRateOracleReader {
         index = rateIndexOfMaturity.lastKnownIndex;
     }
 
-    function loadRateIndexAtMaturity(uint128 id, uint256 maturityTimestamp) external view returns (UD60x18 index) {
+    function loadRateIndexAtMaturity(uint128 id, uint32 maturityTimestamp) external view returns (UD60x18 index) {
         RateOracleReader.Data storage oracleData = RateOracleReader.load(id);
         index = oracleData.rateIndexAtMaturity[maturityTimestamp];
     }
@@ -42,16 +43,16 @@ contract ExposeRateOracleReader {
         }
     }
 
-    function updateCache(uint128 id, uint256 maturityTimestamp) external {
+    function updateCache(uint128 id, uint32 maturityTimestamp) external {
         RateOracleReader.load(id).updateCache(maturityTimestamp);
     }
 
-    function getRateIndexCurrent(uint128 id, uint256 maturityTimestamp) external returns (UD60x18) {
+    function getRateIndexCurrent(uint128 id, uint32 maturityTimestamp) external returns (UD60x18) {
         RateOracleReader.Data storage oracle = RateOracleReader.load(id);
         return oracle.getRateIndexCurrent(maturityTimestamp);
     }
 
-    function getRateIndexMaturity(uint128 id, uint256 maturityTimestamp) external returns (UD60x18) {
+    function getRateIndexMaturity(uint128 id, uint32 maturityTimestamp) external returns (UD60x18) {
         RateOracleReader.Data storage oracle = RateOracleReader.load(id);
         return oracle.getRateIndexMaturity(maturityTimestamp);
     }
@@ -65,16 +66,16 @@ contract RateOracleReaderTest is Test {
     ExposeRateOracleReader rateOracleReader;
 
     MockRateOracle mockRateOracle;
-    uint256 public maturityTimestamp;
+    uint32 public maturityTimestamp;
 
-    uint128 internal constant ONE_YEAR = 3139000;
+    uint32 internal constant ONE_YEAR = 3139000;
     uint128 internal constant marketId = 100;
     bytes32 internal constant rateOracleSlot = keccak256(abi.encode("xyz.voltz.RateOracleReader", marketId));
 
     function setUp() public virtual {
         rateOracleReader = new ExposeRateOracleReader();
         mockRateOracle = new MockRateOracle();
-        maturityTimestamp = block.timestamp + ONE_YEAR;
+        maturityTimestamp =  Time.blockTimestampTruncated() + ONE_YEAR;
         rateOracleReader.create(100, address(mockRateOracle));
     }
 
@@ -120,7 +121,7 @@ contract RateOracleReaderTest is Test {
         mockRateOracle.setLastUpdatedIndex(indexToSet * 1e9);
         rateOracleReader.updateCache(marketId, maturityTimestamp);
 
-        (uint40 timestamp, UD60x18 index) = rateOracleReader.loadRateIndexPreMaturity(marketId, maturityTimestamp);
+        (uint32 timestamp, UD60x18 index) = rateOracleReader.loadRateIndexPreMaturity(marketId, maturityTimestamp);
 
         assertEq(index.unwrap(), indexToSet);
     }
@@ -134,13 +135,13 @@ contract RateOracleReaderTest is Test {
         uint256 indexToSet = 1.001e18;
         mockRateOracle.setLastUpdatedIndex(indexToSet * 1e9);
         rateOracleReader.updateCache(marketId, maturityTimestamp);
-        (uint40 timestamp0, UD60x18 index0) = rateOracleReader.loadRateIndexPreMaturity(marketId, maturityTimestamp);
+        (uint32 timestamp0, UD60x18 index0) = rateOracleReader.loadRateIndexPreMaturity(marketId, maturityTimestamp);
         assertEq(index0.unwrap(), 0);
 
         vm.warp(maturityTimestamp / 2 + 1); // should not trigger cahche update
 
         rateOracleReader.updateCache(marketId, maturityTimestamp);
-        (uint40 timestamp1, UD60x18 index1) = rateOracleReader.loadRateIndexPreMaturity(marketId, maturityTimestamp);
+        (uint32 timestamp1, UD60x18 index1) = rateOracleReader.loadRateIndexPreMaturity(marketId, maturityTimestamp);
         assertEq(index1.unwrap(), indexToSet);
     }
 

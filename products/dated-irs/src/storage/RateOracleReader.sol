@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "../interfaces/IRateOracle.sol";
-import "@voltz-protocol/core/src/utils/contracts/helpers/Time.sol";
+import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
 
 library RateOracleReader {
@@ -15,7 +15,7 @@ library RateOracleReader {
     error MissingRateIndexAtMaturity();
 
     struct PreMaturityData {
-        uint40 lastKnownTimestamp;
+        uint32 lastKnownTimestamp;
         UD60x18 lastKnownIndex; // TODO - truncate indices to UD40x18 (nned to define this and faciliate checked casting) to save a
             // storage slot here and elsewhere
     }
@@ -40,8 +40,8 @@ library RateOracleReader {
         oracle.oracleAddress = oracleAddress;
     }
 
-    function updateCache(Data storage self, uint256 maturityTimestamp) internal {
-        if (block.timestamp >= maturityTimestamp) {
+    function updateCache(Data storage self, uint32 maturityTimestamp) internal {
+        if ( Time.blockTimestampTruncated() >= maturityTimestamp) {
             // maturity timestamp has passed
             UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
             if (rateIndexMaturity.unwrap() == 0) {
@@ -58,7 +58,7 @@ library RateOracleReader {
                         beforeIndex: cache.lastKnownIndex,
                         beforeTimestamp: cache.lastKnownTimestamp,
                         atOrAfterIndex: currentIndex,
-                        atOrAfterTimestamp: block.timestamp,
+                        atOrAfterTimestamp:  Time.blockTimestampTruncated(),
                         queryTimestamp: maturityTimestamp
                     });
                     self.rateIndexAtMaturity[maturityTimestamp] = rateIndexMaturity;
@@ -72,8 +72,8 @@ library RateOracleReader {
             PreMaturityData storage cache = self.rateIndexPreMaturity[maturityTimestamp];
             if (cache.lastKnownTimestamp > 0) {
                 // We have saved a pre-maturity value already; check whether we need to update it
-                uint256 timeTillMaturity = maturityTimestamp - block.timestamp;
-                uint256 timeSinceLastWrite = block.timestamp - cache.lastKnownTimestamp;
+                uint256 timeTillMaturity = maturityTimestamp -  Time.blockTimestampTruncated();
+                uint256 timeSinceLastWrite =  Time.blockTimestampTruncated() - cache.lastKnownTimestamp;
                 if (timeSinceLastWrite < timeTillMaturity) {
                     // We only update the cache if we are at least halfway to maturity since the last cache update
                     // This heuristic should give us a timestamp very close to the maturity timestamp, but should save unnecessary
@@ -89,8 +89,8 @@ library RateOracleReader {
         }
     }
 
-    function getRateIndexCurrent(Data storage self, uint256 maturityTimestamp) internal view returns (UD60x18 rateIndexCurrent) {
-        if (block.timestamp >= maturityTimestamp) {
+    function getRateIndexCurrent(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexCurrent) {
+        if ( Time.blockTimestampTruncated() >= maturityTimestamp) {
             // maturity timestamp has passed
             UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
 
@@ -106,7 +106,7 @@ library RateOracleReader {
                     beforeIndex: cache.lastKnownIndex,
                     beforeTimestamp: cache.lastKnownTimestamp,
                     atOrAfterIndex: currentIndex,
-                    atOrAfterTimestamp: block.timestamp,
+                    atOrAfterTimestamp:  Time.blockTimestampTruncated(),
                     queryTimestamp: maturityTimestamp
                 });
             }
@@ -117,8 +117,8 @@ library RateOracleReader {
         }
     }
 
-    function getRateIndexMaturity(Data storage self, uint256 maturityTimestamp) internal view returns (UD60x18 rateIndexMaturity) {
-        if (block.timestamp < maturityTimestamp) {
+    function getRateIndexMaturity(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexMaturity) {
+        if ( Time.blockTimestampTruncated() < maturityTimestamp) {
             revert MaturityNotReached();
         }
 

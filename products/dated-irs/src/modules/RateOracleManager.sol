@@ -20,7 +20,7 @@ contract RateOracleManager is IRateOracleModule {
 
     function getRateIndexCurrent(
         uint128 marketId,
-        uint256 maturityTimestamp
+        uint32 maturityTimestamp
     )
         external
         view
@@ -35,7 +35,7 @@ contract RateOracleManager is IRateOracleModule {
      */
     function getRateIndexMaturity(
         uint128 marketId,
-        uint256 maturityTimestamp
+        uint32 maturityTimestamp
     )
         external
         view

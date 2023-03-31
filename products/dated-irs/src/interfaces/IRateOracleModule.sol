@@ -24,7 +24,7 @@ interface IRateOracleModule {
      * @param maturityTimestamp Maturity Timestamp of a given irs market that's requesting the index value for settlement purposes
      * @return rateIndexMaturity Rate index at the requested maturityTimestamp
      */
-    function getRateIndexMaturity(uint128 marketId, uint256 maturityTimestamp) external returns (UD60x18 rateIndexMaturity);
+    function getRateIndexMaturity(uint128 marketId, uint32 maturityTimestamp) external returns (UD60x18 rateIndexMaturity);
 
     /**
      * @notice Requests the current rate index, or the index at maturity if we are past maturity, of a given interest rate market
@@ -32,7 +32,7 @@ interface IRateOracleModule {
      * @param marketId Id of the market (e.g. aUSDC lend) for which we're requesting the current rate index value
      * @return rateIndexCurrent Rate index at the current timestamp or at maturity time (whichever comes earlier)
      */
-    function getRateIndexCurrent(uint128 marketId, uint256 maturityTimestamp) external returns (UD60x18 rateIndexCurrent);
+    function getRateIndexCurrent(uint128 marketId, uint32 maturityTimestamp) external returns (UD60x18 rateIndexCurrent);
 
     /**
      * @notice Register a variable rate oralce

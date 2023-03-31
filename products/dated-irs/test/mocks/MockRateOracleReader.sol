@@ -4,7 +4,7 @@ pragma solidity >=0.8.13;
 import "../../src/interfaces/IRateOracle.sol";
 import "../../src/storage/RateOracleReader.sol";
 import "./MockRateOracle.sol";
-import "@voltz-protocol/core/src/utils/contracts/helpers/Time.sol";
+import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 contract MockRateOracleReader {
@@ -16,7 +16,7 @@ contract MockRateOracleReader {
         oracleAddress = _oracleAddress;
     }
 
-    // function setIndexCache(RateOracleReader.Data memory self, uint40 lastKnownTimestamp, UD60x18 lastKnownIndex, uint256
+    // function setIndexCache(RateOracleReader.Data memory self, uint32 lastKnownTimestamp, UD60x18 lastKnownIndex, uint256
     // maturityTimestamp) public {
     //     self.rateIndexPreMaturity[maturityTimestamp].lastKnownTimestamp = lastKnownTimestamp;
     //     self.rateIndexPreMaturity[maturityTimestamp].lastKnownIndex = lastKnownIndex;

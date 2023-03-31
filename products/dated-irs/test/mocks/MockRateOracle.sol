@@ -9,12 +9,12 @@ import "../../src/externalInterfaces/IAaveV3LendingPool.sol";
 import { UD60x18, ud } from "@prb/math/UD60x18.sol";
 
 contract MockRateOracle is IRateOracle {
-    uint40 public lastUpdatedTimestamp;
+    uint32 public lastUpdatedTimestamp;
     uint256 public lastUpdatedLiquidityIndex;
 
     /// @inheritdoc IRateOracle
-    function getLastUpdatedIndex() public view override returns (uint40 timestamp, UD60x18 liquidityIndex) {
-        return (uint40(block.timestamp), ud(lastUpdatedLiquidityIndex / 1e9));
+    function getLastUpdatedIndex() public view override returns (uint32 timestamp, UD60x18 liquidityIndex) {
+        return (Time.blockTimestampTruncated(), ud(lastUpdatedLiquidityIndex / 1e9));
     }
 
     function setLastUpdatedIndex(uint256 _lastUpdatedLiquidityIndex) public {

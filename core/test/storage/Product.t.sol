@@ -32,7 +32,7 @@ contract ExposedProduct is CoreState {
         return product.getAccountUnrealizedPnL(accountId, collateralType);
     }
 
-    function baseToAnnualizedExposure(uint128 productId, int256[] memory baseAmounts, uint128 marketId, uint256 maturityTimestamp) 
+    function baseToAnnualizedExposure(uint128 productId, int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp) 
         external view returns (int256[] memory) 
     {
         Product.Data storage product = Product.load(productId);

@@ -4,7 +4,7 @@ pragma solidity =0.8.17;
 
 import "../interfaces/IRateOracle.sol";
 import "../externalInterfaces/IAaveV3LendingPool.sol";
-import "@voltz-protocol/core/src/utils/contracts/helpers/Time.sol";
+import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 // import "../rate_oracles/CompoundingRateOracle.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
@@ -20,7 +20,7 @@ contract AaveRateOracle is IRateOracle {
     }
 
     /// @inheritdoc IRateOracle
-    function getLastUpdatedIndex() public view override returns (uint40 timestamp, UD60x18 liquidityIndex) {
+    function getLastUpdatedIndex() public view override returns (uint32 timestamp, UD60x18 liquidityIndex) {
         uint256 liquidityIndexInRay = aaveLendingPool.getReserveNormalizedIncome(underlying);
         // if (liquidityIndex == 0) {
         //     revert CustomErrors.AavePoolGetReserveNormalizedIncomeReturnedZero();

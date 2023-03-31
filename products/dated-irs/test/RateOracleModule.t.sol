@@ -1,6 +1,7 @@
 pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
+import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "./mocks/MockRateOracle.sol";
 import "../src/oracles/AaveRateOracle.sol";
 import "../src/modules/RateOracleManager.sol";
@@ -18,14 +19,14 @@ contract RateOracleManagerTest is Test {
     event RateOracleRegistered(uint128 indexed marketId, address indexed oracleAddress);
 
     MockRateOracle mockRateOracle;
-    uint256 public maturityTimestamp;
+    uint32 public maturityTimestamp;
 
     function setUp() public virtual {
         rateOracleManager = new RateOracleManager();
         MockAaveLendingPool lendingPool = new MockAaveLendingPool();
         AaveRateOracle aaveOracle = new AaveRateOracle(lendingPool, address(0));
         mockRateOracle = new MockRateOracle();
-        maturityTimestamp = block.timestamp + 3139000;
+        maturityTimestamp =  Time.blockTimestampTruncated() + 3139000;
         rateOracleManager.registerVariableOracle(100, address(mockRateOracle));
     }
 

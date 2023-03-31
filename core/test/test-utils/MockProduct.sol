@@ -49,11 +49,11 @@ contract MockProduct is IProduct {
 
     mapping(uint128 => mapping (uint256 => uint256)) internal mockBaseToAnnualizedFactor;
 
-    function mockBaseToAnnualizedExposure(uint128 marketId, uint256 maturityTimestamp, uint256 baseToAnnualizedFactor) public {
+    function mockBaseToAnnualizedExposure(uint128 marketId, uint32 maturityTimestamp, uint256 baseToAnnualizedFactor) public {
         mockBaseToAnnualizedFactor[marketId][maturityTimestamp] = baseToAnnualizedFactor;
     }
 
-    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint256 maturityTimestamp) 
+    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp) 
         external view returns (int256[] memory exposures) 
     {
         exposures = new int256[](baseAmounts.length);

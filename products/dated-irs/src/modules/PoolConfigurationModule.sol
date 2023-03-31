@@ -3,7 +3,7 @@ pragma solidity >=0.8.13;
 
 import "../interfaces/IPoolConfigurationModule.sol";
 import "../storage/PoolConfiguration.sol";
-import "@voltz-protocol/core/src/utils/contracts/storage/OwnableStorage.sol";
+import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 
 /**
  * @title Module for configuring the pool linked to the dated irs product

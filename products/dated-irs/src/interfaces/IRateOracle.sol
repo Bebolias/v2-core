@@ -19,7 +19,7 @@ interface IRateOracle {
     /// @dev This function should revert if a valid rate cannot be discerned
     /// @return timestamp the timestamp corresponding to the known rate (could be the current time, or a time in the past)
     /// @return liquidityIndex the liquidity index value, as a decimal scaled up by 10^18 for storage in a uint256
-    function getLastUpdatedIndex() external view returns (uint40 timestamp, UD60x18 liquidityIndex);
+    function getLastUpdatedIndex() external view returns (uint32 timestamp, UD60x18 liquidityIndex);
 
     /// @notice Get the current liquidity index for the rate oracle
     /// This data point may be extrapolated from data known data points available in the underlying platform.

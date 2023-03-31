@@ -1285,7 +1285,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@voltz-protocol/core@workspace:core":
+"@voltz-protocol/core@workspace:^, @voltz-protocol/core@workspace:core":
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/core@workspace:core"
   dependencies:
@@ -1298,6 +1298,19 @@ __metadata:
     prettier: 2.8.4
     semantic-release: ^20.1.1
     solhint: 3.4.0
+  languageName: unknown
+  linkType: soft
+
+"@voltz-protocol/products-dated-irs@workspace:products/dated-irs":
+  version: 0.0.0-use.local
+  resolution: "@voltz-protocol/products-dated-irs@workspace:products/dated-irs"
+  dependencies:
+    "@voltz-protocol/core": "workspace:^"
+    "@voltz-protocol/util-contracts": "workspace:^"
+    core: "link:../../core"
+    lcov-badge-generator: 1.0.5
+    prettier: 2.8.4
+    solhint: ^3.4.1
   languageName: unknown
   linkType: soft
 

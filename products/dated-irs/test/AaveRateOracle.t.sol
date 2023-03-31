@@ -1,6 +1,7 @@
 pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
+import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "./mocks/MockAaveLendingPool.sol";
 import "../src/oracles/AaveRateOracle.sol";
 import "oz/interfaces/IERC20.sol";
@@ -36,9 +37,9 @@ contract AaveRateOracleTest is Test {
     }
 
     function test_LastUpdatedIndex() public {
-        (uint40 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
+        (uint32 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
         assertEq(index.unwrap(), initValue.unwrap());
-        assertEq(time, block.timestamp);
+        assertEq(time,  Time.blockTimestampTruncated());
     }
 
     function test_InterpolateIndexValue() public {
@@ -132,7 +133,7 @@ contract AaveRateOracleTest is Test {
 
     function test_SetNonZeroIndexInMock() public {
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        vm.warp(block.timestamp + 10000); // TODO: not sure how this behaves, assuming it starts a new node per test
+        vm.warp( Time.blockTimestampTruncated() + 10000); // TODO: not sure how this behaves, assuming it starts a new node per test
         assertApproxEqRel(
             mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS),
             INDEX_AFTER_SET_TIME * 1e9,
@@ -142,16 +143,16 @@ contract AaveRateOracleTest is Test {
 
     function test_NonZeroCurrentIndex() public {
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        vm.warp(block.timestamp + 10000); // TODO: not sure how this behaves, assuming it starts a new node per test
+        vm.warp( Time.blockTimestampTruncated() + 10000); // TODO: not sure how this behaves, assuming it starts a new node per test
         assertApproxEqAbs(rateOracle.getCurrentIndex().unwrap(), INDEX_AFTER_SET_TIME, 1e7);
     }
 
     function test_NonZeroLastUpdatedIndex() public {
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        vm.warp(block.timestamp + 10000);
-        (uint40 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
+        vm.warp( Time.blockTimestampTruncated() + 10000);
+        (uint32 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
         assertApproxEqRel(index.unwrap(), INDEX_AFTER_SET_TIME, 1e17);
-        assertEq(time, block.timestamp);
+        assertEq(time,  Time.blockTimestampTruncated());
     }
 
     function testFuzz_etNonZeroIndexInMock(uint256 factorPerSecond, uint16 timePassed) public {
@@ -159,7 +160,7 @@ contract AaveRateOracleTest is Test {
         // not bigger than 72% apy per year
         vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
-        vm.warp(block.timestamp + timePassed);
+        vm.warp( Time.blockTimestampTruncated() + timePassed);
         assertTrue(mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS) >= initValue.unwrap());
     }
 
@@ -168,7 +169,7 @@ contract AaveRateOracleTest is Test {
         // not bigger than 72% apy per year
         vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
-        vm.warp(block.timestamp + timePassed);
+        vm.warp( Time.blockTimestampTruncated() + timePassed);
         UD60x18 index = rateOracle.getCurrentIndex();
         assertTrue(index.gte(initValue));
     }
@@ -178,9 +179,9 @@ contract AaveRateOracleTest is Test {
         // not bigger than 72% apy per year
         vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
-        vm.warp(block.timestamp + timePassed);
-        (uint40 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
+        vm.warp( Time.blockTimestampTruncated() + timePassed);
+        (uint32 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
         assertTrue(index.gte(initValue));
-        assertEq(time, block.timestamp);
+        assertEq(time,  Time.blockTimestampTruncated());
     }
 }
