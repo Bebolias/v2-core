@@ -91,7 +91,7 @@ contract ProductIRSModule is IProductIRSModule {
     function getAccountUnrealizedPnL(uint128 accountId, address collateralType) external view override returns (SD59x18 unrealizedPnL) {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address _poolAddress = PoolConfiguration.getPoolAddress();
-        return portfolio.getAccountUnrealizedPnL(_poolAddress);
+        return portfolio.getAccountUnrealizedPnL(_poolAddress, collateralType);
     }
 
     /**
@@ -115,7 +115,7 @@ contract ProductIRSModule is IProductIRSModule {
     {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address _poolAddress = PoolConfiguration.getPoolAddress();
-        return portfolio.getAccountAnnualizedExposures(_poolAddress);
+        return portfolio.getAccountAnnualizedExposures(_poolAddress, collateralType);
     }
 
     /**
@@ -124,7 +124,7 @@ contract ProductIRSModule is IProductIRSModule {
     function closeAccount(uint128 accountId, address collateralType) external override {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address _poolAddress = PoolConfiguration.getPoolAddress();
-        portfolio.closeAccount(_poolAddress);
+        portfolio.closeAccount(_poolAddress, collateralType);
     }
 
     /**

@@ -7,6 +7,7 @@ import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "./Position.sol";
 import "./RateOracleReader.sol";
 import "./PoolConfiguration.sol";
+import "./MarketConfiguration.sol";
 import "../interfaces/IPool.sol";
 // todo: for now can import core workspace
 import "@voltz-protocol/core/src/storage/Account.sol";
@@ -44,12 +45,13 @@ library Portfolio {
          * @dev marketId (e.g. aUSDC lend) --> maturityTimestamp (e.g. 31st Dec 2023) --> Position object with filled
          * balances
          */
-        mapping(uint128 => mapping(uint256 => Position.Data)) positions;
+        mapping(uint128 => mapping(uint32 => Position.Data)) positions;
         /**
-         * @dev Maturities & ids of all the markets in which the account has active positions
+         * @dev Mapping from settlementToken to an
          * array of marketId (e.g. aUSDC lend) and activeMaturities (e.g. 31st Dec 2023)
-         */
-        SetUtil.UintSet activeMarketsAndMaturities;
+         * in which the account has active positions
+         */ 
+        mapping(address => SetUtil.UintSet) activeMarketsAndMaturities;
     }
 
     /**
@@ -78,10 +80,10 @@ library Portfolio {
      * consider avoiding pool if account is purely taker to save gas?
      * todo: this function looks expesive and feels like there's room for optimisations
      */
-    function getAccountUnrealizedPnL(Data storage self, address poolAddress) internal view returns (SD59x18 unrealizedPnL) {
+    function getAccountUnrealizedPnL(Data storage self, address poolAddress, address collateralType) internal view returns (SD59x18 unrealizedPnL) {
         // TODO: looks expensive - need to place limits on number of allowed markets and allowed maturities?
-        for (uint256 i = 0; i < self.activeMarketsAndMaturities.length(); i++) {
-            uint256 marketMaturityPacked = self.activeMarketsAndMaturities.valueAt(i + 1);
+        for (uint256 i = 0; i < self.activeMarketsAndMaturities[collateralType].length(); i++) {
+            uint256 marketMaturityPacked = self.activeMarketsAndMaturities[collateralType].valueAt(i + 1);
             (uint128 marketId, uint32 maturityTimestamp) = unpack(marketMaturityPacked);
 
             SD59x18 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
@@ -139,18 +141,18 @@ library Portfolio {
      */
     function getAccountAnnualizedExposures(
         Data storage self,
-        address poolAddress
+        address poolAddress,
+        address collateralType
     )
         internal
         view
         returns (Account.Exposure[] memory exposures)
     {
-        uint256 marketsAndMaturitiesCount = self.activeMarketsAndMaturities.length();
+        uint256 marketsAndMaturitiesCount = self.activeMarketsAndMaturities[collateralType].length();
         exposures = new Account.Exposure[](marketsAndMaturitiesCount);
 
         for (uint256 i = 0; i < marketsAndMaturitiesCount; i++) {
-            uint256 marketMaturityPacked = self.activeMarketsAndMaturities.valueAt(i + 1);
-            (uint128 marketId, uint32 maturityTimestamp) = unpack(marketMaturityPacked);
+            (uint128 marketId, uint32 maturityTimestamp) = self.getMarketAndMaturity(i+1, collateralType);
 
             SD59x18 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
             (SD59x18 baseBalancePool,) = IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
@@ -174,11 +176,10 @@ library Portfolio {
      * @dev Fully Close all the positions owned by the account within the dated irs portfolio
      * poolAddress in which to close the account, note in the beginning we'll only have a single pool
      */
-    function closeAccount(Data storage self, address poolAddress) internal {
+    function closeAccount(Data storage self, address poolAddress, address collateralType) internal {
         IPool pool = IPool(poolAddress);
-        for (uint256 i = 1; i <= self.activeMarketsAndMaturities.length(); i++) {
-            uint256 marketMaturityPacked = self.activeMarketsAndMaturities.valueAt(i);
-            (uint128 marketId, uint32 maturityTimestamp) = unpack(marketMaturityPacked);
+        for (uint256 i = 1; i <= self.activeMarketsAndMaturities[collateralType].length(); i++) {
+            (uint128 marketId, uint32 maturityTimestamp) = self.getMarketAndMaturity(i, collateralType);
 
             Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
@@ -250,8 +251,9 @@ library Portfolio {
     function activateMarketMaturity(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal {
         // todo: check if market/maturity exist
         uint256 marketMaturityPacked = pack(marketId, maturityTimestamp);
-        if (!self.activeMarketsAndMaturities.contains(marketMaturityPacked)) {
-            self.activeMarketsAndMaturities.add(marketMaturityPacked);
+        address collateralType = MarketConfiguration.load(marketId).quoteToken;
+        if (!self.activeMarketsAndMaturities[collateralType].contains(marketMaturityPacked)) {
+            self.activeMarketsAndMaturities[collateralType].add(marketMaturityPacked);
         }
     }
 
@@ -261,8 +263,9 @@ library Portfolio {
      */
     function deactivateMarketMaturity(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal {
         uint256 marketMaturityPacked = pack(marketId, maturityTimestamp);
-        if (self.activeMarketsAndMaturities.contains(marketMaturityPacked)) {
-            self.activeMarketsAndMaturities.remove(marketMaturityPacked);
+        address collateralType = MarketConfiguration.load(marketId).quoteToken;
+        if (self.activeMarketsAndMaturities[collateralType].contains(marketMaturityPacked)) {
+            self.activeMarketsAndMaturities[collateralType].remove(marketMaturityPacked);
         }
     }
 
@@ -274,5 +277,10 @@ library Portfolio {
     function unpack(uint256 value) internal view returns (uint128 a, uint32 b) {
         a = uint128(value >> 32);
         b = uint32(value - uint256(a << 32)); // todo: safecast
+    }
+
+    function getMarketAndMaturity(Data storage self, uint256 index, address collateralType) internal view returns (uint128 marketId, uint32 maturityTimestamp) {
+        uint256 marketMaturityPacked = self.activeMarketsAndMaturities[collateralType].valueAt(index);
+        (marketId, maturityTimestamp) = unpack(marketMaturityPacked);
     }
 }
