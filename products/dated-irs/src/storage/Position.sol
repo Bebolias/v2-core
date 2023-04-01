@@ -15,7 +15,7 @@ library Position {
 
     function update(Data storage self, SD59x18 baseDelta, SD59x18 quoteDelta) internal {
         self.baseBalance = self.baseBalance.add(baseDelta);
-        self.quoteBalance = self.baseBalance.add(quoteDelta);
+        self.quoteBalance = self.quoteBalance.add(quoteDelta);
     }
 
     function settle(Data storage self) internal {

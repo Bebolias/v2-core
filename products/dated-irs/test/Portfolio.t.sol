@@ -13,7 +13,6 @@ import { SD59x18, unwrap as sUnwrap } from "@prb/math/SD59x18.sol";
 
 contract ExposePortfolio {
     using { uUnwrap } for UD60x18;
-    using { toSD59x18 } for int256;
     using Portfolio for Portfolio.Data;
     using SetUtil for SetUtil.UintSet;
     using RateOracleReader for RateOracleReader.Data;
@@ -62,9 +61,9 @@ contract ExposePortfolio {
         return portfolio.updatePosition(marketId, maturityTimestamp, baseDelta, quoteDelta);
     }
 
-    function settle(uint128 id, uint128 marketId, uint32 maturityTimestamp) external returns (SD59x18 settlementCashflow) {
+    function settle(uint128 id, uint128 marketId, uint32 maturityTimestamp, address poolAddress) external returns (SD59x18 settlementCashflow) {
         Portfolio.Data storage portfolio = Portfolio.load(id);
-        return portfolio.settle(marketId, maturityTimestamp);
+        return portfolio.settle(marketId, maturityTimestamp, poolAddress);
     }
 
     function updateCache(uint128 marketId, uint32 maturityTimestamp) external {
@@ -260,8 +259,8 @@ contract PortfolioTest is Test {
         mockRateOracle.setLastUpdatedIndex(1e27);
         portfolio.updateCache(marketId, maturityTimestamp);
 
-        SD59x18 settlementCashflow = portfolio.settle(accountId, marketId, maturityTimestamp);
-        assertEq(settlementCashflow.sUnwrap(), 10e18 + 20);
+        SD59x18 settlementCashflow = portfolio.settle(accountId, marketId, maturityTimestamp, address(mockPool));
+        assertEq(settlementCashflow.sUnwrap(), 30);
 
         Position.Data memory position = portfolio.getPositionData(accountId, marketId, maturityTimestamp);
         assertEq(position.baseBalance.sUnwrap(), 0);
@@ -293,13 +292,13 @@ contract PortfolioTest is Test {
         vm.warp(maturityTimestamp + 1);
         portfolio.updateCache(marketId, maturityTimestamp);
 
-        SD59x18 settlementCashflow = portfolio.settle(accountId, 100, maturityTimestamp);
+        SD59x18 settlementCashflow = portfolio.settle(accountId, marketId, maturityTimestamp, address(mockPool));
 
         Position.Data memory position = portfolio.getPositionData(accountId, marketId, maturityTimestamp);
 
         assertEq(position.baseBalance.sUnwrap(), 0);
         assertEq(position.quoteBalance.sUnwrap(), 0);
-        assertEq(settlementCashflow.sUnwrap() , 10e19 + 20);
+        assertEq(settlementCashflow.sUnwrap() , 30);
     }
 
     function test_AnnualizedExposureFactorBeforeMaturity() public {
@@ -324,7 +323,7 @@ contract PortfolioTest is Test {
     function test_AccountAnnualizedExposureTaker() public {
         uint32 maturityTimestamp = currentTimestamp + 31540000;
 
-        portfolio.updatePosition(accountId, marketId, maturityTimestamp, sd(10), sd(20));
+        portfolio.updatePosition(accountId, marketId, maturityTimestamp, sd(10 * 1e6), sd(20 * 1e6));
 
         mockRateOracle.setLastUpdatedIndex(1e27);
 
@@ -332,7 +331,7 @@ contract PortfolioTest is Test {
 
         assertEq(exposures.length, 1);
         assertEq(exposures[0].marketId, marketId);
-        assertEq(exposures[0].filled.sUnwrap(), 1e19);
+        assertEq(exposures[0].filled.sUnwrap(), 1e7);
         assertEq(exposures[0].unfilledLong.sUnwrap(), 0);
         assertEq(exposures[0].unfilledShort.sUnwrap(), 0);
     }
@@ -349,8 +348,8 @@ contract PortfolioTest is Test {
 
         assertEq(exposures.length, 1);
         assertEq(exposures[0].marketId, marketId);
-        assertEq(exposures[0].filled.sUnwrap(), 2.5e19);
-        assertEq(exposures[0].unfilledLong.sUnwrap(), 2e18);
-        assertEq(exposures[0].unfilledShort.sUnwrap(), -3e18);
+        assertEq(exposures[0].filled.sUnwrap(), 25);
+        assertEq(exposures[0].unfilledLong.sUnwrap(), 2);
+        assertEq(exposures[0].unfilledShort.sUnwrap(), -3);
     }
 }

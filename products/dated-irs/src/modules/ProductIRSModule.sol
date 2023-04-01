@@ -68,9 +68,9 @@ contract ProductIRSModule is IProductIRSModule {
      * @inheritdoc IProductIRSModule
      */
 
-    function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) external override {
+    function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp, address poolAddress) external override {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        SD59x18 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp);
+        SD59x18 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp,poolAddress);
 
         address quoteToken = MarketConfiguration.load(marketId).quoteToken;
 
