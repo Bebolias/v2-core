@@ -2,9 +2,14 @@
 
 pragma solidity =0.8.17;
 
+import { UD60x18, toUD60x18, ud } from "@prb/math/UD60x18.sol";
+
 library Time {
+
+    using { toUD60x18 } for uint256;
+
     // uint256 public constant SECONDS_IN_DAY_WAD = 86400e18;
-    uint256 public constant SECONDS_IN_YEAR_WAD = 31540000e18;
+    uint256 public constant SECONDS_IN_YEAR = 31540000;
 
     // /// @notice Calculate block.timestamp to wei precision
     // /// @return Current timestamp in wei-seconds (1/1e18)
@@ -22,10 +27,9 @@ library Time {
         require((timestamp = uint32(_timestamp)) == _timestamp, "TSOFLOW");
     }
 
-    function timeDeltaAnnualizedWad(uint32 timestamp) internal pure returns (uint32 timeDelta) {
+    function timeDeltaAnnualized(uint32 timestamp) internal view returns (UD60x18 timeDeltaAnnualized) {
         if (timestamp > blockTimestampTruncated()) {
-            uint256 timeDeltaUnchecked = (timestamp - blockTimestampTruncated()) * 1e18 / SECONDS_IN_YEAR_WAD;
-            require((timeDelta = uint32(timeDeltaUnchecked)) == timeDeltaUnchecked, "TOFLOW");
+            timeDeltaAnnualized = (uint256(timestamp) - block.timestamp).toUD60x18().div(SECONDS_IN_YEAR.toUD60x18());
         }
         
     }

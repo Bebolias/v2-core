@@ -4,6 +4,7 @@ pragma solidity >=0.8.13;
 import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
+import "@voltz-protocol/util-contracts/src/helpers/Pack.sol";
 import "./Position.sol";
 import "./RateOracleReader.sol";
 import "./PoolConfiguration.sol";
@@ -11,8 +12,8 @@ import "./MarketConfiguration.sol";
 import "../interfaces/IPool.sol";
 // todo: for now can import core workspace
 import "@voltz-protocol/core/src/storage/Account.sol";
-import { UD60x18, unwrap as uUnwrap } from "@prb/math/UD60x18.sol";
-import { SD59x18, sd , UNIT, ZERO, unwrap as sUnwrap } from "@prb/math/SD59x18.sol";
+import { UD60x18 } from "@prb/math/UD60x18.sol";
+import { SD59x18, UNIT, ZERO } from "@prb/math/SD59x18.sol";
 import { console2 } from "forge-std/console2.sol";
 
 /**
@@ -20,9 +21,8 @@ import { console2 } from "forge-std/console2.sol";
  */
 library Portfolio {
     using Portfolio for Portfolio.Data;
-    using { uUnwrap } for UD60x18;
-    using { sUnwrap } for SD59x18;
-    using { sd } for int256;
+    using SafeCastPrbMath for UD60x18;
+    using SafeCastPrbMath for SD59x18;
     using Position for Position.Data;
     using SetUtil for SetUtil.UintSet;
     using SafeCastU256 for uint256;
@@ -84,7 +84,7 @@ library Portfolio {
         // TODO: looks expensive - need to place limits on number of allowed markets and allowed maturities?
         for (uint256 i = 0; i < self.activeMarketsAndMaturities[collateralType].length(); i++) {
             uint256 marketMaturityPacked = self.activeMarketsAndMaturities[collateralType].valueAt(i + 1);
-            (uint128 marketId, uint32 maturityTimestamp) = unpack(marketMaturityPacked);
+            (uint128 marketId, uint32 maturityTimestamp) = Pack.unpack(marketMaturityPacked);
 
             SD59x18 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
             SD59x18 quoteBalance = self.positions[marketId][maturityTimestamp].quoteBalance;
@@ -101,15 +101,15 @@ library Portfolio {
     function computeUnwindQuote(uint128 marketId, uint32 maturityTimestamp, address poolAddress, SD59x18 baseAmount) internal view returns (SD59x18 unwindQuote) {
         UD60x18 timeDeltaAnnualized = Time.timeDeltaAnnualized(maturityTimestamp);
 
-        SD59x18 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp).uUnwrap().toInt().sd();
+        UD60x18 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp);
 
-        uint256 gwap = IPool(poolAddress).getDatedIRSGwap(marketId, maturityTimestamp).uUnwrap();
+        UD60x18 gwap = IPool(poolAddress).getDatedIRSGwap(marketId, maturityTimestamp);
 
         unwindQuote = baseAmount
-            .mul(currentLiquidityIndex)
+            .mul(currentLiquidityIndex.toSD59x18())
             .mul(
-                SD59x18.wrap(gwap.toInt())
-                .mul(SD59x18.wrap(timeDeltaAnnualized.uUnwrap().toInt()))
+                gwap.toSD59x18()
+                .mul(timeDeltaAnnualized.toSD59x18())
                 .add(UNIT)
             );
     }
@@ -131,7 +131,7 @@ library Portfolio {
         UD60x18 factor = annualizedExposureFactor(marketId, maturityTimestamp);
 
         for (uint256 i = 0; i < baseAmounts.length; i++) {
-            exposures[i] = baseAmounts[i].mul(SD59x18.wrap(factor.uUnwrap().toInt()));
+            exposures[i] = baseAmounts[i].mul(factor.toSD59x18());
         }
     }
 
@@ -162,9 +162,9 @@ library Portfolio {
                 UD60x18 annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
                 exposures[i] = Account.Exposure({
                     marketId: marketId,
-                    filled: baseBalance.add(baseBalancePool).mul(SD59x18.wrap(annualizedExposureFactor.uUnwrap().toInt())),
-                    unfilledLong: unfilledBaseLong.mul(SD59x18.wrap(annualizedExposureFactor.uUnwrap().toInt())),
-                    unfilledShort: unfilledBaseShort.mul(SD59x18.wrap(annualizedExposureFactor.uUnwrap().toInt()))
+                    filled: baseBalance.add(baseBalancePool).mul(annualizedExposureFactor.toSD59x18()),
+                    unfilledLong: unfilledBaseLong.mul(annualizedExposureFactor.toSD59x18()),
+                    unfilledShort: unfilledBaseShort.mul(annualizedExposureFactor.toSD59x18())
                 });
             }
         }
@@ -237,7 +237,7 @@ library Portfolio {
         
         settlementCashflow = position.baseBalance
             .add(closedBasePool)
-            .mul(liquidityIndexMaturity.uUnwrap().toInt().sd())
+            .mul(liquidityIndexMaturity.toSD59x18())
             .add(position.quoteBalance)
             .add(closedQuotePool);
             
@@ -250,7 +250,7 @@ library Portfolio {
      */
     function activateMarketMaturity(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal {
         // todo: check if market/maturity exist
-        uint256 marketMaturityPacked = pack(marketId, maturityTimestamp);
+        uint256 marketMaturityPacked = Pack.pack(marketId, maturityTimestamp);
         address collateralType = MarketConfiguration.load(marketId).quoteToken;
         if (!self.activeMarketsAndMaturities[collateralType].contains(marketMaturityPacked)) {
             self.activeMarketsAndMaturities[collateralType].add(marketMaturityPacked);
@@ -262,7 +262,7 @@ library Portfolio {
      * note this can also be called by the pool when a position is settled
      */
     function deactivateMarketMaturity(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal {
-        uint256 marketMaturityPacked = pack(marketId, maturityTimestamp);
+        uint256 marketMaturityPacked = Pack.pack(marketId, maturityTimestamp);
         address collateralType = MarketConfiguration.load(marketId).quoteToken;
         if (self.activeMarketsAndMaturities[collateralType].contains(marketMaturityPacked)) {
             self.activeMarketsAndMaturities[collateralType].remove(marketMaturityPacked);
@@ -270,17 +270,9 @@ library Portfolio {
     }
 
     // todo: add to library
-    function pack(uint128 a, uint32 b) internal pure returns (uint256) {
-        return (a << 32) | b;
-    }
-
-    function unpack(uint256 value) internal view returns (uint128 a, uint32 b) {
-        a = uint128(value >> 32);
-        b = uint32(value - uint256(a << 32)); // todo: safecast
-    }
 
     function getMarketAndMaturity(Data storage self, uint256 index, address collateralType) internal view returns (uint128 marketId, uint32 maturityTimestamp) {
         uint256 marketMaturityPacked = self.activeMarketsAndMaturities[collateralType].valueAt(index);
-        (marketId, maturityTimestamp) = unpack(marketMaturityPacked);
+        (marketId, maturityTimestamp) = Pack.unpack(marketMaturityPacked);
     }
 }
