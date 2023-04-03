@@ -3,7 +3,6 @@ pragma solidity >=0.8.13;
 
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
-import { SD59x18 } from "@prb/math/SD59x18.sol";
 
 /// @title Interface a Pool needs to adhere.
 interface IPool is IERC165 {
@@ -13,10 +12,10 @@ interface IPool is IERC165 {
     function executeDatedTakerOrder(
         uint128 marketId,
         uint32 maturityTimestamp,
-        SD59x18 baseAmount
+        int256 baseAmount
     )
         external
-        returns (SD59x18 executedBaseAmount, SD59x18 executedQuoteAmount);
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount);
 
     function getAccountFilledBalances(
         uint128 marketId,
@@ -25,7 +24,7 @@ interface IPool is IERC165 {
     )
         external
         view
-        returns (SD59x18 baseBalancePool, SD59x18 quoteBalancePool);
+        returns (int256 baseBalancePool, int256 quoteBalancePool);
 
     function getAccountUnfilledBases(
         uint128 marketId,
@@ -34,7 +33,7 @@ interface IPool is IERC165 {
     )
         external
         view
-        returns (SD59x18 unfilledBaseLong, SD59x18 unfilledBaseShort);
+        returns (int256 unfilledBaseLong, int256 unfilledBaseShort);
 
 
     function closePosition(
@@ -43,7 +42,7 @@ interface IPool is IERC165 {
         uint128 accountId
     )
         external
-        returns (SD59x18 closedBasePool, SD59x18 closedQuotePool);
+        returns (int256 closedBasePool, int256 closedQuotePool);
 
     /**
      * @notice Get dated irs gwap for the purposes of unrealized pnl calculation in the portfolio (see Portfolio.sol)

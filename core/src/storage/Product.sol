@@ -4,16 +4,12 @@ pragma solidity >=0.8.13;
 import "@voltz-protocol/util-contracts/src/errors/AccessError.sol";
 import "../interfaces/external/IProduct.sol";
 import "./Account.sol";
-import { UD60x18, ud} from "@prb/math/UD60x18.sol";
-import { SD59x18, unwrap, sd } from "@prb/math/SD59x18.sol";
 
 /**
  * @title Connects external contracts that implement the `IProduct` interface to the protocol.
  *
  */
 library Product {
-    using { unwrap } for SD59x18;
-
     struct Data {
         /**
          * @dev Numeric identifier for the product. Must be unique.
@@ -67,7 +63,7 @@ library Product {
     function getAccountUnrealizedPnL(Data storage self, uint128 accountId, address collateralType) 
         internal view returns (int256 accountUnrealizedPnL) 
     {
-        return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId, collateralType).unwrap();
+        return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId, collateralType);
     }
 
     /**
@@ -79,18 +75,7 @@ library Product {
     function baseToAnnualizedExposure(Data storage self, int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp) 
         external view returns (int256[] memory exposures) 
     {
-        // todo: introduce PRBMath in core & remove this bit
-        SD59x18[] memory baseAmountsSD = new SD59x18[](baseAmounts.length);
-        for (uint i = 0; i < baseAmounts.length; i++) {
-            baseAmountsSD[i] = sd(baseAmounts[i]);
-        }
-        SD59x18[] memory resultSD =  IProduct(self.productAddress).baseToAnnualizedExposure(baseAmountsSD, marketId, uint32(maturityTimestamp));
-
-        int256[] memory result = new int256[](resultSD.length);
-        for (uint i = 0; i < resultSD.length; i++) {
-            result[i] = unwrap(resultSD[i]);
-        }
-        return result;
+        return IProduct(self.productAddress).baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
     }
 
     /**

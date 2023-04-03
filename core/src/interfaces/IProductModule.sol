@@ -48,7 +48,7 @@ interface IProductModule {
     // todo: is annualizedNotional supposed to be unsigned?
     function propagateTakerOrder(
         uint128 accountId, uint128 productId, uint128 marketId, 
-        address collateralType, uint256 annualizedNotional) 
+        address collateralType, int256 annualizedNotional) 
         external returns (uint256 fee);
 
     // todo: is annualizedNotional supposed to be unsigned?

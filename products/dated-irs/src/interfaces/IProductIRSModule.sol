@@ -2,7 +2,6 @@
 pragma solidity >=0.8.13;
 
 import "@voltz-protocol/core/src/interfaces/external/IProduct.sol";
-import { SD59x18 } from "@prb/math/SD59x18.sol";
 
 /// @title Interface of a dated irs product
 interface IProductIRSModule is IProduct {
@@ -30,8 +29,8 @@ interface IProductIRSModule is IProduct {
         uint128 accountId,
         uint128 marketId,
         uint32 maturityTimestamp,
-        SD59x18 baseAmount
+        int256 baseAmount
     )
         external
-        returns (SD59x18 executedBaseAmount, SD59x18 executedQuoteAmount);
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount);
 }
