@@ -2,13 +2,14 @@
 
 pragma solidity =0.8.17;
 
+import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 /// @dev The RateOracle is used for two purposes on the Voltz Protocol
 /// @dev Settlement: in order to be able to settle IRS positions after the termEndTimestamp of a given AMM
 /// @dev Margin Engine Computations: getApyFromTo is used by the MarginEngine
 /// @dev It is necessary to produce margin requirements for Trader and Liquidity Providers
-interface IRateOracle {
+interface IRateOracle is IERC165 {
     /// @notice Get the last updated liquidity index with the timestamp at which it was written
     /// This data point must be a known data point from the source of the data, and not extrapolated or interpolated by us.
     /// The source and expected values of "lquidity index" may differ by rate oracle type. All that

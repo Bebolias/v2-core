@@ -7,7 +7,6 @@ import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Pack.sol";
 import "./Position.sol";
 import "./RateOracleReader.sol";
-import "./PoolConfiguration.sol";
 import "./MarketConfiguration.sol";
 import "../interfaces/IPool.sol";
 // todo: for now can import core workspace
@@ -32,6 +31,7 @@ library Portfolio {
      * @notice Emitted when attempting to settle before maturity
      */
     error SettlementBeforeMaturity(uint128 marketId, uint32 maturityTimestamp, uint256 accountId);
+    error UnknownMarket(uint128 marketId);
 
     struct Data {
         /**
@@ -251,8 +251,11 @@ library Portfolio {
      */
     function activateMarketMaturity(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal {
         // todo: check if market/maturity exist
-        uint256 marketMaturityPacked = Pack.pack(marketId, maturityTimestamp);
         address collateralType = MarketConfiguration.load(marketId).quoteToken;
+        if (collateralType == address(0)) {
+            revert UnknownMarket(marketId);
+        }
+        uint256 marketMaturityPacked = Pack.pack(marketId, maturityTimestamp);
         if (!self.activeMarketsAndMaturities[collateralType].contains(marketMaturityPacked)) {
             self.activeMarketsAndMaturities[collateralType].add(marketMaturityPacked);
         }

@@ -40,4 +40,11 @@ contract MockRateOracle is IRateOracle {
     {
         interpolatedIndex = beforeIndex.add(atOrAfterIndex).div(ud(2e18));
     }
+
+    /**
+     * @inheritdoc IERC165
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165) returns (bool) {
+        return interfaceId == type(IRateOracle).interfaceId;
+    }
 }

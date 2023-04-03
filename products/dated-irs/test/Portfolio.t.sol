@@ -4,7 +4,6 @@ import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "../src/storage/Portfolio.sol";
 import "../src/storage/MarketConfiguration.sol";
-import "../src/storage/PoolConfiguration.sol";
 import "../src/storage/RateOracleReader.sol";
 import "./mocks/MockRateOracle.sol";
 import "./mocks/MockPool.sol";
@@ -121,7 +120,6 @@ contract PortfolioTest is Test {
         mockPool = new MockPool();
         mockRateOracle = new MockRateOracle();
 
-        PoolConfiguration.set(PoolConfiguration.Data({ poolAddress: address(mockPool) }));
         maturityTimestamp = currentTimestamp + ONE_YEAR;
 
         portfolio = new ExposePortfolio();

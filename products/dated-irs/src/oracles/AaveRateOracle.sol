@@ -68,4 +68,11 @@ contract AaveRateOracle is IRateOracle {
             ud(queryTimestampWad - beforeTimestampWad).div(ud(atOrAfterTimestampWad - beforeTimestampWad));
         return proportionOfPeriodElapsed.mul(totalDelta).add(beforeIndex);
     }
+
+    /**
+     * @inheritdoc IERC165
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165) returns (bool) {
+        return interfaceId == type(IRateOracle).interfaceId;
+    }
 }

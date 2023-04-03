@@ -2,10 +2,11 @@
 pragma solidity >=0.8.13;
 
 import "../interfaces/IProductIRSModule.sol";
+import "../interfaces/IMarketConfigurationModule.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
 import "../storage/Portfolio.sol";
 import "../storage/MarketConfiguration.sol";
-import "../storage/PoolConfiguration.sol";
+import "../storage/ProductConfiguration.sol";
 import "../storage/RateOracleReader.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
@@ -19,16 +20,6 @@ contract ProductIRSModule is IProductIRSModule {
     using RateOracleReader for RateOracleReader.Data;
     using Portfolio for Portfolio.Data;
     using SafeCastI256 for int256;
-
-    address private _proxy;
-    uint128 private _productId;
-
-    function initialize(address proxy, uint128 productId) external {
-        // todo: do we want to make below two varaibles settable? if yes need to be careful because the core relies on
-        // e.g. productId information
-        _proxy = proxy;
-        _productId = productId;
-    }
 
     /**
      * @inheritdoc IProductIRSModule
@@ -47,18 +38,19 @@ contract ProductIRSModule is IProductIRSModule {
         RateOracleReader.load(marketId).updateCache(maturityTimestamp);
 
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
-        address _poolAddress = PoolConfiguration.getPoolAddress();
+        address _poolAddress = ProductConfiguration.getPoolAddress();
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         IPool pool = IPool(_poolAddress);
         (executedBaseAmount, executedQuoteAmount) = pool.executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount);
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
 
         // propagate order
-        address quoteToken = MarketConfiguration.load(marketId).quoteToken;
+        address _proxy = ProductConfiguration.getProxyAddress();
+        address quoteToken = IMarketConfigurationModule(_proxy).getMarketConfiguration(marketId).quoteToken;
         int256[] memory baseAmounts = new int256[](1);
         baseAmounts[0] = executedBaseAmount;
         int256 annualizedBaseAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
-        IProductModule(_proxy).propagateTakerOrder(accountId, _productId, marketId, quoteToken, annualizedBaseAmount);
+        IProductModule(_proxy).propagateTakerOrder(accountId, ProductConfiguration.getProductId(), marketId, quoteToken, annualizedBaseAmount);
     }
 
     /**
@@ -69,7 +61,8 @@ contract ProductIRSModule is IProductIRSModule {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp,poolAddress);
 
-        address quoteToken = MarketConfiguration.load(marketId).quoteToken;
+        address _proxy = ProductConfiguration.getProxyAddress();
+        address quoteToken = IMarketConfigurationModule(_proxy).getMarketConfiguration(marketId).quoteToken;
 
         IProductModule(_proxy).propagateCashflow(accountId, quoteToken, settlementCashflowInQuote);
     }
@@ -87,7 +80,7 @@ contract ProductIRSModule is IProductIRSModule {
      // todo: override & add collateralType
     function getAccountUnrealizedPnL(uint128 accountId, address collateralType) external view override returns (int256 unrealizedPnL) {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        address _poolAddress = PoolConfiguration.getPoolAddress();
+        address _poolAddress = ProductConfiguration.getPoolAddress();
         return portfolio.getAccountUnrealizedPnL(_poolAddress, collateralType);
     }
 
@@ -111,7 +104,7 @@ contract ProductIRSModule is IProductIRSModule {
         returns (Account.Exposure[] memory exposures)
     {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        address _poolAddress = PoolConfiguration.getPoolAddress();
+        address _poolAddress = ProductConfiguration.getPoolAddress();
         return portfolio.getAccountAnnualizedExposures(_poolAddress, collateralType);
     }
 
@@ -120,8 +113,14 @@ contract ProductIRSModule is IProductIRSModule {
      */
     function closeAccount(uint128 accountId, address collateralType) external override {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        address _poolAddress = PoolConfiguration.getPoolAddress();
+        address _poolAddress = ProductConfiguration.getPoolAddress();
         portfolio.closeAccount(_poolAddress, collateralType);
+    }
+
+    // todo: intorduce in interface or create separate module for exposing this function
+    function configureProduct(ProductConfiguration.Data memory config) external {
+        ProductConfiguration.set(config);
+        emit ProductConfigured(config);
     }
 
     /**

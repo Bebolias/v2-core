@@ -33,9 +33,9 @@ contract RateOracleManagerTest is Test {
     function test_InitRegisterVariableOracle() public {
         // expect RateOracleRegistered event
         vm.expectEmit(true, true, false, true);
-        emit RateOracleRegistered(100, address(mockRateOracle));
+        emit RateOracleRegistered(200, address(mockRateOracle));
 
-        rateOracleManager.registerVariableOracle(100, address(mockRateOracle));
+        rateOracleManager.registerVariableOracle(200, address(mockRateOracle));
     }
 
     function test_InitGetRateIndexCurrent() public {
