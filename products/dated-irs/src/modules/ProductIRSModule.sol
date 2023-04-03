@@ -59,7 +59,7 @@ contract ProductIRSModule is IProductIRSModule {
 
     function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp, address poolAddress) external override {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp,poolAddress);
+        int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp, poolAddress);
 
         address _proxy = ProductConfiguration.getProxyAddress();
         address quoteToken = IMarketConfigurationModule(_proxy).getMarketConfiguration(marketId).quoteToken;
@@ -90,7 +90,7 @@ contract ProductIRSModule is IProductIRSModule {
     function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp) 
         public view returns (int256[] memory exposures) 
     {
-        Portfolio.baseToAnnualizedExposure(baseAmounts, marketId, uint32(maturityTimestamp));
+        Portfolio.baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
     }
 
     /**
@@ -117,7 +117,7 @@ contract ProductIRSModule is IProductIRSModule {
         portfolio.closeAccount(_poolAddress, collateralType);
     }
 
-    // todo: intorduce in interface or create separate module for exposing this function
+    // todo: introduce in interface or create separate module for exposing this function
     function configureProduct(ProductConfiguration.Data memory config) external {
         ProductConfiguration.set(config);
         emit ProductConfigured(config);
