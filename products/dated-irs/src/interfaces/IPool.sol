@@ -35,7 +35,6 @@ interface IPool is IERC165 {
         view
         returns (int256 unfilledBaseLong, int256 unfilledBaseShort);
 
-
     function closePosition(
         uint128 marketId,
         uint32 maturityTimestamp,

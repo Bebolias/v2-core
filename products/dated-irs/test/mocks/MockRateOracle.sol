@@ -25,7 +25,7 @@ contract MockRateOracle is IRateOracle {
     function getCurrentIndex() external view override returns (UD60x18 liquidityIndex) {
         return ud(lastUpdatedLiquidityIndex / 1e9);
     }
-    
+
     // why is this public?
     function interpolateIndexValue(
         UD60x18 beforeIndex,

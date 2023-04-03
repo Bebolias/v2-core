@@ -22,7 +22,7 @@ contract MockAaveLendingPool is IAaveV3LendingPool {
         UD60x18 factor = factorPerSecond[_underlyingAsset];
         UD60x18 currentIndex = reserveNormalizedIncome[_underlyingAsset];
         if (factor.unwrap() > 0) {
-            uint256 secondsSinceNormalizedIncomeSet =  Time.blockTimestampTruncated()- startTime[_underlyingAsset];
+            uint256 secondsSinceNormalizedIncomeSet = Time.blockTimestampTruncated() - startTime[_underlyingAsset];
             currentIndex = reserveNormalizedIncome[_underlyingAsset].mul(factor.powu(secondsSinceNormalizedIncomeSet));
         }
 
@@ -32,7 +32,7 @@ contract MockAaveLendingPool is IAaveV3LendingPool {
 
     function setReserveNormalizedIncome(IERC20 _underlyingAsset, UD60x18 _reserveNormalizedIncomeInWeiNotRay) public {
         reserveNormalizedIncome[address(_underlyingAsset)] = _reserveNormalizedIncomeInWeiNotRay;
-        startTime[address(_underlyingAsset)] =  Time.blockTimestampTruncated();
+        startTime[address(_underlyingAsset)] = Time.blockTimestampTruncated();
     }
 
     function setFactorPerSecond(IERC20 _underlyingAsset, UD60x18 _factorPerSecond) public {

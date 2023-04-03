@@ -6,7 +6,6 @@ import "../storage/ProductConfiguration.sol";
 
 /// @title Interface of a dated irs product
 interface IProductIRSModule is IProduct {
-
     event ProductConfigured(ProductConfiguration.Data config);
 
     // process taker and maker orders & single pool

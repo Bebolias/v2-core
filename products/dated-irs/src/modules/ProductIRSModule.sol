@@ -50,7 +50,9 @@ contract ProductIRSModule is IProductIRSModule {
         int256[] memory baseAmounts = new int256[](1);
         baseAmounts[0] = executedBaseAmount;
         int256 annualizedBaseAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
-        IProductModule(_proxy).propagateTakerOrder(accountId, ProductConfiguration.getProductId(), marketId, quoteToken, annualizedBaseAmount);
+        IProductModule(_proxy).propagateTakerOrder(
+            accountId, ProductConfiguration.getProductId(), marketId, quoteToken, annualizedBaseAmount
+        );
     }
 
     /**
@@ -77,8 +79,16 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProduct
      */
-     // todo: override & add collateralType
-    function getAccountUnrealizedPnL(uint128 accountId, address collateralType) external view override returns (int256 unrealizedPnL) {
+    // todo: override & add collateralType
+    function getAccountUnrealizedPnL(
+        uint128 accountId,
+        address collateralType
+    )
+        external
+        view
+        override
+        returns (int256 unrealizedPnL)
+    {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address _poolAddress = ProductConfiguration.getPoolAddress();
         return portfolio.getAccountUnrealizedPnL(_poolAddress, collateralType);
@@ -87,8 +97,14 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProduct
      */
-    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp) 
-        public view returns (int256[] memory exposures) 
+    function baseToAnnualizedExposure(
+        int256[] memory baseAmounts,
+        uint128 marketId,
+        uint32 maturityTimestamp
+    )
+        public
+        view
+        returns (int256[] memory exposures)
     {
         Portfolio.baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
     }
@@ -96,8 +112,11 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProduct
      */
-     // todo: override & add collateralType
-    function getAccountAnnualizedExposures(uint128 accountId, address collateralType)
+    // todo: override & add collateralType
+    function getAccountAnnualizedExposures(
+        uint128 accountId,
+        address collateralType
+    )
         external
         view
         override

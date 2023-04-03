@@ -71,12 +71,13 @@ contract MockPool is IPool {
         uint128 accountId
     )
         external
-        returns (int256 closedBasePool, int256 closedQuotePool) {
-            closedBasePool = baseBalancePool;
-            closedQuotePool = quoteBalancePool;
-            
-            baseBalancePool = 0;
-            quoteBalancePool = 0;
+        returns (int256 closedBasePool, int256 closedQuotePool)
+    {
+        closedBasePool = baseBalancePool;
+        closedQuotePool = quoteBalancePool;
+
+        baseBalancePool = 0;
+        quoteBalancePool = 0;
     }
 
     function getDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp) external view returns (UD60x18) {

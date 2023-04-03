@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-
 /**
  * @title Tracks configurations for the Products
  * note Enables the owner of the ProductProxy to configure the pool address the product is linked to
@@ -18,7 +17,7 @@ library ProductConfiguration {
          * @dev Address of the core proxy
          */
         address coreProxy;
-         /**
+        /**
          * @dev Address of the pool address the product is linked to
          */
         address poolAddress;

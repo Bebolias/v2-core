@@ -75,7 +75,7 @@ contract RateOracleReaderTest is Test {
     function setUp() public virtual {
         rateOracleReader = new ExposeRateOracleReader();
         mockRateOracle = new MockRateOracle();
-        maturityTimestamp =  Time.blockTimestampTruncated() + ONE_YEAR;
+        maturityTimestamp = Time.blockTimestampTruncated() + ONE_YEAR;
         rateOracleReader.create(100, address(mockRateOracle));
     }
 

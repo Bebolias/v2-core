@@ -8,7 +8,7 @@ import "../src/storage/RateOracleReader.sol";
 import "./mocks/MockRateOracle.sol";
 import "./mocks/MockPool.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
-import { UD60x18, ud, unwrap as uUnwrap} from "@prb/math/UD60x18.sol";
+import { UD60x18, ud, unwrap as uUnwrap } from "@prb/math/UD60x18.sol";
 
 contract ExposePortfolio {
     using Portfolio for Portfolio.Data;
@@ -30,7 +30,14 @@ contract ExposePortfolio {
         }
     }
 
-    function getAccountAnnualizedExposures(uint128 id, address poolAddress, address collateralType) external returns (Account.Exposure[] memory) {
+    function getAccountAnnualizedExposures(
+        uint128 id,
+        address poolAddress,
+        address collateralType
+    )
+        external
+        returns (Account.Exposure[] memory)
+    {
         return Portfolio.load(id).getAccountAnnualizedExposures(poolAddress, collateralType);
     }
 
@@ -59,7 +66,15 @@ contract ExposePortfolio {
         return portfolio.updatePosition(marketId, maturityTimestamp, baseDelta, quoteDelta);
     }
 
-    function settle(uint128 id, uint128 marketId, uint32 maturityTimestamp, address poolAddress) external returns (int256 settlementCashflow) {
+    function settle(
+        uint128 id,
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        address poolAddress
+    )
+        external
+        returns (int256 settlementCashflow)
+    {
         Portfolio.Data storage portfolio = Portfolio.load(id);
         return portfolio.settle(marketId, maturityTimestamp, poolAddress);
     }
@@ -73,7 +88,7 @@ contract ExposePortfolio {
     }
 
     function setMarket(uint128 marketId, address quoteToken) external {
-        MarketConfiguration.set(MarketConfiguration.Data({marketId: marketId, quoteToken: quoteToken}));
+        MarketConfiguration.set(MarketConfiguration.Data({ marketId: marketId, quoteToken: quoteToken }));
     }
 
     // EXTRA GETTERS
@@ -90,7 +105,15 @@ contract ExposePortfolio {
         position = portfolio.positions[marketId][maturityTimestamp];
     }
 
-    function isActiveMarketAndMaturity(uint128 id, uint128 marketId, uint32 maturityTimestamp, address collateralType) external returns (bool) {
+    function isActiveMarketAndMaturity(
+        uint128 id,
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        address collateralType
+    )
+        external
+        returns (bool)
+    {
         Portfolio.Data storage portfolio = Portfolio.load(id);
         return portfolio.activeMarketsAndMaturities[collateralType].contains((marketId << 32) | maturityTimestamp);
     }
@@ -301,7 +324,7 @@ contract PortfolioTest is Test {
 
         assertEq(position.baseBalance, 0);
         assertEq(position.quoteBalance, 0);
-        assertEq(settlementCashflow , 30);
+        assertEq(settlementCashflow, 30);
     }
 
     function test_AnnualizedExposureFactorBeforeMaturity() public {
@@ -330,7 +353,8 @@ contract PortfolioTest is Test {
 
         mockRateOracle.setLastUpdatedIndex(1e27);
 
-        Account.Exposure[] memory exposures = portfolio.getAccountAnnualizedExposures(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
+        Account.Exposure[] memory exposures =
+            portfolio.getAccountAnnualizedExposures(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
 
         assertEq(exposures.length, 1);
         assertEq(exposures[0].marketId, marketId);
@@ -347,7 +371,8 @@ contract PortfolioTest is Test {
 
         mockRateOracle.setLastUpdatedIndex(1e27);
 
-        Account.Exposure[] memory exposures = portfolio.getAccountAnnualizedExposures(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
+        Account.Exposure[] memory exposures =
+            portfolio.getAccountAnnualizedExposures(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
 
         assertEq(exposures.length, 1);
         assertEq(exposures[0].marketId, marketId);

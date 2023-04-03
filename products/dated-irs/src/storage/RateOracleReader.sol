@@ -41,7 +41,7 @@ library RateOracleReader {
     }
 
     function updateCache(Data storage self, uint32 maturityTimestamp) internal {
-        if ( Time.blockTimestampTruncated() >= maturityTimestamp) {
+        if (Time.blockTimestampTruncated() >= maturityTimestamp) {
             // maturity timestamp has passed
             UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
             if (rateIndexMaturity.unwrap() == 0) {
@@ -58,7 +58,7 @@ library RateOracleReader {
                         beforeIndex: cache.lastKnownIndex,
                         beforeTimestamp: cache.lastKnownTimestamp,
                         atOrAfterIndex: currentIndex,
-                        atOrAfterTimestamp:  Time.blockTimestampTruncated(),
+                        atOrAfterTimestamp: Time.blockTimestampTruncated(),
                         queryTimestamp: maturityTimestamp
                     });
                     self.rateIndexAtMaturity[maturityTimestamp] = rateIndexMaturity;
@@ -72,8 +72,8 @@ library RateOracleReader {
             PreMaturityData storage cache = self.rateIndexPreMaturity[maturityTimestamp];
             if (cache.lastKnownTimestamp > 0) {
                 // We have saved a pre-maturity value already; check whether we need to update it
-                uint256 timeTillMaturity = maturityTimestamp -  Time.blockTimestampTruncated();
-                uint256 timeSinceLastWrite =  Time.blockTimestampTruncated() - cache.lastKnownTimestamp;
+                uint256 timeTillMaturity = maturityTimestamp - Time.blockTimestampTruncated();
+                uint256 timeSinceLastWrite = Time.blockTimestampTruncated() - cache.lastKnownTimestamp;
                 if (timeSinceLastWrite < timeTillMaturity) {
                     // We only update the cache if we are at least halfway to maturity since the last cache update
                     // This heuristic should give us a timestamp very close to the maturity timestamp, but should save unnecessary
@@ -90,7 +90,7 @@ library RateOracleReader {
     }
 
     function getRateIndexCurrent(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexCurrent) {
-        if ( Time.blockTimestampTruncated() >= maturityTimestamp) {
+        if (Time.blockTimestampTruncated() >= maturityTimestamp) {
             // maturity timestamp has passed
             UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];
 
@@ -106,7 +106,7 @@ library RateOracleReader {
                     beforeIndex: cache.lastKnownIndex,
                     beforeTimestamp: cache.lastKnownTimestamp,
                     atOrAfterIndex: currentIndex,
-                    atOrAfterTimestamp:  Time.blockTimestampTruncated(),
+                    atOrAfterTimestamp: Time.blockTimestampTruncated(),
                     queryTimestamp: maturityTimestamp
                 });
             }
@@ -118,7 +118,7 @@ library RateOracleReader {
     }
 
     function getRateIndexMaturity(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexMaturity) {
-        if ( Time.blockTimestampTruncated() < maturityTimestamp) {
+        if (Time.blockTimestampTruncated() < maturityTimestamp) {
             revert MaturityNotReached();
         }
 

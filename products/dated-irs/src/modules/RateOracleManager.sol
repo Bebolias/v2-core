@@ -58,7 +58,7 @@ contract RateOracleManager is IRateOracleModule {
         if (!_validateVariableOracleAddress(oracleAddress)) {
             revert InvalidVariableOracleAddress(oracleAddress);
         }
-        
+
         // register the variable rate oracle
         RateOracleReader.create(marketId, oracleAddress);
         emit RateOracleRegistered(marketId, oracleAddress);

@@ -26,7 +26,7 @@ contract RateOracleManagerTest is Test {
         MockAaveLendingPool lendingPool = new MockAaveLendingPool();
         AaveRateOracle aaveOracle = new AaveRateOracle(lendingPool, address(0));
         mockRateOracle = new MockRateOracle();
-        maturityTimestamp =  Time.blockTimestampTruncated() + 3139000;
+        maturityTimestamp = Time.blockTimestampTruncated() + 3139000;
         rateOracleManager.registerVariableOracle(100, address(mockRateOracle));
     }
 
