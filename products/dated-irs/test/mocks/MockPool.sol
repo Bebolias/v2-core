@@ -7,8 +7,8 @@ import "../../src/interfaces/IPool.sol";
 contract MockPool is IPool {
     int256 baseBalancePool;
     int256 quoteBalancePool;
-    int256 unfilledBaseLong;
-    int256 unfilledBaseShort;
+    uint256 unfilledBaseLong;
+    uint256 unfilledBaseShort;
     mapping(uint256 => UD60x18) datedIRSGwaps;
 
     function name(uint128 poolId) external view returns (string memory) {
@@ -30,8 +30,8 @@ contract MockPool is IPool {
     function setBalances(
         int256 _baseBalancePool,
         int256 _quoteBalancePool,
-        int256 _unfilledBaseLong,
-        int256 _unfilledBaseShort
+        uint256 _unfilledBaseLong,
+        uint256 _unfilledBaseShort
     )
         external
     {
@@ -60,7 +60,7 @@ contract MockPool is IPool {
     )
         external
         view
-        returns (int256, int256)
+        returns (uint256, uint256)
     {
         return (unfilledBaseLong, unfilledBaseShort);
     }

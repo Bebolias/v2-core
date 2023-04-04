@@ -9,8 +9,8 @@ import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import "./Collateral.sol";
 import "./Product.sol";
 
-import "oz/contracts/utils/math/Math.sol";
-import "oz/contracts/utils/math/SignedMath.sol";
+import "oz/utils/math/Math.sol";
+import "oz/utils/math/SignedMath.sol";
 
 import { mulUDxUint, mulSDxInt } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 

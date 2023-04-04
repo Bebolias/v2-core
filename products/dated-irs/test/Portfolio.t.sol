@@ -367,7 +367,7 @@ contract PortfolioTest is Test {
         uint32 maturityTimestamp = currentTimestamp + 31540000;
 
         portfolio.updatePosition(accountId, marketId, maturityTimestamp, 10, 20);
-        mockPool.setBalances(15, 21, 2, -3);
+        mockPool.setBalances(15, 21, 2, 3);
 
         mockRateOracle.setLastUpdatedIndex(1e27);
 
@@ -378,6 +378,6 @@ contract PortfolioTest is Test {
         assertEq(exposures[0].marketId, marketId);
         assertEq(exposures[0].filled, 25);
         assertEq(exposures[0].unfilledLong, 2);
-        assertEq(exposures[0].unfilledShort, -3);
+        assertEq(exposures[0].unfilledShort, 3);
     }
 }

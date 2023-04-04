@@ -1,6 +1,6 @@
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
-oz=lib/openzeppelin-contracts/
+oz=lib/openzeppelin-contracts/contracts/
 @prb/math/=lib/prb-math/src/
 @prb/test/=lib/prb-test/src/
 @voltz-protocol/util-contracts/=../node_modules/@voltz-protocol/util-contracts/

@@ -11,16 +11,15 @@ import "./MarketConfiguration.sol";
 import "../interfaces/IPool.sol";
 // todo: for now can import core workspace
 import "@voltz-protocol/core/src/storage/Account.sol";
-import { UD60x18 } from "@prb/math/UD60x18.sol";
-import { SD59x18, UNIT } from "@prb/math/SD59x18.sol";
+import { UD60x18, UNIT } from "@prb/math/UD60x18.sol";
+import { SD59x18 } from "@prb/math/SD59x18.sol";
+import { mulUDxUint, mulUDxInt } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions
  */
 library Portfolio {
     using Portfolio for Portfolio.Data;
-    using SafeCastPrbMath for UD60x18;
-    using SafeCastPrbMath for SD59x18;
     using Position for Position.Data;
     using SetUtil for SetUtil.UintSet;
     using SafeCastU256 for uint256;
@@ -121,11 +120,7 @@ library Portfolio {
 
         UD60x18 gwap = IPool(poolAddress).getDatedIRSGwap(marketId, maturityTimestamp);
 
-        unwindQuote = SD59x18.unwrap(
-            SD59x18.wrap(baseAmount).mul(currentLiquidityIndex.toSD59x18()).mul(
-                gwap.toSD59x18().mul(timeDeltaAnnualized.toSD59x18()).add(UNIT)
-            )
-        );
+        unwindQuote = mulUDxInt(gwap.mul(timeDeltaAnnualized).add(UNIT), mulUDxInt(currentLiquidityIndex, baseAmount));
     }
 
     /**
@@ -153,7 +148,7 @@ library Portfolio {
         UD60x18 factor = annualizedExposureFactor(marketId, maturityTimestamp);
 
         for (uint256 i = 0; i < baseAmounts.length; i++) {
-            exposures[i] = SD59x18.unwrap(SD59x18.wrap(baseAmounts[i]).mul(factor.toSD59x18()));
+            exposures[i] = mulUDxInt(factor, baseAmounts[i]);
         }
     }
 
@@ -178,15 +173,15 @@ library Portfolio {
 
             int256 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
             (int256 baseBalancePool,) = IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
-            (int256 unfilledBaseLong, int256 unfilledBaseShort) =
+            (uint256 unfilledBaseLong, uint256 unfilledBaseShort) =
                 IPool(poolAddress).getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
             {
                 UD60x18 annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
                 exposures[i] = Account.Exposure({
                     marketId: marketId,
-                    filled: SD59x18.unwrap(SD59x18.wrap(baseBalance + baseBalancePool).mul(annualizedExposureFactor.toSD59x18())),
-                    unfilledLong: SD59x18.unwrap(SD59x18.wrap(unfilledBaseLong).mul(annualizedExposureFactor.toSD59x18())),
-                    unfilledShort: SD59x18.unwrap(SD59x18.wrap(unfilledBaseShort).mul(annualizedExposureFactor.toSD59x18()))
+                    filled: mulUDxInt(annualizedExposureFactor, baseBalance + baseBalancePool),
+                    unfilledLong: mulUDxUint(annualizedExposureFactor, unfilledBaseLong),
+                    unfilledShort: mulUDxUint(annualizedExposureFactor, unfilledBaseShort)
                 });
             }
         }
@@ -266,9 +261,7 @@ library Portfolio {
 
         (int256 closedBasePool, int256 closedQuotePool) = pool.closePosition(marketId, maturityTimestamp, self.accountId);
 
-        settlementCashflow = SD59x18.unwrap(
-            SD59x18.wrap(position.baseBalance + closedBasePool).mul(liquidityIndexMaturity.toSD59x18())
-        ) + position.quoteBalance + closedQuotePool;
+        settlementCashflow = mulUDxInt(liquidityIndexMaturity, position.baseBalance + closedBasePool) + position.quoteBalance + closedQuotePool;
 
         position.settle();
     }

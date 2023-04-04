@@ -96,9 +96,9 @@ contract ProductModule is IProductModule {
      */
     function distributeFees(
         uint128 payingAccountId, uint128 receivingAccountId, UD60x18 atomicFee, 
-        address collateralType, uint256 annualizedNotional
+        address collateralType, int256 annualizedNotional
     ) internal returns (uint256 fee) {
-        fee = mulUDxUint(atomicFee, annualizedNotional);
+        fee = mulUDxUint(atomicFee, abs(annualizedNotional));
 
         Account.Data storage payingAccount = Account.exists(payingAccountId);
         payingAccount.collaterals[collateralType].decreaseCollateralBalance(fee);
@@ -108,7 +108,7 @@ contract ProductModule is IProductModule {
     }
 
     function propagateTakerOrder(
-        uint128 accountId, uint128 productId, uint128 marketId, address collateralType, uint256 annualizedNotional
+        uint128 accountId, uint128 productId, uint128 marketId, address collateralType, int256 annualizedNotional
     ) 
         external override returns (uint256 fee)
     {
@@ -127,7 +127,7 @@ contract ProductModule is IProductModule {
     }
 
     function propagateMakerOrder(
-        uint128 accountId, uint128 productId, uint128 marketId, address collateralType, uint256 annualizedNotional
+        uint128 accountId, uint128 productId, uint128 marketId, address collateralType, int256 annualizedNotional
     ) 
         external override returns (uint256 fee)
     {

@@ -66,7 +66,9 @@ contract ProductIRSModule is IProductIRSModule {
         address _proxy = ProductConfiguration.getProxyAddress();
         address quoteToken = IMarketConfigurationModule(_proxy).getMarketConfiguration(marketId).quoteToken;
 
-        IProductModule(_proxy).propagateCashflow(accountId, quoteToken, settlementCashflowInQuote);
+        uint128 productId = ProductConfiguration.getProductId();
+
+        IProductModule(_proxy).propagateCashflow(accountId, productId, quoteToken, settlementCashflowInQuote);
     }
 
     /**
