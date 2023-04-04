@@ -11,6 +11,7 @@ import "@voltz-protocol/util-modules/src/storage/AssociatedSystem.sol";
 import "@voltz-protocol/util-contracts/src/helpers/ERC165Helper.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
+import "oz/utils/math/SignedMath.sol";
 
 import { mulUDxUint } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
@@ -98,7 +99,7 @@ contract ProductModule is IProductModule {
         uint128 payingAccountId, uint128 receivingAccountId, UD60x18 atomicFee, 
         address collateralType, int256 annualizedNotional
     ) internal returns (uint256 fee) {
-        fee = mulUDxUint(atomicFee, abs(annualizedNotional));
+        fee = mulUDxUint(atomicFee, SignedMath.abs(annualizedNotional));
 
         Account.Data storage payingAccount = Account.exists(payingAccountId);
         payingAccount.collaterals[collateralType].decreaseCollateralBalance(fee);

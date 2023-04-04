@@ -2388,6 +2388,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"core@link:../../core::locator=%40voltz-protocol%2Fproducts-dated-irs%40workspace%3Aproducts%2Fdated-irs":
+  version: 0.0.0-use.local
+  resolution: "core@link:../../core::locator=%40voltz-protocol%2Fproducts-dated-irs%40workspace%3Aproducts%2Fdated-irs"
+  languageName: node
+  linkType: soft
+
 "cosmiconfig@npm:^5.0.7":
   version: 5.2.1
   resolution: "cosmiconfig@npm:5.2.1"
