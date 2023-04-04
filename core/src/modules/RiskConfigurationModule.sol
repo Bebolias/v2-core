@@ -28,10 +28,10 @@ contract RiskConfigurationModule is IRiskConfigurationModule {
         ProtocolRiskConfiguration.set(config);
         emit ProtocolRiskConfigured(config);
     }
+
     /**
      * @inheritdoc IRiskConfigurationModule
      */
-
     function getMarketRiskConfiguration(
         uint128 productId,
         uint128 marketId

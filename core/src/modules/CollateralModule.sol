@@ -28,20 +28,29 @@ contract CollateralModule is ICollateralModule {
         address depositFrom = msg.sender;
         address self = address(this);
 
+        uint256 actualTokenAmount = tokenAmount;
+        
+        uint256 liquidationBooster = CollateralConfiguration.load(collateralType).liquidationBooster;
+        if (account.collaterals[collateralType].liquidationBoosterBalance < liquidationBooster) {
+            uint256 liquidationBoosterTopUp = liquidationBooster - account.collaterals[collateralType].liquidationBoosterBalance;
+            actualTokenAmount += liquidationBoosterTopUp;
+            account.collaterals[collateralType].increaseLiquidationBoosterBalance(liquidationBoosterTopUp);
+        }
+
         uint256 allowance = IERC20(collateralType).allowance(depositFrom, self);
-        if (allowance < tokenAmount) {
-            revert IERC20.InsufficientAllowance(tokenAmount, allowance);
+        if (allowance < actualTokenAmount) {
+            revert IERC20.InsufficientAllowance(actualTokenAmount, allowance);
         }
 
         uint256 currentBalance = IERC20(collateralType).balanceOf(self);
         uint256 collateralCap = CollateralConfiguration.load(collateralType).cap;
-        if (collateralCap < currentBalance + tokenAmount) {
-            revert CollateralCapExceeded(collateralType, collateralCap, currentBalance, tokenAmount);
+        if (collateralCap < currentBalance + actualTokenAmount) {
+            revert CollateralCapExceeded(collateralType, collateralCap, currentBalance, tokenAmount, actualTokenAmount - tokenAmount);
         }
 
-        collateralType.safeTransferFrom(depositFrom, self, tokenAmount);
+        collateralType.safeTransferFrom(depositFrom, self, actualTokenAmount);
         account.collaterals[collateralType].increaseCollateralBalance(tokenAmount);
-        emit Deposited(accountId, collateralType, tokenAmount, msg.sender);
+        emit Deposited(accountId, collateralType, tokenAmount, actualTokenAmount - tokenAmount, msg.sender);
     }
 
     /**
@@ -50,7 +59,17 @@ contract CollateralModule is ICollateralModule {
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external override {
         Account.Data storage account = Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
 
-        account.collaterals[collateralType].decreaseCollateralBalance(tokenAmount);
+        if (tokenAmount > account.collaterals[collateralType].balance) {
+            account.collaterals[collateralType].decreaseLiquidationBoosterBalance(
+                tokenAmount - account.collaterals[collateralType].balance
+            );
+
+            account.collaterals[collateralType].decreaseCollateralBalance(
+                account.collaterals[collateralType].balance
+            );
+        } else {
+            account.collaterals[collateralType].decreaseCollateralBalance(tokenAmount);
+        }
 
         account.imCheck(collateralType);
 

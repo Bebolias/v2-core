@@ -2,11 +2,13 @@
 pragma solidity >=0.8.13;
 
 import { UD60x18 } from "@prb/math/UD60x18.sol";
+import "./Account.sol";
 
 /**
  * @title Tracks market-level risk settings
  */
 library MarketFeeConfiguration {
+    using Account for Account.Data;
     struct Data {
         /**
          * @dev Id of the product for which we store fee configurations
@@ -50,6 +52,8 @@ library MarketFeeConfiguration {
      * @param config The MarketFeeConfiguration object
      */
     function set(Data memory config) internal {
+      Account.exists(config.feeCollectorAccountId);
+
       Data storage storedConfig = load(config.productId, config.marketId);
 
       storedConfig.productId = config.productId;

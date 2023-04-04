@@ -12,11 +12,21 @@ library Collateral {
      */
     error InsufficientCollateral(uint256 requestedAmount);
 
+    /**
+     * @dev Thrown when an account does not have sufficient collateral.
+     */
+    error InsufficientLiquidationBoosterBalance(uint256 requestedAmount);
+
     struct Data {
         /**
          * @dev The net amount that is deposited in this collateral
          */
         uint256 balance;
+        /**
+         * @dev The amount of tokens the account has in liquidation booster. Max value is
+         * @dev liquidation booster defined in CollateralConfiguration.
+         */
+        uint256 liquidationBoosterBalance;
     }
 
     /**
@@ -35,5 +45,23 @@ library Collateral {
         }
 
         self.balance -= amount;
+    }
+
+    /**
+     * @dev Increments the entry's liquidation booster balance.
+     */
+    function increaseLiquidationBoosterBalance(Data storage self, uint256 amount) internal {
+        self.liquidationBoosterBalance += amount;
+    }
+
+    /**
+     * @dev Decrements the entry's liquidation booster balance.
+     */
+    function decreaseLiquidationBoosterBalance(Data storage self, uint256 amount) internal {
+        if (self.liquidationBoosterBalance < amount) {
+            revert InsufficientLiquidationBoosterBalance(amount);
+        }
+
+        self.liquidationBoosterBalance -= amount;
     }
 }

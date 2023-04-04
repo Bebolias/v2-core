@@ -5,18 +5,22 @@ import "forge-std/Test.sol";
 import "../../src/modules/FeeConfigurationModule.sol";
 import "../test-utils/Constants.sol";
 
-import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
+import { UD60x18 } from "@prb/math/UD60x18.sol";
+
+contract ExposedFeeConfigurationModule is FeeConfigurationModule {
+    constructor() {
+        Account.create(13, address(1));
+    }
+}
 
 contract FeeConfigurationModuleTest is Test {
-    using { unwrap } for UD60x18;
-
     event MarketFeeConfigured(MarketFeeConfiguration.Data config);
 
-    FeeConfigurationModule internal feeConfigurationModule;
+    ExposedFeeConfigurationModule internal feeConfigurationModule;
     address internal owner = vm.addr(1);
 
     function setUp() public {
-        feeConfigurationModule = new FeeConfigurationModule();
+        feeConfigurationModule = new ExposedFeeConfigurationModule();
 
         vm.store(address(feeConfigurationModule), keccak256(abi.encode("xyz.voltz.OwnableStorage")), bytes32(abi.encode(owner)));
     }
@@ -40,8 +44,8 @@ contract FeeConfigurationModuleTest is Test {
         assertEq(existingConfig.productId, config.productId);
         assertEq(existingConfig.marketId, config.marketId);
         assertEq(existingConfig.feeCollectorAccountId, config.feeCollectorAccountId);
-        assertEq(existingConfig.atomicMakerFee.unwrap(), config.atomicMakerFee.unwrap());
-        assertEq(existingConfig.atomicTakerFee.unwrap(), config.atomicTakerFee.unwrap());
+        assertEq(UD60x18.unwrap(existingConfig.atomicMakerFee), UD60x18.unwrap(config.atomicMakerFee));
+        assertEq(UD60x18.unwrap(existingConfig.atomicTakerFee), UD60x18.unwrap(config.atomicTakerFee));
     }
 
     function testFuzz_revertWhen_ConfigureMarketFee_NoOwner(address otherAddress) public {
@@ -80,8 +84,8 @@ contract FeeConfigurationModuleTest is Test {
         assertEq(existingConfig.productId, 2);
         assertEq(existingConfig.marketId, 20);
         assertEq(existingConfig.feeCollectorAccountId, 13);
-        assertEq(existingConfig.atomicMakerFee.unwrap(), 2e15);
-        assertEq(existingConfig.atomicTakerFee.unwrap(), 1e15);
+        assertEq(UD60x18.unwrap(existingConfig.atomicMakerFee), 2e15);
+        assertEq(UD60x18.unwrap(existingConfig.atomicTakerFee), 1e15);
     }
 
     function test_GetMarketFeeConfiguration_Empty() public {
@@ -89,7 +93,9 @@ contract FeeConfigurationModuleTest is Test {
 
         assertEq(existingConfig.productId, 0);
         assertEq(existingConfig.marketId, 0);
-        assertEq(existingConfig.atomicMakerFee.unwrap(), 0);
-        assertEq(existingConfig.atomicTakerFee.unwrap(), 0);
+        assertEq(UD60x18.unwrap(existingConfig.atomicMakerFee), 0);
+        assertEq(UD60x18.unwrap(existingConfig.atomicTakerFee), 0);
     }
+
+    // todo: test fee collector account does not exist
 }

@@ -10,8 +10,9 @@ import "../storage/MarketFeeConfiguration.sol";
 import "@voltz-protocol/util-modules/src/storage/AssociatedSystem.sol";
 import "@voltz-protocol/util-contracts/src/helpers/ERC165Helper.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
+import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 
-import { UD60x18, unwrap, mul } from "@prb/math/UD60x18.sol";
+import { mulUDxUint } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
 /**
  * @title Protocol-wide entry point for the management of products connected to the protocol.
@@ -24,8 +25,9 @@ contract ProductModule is IProductModule {
     using SafeCastI256 for int256;
     using AssociatedSystem for AssociatedSystem.Data;
     using Collateral for Collateral.Data;
-    
-    using { unwrap } for UD60x18;
+    using SetUtil for SetUtil.UintSet;
+
+    bytes32 private constant _REGISTER_PRODUCT_FEATURE_FLAG = "registerProduct";
 
     /**
      * @inheritdoc IProductModule
@@ -62,7 +64,7 @@ contract ProductModule is IProductModule {
      * @inheritdoc IProductModule
      */
     function registerProduct(address product, string memory name) external override returns (uint128 productId) {
-        // todo: ensure acces to feature flag check
+        FeatureFlag.ensureAccessToFeature(_REGISTER_PRODUCT_FEATURE_FLAG);
 
         if (!ERC165Helper.safeSupportsInterface(product, type(IProduct).interfaceId)) {
             revert IncorrectProductInterface(product);
@@ -96,18 +98,15 @@ contract ProductModule is IProductModule {
         uint128 payingAccountId, uint128 receivingAccountId, UD60x18 atomicFee, 
         address collateralType, uint256 annualizedNotional
     ) internal returns (uint256 fee) {
-        fee = mul(UD60x18.wrap(annualizedNotional), atomicFee).unwrap();
+        fee = mulUDxUint(atomicFee, annualizedNotional);
 
-        Account.Data storage payingAccount = Account.load(payingAccountId);
+        Account.Data storage payingAccount = Account.exists(payingAccountId);
         payingAccount.collaterals[collateralType].decreaseCollateralBalance(fee);
 
-        Account.Data storage receivingAccount = Account.load(receivingAccountId);
+        Account.Data storage receivingAccount = Account.exists(receivingAccountId);
         receivingAccount.collaterals[collateralType].increaseCollateralBalance(fee);
     }
 
-    // check if account exists
-    // or consider calling the product maneger once to do all the checks and updates
-    // todo: mark product in the account object (see python implementation for more details, solidity uses setutil though)
     function propagateTakerOrder(
         uint128 accountId, uint128 productId, uint128 marketId, address collateralType, uint256 annualizedNotional
     ) 
@@ -120,11 +119,13 @@ contract ProductModule is IProductModule {
             accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicTakerFee, collateralType, annualizedNotional
         );
 
-        Account.Data storage account = Account.load(accountId);
+        Account.Data storage account = Account.exists(accountId);
         account.imCheck(collateralType);
+        if (!account.activeProducts.contains(productId)) {
+            account.activeProducts.add(productId);
+        }
     }
 
-    // todo: mark product
     function propagateMakerOrder(
         uint128 accountId, uint128 productId, uint128 marketId, address collateralType, uint256 annualizedNotional
     ) 
@@ -137,12 +138,17 @@ contract ProductModule is IProductModule {
             accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicMakerFee, collateralType, annualizedNotional
         );
         
-        Account.Data storage account = Account.load(accountId);
+        Account.Data storage account = Account.exists(accountId);
         account.imCheck(collateralType);
+        if (!account.activeProducts.contains(productId)) {
+            account.activeProducts.add(productId);
+        }
     }
 
-    function propagateCashflow(uint128 accountId, address collateralType, int256 amount) external override {
-        Account.Data storage account = Account.load(accountId);
+    function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount) external override {
+        Product.onlyProductAddress(productId, msg.sender);
+
+        Account.Data storage account = Account.exists(accountId);
         if (amount > 0) {
             account.collaterals[collateralType].increaseCollateralBalance(amount.toUint());
         } else {

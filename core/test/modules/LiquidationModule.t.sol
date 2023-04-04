@@ -136,7 +136,7 @@ contract LiquidationModuleTest is Test {
         setCollateralProfile("high");
 
         // Trigger liquidation
-        vm.expectRevert(abi.encodeWithSelector(LiquidationModule.AccountNotLiquidatable.selector, 100));
+        vm.expectRevert(abi.encodeWithSelector(ILiquidationModule.AccountNotLiquidatable.selector, 100));
         liquidationModule.liquidate(100, 101, Constants.TOKEN_0);
     }
 
@@ -144,7 +144,7 @@ contract LiquidationModuleTest is Test {
         mockLiquidatorAccount();
 
         // Trigger liquidation
-        vm.expectRevert(abi.encodeWithSelector(LiquidationModule.AccountExposureNotReduced.selector, 100, 1800e18, 1800e18));
+        vm.expectRevert(abi.encodeWithSelector(ILiquidationModule.AccountExposureNotReduced.selector, 100, 1800e18, 1800e18));
         liquidationModule.liquidate(100, 101, Constants.TOKEN_0);
     }
 
@@ -155,4 +155,6 @@ contract LiquidationModuleTest is Test {
         vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 101));
         liquidationModule.liquidate(100, 101, Constants.TOKEN_0);
     }
+
+    //todo test liquidation reward flows
 }

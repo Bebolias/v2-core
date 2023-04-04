@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-// todo: import utils via an npm package (currently just duplicating)
 import "@voltz-protocol/util-contracts/src/errors/AccessError.sol";
 import "../interfaces/external/IProduct.sol";
 import "./Account.sol";

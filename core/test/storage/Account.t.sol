@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 import "../../src/storage/Account.sol";
 import "../test-utils/MockCoreStorage.sol";
 
+import { SD59x18 } from "@prb/math/SD59x18.sol";
+
 contract ExposedAccounts is CoreState {
     using Account for Account.Data;
 
@@ -76,11 +78,11 @@ contract ExposedAccounts is CoreState {
         return account.getTotalAccountValue(collateralType);
     }
 
-    function getRiskParameter(uint128 productId, uint128 marketId) external view returns (int256) {
+    function getRiskParameter(uint128 productId, uint128 marketId) external view returns (SD59x18) {
         return Account.getRiskParameter(productId, marketId);
     }
 
-    function getIMMultiplier() external view returns (uint256) {
+    function getIMMultiplier() external view returns (UD60x18) {
         return Account.getIMMultiplier();
     }
 
@@ -220,12 +222,12 @@ contract AccountTest is Test {
         assertEq(exposures[0].marketId, 10);
         assertEq(exposures[0].filled, 100e18);
         assertEq(exposures[0].unfilledLong, 200e18);
-        assertEq(exposures[0].unfilledShort, -200e18);
+        assertEq(exposures[0].unfilledShort, 200e18);
 
         assertEq(exposures[1].marketId, 11);
         assertEq(exposures[1].filled, 200e18);
         assertEq(exposures[1].unfilledLong, 300e18);
-        assertEq(exposures[1].unfilledShort, -400e18);
+        assertEq(exposures[1].unfilledShort, 400e18);
     }
 
     function test_GetUnrealizedPnL() public {
@@ -241,15 +243,15 @@ contract AccountTest is Test {
     }
 
     function test_GetRiskParameter() public {
-        int256 riskParameter = accounts.getRiskParameter(1, 10);
+        SD59x18 riskParameter = accounts.getRiskParameter(1, 10);
 
-        assertEq(riskParameter, 1e18);
+        assertEq(SD59x18.unwrap(riskParameter), 1e18);
     }
 
     function test_GetIMMultiplier() public {
-        uint256 imMultiplier = accounts.getIMMultiplier();
+        UD60x18 imMultiplier = accounts.getIMMultiplier();
 
-        assertEq(imMultiplier, 2e18);
+        assertEq(UD60x18.unwrap(imMultiplier), 2e18);
     }
 
     function test_GetMarginRequirements() public {

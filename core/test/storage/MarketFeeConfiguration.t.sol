@@ -4,9 +4,13 @@ pragma solidity >=0.8.13;
 import "forge-std/Test.sol";
 import "../../src/storage/MarketFeeConfiguration.sol";
 
-import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
+import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 contract ExposedMarketFeeConfiguration {
+    constructor() {
+        Account.create(13, address(1));
+        Account.create(15, address(1));
+    }
     // Mock support
     function getMarketFeeConfiguration(
         uint128 productId,
@@ -33,8 +37,6 @@ contract ExposedMarketFeeConfiguration {
 }
 
 contract MarketFeeConfigurationTest is Test {
-    using { unwrap } for UD60x18;
-
     ExposedMarketFeeConfiguration internal marketFeeConfiguration;
 
     function setUp() public {
@@ -59,8 +61,8 @@ contract MarketFeeConfigurationTest is Test {
         assertEq(data.productId, 1);
         assertEq(data.marketId, 10);
         assertEq(data.feeCollectorAccountId, 13);
-        assertEq(data.atomicMakerFee.unwrap(), 1e15);
-        assertEq(data.atomicTakerFee.unwrap(), 2e15);
+        assertEq(UD60x18.unwrap(data.atomicMakerFee), 1e15);
+        assertEq(UD60x18.unwrap(data.atomicTakerFee), 2e15);
     }
 
     function test_Set_Twice() public {
@@ -83,8 +85,8 @@ contract MarketFeeConfigurationTest is Test {
         assertEq(data.productId, 1);
         assertEq(data.marketId, 10);
         assertEq(data.feeCollectorAccountId, 15);
-        assertEq(data.atomicMakerFee.unwrap(), 3e15);
-        assertEq(data.atomicTakerFee.unwrap(), 4e15);
+        assertEq(UD60x18.unwrap(data.atomicMakerFee), 3e15);
+        assertEq(UD60x18.unwrap(data.atomicTakerFee), 4e15);
     }
 
     function test_Set_MoreConfigurations() public {
@@ -97,7 +99,7 @@ contract MarketFeeConfigurationTest is Test {
 
         marketFeeConfiguration.set(
             MarketFeeConfiguration.Data({
-                productId: 2, marketId: 20, feeCollectorAccountId: 14, 
+                productId: 2, marketId: 20, feeCollectorAccountId: 15, 
                 atomicMakerFee: UD60x18.wrap(2e15), atomicTakerFee: UD60x18.wrap(1e15)
             })
         );
@@ -108,8 +110,8 @@ contract MarketFeeConfigurationTest is Test {
             assertEq(data.productId, 1);
             assertEq(data.marketId, 10);
             assertEq(data.feeCollectorAccountId, 13);
-            assertEq(data.atomicMakerFee.unwrap(), 1e15);
-            assertEq(data.atomicTakerFee.unwrap(), 2e15);
+            assertEq(UD60x18.unwrap(data.atomicMakerFee), 1e15);
+            assertEq(UD60x18.unwrap(data.atomicTakerFee), 2e15);
         }
 
         {
@@ -117,9 +119,11 @@ contract MarketFeeConfigurationTest is Test {
 
             assertEq(data.productId, 2);
             assertEq(data.marketId, 20);
-            assertEq(data.feeCollectorAccountId, 14);
-            assertEq(data.atomicMakerFee.unwrap(), 2e15);
-            assertEq(data.atomicTakerFee.unwrap(), 1e15);
+            assertEq(data.feeCollectorAccountId, 15);
+            assertEq(UD60x18.unwrap(data.atomicMakerFee), 2e15);
+            assertEq(UD60x18.unwrap(data.atomicTakerFee), 1e15);
         }
     }
+
+    // todo: test fee collector account does not exist
 }

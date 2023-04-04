@@ -110,12 +110,12 @@ contract ProductTest is Test {
         assertEq(exposures[0].marketId, 10);
         assertEq(exposures[0].filled, 100e18);
         assertEq(exposures[0].unfilledLong, 200e18);
-        assertEq(exposures[0].unfilledShort, -200e18);
+        assertEq(exposures[0].unfilledShort, 200e18);
 
         assertEq(exposures[1].marketId, 11);
         assertEq(exposures[1].filled, 200e18);
         assertEq(exposures[1].unfilledLong, 300e18);
-        assertEq(exposures[1].unfilledShort, -400e18);
+        assertEq(exposures[1].unfilledShort, 400e18);
     }
 
     function test_CloseAccount() public {

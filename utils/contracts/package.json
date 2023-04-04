@@ -17,6 +17,7 @@
     "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
   },
   "devDependencies": {
+    "@prb/math": "3.0.0",
     "solhint": "^3.4.1"
   }
 }

@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
+import { SD59x18 } from "@prb/math/SD59x18.sol";
+
 /**
  * @title Tracks market-level risk settings
  */
@@ -17,7 +19,7 @@ library MarketRiskConfiguration {
         /**
          * @dev Risk Parameters are multiplied by notional exposures to derived shocked cashflow calculations
          */
-        int256 riskParameter;
+        SD59x18 riskParameter;
     }
 
     /**

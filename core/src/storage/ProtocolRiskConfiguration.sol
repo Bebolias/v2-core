@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
+import { UD60x18 } from "@prb/math/UD60x18.sol";
+
 /**
  * @title Tracks protocol-wide risk settings
  */
@@ -10,12 +12,12 @@ library ProtocolRiskConfiguration {
          * @dev IM Multiplier is used to introduce a buffer between the liquidation (LM) and initial (IM) margin requirements
          * where IM = imMultiplier * LM
          */
-        uint256 imMultiplier;
+        UD60x18 imMultiplier;
         /**
          * @dev Liquidator reward parameters are multiplied by the im delta caused by the liquidation to get the liquidator reward
          * amount
          */
-        uint256 liquidatorRewardParameter;
+        UD60x18 liquidatorRewardParameter;
     }
 
     /**

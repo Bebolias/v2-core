@@ -25,12 +25,9 @@ library CollateralConfiguration {
          */
         bool depositingEnabled;
         /**
-         * @dev Amount of tokens to award when an account is liquidated.
-         * @dev todo: consider having a minimum amount that accounts need to have deposited to help prevent spamming on the
-         * protocol.
-         * @dev could be -> if zero, set it to be equal to the liquidationReward
+         * @dev Amount of tokens to award when a small account is liquidated.
          */
-        uint256 liquidationReward; // booster, liquidation fee deposit
+        uint256 liquidationBooster;
         /**
          * @dev The oracle manager node id which reports the current price for this collateral type.
          */
@@ -83,7 +80,7 @@ library CollateralConfiguration {
         Data storage storedConfig = load(config.tokenAddress);
 
         storedConfig.tokenAddress = config.tokenAddress;
-        storedConfig.liquidationReward = config.liquidationReward;
+        storedConfig.liquidationBooster = config.liquidationBooster;
         storedConfig.depositingEnabled = config.depositingEnabled;
         storedConfig.cap = config.cap;
     }

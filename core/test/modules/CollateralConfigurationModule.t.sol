@@ -22,7 +22,7 @@ contract CollateralConfigurationModuleTest is Test {
     function test_ConfigureCollateral() public {
         CollateralConfiguration.Data memory config =
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true, liquidationBooster: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
             });
 
         // Expect CollateralConfigured event
@@ -36,7 +36,7 @@ contract CollateralConfigurationModuleTest is Test {
             collateralConfigurationModule.getCollateralConfiguration(Constants.TOKEN_0);
 
         assertEq(existingConfig.depositingEnabled, config.depositingEnabled);
-        assertEq(existingConfig.liquidationReward, config.liquidationReward);
+        assertEq(existingConfig.liquidationBooster, config.liquidationBooster);
         assertEq(existingConfig.tokenAddress, config.tokenAddress);
         assertEq(existingConfig.cap, config.cap);
     }
@@ -46,7 +46,7 @@ contract CollateralConfigurationModuleTest is Test {
 
         CollateralConfiguration.Data memory config =
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true, liquidationBooster: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
             });
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
@@ -58,14 +58,14 @@ contract CollateralConfigurationModuleTest is Test {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true, liquidationBooster: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
             })
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+                depositingEnabled: false, liquidationBooster: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
             })
         );
 
@@ -73,7 +73,7 @@ contract CollateralConfigurationModuleTest is Test {
             collateralConfigurationModule.getCollateralConfiguration(Constants.TOKEN_1);
 
         assertEq(existingConfig.depositingEnabled, false);
-        assertEq(existingConfig.liquidationReward, 1e16);
+        assertEq(existingConfig.liquidationBooster, 1e16);
         assertEq(existingConfig.tokenAddress, Constants.TOKEN_1);
         assertEq(existingConfig.cap, Constants.TOKEN_1_CAP);
     }
@@ -83,7 +83,7 @@ contract CollateralConfigurationModuleTest is Test {
             collateralConfigurationModule.getCollateralConfiguration(Constants.TOKEN_1);
 
         assertEq(existingConfig.depositingEnabled, false);
-        assertEq(existingConfig.liquidationReward, 0);
+        assertEq(existingConfig.liquidationBooster, 0);
         assertEq(existingConfig.tokenAddress, address(0));
     }
 
@@ -91,14 +91,14 @@ contract CollateralConfigurationModuleTest is Test {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true, liquidationBooster: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
             })
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+                depositingEnabled: false, liquidationBooster: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
             })
         );
 
@@ -107,12 +107,12 @@ contract CollateralConfigurationModuleTest is Test {
         assertEq(configs.length, 2);
 
         assertEq(configs[0].depositingEnabled, true);
-        assertEq(configs[0].liquidationReward, 1e18);
+        assertEq(configs[0].liquidationBooster, 1e18);
         assertEq(configs[0].tokenAddress, Constants.TOKEN_0);
         assertEq(configs[0].cap, Constants.TOKEN_0_CAP);
 
         assertEq(configs[1].depositingEnabled, false);
-        assertEq(configs[1].liquidationReward, 1e16);
+        assertEq(configs[1].liquidationBooster, 1e16);
         assertEq(configs[1].tokenAddress, Constants.TOKEN_1);
         assertEq(configs[1].cap, Constants.TOKEN_1_CAP);
     }
@@ -121,14 +121,14 @@ contract CollateralConfigurationModuleTest is Test {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationReward: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true, liquidationBooster: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
             })
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: false, liquidationReward: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+                depositingEnabled: false, liquidationBooster: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
             })
         );
 
@@ -137,7 +137,7 @@ contract CollateralConfigurationModuleTest is Test {
         assertEq(configs.length, 1);
 
         assertEq(configs[0].depositingEnabled, true);
-        assertEq(configs[0].liquidationReward, 1e18);
+        assertEq(configs[0].liquidationBooster, 1e18);
         assertEq(configs[0].tokenAddress, Constants.TOKEN_0);
         assertEq(configs[0].cap, Constants.TOKEN_0_CAP);
     }

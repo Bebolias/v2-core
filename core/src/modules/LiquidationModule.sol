@@ -3,10 +3,13 @@ pragma solidity >=0.8.13;
 
 import "../storage/Account.sol";
 import "../storage/ProtocolRiskConfiguration.sol";
+import "../storage/CollateralConfiguration.sol";
 import "@voltz-protocol/util-contracts/src/errors/ParameterError.sol";
 import "../interfaces/ILiquidationModule.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "../storage/Collateral.sol";
+
+import { mulUDxUint } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
 /**
  * @title Module for liquidated accounts
@@ -15,20 +18,32 @@ import "../storage/Collateral.sol";
 
 contract LiquidationModule is ILiquidationModule {
     using ProtocolRiskConfiguration for ProtocolRiskConfiguration.Data;
+    using CollateralConfiguration for CollateralConfiguration.Data;
     using Account for Account.Data;
     using SafeCastU256 for uint256;
     using SafeCastI256 for int256;
     using Collateral for Collateral.Data;
 
-    /**
-     * @dev Thrown when an account is not liquidatable but liquidation is triggered on it.
-     */
-    error AccountNotLiquidatable(uint128 accountId);
+    function extractLiquidatorReward(uint128 liquidatedAccountId, address collateralType, uint256 imPreClose, uint256 imPostClose) 
+        private returns (uint256 liquidatorRewardAmount) 
+    {
+        Account.Data storage account = Account.load(liquidatedAccountId);
 
-    /**
-     * @dev Thrown when an account exposure is not reduced when liquidated.
-     */
-    error AccountExposureNotReduced(uint128 accountId, uint256 imPreClose, uint256 imPostClose);
+        UD60x18 liquidatorRewardParameter = ProtocolRiskConfiguration.load().liquidatorRewardParameter;
+        uint256 liquidationBooster = CollateralConfiguration.load(collateralType).liquidationBooster;
+
+        if (mulUDxUint(liquidatorRewardParameter, imPreClose) >= liquidationBooster) {
+            liquidatorRewardAmount = mulUDxUint(liquidatorRewardParameter, imPreClose - imPostClose);
+            account.collaterals[collateralType].decreaseCollateralBalance(liquidatorRewardAmount);
+        } else {
+            if (imPostClose != 0) {
+                revert PartialLiquidationNotIncentivized(liquidatedAccountId, imPreClose, imPostClose);
+            }
+
+            liquidatorRewardAmount = liquidationBooster;
+            account.collaterals[collateralType].decreaseLiquidationBoosterBalance(liquidatorRewardAmount);
+        }
+    }
 
     /**
      * @inheritdoc ILiquidationModule
@@ -55,12 +70,9 @@ contract LiquidationModule is ILiquidationModule {
             revert AccountExposureNotReduced(liquidatedAccountId, imPreClose, imPostClose);
         }
 
-        // todo: liquidator deposit logic vs. alternatives (P1)
+        liquidatorRewardAmount = extractLiquidatorReward(liquidatedAccountId, collateralType, imPreClose, imPostClose);
 
-        liquidatorRewardAmount = (imPreClose - imPostClose) * ProtocolRiskConfiguration.load().liquidatorRewardParameter / 1e18;
         Account.Data storage liquidatorAccount = Account.exists(liquidatorAccountId);
-
-        account.collaterals[collateralType].decreaseCollateralBalance(liquidatorRewardAmount);
         liquidatorAccount.collaterals[collateralType].increaseCollateralBalance(liquidatorRewardAmount);
     }
 }

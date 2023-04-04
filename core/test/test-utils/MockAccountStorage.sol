@@ -42,6 +42,7 @@ contract MockAccountStorage {
         uint256 tokenBalance = balance.balance;
 
         account.collaterals[token].balance = tokenBalance;
+        account.collaterals[token].liquidationBoosterBalance = 0;
     }
 
     function addActiveProduct(uint128 accountId, uint128 productId) public {

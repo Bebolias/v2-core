@@ -9,6 +9,11 @@ import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import "./Collateral.sol";
 import "./Product.sol";
 
+import "oz/contracts/utils/math/Math.sol";
+import "oz/contracts/utils/math/SignedMath.sol";
+
+import { mulUDxUint, mulSDxInt } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
+
 /**
  * @title Object for tracking accounts with access control and collateral tracking.
  */
@@ -54,8 +59,6 @@ library Account {
         mapping(address => Collateral.Data) collaterals;
         /**
          * @dev Ids of all the products in which the account has active positions
-         * todo: needs logic to mark active products (check out python) and also check out how marking is done in synthetix, how and
-         * why they use sets vs. simple arrays
          */
         SetUtil.UintSet activeProducts;
     }
@@ -69,10 +72,8 @@ library Account {
         // uint128 productId; -> since already have it in the exposures mapping
         uint128 marketId;
         int256 filled;
-        // this value should technically be uint256, however using int256 to minimise need for casting
-        // todo: consider using uint256 for the below values since they should never be negative
-        int256 unfilledLong;
-        int256 unfilledShort;
+        uint256 unfilledLong;
+        uint256 unfilledShort;
     }
 
     /**
@@ -237,14 +238,14 @@ library Account {
         totalAccountValue = unrealizedPnL + collateralBalance;
     }
 
-    function getRiskParameter(uint128 productId, uint128 marketId) internal view returns (int256 riskParameter) {
+    function getRiskParameter(uint128 productId, uint128 marketId) internal view returns (SD59x18 riskParameter) {
         return MarketRiskConfiguration.load(productId, marketId).riskParameter;
     }
 
     /**
      * @dev Note, im multiplier is assumed to be the same across all products, markets and maturities
      */
-    function getIMMultiplier() internal view returns (uint256 imMultiplier) {
+    function getIMMultiplier() internal view returns (UD60x18 imMultiplier) {
         return ProtocolRiskConfiguration.load().imMultiplier;
     }
 
@@ -274,9 +275,7 @@ library Account {
     }
     /**
      * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
-     * todo: add user defined types
      */
-
     function getMarginRequirements(Data storage self, address collateralType) internal returns (uint256 im, uint256 lm) {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
 
@@ -289,34 +288,23 @@ library Account {
             for (uint256 j = 0; j < annualizedProductMarketExposures.length; j++) {
                 Exposure memory exposure = annualizedProductMarketExposures[j];
                 uint128 marketId = exposure.marketId;
-                int256 riskParameter = getRiskParameter(productId, marketId);
-                int256 maxLong = exposure.filled + exposure.unfilledLong;
-                int256 maxShort = exposure.filled + exposure.unfilledShort;
+                SD59x18 riskParameter = getRiskParameter(productId, marketId);
+                int256 maxLong = exposure.filled + int256(exposure.unfilledLong);
+                int256 maxShort = exposure.filled - int256(exposure.unfilledShort);
                 // note: this conditional logic is redundunt if no correlations, should just be maxLong
                 // hence, why we need to use int256 for risk parameter + minimises need for casting
-                int256 worstFilledUp = riskParameter > 0 ? maxLong : maxShort;
-                int256 worstFilledDown = riskParameter > 0 ? maxShort : maxLong;
+                int256 worstFilledUp = SD59x18.unwrap(riskParameter) > 0 ? maxLong : maxShort;
+                int256 worstFilledDown = SD59x18.unwrap(riskParameter) > 0 ? maxShort : maxLong;
 
-                worstCashflowUp += worstFilledUp * riskParameter / 1e18;
-                worstCashflowDown += worstFilledDown * riskParameter / 1e18;
+                worstCashflowUp += mulSDxInt(riskParameter, worstFilledUp);
+                worstCashflowDown += mulSDxInt(riskParameter, worstFilledDown);
             }
         }
-        (worstCashflowUp, worstCashflowDown) = (abs(worstCashflowUp), abs(worstCashflowDown));
-        lm = max(worstCashflowUp, worstCashflowDown).toUint();
 
-        im = lm * getIMMultiplier() / 1e18;
-    }
+        (uint256 worstCashflowUpAbs, uint256 worstCashflowDownAbs) = 
+            (SignedMath.abs(worstCashflowUp), SignedMath.abs(worstCashflowDown));
 
-    // todo: consider replacing with prb math
-    function max(int256 a, int256 b) internal pure returns (int256) {
-        return a >= b ? a : b;
-    }
-    /**
-     * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
-     *  todo: consider replacing with prb math
-     */
-
-    function abs(int256 x) private pure returns (int256) {
-        return x >= 0 ? x : -x;
+        lm = Math.max(worstCashflowUpAbs, worstCashflowDownAbs);
+        im = mulUDxUint(getIMMultiplier(), lm);
     }
 }

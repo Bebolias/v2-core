@@ -11,18 +11,34 @@ interface ICollateralModule {
      * @param collateralType The address of the collateral of the unsuccessful deposit
      * @param collateralCap The cap limit of the collateral
      * @param currentBalance Protocol's total balance in the collateral type
-     * @param attemptedDeposit The deposit amount of the unsuccessful deposit
+     * @param tokenAmount The token amount of the unsuccessful deposit
+     * @param liquidationBoosterDeposit The amount paid towards the liquidation booster 
+     * (up to ConfigurationConfiguration.liquidationBooster)
      */
-    error CollateralCapExceeded(address collateralType, uint256 collateralCap, uint256 currentBalance, uint256 attemptedDeposit);
+    error CollateralCapExceeded(
+        address collateralType, 
+        uint256 collateralCap, 
+        uint256 currentBalance, 
+        uint256 tokenAmount,
+        uint256 liquidationBoosterDeposit
+    );
 
     /**
      * @notice Emitted when `tokenAmount` of collateral of type `collateralType` is deposited to account `accountId` by `sender`.
      * @param accountId The id of the account that deposited collateral.
      * @param collateralType The address of the collateral that was deposited.
      * @param tokenAmount The amount of collateral that was deposited, denominated in the token's native decimal representation.
+     * @param liquidationBoosterDeposit The amount paid towards the liquidation booster 
+     * (up to ConfigurationConfiguration.liquidationBooster)
      * @param sender The address of the account that triggered the deposit.
      */
-    event Deposited(uint128 indexed accountId, address indexed collateralType, uint256 tokenAmount, address indexed sender);
+    event Deposited(
+        uint128 indexed accountId, 
+        address indexed collateralType, 
+        uint256 tokenAmount,
+        uint256 liquidationBoosterDeposit,
+        address indexed sender
+    );
 
     /**
      * @notice Emitted when `tokenAmount` of collateral of type `collateralType` is withdrawn from account `accountId` by `sender`.

@@ -6,10 +6,21 @@ pragma solidity >=0.8.13;
  */
 interface ILiquidationModule {
     /**
-     * @notice Thrown when attempting to liquidate an account that is not eligible for liquidation.
+     * @dev Thrown when an account is not liquidatable but liquidation is triggered on it.
      */
-    // todo: rename and add arguments to the error
-    error IneligibleForLiquidation();
+    error AccountNotLiquidatable(uint128 accountId);
+
+    /**
+     * @dev Thrown when an account exposure is not reduced when liquidated.
+     */
+    error AccountExposureNotReduced(uint128 accountId, uint256 imPreClose, uint256 imPostClose);
+
+    /**
+     * @dev Thrown when a liquidation uses the liquidation booster but the account
+     * is not fully liquidated.
+     * todo: liquidity minted for liquidation
+     */
+    error PartialLiquidationNotIncentivized(uint128 accountId, uint256 imPreClose, uint256 imPostClose);
 
     /**
      * @notice Emitted when an account is liquidated.
