@@ -38,19 +38,19 @@ contract ProductIRSModule is IProductIRSModule {
         RateOracleReader.load(marketId).updateCache(maturityTimestamp);
 
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
-        address _poolAddress = ProductConfiguration.getPoolAddress();
+        address poolAddress = ProductConfiguration.getPoolAddress();
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        IPool pool = IPool(_poolAddress);
+        IPool pool = IPool(poolAddress);
         (executedBaseAmount, executedQuoteAmount) = pool.executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount);
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
 
         // propagate order
-        address _proxy = ProductConfiguration.getProxyAddress();
-        address quoteToken = IMarketConfigurationModule(_proxy).getMarketConfiguration(marketId).quoteToken;
+        address coreProxy = ProductConfiguration.getProxyAddress();
+        address quoteToken = IMarketConfigurationModule(coreProxy).getMarketConfiguration(marketId).quoteToken;
         int256[] memory baseAmounts = new int256[](1);
         baseAmounts[0] = executedBaseAmount;
         int256 annualizedBaseAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
-        IProductModule(_proxy).propagateTakerOrder(
+        IProductModule(coreProxy).propagateTakerOrder(
             accountId, ProductConfiguration.getProductId(), marketId, quoteToken, annualizedBaseAmount
         );
     }
@@ -59,16 +59,17 @@ contract ProductIRSModule is IProductIRSModule {
      * @inheritdoc IProductIRSModule
      */
 
-    function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp, address poolAddress) external override {
+    function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) external override {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
+        address poolAddress = ProductConfiguration.getPoolAddress();
         int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp, poolAddress);
 
-        address _proxy = ProductConfiguration.getProxyAddress();
-        address quoteToken = IMarketConfigurationModule(_proxy).getMarketConfiguration(marketId).quoteToken;
+        address coreProxy = ProductConfiguration.getProxyAddress();
+        address quoteToken = IMarketConfigurationModule(coreProxy).getMarketConfiguration(marketId).quoteToken;
 
         uint128 productId = ProductConfiguration.getProductId();
 
-        IProductModule(_proxy).propagateCashflow(accountId, productId, quoteToken, settlementCashflowInQuote);
+        IProductModule(coreProxy).propagateCashflow(accountId, productId, quoteToken, settlementCashflowInQuote);
     }
 
     /**
@@ -92,8 +93,8 @@ contract ProductIRSModule is IProductIRSModule {
         returns (int256 unrealizedPnL)
     {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        address _poolAddress = ProductConfiguration.getPoolAddress();
-        return portfolio.getAccountUnrealizedPnL(_poolAddress, collateralType);
+        address poolAddress = ProductConfiguration.getPoolAddress();
+        return portfolio.getAccountUnrealizedPnL(poolAddress, collateralType);
     }
 
     /**
@@ -125,8 +126,8 @@ contract ProductIRSModule is IProductIRSModule {
         returns (Account.Exposure[] memory exposures)
     {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        address _poolAddress = ProductConfiguration.getPoolAddress();
-        return portfolio.getAccountAnnualizedExposures(_poolAddress, collateralType);
+        address poolAddress = ProductConfiguration.getPoolAddress();
+        return portfolio.getAccountAnnualizedExposures(poolAddress, collateralType);
     }
 
     /**
@@ -134,8 +135,8 @@ contract ProductIRSModule is IProductIRSModule {
      */
     function closeAccount(uint128 accountId, address collateralType) external override {
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        address _poolAddress = ProductConfiguration.getPoolAddress();
-        portfolio.closeAccount(_poolAddress, collateralType);
+        address poolAddress = ProductConfiguration.getPoolAddress();
+        portfolio.closeAccount(poolAddress, collateralType);
     }
 
     // todo: introduce in interface or create separate module for exposing this function

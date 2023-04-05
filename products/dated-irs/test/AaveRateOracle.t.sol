@@ -133,7 +133,7 @@ contract AaveRateOracleTest is Test {
 
     function test_SetNonZeroIndexInMock() public {
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        vm.warp(Time.blockTimestampTruncated() + 10000); // TODO: not sure how this behaves, assuming it starts a new node per test
+        vm.warp(Time.blockTimestampTruncated() + 10000);
         assertApproxEqRel(
             mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS),
             INDEX_AFTER_SET_TIME * 1e9,
@@ -143,7 +143,7 @@ contract AaveRateOracleTest is Test {
 
     function test_NonZeroCurrentIndex() public {
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        vm.warp(Time.blockTimestampTruncated() + 10000); // TODO: not sure how this behaves, assuming it starts a new node per test
+        vm.warp(Time.blockTimestampTruncated() + 10000);
         assertApproxEqAbs(rateOracle.getCurrentIndex().unwrap(), INDEX_AFTER_SET_TIME, 1e7);
     }
 

@@ -9,7 +9,7 @@ library Time {
     using { toUD60x18 } for uint256;
 
     // uint256 public constant SECONDS_IN_DAY_WAD = 86400e18;
-    uint256 public constant SECONDS_IN_YEAR = 31540000;
+    uint256 public constant SECONDS_IN_YEAR = 31536000;
 
     // /// @notice Calculate block.timestamp to wei precision
     // /// @return Current timestamp in wei-seconds (1/1e18)

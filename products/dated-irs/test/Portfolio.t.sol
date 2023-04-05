@@ -128,11 +128,10 @@ contract PortfolioTest is Test {
 
     MockRateOracle mockRateOracle;
     MockPool mockPool;
-    uint32 public maturityTimestamp;
     uint32 currentTimestamp;
 
     address constant MOCK_COLLATERAL_TYPE = 0x1122334455667788990011223344556677889900;
-    uint32 internal constant ONE_YEAR = 3139000;
+    uint32 internal constant ONE_YEAR = 31536000;
     uint128 internal constant marketId = 100;
     uint128 internal constant accountId = 200;
     bytes32 internal constant portfolioSlot = keccak256(abi.encode("xyz.voltz.Portfolio", accountId));
@@ -142,8 +141,6 @@ contract PortfolioTest is Test {
 
         mockPool = new MockPool();
         mockRateOracle = new MockRateOracle();
-
-        maturityTimestamp = currentTimestamp + ONE_YEAR;
 
         portfolio = new ExposePortfolio();
         portfolio.create(accountId);
@@ -164,8 +161,8 @@ contract PortfolioTest is Test {
     }
 
     function test_GetAccountUnrealizedPnLWithTraderPositions() public {
-        uint32 maturityTimestamp1 = currentTimestamp + 31540000;
-        uint32 maturityTimestamp2 = currentTimestamp + 31540000 / 2;
+        uint32 maturityTimestamp1 = currentTimestamp + ONE_YEAR;
+        uint32 maturityTimestamp2 = currentTimestamp + ONE_YEAR / 2;
         uint256 liqudityIndex = 1e27;
         UD60x18 gwap1 = ud(0.3e18); // 30% -> 1.3 * base
         UD60x18 gwap2 = ud(0.05e18); // 5% ->1 + (0.05 * 1/2) * base
@@ -183,8 +180,8 @@ contract PortfolioTest is Test {
     }
 
     function test_GetAccountUnrealizedPnLWithLpPositions() public {
-        uint32 maturityTimestamp1 = currentTimestamp + 31540000;
-        uint32 maturityTimestamp2 = currentTimestamp + 31540000 / 2;
+        uint32 maturityTimestamp1 = currentTimestamp + ONE_YEAR;
+        uint32 maturityTimestamp2 = currentTimestamp + ONE_YEAR / 2;
         uint256 liqudityIndex = 1e27;
         UD60x18 gwap1 = ud(0.3e18);
         UD60x18 gwap2 = ud(0.05e18);
@@ -211,8 +208,8 @@ contract PortfolioTest is Test {
     }
 
     function test_GetAccountUnrealizedPnLWithTraderAndLpPositions() public {
-        uint32 maturityTimestamp1 = currentTimestamp + 31540000;
-        uint32 maturityTimestamp2 = currentTimestamp + 31540000 / 2;
+        uint32 maturityTimestamp1 = currentTimestamp + ONE_YEAR;
+        uint32 maturityTimestamp2 = currentTimestamp + ONE_YEAR / 2;
         uint256 liqudityIndex = 1e27;
         UD60x18 gwap1 = ud(0.3e18);
         UD60x18 gwap2 = ud(0.05e18);
@@ -328,7 +325,7 @@ contract PortfolioTest is Test {
     }
 
     function test_AnnualizedExposureFactorBeforeMaturity() public {
-        uint32 maturityTimestamp = currentTimestamp + 31540000;
+        uint32 maturityTimestamp = currentTimestamp + ONE_YEAR;
         mockRateOracle.setLastUpdatedIndex(1e27);
 
         UD60x18 factor = portfolio.annualizedExposureFactor(marketId, maturityTimestamp);
@@ -347,7 +344,7 @@ contract PortfolioTest is Test {
     }
 
     function test_AccountAnnualizedExposureTaker() public {
-        uint32 maturityTimestamp = currentTimestamp + 31540000;
+        uint32 maturityTimestamp = currentTimestamp + ONE_YEAR;
 
         portfolio.updatePosition(accountId, marketId, maturityTimestamp, 10 * 1e6, 20 * 1e6);
 
@@ -364,7 +361,7 @@ contract PortfolioTest is Test {
     }
 
     function test_AccountAnnualizedWithPosition() public {
-        uint32 maturityTimestamp = currentTimestamp + 31540000;
+        uint32 maturityTimestamp = currentTimestamp + ONE_YEAR;
 
         portfolio.updatePosition(accountId, marketId, maturityTimestamp, 10, 20);
         mockPool.setBalances(15, 21, 2, 3);

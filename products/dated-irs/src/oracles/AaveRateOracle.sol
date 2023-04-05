@@ -72,7 +72,7 @@ contract AaveRateOracle is IRateOracle {
     /**
      * @inheritdoc IERC165
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165) returns (bool) {
-        return interfaceId == type(IRateOracle).interfaceId;
+    function supportsInterface(bytes4 interfaceId) external view override(IERC165) returns (bool) {
+        return interfaceId == type(IRateOracle).interfaceId || interfaceId == this.supportsInterface.selector;
     }
 }

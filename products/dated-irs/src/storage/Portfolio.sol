@@ -88,8 +88,8 @@ library Portfolio {
         returns (int256 unrealizedPnL)
     {
         // TODO: looks expensive - need to place limits on number of allowed markets and allowed maturities?
-        for (uint256 i = 0; i < self.activeMarketsAndMaturities[collateralType].length(); i++) {
-            uint256 marketMaturityPacked = self.activeMarketsAndMaturities[collateralType].valueAt(i + 1);
+        for (uint256 i = 1; i <= self.activeMarketsAndMaturities[collateralType].length(); i++) {
+            uint256 marketMaturityPacked = self.activeMarketsAndMaturities[collateralType].valueAt(i);
             (uint128 marketId, uint32 maturityTimestamp) = Pack.unpack(marketMaturityPacked);
 
             int256 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
