@@ -25,7 +25,7 @@ contract LiquidationModule is ILiquidationModule {
     using Collateral for Collateral.Data;
 
     function extractLiquidatorReward(uint128 liquidatedAccountId, address collateralType, uint256 imPreClose, uint256 imPostClose) 
-        private returns (uint256 liquidatorRewardAmount) 
+        internal returns (uint256 liquidatorRewardAmount) 
     {
         Account.Data storage account = Account.load(liquidatedAccountId);
 

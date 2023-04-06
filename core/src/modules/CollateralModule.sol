@@ -110,6 +110,21 @@ contract CollateralModule is ICollateralModule {
     /**
      * @inheritdoc ICollateralModule
      */
+    function getAccountLiquidationBoosterBalance(
+        uint128 accountId,
+        address collateralType
+    )
+        external
+        view
+        override
+        returns (uint256 collateralBalance)
+    {
+        return Account.load(accountId).getLiquidationBoosterBalance(collateralType);
+    }
+
+    /**
+     * @inheritdoc ICollateralModule
+     */
     function getTotalAccountValue(uint128 accountId, address collateralType) 
         external view override returns (int256 totalAccountValue) 
     {

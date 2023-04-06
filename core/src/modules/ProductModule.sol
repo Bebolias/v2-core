@@ -74,8 +74,6 @@ contract ProductModule is IProductModule {
         productId = ProductCreator.create(product, name, msg.sender).id;
 
         emit ProductRegistered(product, productId, msg.sender);
-
-        return productId;
     }
 
     /**
@@ -85,6 +83,7 @@ contract ProductModule is IProductModule {
     function closeAccount(uint128 productId, uint128 accountId, address collateralType) external override {
         Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
         // todo: consider returning data that might be useful in the future
+        // todo: emit event
         Product.load(productId).closeAccount(accountId, collateralType);
     }
 
@@ -125,6 +124,8 @@ contract ProductModule is IProductModule {
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
         }
+
+        //todo: emit event
     }
 
     function propagateMakerOrder(
@@ -144,6 +145,8 @@ contract ProductModule is IProductModule {
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
         }
+
+         //todo: emit event
     }
 
     function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount) external override {
@@ -155,5 +158,8 @@ contract ProductModule is IProductModule {
         } else {
             account.collaterals[collateralType].decreaseCollateralBalance((-amount).toUint());
         }
+
+        //todo: imcheck?
+        //todo: emit event
     }
 }

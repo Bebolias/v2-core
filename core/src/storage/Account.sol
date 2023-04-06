@@ -130,9 +130,8 @@ library Account {
     /**
      * @dev Given a collateral type, returns information about the total balance of the account
      */
-    function getCollateralBalance(Data storage self, address collateralType) internal view returns (uint256 collateralBalanceD18) {
-        collateralBalanceD18 = self.collaterals[collateralType].balance;
-        return collateralBalanceD18;
+    function getCollateralBalance(Data storage self, address collateralType) internal view returns (uint256 collateralBalance) {
+        collateralBalance = self.collaterals[collateralType].balance;
     }
 
     /**
@@ -143,13 +142,22 @@ library Account {
         address collateralType
     )
         internal
-        returns (uint256 collateralBalanceAvailableD18)
+        returns (uint256 collateralBalanceAvailable)
     {
         (uint256 im,) = self.getMarginRequirements(collateralType);
         int256 totalAccountValue = self.getTotalAccountValue(collateralType);
         if (totalAccountValue > im.toInt()) {
-            collateralBalanceAvailableD18 = totalAccountValue.toUint() - im;
+            collateralBalanceAvailable = totalAccountValue.toUint() - im;
         }
+    }
+
+    /**
+     * @dev Given a collateral type, returns information about the total liquidation booster balance of the account
+     */
+    function getLiquidationBoosterBalance(Data storage self, address collateralType) 
+        internal view returns (uint256 liquidationBoosterBalance) 
+    {
+        liquidationBoosterBalance = self.collaterals[collateralType].liquidationBoosterBalance;
     }
 
     /**
