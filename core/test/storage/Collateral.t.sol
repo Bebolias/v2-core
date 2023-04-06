@@ -7,8 +7,8 @@ import "../../src/storage/Collateral.sol";
 contract ExposedCollateral {
     Collateral.Data internal item;
 
-    constructor(uint256 balance) {
-        item = Collateral.Data({balance: balance, liquidationBoosterBalance: 0});
+    constructor(uint256 balance, uint256 liquidationBoosterBalance) {
+        item = Collateral.Data({balance: balance, liquidationBoosterBalance: liquidationBoosterBalance});
     }
 
     // Mock functions
@@ -24,12 +24,20 @@ contract ExposedCollateral {
     function decreaseCollateralBalance(uint256 amount) external {
         Collateral.decreaseCollateralBalance(item, amount);
     }
+
+    function increaseLiquidationBoosterBalance(uint256 amount) external {
+        Collateral.increaseLiquidationBoosterBalance(item, amount);
+    }
+
+    function decreaseLiquidationBoosterBalance(uint256 amount) external {
+        Collateral.decreaseLiquidationBoosterBalance(item, amount);
+    }
 }
 
 contract CollateralTest is Test {
     function test_IncreaseCollateralBalance() public {
         // Collateral with 100 balance
-        ExposedCollateral collateral = new ExposedCollateral(100e18);
+        ExposedCollateral collateral = new ExposedCollateral(100e18, 10e18);
 
         // Increase it by 200
         collateral.increaseCollateralBalance(200e18);
@@ -40,7 +48,7 @@ contract CollateralTest is Test {
 
     function test_DecreaseCollateralBalance() public {
         // Collateral with 300 balance
-        ExposedCollateral collateral = new ExposedCollateral(300e18);
+        ExposedCollateral collateral = new ExposedCollateral(300e18, 0);
 
         // Increase it by 200
         collateral.decreaseCollateralBalance(200e18);
@@ -49,18 +57,36 @@ contract CollateralTest is Test {
         assertEq(collateral.get().balance, 100e18);
     }
 
+    function test_IncreaseLiquidationBoosterBalance() public {
+        ExposedCollateral collateral = new ExposedCollateral(100e18, 10e18);
+        collateral.increaseLiquidationBoosterBalance(20e18);
+        assertEq(collateral.get().liquidationBoosterBalance, 30e18);
+    }
+
+    function test_decreaseLiquidationBoosterBalance() public {
+        ExposedCollateral collateral = new ExposedCollateral(100e18, 10e18);
+        collateral.decreaseLiquidationBoosterBalance(3e18);
+        assertEq(collateral.get().liquidationBoosterBalance, 7e18);
+    }
+
     function test_revertWhen_NotEnoughBalanceToDecrease() public {
         // Collateral with 100 balance
-        ExposedCollateral collateral = new ExposedCollateral(100e18);
+        ExposedCollateral collateral = new ExposedCollateral(100e18, 0);
 
         // Expect revert when decreasing by 200
         vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientCollateral.selector, 200e18));
         collateral.decreaseCollateralBalance(200e18);
     }
 
+    function test_revertWhen_NotEnoughLiquidationBoosterToDecrease() public {
+        ExposedCollateral collateral = new ExposedCollateral(100e18, 10e18);
+        vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientLiquidationBoosterBalance.selector, 17e18));
+        collateral.decreaseLiquidationBoosterBalance(17e18);
+    }
+
     function testFuzz_IncreaseCollateralBalance(uint256 balance, uint256 amount) public {
         vm.assume(amount <= UINT256_MAX - balance);
-        ExposedCollateral collateral = new ExposedCollateral(balance);
+        ExposedCollateral collateral = new ExposedCollateral(balance, 0);
 
         collateral.increaseCollateralBalance(amount);
 
@@ -69,7 +95,7 @@ contract CollateralTest is Test {
 
     function testFuzz_DecreaseCollateralBalance(uint256 balance, uint256 amount) public {
         vm.assume(amount <= balance);
-        ExposedCollateral collateral = new ExposedCollateral(balance);
+        ExposedCollateral collateral = new ExposedCollateral(balance, 0);
 
         collateral.decreaseCollateralBalance(amount);
 
@@ -79,7 +105,7 @@ contract CollateralTest is Test {
     function testFuzz_revertWhen_NotEnoughBalanceToDecrease(uint256 balance, uint256 amount) public {
         vm.assume(amount > balance);
 
-        ExposedCollateral collateral = new ExposedCollateral(balance);
+        ExposedCollateral collateral = new ExposedCollateral(balance, 0);
         vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientCollateral.selector, amount));
 
         collateral.decreaseCollateralBalance(amount);

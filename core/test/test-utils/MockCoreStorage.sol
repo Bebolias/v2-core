@@ -7,7 +7,10 @@ import "./MockProduct.sol";
 import "./Constants.sol";
 import "../../src/storage/MarketRiskConfiguration.sol";
 import "../../src/storage/CollateralConfiguration.sol";
+import "../../src/storage/MarketFeeConfiguration.sol";
 import "forge-std/Test.sol";
+import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
+import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 import { SD59x18 } from "@prb/math/SD59x18.sol";
@@ -26,6 +29,13 @@ contract MockCoreStorage is MockAccountStorage, MockProductStorage { }
  *          - product address: PRODUCT_ADDRESS_2
  *          - name: "Product 2"
  *          - owner: PRODUCT_OWNER
+ * @dev Collaterals:
+ *        - - TOKEN_0
+ *          - liquidation booster: 10
+ *          - CAP: 100000
+ *        - - TOKEN_1
+ *          - liquidation booster: 0.4
+ *          - cap: 1000
  * @dev Market risk configurations:
  *        - - productId: 1
  *          - marketId: 10
@@ -86,12 +96,58 @@ contract MockCoreStorage is MockAccountStorage, MockProductStorage { }
  * @dev Protocol risk configurations:
  *        - im multiplier: 2
  *        - liquidator reward: 0.05
+ * @dev Protocol Fee configurations:
+ *        - (productId: 1, marketId: 10):   
+ *          - feeCollectorAccountId: 999
+ *          - atomicMakerFee: 0.01
+ *          - atomicTakerFee: 0.05
  *
+ *        - (productId: 1, marketId: 11):      
+ *          - feeCollectorAccountId: 999
+ *          - atomicMakerFee: 0.02
+ *          - atomicTakerFee: 0.04
+ *
+ *        - (productId: 2, marketId: 20):  
+ *          - feeCollectorAccountId: 999
+ *          - atomicMakerFee: 0.04
+ *          - atomicTakerFee: 0.02
+ *
+ *        - (productId: 2, marketId: 21):
+ *          - feeCollectorAccountId: 999
+ *          - atomicMakerFee: 0.05
+ *          - atomicTakerFee: 0.01
  */
-contract CoreState is MockCoreStorage {
+contract CoreState is MockCoreStorage, Ownable {
+    using SetUtil for SetUtil.AddressSet;
+
     MockProduct[] internal products;
 
-    constructor() {
+    constructor() Ownable(Constants.PROXY_OWNER) {
+        // Allow _CREATE_PRODUCT Feature Flag to PRODUCT_CREATOR
+        SetUtil.AddressSet storage permissionedAddresses = FeatureFlag.load("registerProduct").permissionedAddresses;
+        permissionedAddresses.add(Constants.PRODUCT_CREATOR);
+
+        // Set protocol risk configuration
+        ProtocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({
+            imMultiplier: UD60x18.wrap(2e18), liquidatorRewardParameter: UD60x18.wrap(5e16)
+        }));
+
+        // Mock collateral configuration (token 0)
+        CollateralConfiguration.set(
+            CollateralConfiguration.Data({
+                depositingEnabled: true, liquidationBooster: Constants.TOKEN_0_LIQUIDATION_BOOSTER, 
+                tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+            })
+        );
+
+        // Mock collateral configuration (token 1)
+        CollateralConfiguration.set(
+            CollateralConfiguration.Data({
+                depositingEnabled: false, liquidationBooster: Constants.TOKEN_1_LIQUIDATION_BOOSTER, 
+                tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+            })
+        );
+
         // Create product (id: 1)
         {
             products.push(new MockProduct("Product 1"));
@@ -109,8 +165,14 @@ contract CoreState is MockCoreStorage {
         // Create account (id: 100)
         {
             CollateralBalance[] memory balances = new CollateralBalance[](2);
-            balances[0] = CollateralBalance({token: Constants.TOKEN_0, balance: Constants.DEFAULT_TOKEN_0_BALANCE});
-            balances[1] = CollateralBalance({token: Constants.TOKEN_1, balance: Constants.DEFAULT_TOKEN_1_BALANCE});
+            balances[0] = CollateralBalance({
+                token: Constants.TOKEN_0, balance: Constants.DEFAULT_TOKEN_0_BALANCE, 
+                liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER
+            });
+            balances[1] = CollateralBalance({
+                token: Constants.TOKEN_1, balance: Constants.DEFAULT_TOKEN_1_BALANCE, 
+                liquidationBoosterBalance: Constants.TOKEN_1_LIQUIDATION_BOOSTER
+            });
 
             uint128[] memory activeProductIds = new uint128[](2);
             activeProductIds[0] = 1;
@@ -119,40 +181,60 @@ contract CoreState is MockCoreStorage {
             mockAccount(100, Constants.ALICE, balances, activeProductIds);
         }
 
+        // Create account (id: 101)
+        {
+            CollateralBalance[] memory balances = new CollateralBalance[](2);
+            balances[0] = CollateralBalance({
+                token: Constants.TOKEN_0, balance: Constants.DEFAULT_TOKEN_0_BALANCE, 
+                liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER
+            });
+            balances[1] = CollateralBalance({
+                token: Constants.TOKEN_1, balance: Constants.DEFAULT_TOKEN_1_BALANCE, 
+                liquidationBoosterBalance: Constants.TOKEN_1_LIQUIDATION_BOOSTER
+            });
+
+            uint128[] memory activeProductIds;
+            mockAccount(101, Constants.BOB, balances, activeProductIds);
+        }
+
+        // Create account (id: 999)
+        {
+            CollateralBalance[] memory balances;
+            uint128[] memory activeProductIds;
+            mockAccount(999, Constants.FEES_COLLECTOR, balances, activeProductIds);
+        }
+
         // Mock Calls to Product Smart Contracts regarding Alice account
         mockAliceCalls();
 
         // Set market risk configuration
-        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18)}));
+        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({
+            productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18)
+        }));
+        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({
+            productId: 1, marketId: 11, riskParameter: SD59x18.wrap(1e18)
+        }));
+        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({
+            productId: 2, marketId: 20, riskParameter: SD59x18.wrap(1e18)
+        }));
 
-        // Set market risk configuration
-        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 11, riskParameter: SD59x18.wrap(1e18)}));
-
-        // Set market risk configuration
-        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: SD59x18.wrap(1e18)}));
+        // Set market fee configuration
+        MarketFeeConfiguration.set(MarketFeeConfiguration.Data({
+            productId: 1, marketId: 10, feeCollectorAccountId: 999, 
+            atomicMakerFee: UD60x18.wrap(1e16), atomicTakerFee: UD60x18.wrap(5e16)
+        }));
+        MarketFeeConfiguration.set(MarketFeeConfiguration.Data({
+            productId: 1, marketId: 11, feeCollectorAccountId: 999, 
+            atomicMakerFee: UD60x18.wrap(2e16), atomicTakerFee: UD60x18.wrap(4e16)
+        }));
+        MarketFeeConfiguration.set(MarketFeeConfiguration.Data({
+            productId: 2, marketId: 20, feeCollectorAccountId: 999, 
+            atomicMakerFee: UD60x18.wrap(4e16), atomicTakerFee: UD60x18.wrap(2e16)
+        }));
 
         // todo: test single account single-token mode
         // Set market risk configuration
         // MarketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 2, marketId: 21, riskParameter: 1e18}));
-
-        // Set protocol risk configuration
-        ProtocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({
-            imMultiplier: UD60x18.wrap(2e18), liquidatorRewardParameter: UD60x18.wrap(5e16)
-        }));
-
-        // Mock collateral configuration (token 0)
-        CollateralConfiguration.set(
-            CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 0, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
-            })
-        );
-
-        // Mock collateral configuration (token 1)
-        CollateralConfiguration.set(
-            CollateralConfiguration.Data({
-                depositingEnabled: false, liquidationBooster: 0, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
-            })
-        );
     }
 
     function getProducts() external view returns (MockProduct[] memory) {

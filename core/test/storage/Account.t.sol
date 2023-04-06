@@ -138,7 +138,9 @@ contract AccountTest is Test {
         if (high) balance = HIGH_COLLATERAL;
 
         // Set up the balance of token 0
-        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({token: Constants.TOKEN_0, balance: balance}));
+        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({
+            token: Constants.TOKEN_0, balance: balance, liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER
+        }));
     }
 
     function test_Exists() public {
@@ -147,8 +149,16 @@ contract AccountTest is Test {
         assertEq(slot, accountSlot);
     }
 
-    function testFail_ZeroAccount() public view {
+    function testFail_load_ZeroAccount() public view {
+        accounts.load(0);
+    }
+
+    function testFail_exists_ZeroAccount() public view {
         accounts.exists(0);
+    }
+
+    function testFail_create_ZeroAccount() public {
+        accounts.create(0, address(1));
     }
 
     function test_revertWhen_AccountDoesNotExist() public {
@@ -336,9 +346,14 @@ contract AccountTest is Test {
         assertEq(collateralBalanceAvailable, 0);
     }
 
+    function test_GetLiquidationBoosterBalance() public {
+        assertEq(accounts.getLiquidationBoosterBalance(accountId, Constants.TOKEN_0), Constants.TOKEN_0_LIQUIDATION_BOOSTER);
+        assertEq(accounts.getLiquidationBoosterBalance(accountId, Constants.TOKEN_1), Constants.TOKEN_1_LIQUIDATION_BOOSTER);
+    }
+
     function testFuzz_GetCollateralBalanceAvailable_NoSettlementToken() public {
         accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({
-            token: Constants.TOKEN_UNKNOWN, balance: 1e18
+            token: Constants.TOKEN_UNKNOWN, balance: 1e18, liquidationBoosterBalance: 0
         }));
 
         uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_UNKNOWN);

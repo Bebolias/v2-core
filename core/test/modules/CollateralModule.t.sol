@@ -31,6 +31,54 @@ contract CollateralModuleTest is Test {
 
     EnhancedCollateralModule internal collateralModule;
 
+    function changeIMRequirementToZero() internal {
+        // Mock second calls to products
+        {
+            MockProduct[] memory products = collateralModule.getProducts();
+
+            // Mock account (id:100) exposures to product (id:1) and markets (ids: 10, 11)
+            {
+                Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
+
+                mockExposures[0] = Account.Exposure({marketId: 10, filled: 0, unfilledLong: 0, unfilledShort: -0});
+                mockExposures[1] = Account.Exposure({marketId: 11, filled: 0, unfilledLong: 0, unfilledShort: 0});
+
+                products[0].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
+                products[0].skipGetAccountAnnualizedExposures(100, Constants.TOKEN_0); // skip old mock
+            }
+
+            // Mock account (id: 100) unrealized PnL in product (id: 1)
+            products[0].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
+            products[0].skipGetAccountUnrealizedPnLMock(100, Constants.TOKEN_0); // skip old mock
+
+            // Mock account (id:100) exposures to product (id:2) and markets (ids: 20)
+            {
+                Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
+
+                mockExposures[0] = Account.Exposure({marketId: 20, filled: 0, unfilledLong: 0, unfilledShort: 0});
+
+                products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
+                products[1].skipGetAccountAnnualizedExposures(100, Constants.TOKEN_0); // skip old mock
+            }
+            // Mock account (id: 100) unrealized PnL in product (id: 2)
+            products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
+            products[1].skipGetAccountUnrealizedPnLMock(100, Constants.TOKEN_0); // skip old mock
+
+            // todo: test single account single-token mode
+            // Mock account (id:100) exposures to product (id:2) and markets (ids: 21)
+            // {
+            //     Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
+
+            //     mockExposures[0] = Account.Exposure({marketId: 21, filled: 0, unfilledLong: 0, unfilledShort: 0});
+
+            //     products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_1, mockExposures);
+            // }
+
+            // todo: test single account single-token mode
+            // products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_1, 1e17);
+        }
+    }
+
     function setUp() public {
         collateralModule = new EnhancedCollateralModule();
     }
@@ -64,6 +112,291 @@ contract CollateralModuleTest is Test {
 
     function test_GetAccountCollateralBalanceAvailable_OtherToken() public {
         assertEq(collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_UNKNOWN), 0);
+    }
+
+    function test_deposit_Collateral() public {
+        uint256 depositAmount = 500e18;
+        uint256 boosterAmount = 0;
+        uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
+        address depositor = Constants.ALICE;
+        collateralModule.changeAccountBalance(
+            100, MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0, balance: 0, liquidationBoosterBalance: 10e18
+            })
+        );
+
+        // Mock ERC20 external calls
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), 
+            abi.encode(depositAndBoosterAmount)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, depositAndBoosterAmount),
+            abi.encode()
+        );
+
+        // Route the deposit from depositor
+        vm.prank(depositor);
+
+        // Expect Deposited event
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Deposited(100, Constants.TOKEN_0, depositAmount, boosterAmount, depositor);
+
+        // Deposit
+        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+
+        // Check the collateral balance post deposit
+        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), depositAmount);
+        assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), 10e18);
+    }
+
+    function test_deposit_CollateralAndLiquidationBooster() public {
+        uint256 depositAmount = 500e18;
+        uint256 boosterAmount = 10e18;
+        uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
+        address depositor = Constants.ALICE;
+        collateralModule.changeAccountBalance(
+            100, MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0, balance: 0, liquidationBoosterBalance: 0
+            })
+        );
+
+        // Mock ERC20 external calls
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), 
+            abi.encode(depositAndBoosterAmount)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, depositAndBoosterAmount),
+            abi.encode()
+        );
+
+        // Route the deposit from depositor
+        vm.prank(depositor);
+
+        // Expect Deposited event
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Deposited(100, Constants.TOKEN_0, depositAmount, boosterAmount, depositor);
+
+        // Deposit
+        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+
+        // Check the collateral balance post deposit
+        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), depositAmount);
+        assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), boosterAmount);
+    }
+
+    function test_deposit_LiquidationBooster() public {
+        uint256 depositAmount = 0;
+        uint256 boosterAmount = 10e18;
+        uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
+        address depositor = Constants.ALICE;
+        collateralModule.changeAccountBalance(
+            100, MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0, balance: 0, liquidationBoosterBalance: 0
+            })
+        );
+
+        // Mock ERC20 external calls
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), 
+            abi.encode(depositAndBoosterAmount)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, depositAndBoosterAmount),
+            abi.encode()
+        );
+
+        // Route the deposit from depositor
+        vm.prank(depositor);
+
+        // Expect Deposited event
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Deposited(100, Constants.TOKEN_0, depositAmount, boosterAmount, depositor);
+
+        // Deposit
+        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+
+        // Check the collateral balance post deposit
+        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), depositAmount);
+        assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), boosterAmount);
+    }
+
+    function test_deposit_CollateralAndPartialBooster() public {
+        uint256 depositAmount = 100e18;
+        uint256 boosterAmount = 3e18;
+        uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
+        address depositor = Constants.ALICE;
+        collateralModule.changeAccountBalance(
+            100, MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0, balance: 0, liquidationBoosterBalance: 7e18
+            })
+        );
+
+        // Mock ERC20 external calls
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), 
+            abi.encode(depositAndBoosterAmount)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, depositAndBoosterAmount),
+            abi.encode()
+        );
+
+        // Route the deposit from depositor
+        vm.prank(depositor);
+
+        // Expect Deposited event
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Deposited(100, Constants.TOKEN_0, depositAmount, boosterAmount, depositor);
+
+        // Deposit
+        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+
+        // Check the collateral balance post deposit
+        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), depositAmount);
+        assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), boosterAmount + 7e18);
+    }
+
+    function test_revertWhen_deposit_Collateral_InsufficientAllowance() public {
+        uint256 depositAmount = 500e18;
+        uint256 boosterAmount = 0;
+        uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
+        address depositor = Constants.ALICE;
+        collateralModule.changeAccountBalance(
+            100, MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0, balance: 0, liquidationBoosterBalance: 10e18
+            })
+        );
+
+        // Mock ERC20 external calls
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), 
+            abi.encode(depositAndBoosterAmount-1)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, depositAndBoosterAmount),
+            abi.encode()
+        );
+
+        // Route the deposit from depositor
+        vm.prank(depositor);
+
+        // Expect Deposited event
+        vm.expectRevert(abi.encodeWithSelector(
+            IERC20.InsufficientAllowance.selector, depositAndBoosterAmount, depositAndBoosterAmount - 1
+        ));
+
+        // Deposit
+        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+    }
+
+    function test_revertWhen_deposit_CollateralAndLiquidationBooster_InsufficientAllowance() public {
+        uint256 depositAmount = 500e18;
+        uint256 boosterAmount = 10e18;
+        uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
+        address depositor = Constants.ALICE;
+        collateralModule.changeAccountBalance(
+            100, MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0, balance: 0, liquidationBoosterBalance: 0
+            })
+        );
+
+        // Mock ERC20 external calls
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), 
+            abi.encode(depositAndBoosterAmount-1)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, depositAndBoosterAmount),
+            abi.encode()
+        );
+
+        // Route the deposit from depositor
+        vm.prank(depositor);
+
+        // Expect Deposited event
+        vm.expectRevert(abi.encodeWithSelector(
+            IERC20.InsufficientAllowance.selector, depositAndBoosterAmount, depositAndBoosterAmount - 1
+        ));
+
+        // Deposit
+        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
+    }
+
+    function test_revertWhen_deposit_LiquidationBooster_InsufficientAllowance() public {
+        uint256 depositAmount = 0;
+        uint256 boosterAmount = 10e18;
+        uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
+        address depositor = Constants.ALICE;
+        collateralModule.changeAccountBalance(
+            100, MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0, balance: 0, liquidationBoosterBalance: 0
+            })
+        );
+
+        // Mock ERC20 external calls
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.balanceOf.selector, collateralModule), abi.encode(0)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0, abi.encodeWithSelector(IERC20.allowance.selector, depositor, collateralModule), 
+            abi.encode(depositAndBoosterAmount-1)
+        );
+
+        vm.mockCall(
+            Constants.TOKEN_0,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, depositor, collateralModule, depositAndBoosterAmount),
+            abi.encode()
+        );
+
+        // Route the deposit from depositor
+        vm.prank(depositor);
+
+        // Expect Deposited event
+        vm.expectRevert(abi.encodeWithSelector(
+            IERC20.InsufficientAllowance.selector, depositAndBoosterAmount, depositAndBoosterAmount - 1
+        ));
+
+        // Deposit
+        collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
     }
 
     function testFuzz_Deposit(address depositor) public {
@@ -128,7 +461,7 @@ contract CollateralModuleTest is Test {
         collateralModule.deposit(100, Constants.TOKEN_1, amount);
     }
 
-    function test_Withdraw() public {
+    function test_Withdraw_Collateral() public {
         // Amount to withdraw
         uint256 amount = 500e18;
 
@@ -147,6 +480,73 @@ contract CollateralModuleTest is Test {
 
         // Check the collateral balance post withdraw
         assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE - amount);
+    }
+
+    function test_Withdraw_CollateralAndLiquidationBooster() public {
+        changeIMRequirementToZero();
+
+        // Amount to withdraw
+        uint256 amount = 10000e18 + 10e18;
+        address user = Constants.ALICE;
+
+        // Mock ERC20 external calls
+        vm.mockCall(Constants.TOKEN_0, abi.encodeWithSelector(IERC20.transfer.selector, user, amount), abi.encode());
+
+        vm.prank(user);
+
+        // Expect Withdrawn event
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Withdrawn(100, Constants.TOKEN_0, amount, user);
+
+        // Withdraw
+        collateralModule.withdraw(100, Constants.TOKEN_0, amount);
+
+        // Check the collateral balance post withdraw
+        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), 0);
+        assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), 0);
+    }
+
+    function test_Withdraw_CollateralAndPartialLiquidationBooster() public {
+        changeIMRequirementToZero();
+
+        // Amount to withdraw
+        uint256 amount = 10000e18 + 3e18;
+        address user = Constants.ALICE;
+
+        // Mock ERC20 external calls
+        vm.mockCall(Constants.TOKEN_0, abi.encodeWithSelector(IERC20.transfer.selector, user, amount), abi.encode());
+
+        vm.prank(user);
+
+        // Expect Withdrawn event
+        vm.expectEmit(true, true, true, true, address(collateralModule));
+        emit Withdrawn(100, Constants.TOKEN_0, amount, user);
+
+        // Withdraw
+        collateralModule.withdraw(100, Constants.TOKEN_0, amount);
+
+        // Check the collateral balance post withdraw
+        assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), 0);
+        assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), 7e18);
+    }
+
+    function test_revertWhen_Withdraw_InsufficientCollateralAndLiquidationBooster() public {
+        changeIMRequirementToZero();
+
+        // Amount to withdraw
+        uint256 amount = 10000e18 + 11e18;
+        address user = Constants.ALICE;
+
+        // Mock ERC20 external calls
+        vm.mockCall(Constants.TOKEN_0, abi.encodeWithSelector(IERC20.transfer.selector, user, amount), abi.encode());
+
+        vm.prank(user);
+
+        // Expect Withdrawn event
+        vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientLiquidationBoosterBalance.selector, 11e18));
+
+        // Withdraw
+        collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 
     function test_revertWhen_Withdraw_UnautohorizedAccount(address otherAddress) public {

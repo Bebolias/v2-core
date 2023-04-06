@@ -13,6 +13,7 @@ contract MockAccountStorage {
     struct CollateralBalance {
         address token;
         uint256 balance;
+        uint256 liquidationBoosterBalance;
     }
 
     function mockAccount(
@@ -40,9 +41,10 @@ contract MockAccountStorage {
 
         address token = balance.token;
         uint256 tokenBalance = balance.balance;
+        uint256 liquidationBoosterBalance = balance.liquidationBoosterBalance;
 
         account.collaterals[token].balance = tokenBalance;
-        account.collaterals[token].liquidationBoosterBalance = 0;
+        account.collaterals[token].liquidationBoosterBalance = liquidationBoosterBalance;
     }
 
     function addActiveProduct(uint128 accountId, uint128 productId) public {
@@ -58,5 +60,20 @@ contract MockAccountStorage {
     function getCollateralBalance(uint128 accountId, address collateralType) external view returns (uint256) {
         Account.Data storage account = Account.load(accountId);
         return account.getCollateralBalance(collateralType);
+    }
+
+    function getLiquidationBoosterBalance(uint128 accountId, address collateralType) external view returns (uint256) {
+        Account.Data storage account = Account.load(accountId);
+        return account.getLiquidationBoosterBalance(collateralType);
+    }
+
+    function getActiveProductsLength(uint128 accountId) public view returns (uint256) {
+        Account.Data storage account = Account.exists(accountId);
+        return account.activeProducts.length();
+    }
+
+    function getActiveProduct(uint128 accountId, uint256 index) public view returns (uint256 productId) {
+        Account.Data storage account = Account.exists(accountId);
+        return account.activeProducts.valueAt(index);
     }
 }
