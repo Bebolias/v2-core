@@ -9,6 +9,9 @@ import "../interfaces/IMulticallModule.sol";
  * @dev Implementation adapted from https://github.com/Uniswap/v3-periphery/blob/main/contracts/base/Multicall.sol
  */
 contract MulticallModule is IMulticallModule {
+    /**
+     * @inheritdoc IMulticallModule
+     */
     function multiCall(address[] calldata targets, bytes[] calldata data)
         public
         payable
