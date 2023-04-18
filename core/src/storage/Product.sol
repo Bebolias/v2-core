@@ -73,7 +73,7 @@ library Product {
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
     function baseToAnnualizedExposure(Data storage self, int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp) 
-        external view returns (int256[] memory exposures) 
+        internal view returns (int256[] memory exposures) 
     {
         return IProduct(self.productAddress).baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
     }
