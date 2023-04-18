@@ -143,7 +143,6 @@ cannon build omnibus-<NETWORK_NAME>.toml --upgrade-from voltz-omnibus:latest --n
 - Increment the version number in each of the omnibus toml files in the root of the repository. (The version in the repository should always be the next version.)
 - Commit and merge the change.
 - After the new version of the voltz-omnibus package has been published, the previously published packages can be verified on Etherscan.
-<<<<<<< HEAD
 - From the relevant package's directory, run the following command for each network it was deployed on:  `npx hardhat cannon:verify <PACKAGE_NAME>:<VERSION> --network <NETWORK_NAME>`
 
 # Cannon
@@ -179,9 +178,7 @@ Verify your project’s contracts on Etherscan:
 Finally publish the project to a registry. [...]
 
 
-=======
 - From the relevant package's directory, run the following command for each network it was deployed on: `npx hardhat cannon:verify <PACKAGE_NAME>:<VERSION> --network <NETWORK_NAME>`
->>>>>>> 0c873ca7d6453be5626dd093f4b6a53f46433c40
 
 # Draft Notes
 
