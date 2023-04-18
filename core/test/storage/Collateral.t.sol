@@ -69,7 +69,7 @@ contract CollateralTest is Test {
         assertEq(collateral.get().liquidationBoosterBalance, 7e18);
     }
 
-    function test_revertWhen_NotEnoughBalanceToDecrease() public {
+    function test_RevertWhen_NotEnoughBalanceToDecrease() public {
         // Collateral with 100 balance
         ExposedCollateral collateral = new ExposedCollateral(100e18, 0);
 
@@ -78,7 +78,7 @@ contract CollateralTest is Test {
         collateral.decreaseCollateralBalance(200e18);
     }
 
-    function test_revertWhen_NotEnoughLiquidationBoosterToDecrease() public {
+    function test_RevertWhen_NotEnoughLiquidationBoosterToDecrease() public {
         ExposedCollateral collateral = new ExposedCollateral(100e18, 10e18);
         vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientLiquidationBoosterBalance.selector, 17e18));
         collateral.decreaseLiquidationBoosterBalance(17e18);
@@ -102,7 +102,7 @@ contract CollateralTest is Test {
         assertEq(collateral.get().balance, balance - amount);
     }
 
-    function testFuzz_revertWhen_NotEnoughBalanceToDecrease(uint256 balance, uint256 amount) public {
+    function testFuzz_RevertWhen_NotEnoughBalanceToDecrease(uint256 balance, uint256 amount) public {
         vm.assume(amount > balance);
 
         ExposedCollateral collateral = new ExposedCollateral(balance, 0);

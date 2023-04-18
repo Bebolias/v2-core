@@ -161,7 +161,7 @@ contract AccountTest is Test {
         accounts.create(0, address(1));
     }
 
-    function test_revertWhen_AccountDoesNotExist() public {
+    function test_RevertWhen_AccountDoesNotExist() public {
         vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 1));
 
         accounts.exists(1);
@@ -195,7 +195,7 @@ contract AccountTest is Test {
         assertEq(slot, accountSlot);
     }
 
-    function testFuzz_revertWhen_LoadAccountAndValidateOwnership(address randomUser) public {
+    function testFuzz_RevertWhen_LoadAccountAndValidateOwnership(address randomUser) public {
         vm.assume(randomUser != Constants.ALICE);
 
         vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, accountId, randomUser));
@@ -209,7 +209,7 @@ contract AccountTest is Test {
         assertEq(slot, accountSlot);
     }
 
-    function testFuzz_revertWhen_LoadAccountAndValidatePermission(address randomUser) public {
+    function testFuzz_RevertWhen_LoadAccountAndValidatePermission(address randomUser) public {
         vm.assume(randomUser != Constants.ALICE);
 
         vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, accountId, randomUser));
@@ -309,7 +309,7 @@ contract AccountTest is Test {
         assertEq(im, 1800e18);
     }
 
-    function test_revertWhen_ImCheck_False() public {
+    function test_RevertWhen_ImCheck_False() public {
         setCollateralProfile("medium");
 
         vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, accountId));

@@ -172,7 +172,7 @@ contract LiquidationModuleTest is Test {
         assertEq(liquidationModule.getLiquidationBoosterBalance(100, Constants.TOKEN_0), 0);
     }
 
-    function test_revertWhen_ExtractLiquidatorReward_SmallPosition_PartiallyLiquidated() public {
+    function test_RevertWhen_ExtractLiquidatorReward_SmallPosition_PartiallyLiquidated() public {
         vm.expectRevert(abi.encodeWithSelector(ILiquidationModule.PartialLiquidationNotIncentivized.selector, 100, 100e18, 1));
         liquidationModule._extractLiquidatorReward(100, Constants.TOKEN_0, 100e18, 1);
     }
@@ -191,7 +191,7 @@ contract LiquidationModuleTest is Test {
         assertEq(liquidationModule.getLiquidationBoosterBalance(100, Constants.TOKEN_0), Constants.TOKEN_0_LIQUIDATION_BOOSTER);
     }
 
-    function test_revertWhen_ExtractLiquidatorReward_SmallPosition() public {
+    function test_RevertWhen_ExtractLiquidatorReward_SmallPosition() public {
         liquidationModule.changeAccountBalance(
             100, MockAccountStorage.CollateralBalance({
                 token: Constants.TOKEN_0, balance: 0, liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER - 1
@@ -204,7 +204,7 @@ contract LiquidationModuleTest is Test {
         liquidationModule._extractLiquidatorReward(100, Constants.TOKEN_0, 100e18, 0);
     }
 
-    function test_revertWhen_ExtractLiquidatorReward_BigPosition() public {
+    function test_RevertWhen_ExtractLiquidatorReward_BigPosition() public {
         liquidationModule.changeAccountBalance(
             100, MockAccountStorage.CollateralBalance({
                 token: Constants.TOKEN_0, balance: 15e18 - 1, liquidationBoosterBalance: 0
@@ -306,7 +306,7 @@ contract LiquidationModuleTest is Test {
         }
     }
 
-    function test_revertWhen_Liquidate_SmallPosition_Partial() public {
+    function test_RevertWhen_Liquidate_SmallPosition_Partial() public {
         injectPartialExposures();
         mockLiquidatorAccount();
         liquidationModule.setLiquidationBooster(100, Constants.TOKEN_0, 101e18);

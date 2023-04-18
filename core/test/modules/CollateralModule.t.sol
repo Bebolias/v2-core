@@ -282,7 +282,7 @@ contract CollateralModuleTest is Test {
         assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), boosterAmount + 7e18);
     }
 
-    function test_revertWhen_deposit_Collateral_InsufficientAllowance() public {
+    function test_RevertWhen_deposit_Collateral_InsufficientAllowance() public {
         uint256 depositAmount = 500e18;
         uint256 boosterAmount = 0;
         uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
@@ -321,7 +321,7 @@ contract CollateralModuleTest is Test {
         collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
     }
 
-    function test_revertWhen_deposit_CollateralAndLiquidationBooster_InsufficientAllowance() public {
+    function test_RevertWhen_deposit_CollateralAndLiquidationBooster_InsufficientAllowance() public {
         uint256 depositAmount = 500e18;
         uint256 boosterAmount = 10e18;
         uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
@@ -360,7 +360,7 @@ contract CollateralModuleTest is Test {
         collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
     }
 
-    function test_revertWhen_deposit_LiquidationBooster_InsufficientAllowance() public {
+    function test_RevertWhen_deposit_LiquidationBooster_InsufficientAllowance() public {
         uint256 depositAmount = 0;
         uint256 boosterAmount = 10e18;
         uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
@@ -432,7 +432,7 @@ contract CollateralModuleTest is Test {
         assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE + amount);
     }
 
-    function testFuzz_revertWhen_Deposit_WithNotEnoughAllowance(address depositor) public {
+    function testFuzz_RevertWhen_Deposit_WithNotEnoughAllowance(address depositor) public {
         // Amount to deposit
         uint256 amount = 500e18;
 
@@ -449,7 +449,7 @@ contract CollateralModuleTest is Test {
         collateralModule.deposit(100, Constants.TOKEN_0, amount);
     }
 
-    function testFuzz_revertWhen_Deposit_WithCollateralTypeNotEnabled(address depositor) public {
+    function testFuzz_RevertWhen_Deposit_WithCollateralTypeNotEnabled(address depositor) public {
         // Amount to deposit
         uint256 amount = 500e18;
 
@@ -530,7 +530,7 @@ contract CollateralModuleTest is Test {
         assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), 7e18);
     }
 
-    function test_revertWhen_Withdraw_InsufficientCollateralAndLiquidationBooster() public {
+    function test_RevertWhen_Withdraw_InsufficientCollateralAndLiquidationBooster() public {
         changeIMRequirementToZero();
 
         // Amount to withdraw
@@ -549,7 +549,7 @@ contract CollateralModuleTest is Test {
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 
-    function test_revertWhen_Withdraw_UnautohorizedAccount(address otherAddress) public {
+    function test_RevertWhen_Withdraw_UnautohorizedAccount(address otherAddress) public {
         vm.assume(otherAddress != Constants.ALICE);
 
         // Amount to withdraw
@@ -563,7 +563,7 @@ contract CollateralModuleTest is Test {
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 
-    function test_revertWhen_Withdraw_MoreThanBalance() public {
+    function test_RevertWhen_Withdraw_MoreThanBalance() public {
         // Amount to withdraw
         uint256 amount = 10500e18;
 
@@ -575,7 +575,7 @@ contract CollateralModuleTest is Test {
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 
-    function test_revertWhen_Withdraw_WhenIMNoLongerSatisfied() public {
+    function test_RevertWhen_Withdraw_WhenIMNoLongerSatisfied() public {
         // Amount to withdraw
         uint256 amount = 9500e18;
 
@@ -587,7 +587,7 @@ contract CollateralModuleTest is Test {
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 
-    function test_revertWhen_CapExceeded_Deposit() public {
+    function test_RevertWhen_CapExceeded_Deposit() public {
         address depositor = address(1);
         uint256 amount = Constants.TOKEN_0_CAP + 1;
 
@@ -611,7 +611,7 @@ contract CollateralModuleTest is Test {
         collateralModule.deposit(100, Constants.TOKEN_0, amount);
     }
 
-    function test_revertWhen_CapExceeded_MultipleDeposits() public {
+    function test_RevertWhen_CapExceeded_MultipleDeposits() public {
         address depositor = address(1);
         uint256 amount = Constants.TOKEN_0_CAP / 2;
 

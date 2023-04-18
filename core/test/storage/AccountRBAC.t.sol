@@ -102,7 +102,7 @@ contract AccountRBACTest is Test {
         assertEq(authorized, false);
     }
 
-    function test_revertWhen_InvalidAuthorized() public {
+    function test_RevertWhen_InvalidAuthorized() public {
         address owner = address(1);
         address target = address(2);
 
@@ -130,13 +130,13 @@ contract AccountRBACTest is Test {
         accountRBAC.checkPermissionIsValid("ADMIN");
     }
 
-    function test_revertWhen_InvalidPermission() public {
+    function test_RevertWhen_InvalidPermission() public {
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(address(1));
         vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
         accountRBAC.checkPermissionIsValid("PER123");
     }
 
-    function test_revertWhen_HasPermission() public {
+    function test_RevertWhen_HasPermission() public {
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(address(1));
         vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
         accountRBAC.hasPermission("PER123", address(2));
@@ -159,7 +159,7 @@ contract AccountRBACTest is Test {
         assertEq(accountRBAC.hasPermission("ADMIN", randomAddress), true);
     }
 
-    function test_revertWhen_GrantPermission() public {
+    function test_RevertWhen_GrantPermission() public {
         address randomAddress = address(1);
 
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(address(1));
@@ -190,7 +190,7 @@ contract AccountRBACTest is Test {
         assertEq(permissionAddresses[0], randomAddress2);
     }
 
-    function test_revertWhen_RevokePermission() public {
+    function test_RevertWhen_RevokePermission() public {
         address randomAddress = address(1);
         address randomAddress2 = address(2);
 

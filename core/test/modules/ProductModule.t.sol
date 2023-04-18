@@ -67,14 +67,14 @@ contract ProductModuleTest is Test {
     productModule.registerProduct(address(product3), "Product 3");
   }
 
-  function test_revertWhen_RegisterProduct_NoPermission() public {
+  function test_RevertWhen_RegisterProduct_NoPermission() public {
     MockProduct product3 = new MockProduct("Product 3");
 
     vm.expectRevert(abi.encodeWithSelector(FeatureFlag.FeatureUnavailable.selector, bytes32("registerProduct")));
     productModule.registerProduct(address(product3), "Product 3");
   }
 
-  function test_revertWhen_RegisterProduct_NoInterfaceSupport() public {
+  function test_RevertWhen_RegisterProduct_NoInterfaceSupport() public {
     vm.prank(Constants.PRODUCT_CREATOR);
     vm.expectRevert(abi.encodeWithSelector(IProductModule.IncorrectProductInterface.selector, address(232323)));
     productModule.registerProduct(address(232323), "Product 3");
@@ -95,7 +95,7 @@ contract ProductModuleTest is Test {
     assertEq(exposuresAfter.length, 0);
   }
 
-  function test_revertWhen_CloseAccount_NoPermission() public {
+  function test_RevertWhen_CloseAccount_NoPermission() public {
     vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, 100, address(this)));
     productModule.closeAccount(1, 100, Constants.TOKEN_0);
   }
@@ -112,12 +112,12 @@ contract ProductModuleTest is Test {
     assertEq(productModule.getCollateralBalance(101, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE);
   }
 
-  function test_revertWhen_distributeFees_InsufficientFunds() public {
+  function test_RevertWhen_distributeFees_InsufficientFunds() public {
     vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientCollateral.selector, Constants.DEFAULT_TOKEN_0_BALANCE + 1));
     productModule._distributeFees(100, 101, UD60x18.wrap(1e18), Constants.TOKEN_0, int256(Constants.DEFAULT_TOKEN_0_BALANCE + 1));
   }
 
-  function test_revertWhen_distributeFees_InvalidAccountId() public {
+  function test_RevertWhen_distributeFees_InvalidAccountId() public {
     vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 454545));
     productModule._distributeFees(454545, 101, UD60x18.wrap(1e18), Constants.TOKEN_0, 1);
 
@@ -163,24 +163,24 @@ contract ProductModuleTest is Test {
     assertEq(productModule.getActiveProduct(100, productModule.getActiveProductsLength(100)), productId);
   }
 
-  function test_revertWhen_propagateTakerOrder_NotProduct() public {
+  function test_RevertWhen_propagateTakerOrder_NotProduct() public {
     vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, address(this)));
     productModule.propagateTakerOrder(100, 1, 10, Constants.TOKEN_0, 100e18);
   }
 
-  function test_revertWhen_propagateTakerOrder_InvalidAccountId() public {
+  function test_RevertWhen_propagateTakerOrder_InvalidAccountId() public {
     vm.prank(address(productModule.getProducts()[0]));
     vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 454545));
     productModule.propagateTakerOrder(454545, 1, 10, Constants.TOKEN_0, 1);
   }
 
-  function test_revertWhen_propagateTakerOrder_InsufficientFunds() public {
+  function test_RevertWhen_propagateTakerOrder_InsufficientFunds() public {
     vm.prank(address(productModule.getProducts()[0]));
     vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientCollateral.selector, Constants.DEFAULT_TOKEN_0_BALANCE + 1));
     productModule.propagateTakerOrder(100, 1, 10, Constants.TOKEN_0, int256(20 * (Constants.DEFAULT_TOKEN_0_BALANCE + 1)));
   }
 
-  function test_revertWhen_propagateTakerOrder_ImCheck() public {
+  function test_RevertWhen_propagateTakerOrder_ImCheck() public {
     uint256 uPnL = 100e18;
     uint256 im = 1800e18;
 
@@ -229,18 +229,18 @@ contract ProductModuleTest is Test {
     assertEq(productModule.getActiveProduct(100, productModule.getActiveProductsLength(100)), productId);
   }
 
-  function test_revertWhen_propagateMakerOrder_NotProduct() public {
+  function test_RevertWhen_propagateMakerOrder_NotProduct() public {
     vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, address(this)));
     productModule.propagateMakerOrder(100, 1, 10, Constants.TOKEN_0, 100e18);
   }
 
-  function test_revertWhen_propagateMakerOrder_InvalidAccountId() public {
+  function test_RevertWhen_propagateMakerOrder_InvalidAccountId() public {
     vm.prank(address(productModule.getProducts()[0]));
     vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 454545));
     productModule.propagateMakerOrder(454545, 1, 10, Constants.TOKEN_0, 1);
   }
 
-  function test_revertWhen_propagateMakerOrder_ImCheck() public {
+  function test_RevertWhen_propagateMakerOrder_ImCheck() public {
     uint256 uPnL = 100e18;
     uint256 im = 1800e18;
 
@@ -251,7 +251,7 @@ contract ProductModuleTest is Test {
     );
   }
 
-  function test_revertWhen_propagateMakerOrder_InsufficientFunds() public {
+  function test_RevertWhen_propagateMakerOrder_InsufficientFunds() public {
     vm.prank(address(productModule.getProducts()[0]));
     vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientCollateral.selector, Constants.DEFAULT_TOKEN_0_BALANCE + 1));
     productModule.propagateMakerOrder(100, 1, 10, Constants.TOKEN_0, int256(100 * (Constants.DEFAULT_TOKEN_0_BALANCE + 1)));
@@ -268,25 +268,25 @@ contract ProductModuleTest is Test {
     assertEq(productModule.getCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE + 3e18);
   }
 
-  function test_revertWhen_propagateCashflow_InsufficientFunds() public {
+  function test_RevertWhen_propagateCashflow_InsufficientFunds() public {
     vm.prank(address(productModule.getProducts()[0]));
     vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientCollateral.selector, Constants.DEFAULT_TOKEN_0_BALANCE + 1));
     productModule.propagateCashflow(100, 1, Constants.TOKEN_0, -int256(Constants.DEFAULT_TOKEN_0_BALANCE+1));
   }
 
-  function test_revertWhen_propagateCashflow_NotProduct() public {
+  function test_RevertWhen_propagateCashflow_NotProduct() public {
     vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, address(this)));
     productModule.propagateCashflow(100, 1, Constants.TOKEN_0, 1);
   }
 
-  function test_revertWhen_propagateCashflow_InvalidAccountId() public {
+  function test_RevertWhen_propagateCashflow_InvalidAccountId() public {
     vm.prank(address(productModule.getProducts()[0]));
     vm.expectRevert(abi.encodeWithSelector(Account.AccountNotFound.selector, 454545));
     productModule.propagateCashflow(454545, 1, Constants.TOKEN_0, 1);
   }
 
   // todo: see if imcheck is needed in propagate cashflow
-  // function test_revertWhen_propagateCashflow_ImCheck() public {
+  // function test_RevertWhen_propagateCashflow_ImCheck() public {
   //   uint256 uPnL = 100e18;
   //   uint256 im = 1800e18;
 

@@ -40,7 +40,7 @@ contract RiskConfigurationModuleTest is Test {
         assertEq(SD59x18.unwrap(existingConfig.riskParameter), SD59x18.unwrap(config.riskParameter));
     }
 
-    function testFuzz_revertWhen_ConfigureMarketRisk_NoOwner(address otherAddress) public {
+    function testFuzz_RevertWhen_ConfigureMarketRisk_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
         MarketRiskConfiguration.Data memory config = MarketRiskConfiguration.Data({
@@ -95,7 +95,7 @@ contract RiskConfigurationModuleTest is Test {
         assertEq(UD60x18.unwrap(existingConfig.liquidatorRewardParameter), UD60x18.unwrap(config.liquidatorRewardParameter));
     }
 
-    function testFuzz_revertWhen_ConfigureProtocolRisk_NoOwner(address otherAddress) public {
+    function testFuzz_RevertWhen_ConfigureProtocolRisk_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
         ProtocolRiskConfiguration.Data memory config =

@@ -33,7 +33,7 @@ contract AccountTokenModuleTest is Test, IERC721Receiver {
         accountTokenModule.safeMint(user, accountId, "");
     }
 
-    function test_revertWhen_Transfer_UnmockedAccountTransfer() public {
+    function test_RevertWhen_Transfer_UnmockedAccountTransfer() public {
         address user = vm.addr(2);
         uint128 accountId = 100;
 

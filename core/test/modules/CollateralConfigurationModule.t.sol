@@ -41,7 +41,7 @@ contract CollateralConfigurationModuleTest is Test {
         assertEq(existingConfig.cap, config.cap);
     }
 
-    function testFuzz_revertWhen_ConfigureCollateral_NoOwner(address otherAddress) public {
+    function testFuzz_RevertWhen_ConfigureCollateral_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
         CollateralConfiguration.Data memory config =

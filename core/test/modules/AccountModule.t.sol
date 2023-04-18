@@ -50,7 +50,7 @@ contract AccountModuleTest is Test {
         accountModule.createAccount(100);
     }
 
-    function test_revertWhen_CreateAccount_UnmockedMint() public {
+    function test_RevertWhen_CreateAccount_UnmockedMint() public {
         vm.expectRevert();
         accountModule.createAccount(100);
     }
@@ -83,7 +83,7 @@ contract AccountModuleTest is Test {
         assertEq(accountPerms[0].permissions[0], AccountRBAC._ADMIN_PERMISSION);
     }
 
-    function test_revertWhen_GrantPermission() public {
+    function test_RevertWhen_GrantPermission() public {
         address unauthorizedAddress = address(1);
 
         vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
@@ -94,7 +94,7 @@ contract AccountModuleTest is Test {
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, unauthorizedAddress);
     }
 
-    function test_revertWhen_GrantPermissionFromAdmin() public {
+    function test_RevertWhen_GrantPermissionFromAdmin() public {
         address adminAddress = address(1);
 
         vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
@@ -129,7 +129,7 @@ contract AccountModuleTest is Test {
         assertEq(accountPerms.length, 0);
     }
 
-    function test_revertWhen_RevokeInexistentPermission() public {
+    function test_RevertWhen_RevokeInexistentPermission() public {
         address revokedAddress = address(1);
 
         vm.assume(revokedAddress != address(this));
@@ -148,7 +148,7 @@ contract AccountModuleTest is Test {
         accountModule.revokePermission(100, "PER123", revokedAddress);
     }
 
-    function test_revertWhen_RevokeUnauthorizedPermission() public {
+    function test_RevertWhen_RevokeUnauthorizedPermission() public {
         address revokedAddress = address(1);
         address unauthorizedAddress = address(2);
 
@@ -168,7 +168,7 @@ contract AccountModuleTest is Test {
         accountModule.revokePermission(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress);
     }
 
-    function test_revertWhen_RevokePermissionFromAdmin() public {
+    function test_RevertWhen_RevokePermissionFromAdmin() public {
         address adminAddress = address(1);
         address otherAdminAddress = address(2);
 
@@ -206,7 +206,7 @@ contract AccountModuleTest is Test {
         assertEq(accountPerms.length, 0);
     }
 
-    function test_revertWhen_RenounceInexistentPermission() public {
+    function test_RevertWhen_RenounceInexistentPermission() public {
         address renouncedAddress = address(1);
 
         vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
@@ -231,7 +231,7 @@ contract AccountModuleTest is Test {
         assertEq(accountModule.getAccountOwner(100), to);
     }
 
-    function test_revertWhen_NotifyAccountTransfer_NoTokenAccount() public {
+    function test_RevertWhen_NotifyAccountTransfer_NoTokenAccount() public {
         address otherAddress = address(1);
 
         vm.prank(otherAddress);

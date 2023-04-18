@@ -48,7 +48,7 @@ contract FeeConfigurationModuleTest is Test {
         assertEq(UD60x18.unwrap(existingConfig.atomicTakerFee), UD60x18.unwrap(config.atomicTakerFee));
     }
 
-    function testFuzz_revertWhen_ConfigureMarketFee_NoOwner(address otherAddress) public {
+    function testFuzz_RevertWhen_ConfigureMarketFee_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
         MarketFeeConfiguration.Data memory config = 
