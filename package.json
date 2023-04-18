@@ -52,6 +52,7 @@
         "typescript": "4.9.3"
     },
     "workspaces": [
+        "periphery",
         "core",
         "utils/contracts",
         "utils/modules",

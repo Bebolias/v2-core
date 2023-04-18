@@ -1531,6 +1531,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@voltz-protocol/periphery@workspace:periphery":
+  version: 0.0.0-use.local
+  resolution: "@voltz-protocol/periphery@workspace:periphery"
+  dependencies:
+    "@semantic-release/git": ^10.0.1
+    "@semantic-release/github": ^8.0.7
+    "@usecannon/cli": ^2.1.7
+    "@voltz-protocol/util-contracts": "workspace:^"
+    "@voltz-protocol/util-modules": "workspace:^"
+    lcov-badge-generator: 1.0.5
+    prettier: 2.8.4
+    semantic-release: ^20.1.1
+    solhint: 3.4.0
+  languageName: unknown
+  linkType: soft
+
 "@voltz-protocol/products-dated-irs@workspace:products/dated-irs":
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/products-dated-irs@workspace:products/dated-irs"
