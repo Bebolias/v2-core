@@ -8,5 +8,17 @@ import "../interfaces/IExecutionModule.sol";
  * @dev See IExecutionModule.
  */
 contract ExecutionModule is IExecutionModule {
-    
+    modifier checkDeadline(uint256 deadline) {
+        if (block.timestamp > deadline) revert TransactionDeadlinePassed();
+        _;
+    }
+
+    /// @inheritdoc IExecutionModule
+    function execute(bytes calldata commands, bytes[] calldata inputs, uint256 deadline)
+        external
+        payable
+        checkDeadline(deadline)
+    {
+        execute(commands, inputs);
+    }
 }
