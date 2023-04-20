@@ -31,7 +31,9 @@ library Dispatcher {
             // todo: add equivalent abi decode
         } else if (comamnd == Commands.TRANSFER) {
             // todo: add equivalent abi decode
-        } else if (command == Commands.WRAP_ETH) {} else if (command == Commands.UNWRAP_ETH) {
+        } else if (command == Commands.WRAP_ETH) {
+            // todo: add equivalent abi decode
+        } else if (command == Commands.UNWRAP_ETH) {
             // todo: add equivalent abi decode
         } else {
             // placeholder area for commands ...
