@@ -51,7 +51,7 @@ library ProductConfiguration {
         storedPoolAddress = storedConfig.poolAddress;
     }
 
-    function getProxyAddress() internal view returns (address storedProxyAddress) {
+    function getCoreProxyAddress() internal view returns (address storedProxyAddress) {
         Data storage storedConfig = load();
         storedProxyAddress = storedConfig.coreProxy;
     }

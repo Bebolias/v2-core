@@ -84,7 +84,7 @@ contract ExposePortfolio {
     }
 
     function createRateOracle(uint128 marketId, address rateOracleAddress) external {
-        RateOracleReader.create(marketId, rateOracleAddress);
+        RateOracleReader.set(marketId, rateOracleAddress);
     }
 
     function setMarket(uint128 marketId, address quoteToken) external {

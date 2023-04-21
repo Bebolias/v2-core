@@ -225,12 +225,13 @@ library Portfolio {
         internal
     {
         Position.Data storage position = self.positions[marketId][maturityTimestamp];
-        position.update(baseDelta, quoteDelta);
 
         // register active market
-        if (position.baseBalance != 0 || position.quoteBalance != 0) {
+        if (position.baseBalance == 0 && position.quoteBalance == 0) {
             self.activateMarketMaturity(marketId, maturityTimestamp);
         }
+
+        position.update(baseDelta, quoteDelta);
     }
 
     /**
@@ -251,7 +252,6 @@ library Portfolio {
 
         Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
-        // TODO: use PRB math
         UD60x18 liquidityIndexMaturity = RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp);
 
         self.deactivateMarketMaturity(marketId, maturityTimestamp);
@@ -272,7 +272,7 @@ library Portfolio {
      * note this can also be called by the pool when a position is intitalised
      */
     function activateMarketMaturity(Data storage self, uint128 marketId, uint32 maturityTimestamp) internal {
-        // todo: check if market/maturity exist
+        // check if market/maturity exist
         address collateralType = MarketConfiguration.load(marketId).quoteToken;
         if (collateralType == address(0)) {
             revert UnknownMarket(marketId);
@@ -295,8 +295,10 @@ library Portfolio {
         }
     }
 
-    // todo: add to library
-
+    /**
+     * @dev retreives marketId and maturityTimestamp from the list
+     * of active markets and maturities associated with the collateral type
+     */
     function getMarketAndMaturity(
         Data storage self,
         uint256 index,

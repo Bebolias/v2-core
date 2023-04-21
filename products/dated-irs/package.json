@@ -17,6 +17,7 @@
   "devDependencies": {
     "@voltz-protocol/core": "workspace:^",
     "@voltz-protocol/util-contracts": "workspace:^",
+    "@voltz-protocol/util-modules": "workspace:^",
     "lcov-badge-generator": "1.0.5",
     "prettier": "2.8.4",
     "solhint": "^3.4.1"

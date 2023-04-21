@@ -174,4 +174,16 @@ interface IAccountModule {
         bytes32 permission,
         address target
     ) external view returns (bool isAuthorized);
+
+    /**
+     * @notice Reverts if `target` is not authorized to `permission` for account `accountId`.
+     * @param accountId The id of the account whose permission is being queried.
+     * @param permission The bytes32 identifier of the permission.
+     * @param target The target address whose permission is being queried.
+     */
+    function onlyAuthorized(
+        uint128 accountId,
+        bytes32 permission,
+        address target
+    ) external view;
 }

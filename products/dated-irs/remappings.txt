@@ -6,3 +6,4 @@ src=src
 @prb/test/=lib/prb-test/src/
 @voltz-protocol/core/=../../node_modules/@voltz-protocol/core/
 @voltz-protocol/util-contracts/=../../node_modules/@voltz-protocol/util-contracts/
+@voltz-protocol/util-modules/=../../node_modules/@voltz-protocol/util-modules/

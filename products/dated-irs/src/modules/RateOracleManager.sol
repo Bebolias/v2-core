@@ -5,6 +5,7 @@ import "../interfaces/IRateOracleModule.sol";
 import "../interfaces/IRateOracle.sol";
 import "../storage/RateOracleReader.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
+import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 /**
@@ -47,28 +48,50 @@ contract RateOracleManager is IRateOracleModule {
         return RateOracleReader.load(marketId).getRateIndexMaturity(maturityTimestamp);
     }
 
-    // todo: do we want this function to return something?
-    // todo: needs a feature flag to check for permission to register new variable rate oracles
-    // todo: can we enable editing existing rate oracles?
+    /**
+     * @inheritdoc IRateOracleModule
+     */
     function registerVariableOracle(uint128 marketId, address oracleAddress) external override {
+        OwnableStorage.onlyOwner();
+
         if (_isVariableOracleRegistered(marketId)) {
-            return;
+            revert AlreadyRegisteredVariableOracle(oracleAddress);
         }
 
+        validateAndConfigureOracleAddress(marketId, oracleAddress);
+        emit RateOracleRegistered(marketId, oracleAddress);
+    }
+
+    /**
+     * @inheritdoc IRateOracleModule
+     */
+    function configureVariableOracle(uint128 marketId, address oracleAddress) external override {
+        OwnableStorage.onlyOwner();
+
+        if (!_isVariableOracleRegistered(marketId)) {
+            revert UnknownVariableOracle(oracleAddress);
+        }
+
+        validateAndConfigureOracleAddress(marketId, oracleAddress);
+        emit RateOracleConfigured(marketId, oracleAddress);
+    }
+
+    /**
+     * @dev Validates the address interface and creates or configures a rate oracle
+     */
+    function validateAndConfigureOracleAddress(uint128 marketId, address oracleAddress) internal {
         if (!_validateVariableOracleAddress(oracleAddress)) {
             revert InvalidVariableOracleAddress(oracleAddress);
         }
 
-        // register the variable rate oracle
-        RateOracleReader.create(marketId, oracleAddress);
-        emit RateOracleRegistered(marketId, oracleAddress);
+        // configure the variable rate oracle
+        RateOracleReader.set(marketId, oracleAddress);
     }
 
     function _isVariableOracleRegistered(uint128 marketId) internal returns (bool) {
         return RateOracleReader.load(marketId).oracleAddress != address(0);
     }
 
-    // TODO: implement
     function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {
         return IERC165(oracleAddress).supportsInterface(type(IRateOracle).interfaceId);
     }

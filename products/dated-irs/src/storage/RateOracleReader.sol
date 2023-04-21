@@ -34,7 +34,7 @@ library RateOracleReader {
         }
     }
 
-    function create(uint128 marketId, address oracleAddress) internal returns (Data storage oracle) {
+    function set(uint128 marketId, address oracleAddress) internal returns (Data storage oracle) {
         oracle = load(marketId);
         oracle.marketId = marketId;
         oracle.oracleAddress = oracleAddress;

@@ -1307,6 +1307,7 @@ __metadata:
   dependencies:
     "@voltz-protocol/core": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
+    "@voltz-protocol/util-modules": "workspace:^"
     core: "link:../../core"
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4

@@ -93,6 +93,19 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
+    function onlyAuthorized(
+        uint128 accountId,
+        bytes32 permission,
+        address target
+    ) public view override {
+        if (!isAuthorized(accountId, permission, target)) {
+            revert PermissionNotGranted(accountId, AccountRBAC._ADMIN_PERMISSION, target);
+        }
+    }
+
+    /**
+     * @inheritdoc IAccountModule
+     */
     function grantPermission(
         uint128 accountId,
         bytes32 permission,

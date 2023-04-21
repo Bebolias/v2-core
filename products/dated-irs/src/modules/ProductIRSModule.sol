@@ -3,13 +3,16 @@ pragma solidity >=0.8.13;
 
 import "../interfaces/IProductIRSModule.sol";
 import "../interfaces/IMarketConfigurationModule.sol";
+import "@voltz-protocol/core/src/interfaces/IAccountModule.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
+import "@voltz-protocol/core/src/storage/AccountRBAC.sol";
 import "../storage/Portfolio.sol";
 import "../storage/MarketConfiguration.sol";
 import "../storage/ProductConfiguration.sol";
 import "../storage/RateOracleReader.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
+import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 
 /**
  * @title Dated Interest Rate Swap Product
@@ -34,6 +37,11 @@ contract ProductIRSModule is IProductIRSModule {
         override
         returns (int256 executedBaseAmount, int256 executedQuoteAmount)
     {
+        address coreProxy = ProductConfiguration.getCoreProxyAddress();
+
+        // check account access permissions
+        IAccountModule(coreProxy).onlyAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+
         // update rate oracle cache if empty or hasn't been updated in a while
         RateOracleReader.load(marketId).updateCache(maturityTimestamp);
 
@@ -45,7 +53,6 @@ contract ProductIRSModule is IProductIRSModule {
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
 
         // propagate order
-        address coreProxy = ProductConfiguration.getProxyAddress();
         address quoteToken = IMarketConfigurationModule(coreProxy).getMarketConfiguration(marketId).quoteToken;
         int256[] memory baseAmounts = new int256[](1);
         baseAmounts[0] = executedBaseAmount;
@@ -60,11 +67,15 @@ contract ProductIRSModule is IProductIRSModule {
      */
 
     function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) external override {
+        address coreProxy = ProductConfiguration.getCoreProxyAddress();
+
+        // check account access permissions
+        IAccountModule(coreProxy).onlyAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
         int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp, poolAddress);
 
-        address coreProxy = ProductConfiguration.getProxyAddress();
         address quoteToken = IMarketConfigurationModule(coreProxy).getMarketConfiguration(marketId).quoteToken;
 
         uint128 productId = ProductConfiguration.getProductId();
@@ -134,13 +145,23 @@ contract ProductIRSModule is IProductIRSModule {
      * @inheritdoc IProduct
      */
     function closeAccount(uint128 accountId, address collateralType) external override {
+        address coreProxy = ProductConfiguration.getCoreProxyAddress();
+
+        if (
+            !IAccountModule(coreProxy).isAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender)
+                && msg.sender != ProductConfiguration.getCoreProxyAddress()
+        ) {
+            revert NotAuthorized(msg.sender, "closeAccount");
+        }
+
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
         portfolio.closeAccount(poolAddress, collateralType);
     }
 
-    // todo: introduce in interface or create separate module for exposing this function
     function configureProduct(ProductConfiguration.Data memory config) external {
+        OwnableStorage.onlyOwner();
+
         ProductConfiguration.set(config);
         emit ProductConfigured(config);
     }
@@ -148,7 +169,7 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IERC165
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external view override(IERC165) returns (bool) {
         return interfaceId == type(IProduct).interfaceId || interfaceId == this.supportsInterface.selector;
     }
 }

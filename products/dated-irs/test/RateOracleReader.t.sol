@@ -37,7 +37,7 @@ contract ExposeRateOracleReader {
     }
 
     function create(uint128 marketId, address oracleAddress) external returns (bytes32 s) {
-        RateOracleReader.Data storage oracle = RateOracleReader.create(marketId, oracleAddress);
+        RateOracleReader.Data storage oracle = RateOracleReader.set(marketId, oracleAddress);
         assembly {
             s := oracle.slot
         }

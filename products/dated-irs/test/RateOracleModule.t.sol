@@ -2,6 +2,7 @@ pragma solidity 0.8.17;
 
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
+import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
 import "./mocks/MockRateOracle.sol";
 import "../src/oracles/AaveRateOracle.sol";
 import "../src/modules/RateOracleManager.sol";
@@ -9,10 +10,17 @@ import "../src/storage/RateOracleReader.sol";
 import "oz/interfaces/IERC20.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
 
+contract RateOracleManagerExtended is RateOracleManager {
+    function setOwner(address account) external {
+        OwnableStorage.Data storage ownable = OwnableStorage.load();
+        ownable.owner = account;
+    }
+}
+
 contract RateOracleManagerTest is Test {
     using { unwrap } for UD60x18;
 
-    RateOracleManager rateOracleManager;
+    RateOracleManagerExtended rateOracleManager;
 
     using RateOracleReader for RateOracleReader.Data;
 
@@ -22,11 +30,13 @@ contract RateOracleManagerTest is Test {
     uint32 public maturityTimestamp;
 
     function setUp() public virtual {
-        rateOracleManager = new RateOracleManager();
-        MockAaveLendingPool lendingPool = new MockAaveLendingPool();
-        AaveRateOracle aaveOracle = new AaveRateOracle(lendingPool, address(0));
+        rateOracleManager = new RateOracleManagerExtended();
+        rateOracleManager.setOwner(address(this));
+
         mockRateOracle = new MockRateOracle();
+
         maturityTimestamp = Time.blockTimestampTruncated() + 3139000;
+
         rateOracleManager.registerVariableOracle(100, address(mockRateOracle));
     }
 
