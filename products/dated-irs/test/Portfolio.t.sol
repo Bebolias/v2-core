@@ -88,7 +88,7 @@ contract ExposePortfolio {
     }
 
     function setMarket(uint128 marketId, address quoteToken) external {
-        MarketConfiguration.set(MarketConfiguration.Data({ marketId: marketId, quoteToken: quoteToken }));
+        MarketConfiguration.set(MarketConfiguration.Data({marketId: marketId, quoteToken: quoteToken}));
     }
 
     // EXTRA GETTERS

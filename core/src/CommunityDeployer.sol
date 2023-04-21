@@ -7,13 +7,15 @@ import "./modules/OwnerUpgradeModule.sol";
 import "oz/utils/cryptography/MerkleProof.sol";
 
 contract CommunityDeployer {
-    /// @notice Timelock Period In Seconds, once the deployment is queued, 2 days need to pass in order to make deployment of the Voltz Factory possible
+    /// @notice Timelock Period In Seconds, once the deployment is queued, 
+    /// 2 days need to pass in order to make deployment of the Voltz Factory possible
     uint256 public constant TIMELOCK_PERIOD_IN_SECONDS = 2 days;
 
     /// @notice Multisig owner address
     address public ownerAddress;
 
-    /// @notice The number of votes in support of a proposal required in order for a quorum to be reached and for a vote to succeed
+    /// @notice The number of votes in support of a proposal required in order for a quorum 
+    /// to be reached and for a vote to succeed
     uint256 public quorumVotes;
 
     /// @notice Voltz Protocol V2 Core Router
@@ -40,10 +42,12 @@ contract CommunityDeployer {
     /// @notice Total number of votes against the deployment of Voltz Protocol V2 Core
     uint256 public noVoteCount;
 
-    /// @notice voting end block timestamp (once this contract is deployed, voting is considered to be officially started)
+    /// @notice voting end block timestamp (once this contract is deployed, voting is considered 
+    /// to be officially started)
     uint256 public blockTimestampVotingEnd;
 
-    /// @notice timelock end block timestamp (once the proposal is queued, the timelock period pre-deployment is considered to be officially started)
+    /// @notice timelock end block timestamp (once the proposal is queued, the timelock period pre-deployment 
+    /// is considered to be officially started)
     uint256 public blockTimestampTimelockEnd;
 
     /// @notice isQueued needs to be true in order for the timelock period to start in advance of the deployment
@@ -52,7 +56,8 @@ contract CommunityDeployer {
     /// @notice isDeployed makes sure contract is deploying at most one Core Proxy
     bool public isDeployed;
 
-    /// @notice Voltz V2 Core Proxy to be deployed in a scenario where a successful vote is followed by the queue and deployment
+    /// @notice Voltz V2 Core Proxy to be deployed in a scenario where a successful vote is followed by the 
+    /// queue and deployment
     CoreProxy public coreProxy;
 
     // Merkle Tree
@@ -109,7 +114,8 @@ contract CommunityDeployer {
             (1 << votedBitIndex);
     }
 
-    /// @notice Deploy the Voltz Factory by passing the masterVAMM and the masterMarginEngine into the Factory constructor
+    /// @notice Deploy the Voltz Factory by passing the masterVAMM and the masterMarginEngine 
+    /// into the Factory constructor
     function deploy() external {
         require(isQueued, "not queued");
         require(
@@ -146,8 +152,10 @@ contract CommunityDeployer {
     /// @notice Vote for the proposal to deploy the Voltz Factory contract
     /// @param _index index of the voter
     /// @param _numberOfVotes number of voltz genesis nfts held by the msg.sender before the snapshot was taken
-    /// @param _yesVote if this boolean is true then the msg.sender is casting a yes vote, if the boolean is false the msg.sender is casting a no vote
-    /// @param _merkleProof merkle proof that needs to be verified against the merkle root to check the msg.sender against the snapshot
+    /// @param _yesVote if this boolean is true then the msg.sender is casting a yes vote, 
+    /// if the boolean is false the msg.sender is casting a no vote
+    /// @param _merkleProof merkle proof that needs to be verified against the merkle root to 
+    /// check the msg.sender against the snapshot
     function castVote(
         uint256 _index,
         uint256 _numberOfVotes,
