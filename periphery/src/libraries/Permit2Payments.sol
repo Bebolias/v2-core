@@ -3,6 +3,7 @@ pragma solidity >=0.8.13;
 
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "./Payments.sol";
+import "../interfaces/external/IAllowanceTransfer.sol";
 
 /**
  * @title Payments through Permit2
