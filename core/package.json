@@ -6,7 +6,7 @@
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@usecannon/cli": "^2.1.7"
+    "@usecannon/cli": "2.4.6"
   },
   "scripts": {
     "lint:check": "yarn lint:sol:check && yarn prettier:check",

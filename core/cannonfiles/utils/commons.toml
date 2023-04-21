@@ -1,0 +1,20 @@
+name = "voltz-core"
+version = "0.0.4"
+description = "Voltz V2 Core"
+
+# `salt` here only affects the InitialModuleBunde and CoreProxy contracts
+[setting.salt]
+description = "Change this to a unique string when deploying multiple instances of the protocol. Note that only the proxy contract will be unique."
+defaultValue = "main"
+
+# owner is required and must be overridden
+[setting.owner]
+description = "Admin user for the protocol"
+
+# Deploys InitialModuleBundle, which inherits from OwnerModule and 
+# UpgradeModule, which essentially represents an UUPSUpgradeable 
+# contract. Only re-deployed if salt is changed.
+[contract.InitialModuleBundle]
+artifact = "InitialModuleBundle"
+salt = "<%= settings.salt %>"
+create2 = true

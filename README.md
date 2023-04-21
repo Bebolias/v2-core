@@ -26,6 +26,12 @@ This is a monorepo with the following folder structure and packages:
 # Useful Yarn Workspaces Commands
 - Example: how to add an workspace dependency into another: `yarn workspace @voltz-protocol/core add --dev @voltz-protocol/util-contracts`.
 
+# Cannon Deployments
+- Ensure you have the latest version of [Cannon](https://usecannon.com) installed: `npm install -g @usecannon/cli`
+- Ensure you have the router plugin installed: `cannon plugin add cannon-plugin-router`
+- Setup IPFS connection and Registry Contract: `cannon setup`
+- If you want to build and deploy core, go into core: `cd core`. Run `cannon build cannonfiles/goerli.json` to build and deploy locally. Run `cannon build cannonfiles/goerli.json --chain-id 5 --provider_url RPC_URL --dry-run` to simulate deployment on goerli. Run without `--dry-run` to build and deploy on goerli. If package was already deployed, use `--upgrade-from voltz-core:latest` to deploy only changed files and the other dependent contracts (such as the router). 
+  
 # Priorities
 
 **P1**

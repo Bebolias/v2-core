@@ -1,0 +1,33 @@
+name = "voltz-community-deployer"
+version = "0.0.4"
+description = "Voltz V2 Community Deployer"
+
+[setting.voltzCorePackage]
+
+[import.voltzCore]
+source="<%= settings.voltzCorePackage %>"
+
+[setting.quorumVotes]
+[setting.ownerAddress]
+[setting.merkleRoot]
+[setting.blockTimestampVotingEnd]
+[setting.accountNftId]
+[setting.accountNftName]
+[setting.accountNftSymbol]
+[setting.accountNftUri]
+
+[contract.VoltzV2CommunityDeployer]
+artifact="CommunityDeployer"
+args=[
+  "<%= imports.voltzCore.contracts.CoreRouter.address %>", # coreRouter
+  "<%= imports.voltzCore.contracts.AccountNFTRouter.address %>", # accountNftRouter
+  "<%= settings.accountNftId %>",   # accountNftId
+  "<%= settings.accountNftName %>", # accountNftName
+  "<%= settings.accountNftSymbol %>", # accountNftSymbol
+  "<%= settings.accountNftUri %>", # accountNftUri
+  "<%= settings.quorumVotes %>", # quorumVotes
+  "<%= settings.ownerAddress %>", # ownerAddress
+  "<%= settings.merkleRoot %>", # merkleRoot
+  "<%= settings.blockTimestampVotingEnd %>" # blockTimestampVotingEnd
+]
+depends = ["import.voltzCore"]

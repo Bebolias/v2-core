@@ -1,0 +1,48 @@
+# Deploys an initial Core Proxy so that a new Core Proxy is not 
+# re-deployed every time we deploy a new router. Implementation is
+# then upgraded to the correct Router implementation in the
+# invoke.upgrade_core_proxy command below.
+[contract.InitialCoreProxy]
+artifact = "CoreProxy"
+args = ["<%= contracts.InitialModuleBundle.address %>", "<%= settings.owner %>"]
+abiOf = ["InitialModuleBundle"]
+salt = "<%= settings.salt %>"
+create2 = true
+depends = ["contract.InitialModuleBundle"]
+
+# Upgrades implementation of Core Proxy to point to the new 
+# router implementation.
+[invoke.upgrade_core_proxy]
+target = ["InitialCoreProxy"]
+abi = "UpgradeModule"
+from = "<%= settings.owner %>"
+func = "upgradeTo"
+args = ["<%= contracts.CoreRouter.address %>"]
+factory.CoreProxy.abiOf = ["CoreRouter"]
+factory.CoreProxy.event = "Upgraded"
+factory.CoreProxy.arg = 0
+depends = [
+  "contract.InitialCoreProxy",
+  "router.CoreRouter"
+]
+
+# Deploys the Account NFT Proxy and initialises
+# it in the CoreProxy's AssociatedSystem.
+[invoke.init_account_nft_proxy]
+target = ["CoreProxy"]
+fromCall.func = "owner"
+func = "initOrUpgradeNft"
+args = [
+  "0x6163636f756e744e465400000000000000000000000000000000000000000000", # accountNFT
+  "Voltz V2 Account NFT",
+  "VOLTZ",
+  "https://www.voltz.xyz/",
+  "<%= contracts.AccountNFTRouter.address %>"
+]
+depends = [
+  "invoke.upgrade_core_proxy",
+  "router.AccountNFTRouter"
+]
+factory.AccountNFTProxy.abiOf = ["AccountNFTRouter"]
+factory.AccountNFTProxy.event = "AssociatedSystemSet"
+factory.AccountNFTProxy.arg = 2

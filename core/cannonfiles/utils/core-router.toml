@@ -1,0 +1,48 @@
+#####################################
+# Deploy Core Router Modules
+#####################################
+[contract.AccountModule]
+artifact = "AccountModule"
+[contract.AssociatedSystemsModule]
+artifact = "AssociatedSystemsModule"
+[contract.CollateralConfigurationModule]
+artifact = "CollateralConfigurationModule"
+[contract.CollateralModule]
+artifact = "CollateralModule"
+[contract.FeatureFlagModule]
+artifact = "FeatureFlagModule"
+[contract.FeeConfigurationModule]
+artifact = "FeeConfigurationModule"
+[contract.LiquidationModule]
+artifact = "LiquidationModule"
+[contract.ProductModule]
+artifact = "ProductModule"
+[contract.RiskConfigurationModule]
+artifact = "RiskConfigurationModule"
+
+# Deploys Core Router
+[router.CoreRouter]
+contracts = [
+    "InitialModuleBundle",
+    "AccountModule",
+    "AssociatedSystemsModule",
+    "CollateralConfigurationModule",
+    "CollateralModule",
+    "FeatureFlagModule",
+    "FeeConfigurationModule",
+    "LiquidationModule",
+    "ProductModule",
+    "RiskConfigurationModule"
+]
+depends = [
+  "contract.InitialModuleBundle",
+  "contract.AccountModule",
+  "contract.AssociatedSystemsModule",
+  "contract.CollateralConfigurationModule",
+  "contract.CollateralModule",
+  "contract.FeatureFlagModule",
+  "contract.FeeConfigurationModule",
+  "contract.LiquidationModule",
+  "contract.ProductModule",
+  "contract.RiskConfigurationModule"
+]

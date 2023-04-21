@@ -1,0 +1,6 @@
+include = [
+  "utils/commons.toml",
+  "utils/core-router.toml",
+  "utils/account-nft-router.toml",
+  "utils/core-proxy.toml"
+]

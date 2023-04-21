@@ -1,0 +1,17 @@
+#####################################
+# Deploys Account NFT Router Modules
+#####################################
+[contract.AccountTokenModule]
+artifact = "AccountTokenModule"
+
+# Deploys Account NFT Router. Proxy will be deployed
+# by the Core Proxy (AssociatedSystemsModule) below.
+[router.AccountNFTRouter]
+contracts = [
+    "InitialModuleBundle",
+    "AccountTokenModule",
+]
+depends = [
+  "contract.InitialModuleBundle",
+  "contract.AccountTokenModule"
+]
