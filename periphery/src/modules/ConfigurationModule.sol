@@ -13,7 +13,7 @@ contract ConfigurationModule is IConfigurationModule {
     using Config for Config.Data;
 
     /**
-     * @inheritdoc ICollateralConfigurationModule
+     * @inheritdoc IConfigurationModule
      */
     function configure(CollateralConfiguration.Data memory config) external override {
         OwnableStorage.onlyOwner();
@@ -21,5 +21,12 @@ contract ConfigurationModule is IConfigurationModule {
         Config.set(config);
 
         emit PeripheryConfigured(config);
+    }
+
+    /**
+     * @inheritdoc IConfigurationModule
+     */
+    function getConfiguration() external pure override returns (CollateralConfiguration.Data memory) {
+        return Config.load();
     }
 }
