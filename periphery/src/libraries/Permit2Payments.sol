@@ -2,6 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
+import "./Payments.sol";
 
 /**
  * @title Payments through Permit2
@@ -32,5 +33,15 @@ library Permit2Payments {
             if (batchDetails[i].from != owner) revert FromAddressIsNotOwner();
         }
         PERMIT2.transferFrom(batchDetails);
+    }
+
+    /// @notice Either performs a regular payment or transferFrom on Permit2, depending on the payer address
+    /// @param token The token to transfer
+    /// @param payer The address to pay for the transfer
+    /// @param recipient The recipient of the transfer
+    /// @param amount The amount to transfer
+    function payOrPermit2Transfer(address token, address payer, address recipient, uint256 amount) internal {
+        if (payer == address(this)) Payments.pay(token, recipient, amount);
+        else permit2TransferFrom(token, payer, recipient, amount.toUint160());
     }
 }
