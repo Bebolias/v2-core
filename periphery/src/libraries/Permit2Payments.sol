@@ -4,6 +4,7 @@ pragma solidity >=0.8.13;
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "./Payments.sol";
 import "../interfaces/external/IAllowanceTransfer.sol";
+import "../storage/Config.sol";
 
 /**
  * @title Payments through Permit2
@@ -21,7 +22,7 @@ library Permit2Payments {
     /// @param to The recipient of the transfer
     /// @param amount The amount to transfer
     function permit2TransferFrom(address token, address from, address to, uint160 amount) internal {
-        PERMIT2.transferFrom(from, to, amount, token);
+        Config.load().PERMIT2.transferFrom(from, to, amount, token);
     }
 
     /// @notice Performs a batch transferFrom on Permit2
@@ -33,7 +34,7 @@ library Permit2Payments {
         for (uint256 i = 0; i < batchLength; ++i) {
             if (batchDetails[i].from != owner) revert FromAddressIsNotOwner();
         }
-        PERMIT2.transferFrom(batchDetails);
+        Config.load().PERMIT2.transferFrom(batchDetails);
     }
 
     /// @notice Either performs a regular payment or transferFrom on Permit2, depending on the payer address
