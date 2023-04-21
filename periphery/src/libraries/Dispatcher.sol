@@ -21,9 +21,9 @@ library Dispatcher {
         if (command == Commands.V2_DatedIRS_SWAP) {
             // todo: add equivalent abi decode
             // todo: decode parameters & execute the swap
-        } else if (command == Commands.V2_DATED_IRS_SWAP) {
+        } else if (command == Commands.V2_DATED_IRS_INSTRUMENT_SWAP) {
             // todo: add equivalent abi decode
-        } else if (command == Commands.V2_VAMM_LP) {
+        } else if (command == Commands.V2_VAMM_EXCHANGE_LP) {
             // todo: add equivalent abi decode
         } else if (command == Commands.V2_CORE_DEPOSIT) {
             // todo: add equivalent abi decode
