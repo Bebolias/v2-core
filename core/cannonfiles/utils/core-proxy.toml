@@ -4,11 +4,11 @@
 # invoke.upgrade_core_proxy command below.
 [contract.InitialCoreProxy]
 artifact = "CoreProxy"
-args = ["<%= contracts.InitialModuleBundle.address %>", "<%= settings.owner %>"]
-abiOf = ["InitialModuleBundle"]
+args = ["<%= contracts.OwnerUpgradeModule.address %>", "<%= settings.owner %>"]
+abiOf = ["OwnerUpgradeModule"]
 salt = "<%= settings.salt %>"
 create2 = true
-depends = ["contract.InitialModuleBundle"]
+depends = ["contract.OwnerUpgradeModule"]
 
 # Upgrades implementation of Core Proxy to point to the new 
 # router implementation.

@@ -23,7 +23,7 @@ artifact = "RiskConfigurationModule"
 # Deploys Core Router
 [router.CoreRouter]
 contracts = [
-    "InitialModuleBundle",
+    "OwnerUpgradeModule",
     "AccountModule",
     "AssociatedSystemsModule",
     "CollateralConfigurationModule",
@@ -35,7 +35,7 @@ contracts = [
     "RiskConfigurationModule"
 ]
 depends = [
-  "contract.InitialModuleBundle",
+  "contract.OwnerUpgradeModule",
   "contract.AccountModule",
   "contract.AssociatedSystemsModule",
   "contract.CollateralConfigurationModule",

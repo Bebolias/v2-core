@@ -3,7 +3,7 @@ pragma solidity >=0.8.13;
 
 import "./CoreProxy.sol";
 import "./modules/AssociatedSystemsModule.sol";
-import "./modules/InitialModuleBundle.sol";
+import "./modules/OwnerUpgradeModule.sol";
 import "oz/utils/cryptography/MerkleProof.sol";
 
 contract CommunityDeployer {
@@ -126,7 +126,7 @@ contract CommunityDeployer {
             accountNftUri,
             accountNftRouter
         );
-        InitialModuleBundle(address(coreProxy)).nominateNewOwner(ownerAddress);
+        OwnerUpgradeModule(address(coreProxy)).nominateNewOwner(ownerAddress);
 
         isDeployed = true;
     }

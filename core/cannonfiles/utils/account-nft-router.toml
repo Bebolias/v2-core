@@ -8,10 +8,10 @@ artifact = "AccountTokenModule"
 # by the Core Proxy (AssociatedSystemsModule) below.
 [router.AccountNFTRouter]
 contracts = [
-    "InitialModuleBundle",
+    "OwnerUpgradeModule",
     "AccountTokenModule",
 ]
 depends = [
-  "contract.InitialModuleBundle",
+  "contract.OwnerUpgradeModule",
   "contract.AccountTokenModule"
 ]

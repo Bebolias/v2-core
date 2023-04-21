@@ -11,10 +11,10 @@ defaultValue = "main"
 [setting.owner]
 description = "Admin user for the protocol"
 
-# Deploys InitialModuleBundle, which inherits from OwnerModule and 
-# UpgradeModule, which essentially represents an UUPSUpgradeable 
+# Deploys OwnerUpgradeModule, which inherits from OwnerModule and 
+# UpgradeModule; it essentially represents an UUPSUpgradeable 
 # contract. Only re-deployed if salt is changed.
-[contract.InitialModuleBundle]
-artifact = "InitialModuleBundle"
+[contract.OwnerUpgradeModule]
+artifact = "OwnerUpgradeModule"
 salt = "<%= settings.salt %>"
 create2 = true
