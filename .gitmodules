@@ -25,3 +25,12 @@
 [submodule "products/dated-irs/lib/forge-std"]
 	path = products/dated-irs/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "periphery/lib/forge-std"]
+	path = periphery/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "periphery/periphery/lib/openzeppelin-contracts"]
+	path = periphery/periphery/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "periphery/lib/openzeppelin-contracts"]
+	path = periphery/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
