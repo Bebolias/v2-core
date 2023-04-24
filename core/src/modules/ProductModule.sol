@@ -91,6 +91,7 @@ contract ProductModule is IProductModule {
      * @dev Internal function to distribute trade fees according to the market fee config
      * @param payingAccountId Account id of trade initiatior
      * @param receivingAccountId Account id of fee collector
+     * @param atomicFee Fee percentage of annualized notional to be distributed
      * @param collateralType Quote token used to pay fees in
      * @param annualizedNotional Traded annualized notional
      */
