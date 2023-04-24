@@ -18,11 +18,9 @@ library Dispatcher {
 
         // todo: dig deeper into if boundaries in here https://github.com/Uniswap/universal-router/blob/a88bc6e15af738b61d7bee8feb7df8d2a6e26347/contracts/base/Dispatcher.sol#L40
 
-        if (command == Commands.V2_DatedIRS_SWAP) {
+        if (command == Commands.V2_DATED_IRS_INSTRUMENT_SWAP) {
             // todo: add equivalent abi decode
             // todo: decode parameters & execute the swap
-        } else if (command == Commands.V2_DATED_IRS_INSTRUMENT_SWAP) {
-            // todo: add equivalent abi decode
         } else if (command == Commands.V2_DATED_IRS_INSTRUMENT_SETTLE) {
             // todo: add equivalent abi decode
         } else if (command == Commands.V2_VAMM_EXCHANGE_LP) {

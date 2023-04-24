@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-/// @title Constant state
-/// @notice Constant state used by the Periphery
-library Constants {
-    /// @dev Used for identifying cases when this contract's balance of a token is to be used as an input
-    /// This value is equivalent to 1<<255, i.e. a singular 1 in the most significant bit.
-    uint256 internal constant CONTRACT_BALANCE = 0x8000000000000000000000000000000000000000000000000000000000000000;
-    /// @dev Used as a flag for identifying the transfer of ETH instead of a token
-    address internal constant ETH = address(0);
-    /// @dev Used as a flag for identifying that msg.sender should be used, saves gas by sending more 0 bytes
-    address internal constant MSG_SENDER = address(1);
-    /// @dev Used as a flag for identifying address(this) should be used, saves gas by sending more 0 bytes
-    address internal constant ADDRESS_THIS = address(2);
+/// @title Commands
+/// @notice Command Flags used to decode commands
+library Commands {
+    // Masks to extract certain bits of commands
+    bytes1 internal constant FLAG_ALLOW_REVERT = 0x80;
+    bytes1 internal constant COMMAND_TYPE_MASK = 0x3f;
+
+    // Command Types. Maximum supported command at this moment is 0x3f.
+    uint256 constant V2_DATED_IRS_INSTRUMENT_SWAP = 0x00;
+    uint256 constant V2_DATED_IRS_INSTRUMENT_SETTLE = 0x01;
+    uint256 constant V2_VAMM_EXCHANGE_LP = 0x02;
+    uint256 constant V2_CORE_DEPOSIT = 0x03;
+    uint256 constant V2_CORE_WITHDRAW = 0x04;
+    uint256 constant TRANSFER = 0x05;
+    uint256 constant WRAP_ETH = 0x06;
+    uint256 constant UNWRAP_ETH = 0x07;
 }
