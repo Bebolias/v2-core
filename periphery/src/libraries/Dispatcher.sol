@@ -4,6 +4,7 @@ pragma solidity >=0.8.13;
 import "./Commands.sol";
 import "./V2DatedIRS.sol";
 import "./V2Core.sol";
+import "./Payments.sol";
 
 /**
  * @title This library decodes and executes commands
@@ -72,7 +73,18 @@ library Dispatcher {
             }
             V2Core.withdraw(accountId, collateralType, tokenAmount);
         } else if (command == Commands.TRANSFER) {
-            // todo: add equivalent abi decode
+            // equivalent:  abi.decode(inputs, (address, address, uint256))
+            address token;
+            address recipient;
+            uint256 value;
+            assembly {
+                token := calldataload(inputs.offset)
+                recipient := calldataload(add(inputs.offset, 0x20))
+                value := calldataload(add(inputs.offset, 0x40))
+            }
+            // todo: check why we need to do map(recipient)
+            // ref: https://github.com/Uniswap/universal-router/blob/3ccbe972fe6f7dc1347d6974e45ea331321de714/contracts/base/Dispatcher.sol#L113
+            Payments.pay(token, map(recipient), value);
         } else if (command == Commands.WRAP_ETH) {
             // todo: add equivalent abi decode
         } else if (command == Commands.UNWRAP_ETH) {
