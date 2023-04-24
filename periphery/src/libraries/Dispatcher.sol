@@ -86,9 +86,23 @@ library Dispatcher {
             // ref: https://github.com/Uniswap/universal-router/blob/3ccbe972fe6f7dc1347d6974e45ea331321de714/contracts/base/Dispatcher.sol#L113
             Payments.pay(token, map(recipient), value);
         } else if (command == Commands.WRAP_ETH) {
-            // todo: add equivalent abi decode
+            // equivalent: abi.decode(inputs, (address, uint256))
+            address recipient;
+            uint256 amountMin;
+            assembly {
+                recipient := calldataload(inputs.offset)
+                amountMin := calldataload(add(inputs.offset, 0x20))
+            }
+            Payments.wrapETH(map(recipient), amountMin);
         } else if (command == Commands.UNWRAP_ETH) {
-            // todo: add equivalent abi decode
+            // equivalent: abi.decode(inputs, (address, uint256))
+            address recipient;
+            uint256 amountMin;
+            assembly {
+                recipient := calldataload(inputs.offset)
+                amountMin := calldataload(add(inputs.offset, 0x20))
+            }
+            Payments.unwrapWETH9(map(recipient), amountMin);
         } else {
             // placeholder area for commands ...
             revert InvalidCommandType(command);
