@@ -34,14 +34,43 @@ library Dispatcher {
                 accountId := calldataload(inputs.offset)
                 marketId := calldataload(add(inputs.offset, 0x20))
                 maturityTimestamp := calldataload(add(inputs.offset, 0x40))
-                maturityTimestamp := calldataload(add(inputs.offset, 0x60))
+                baseAmount := calldataload(add(inputs.offset, 0x60))
             }
+
+            V2DatedIRS.swap(accountId, marketId, maturityTimestamp, baseAmount);
         } else if (command == Commands.V2_DATED_IRS_INSTRUMENT_SETTLE) {
-            // todo: add equivalent abi decode
+            // equivalent: abi.decode(inputs, (uint128, uint128, uint32))
+            uint128 accountId;
+            uint128 marketId;
+            uint32 maturityTimestamp;
+            assembly {
+                accountId := calldataload(inputs.offset)
+                marketId := calldataload(add(inputs.offset, 0x20))
+                maturityTimestamp := calldataload(add(inputs.offset, 0x40))
+            }
+            V2DatedIRS.settle(accountId, marketId, maturityTimestamp);
         } else if (command == Commands.V2_CORE_DEPOSIT) {
-            // todo: add equivalent abi decode
+            // equivalent: abi.decode(inputs, (uint128, address, uint256))
+            uint128 accountId;
+            address collateralType;
+            uint256 tokenAmount;
+            assembly {
+                accountId := calldataload(inputs.offset)
+                collateralType := calldataload(add(inputs.offset, 0x20))
+                tokenAmount := calldataload(add(inputs.offset, 0x40))
+            }
+            V2Core.deposit(accountId, collateralType, tokenAmount);
         } else if (command == Commands.V2_CORE_WITHDRAW) {
-            // todo: add equivalent abi decode
+            // equivalent: abi.decode(inputs, (uint128, address, uint256))
+            uint128 accountId;
+            address collateralType;
+            uint256 tokenAmount;
+            assembly {
+                accountId := calldataload(inputs.offset)
+                collateralType := calldataload(add(inputs.offset, 0x20))
+                tokenAmount := calldataload(add(inputs.offset, 0x40))
+            }
+            V2Core.withdraw(accountId, collateralType, tokenAmount);
         } else if (command == Commands.TRANSFER) {
             // todo: add equivalent abi decode
         } else if (command == Commands.WRAP_ETH) {
