@@ -50,6 +50,7 @@ contract PaymentsTest is Test {
             address(weth9), abi.encodeWithSelector(IERC20.transfer.selector, address(2), 1 ether), abi.encode((0))
         );
         vm.expectCall(address(weth9), abi.encodeWithSelector(IERC20.transfer.selector, address(2), 1 ether));
+        vm.expectCall(address(weth9), 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector));
         exposedPayments.wrapETH(address(2), 1 ether);
     }
 }

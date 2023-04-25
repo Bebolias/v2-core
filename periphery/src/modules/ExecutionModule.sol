@@ -35,7 +35,7 @@ contract ExecutionModule is IExecutionModule {
 
             bytes calldata input = inputs[commandIndex];
 
-            (success, output) = Dispatcher.dispatch(command, input);
+            success = Dispatcher.dispatch(command, input);
 
             if (!success && successRequired(command)) {
                 revert ExecutionFailed({commandIndex: commandIndex, message: output});

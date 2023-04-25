@@ -19,8 +19,7 @@ library Dispatcher {
     /// @param commandType The command type to execute
     /// @param inputs The inputs to execute the command with
     /// @return success True on success of the command, false on failure
-    /// @return output The outputs or error messages, if any, from the command
-    function dispatch(bytes1 commandType, bytes calldata inputs) internal returns (bool success, bytes memory output) {
+    function dispatch(bytes1 commandType, bytes calldata inputs) internal returns (bool success) {
         uint256 command = uint8(commandType & Commands.COMMAND_TYPE_MASK);
         success = true;
 
