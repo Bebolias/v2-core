@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/storage/CollateralConfiguration.sol";
@@ -63,7 +63,10 @@ contract CollateralConfigurationTest is Test {
     function test_Set() public {
         collateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 5e16, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true,
+                liquidationBooster: 5e16,
+                tokenAddress: Constants.TOKEN_0,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
@@ -88,13 +91,19 @@ contract CollateralConfigurationTest is Test {
     function test_Set_Twice() public {
         collateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 5e16, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true,
+                liquidationBooster: 5e16,
+                tokenAddress: Constants.TOKEN_0,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
         collateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 1e16, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true,
+                liquidationBooster: 1e16,
+                tokenAddress: Constants.TOKEN_0,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
@@ -119,13 +128,19 @@ contract CollateralConfigurationTest is Test {
     function test_Set_MoreConfigurations() public {
         collateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 5e16, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true,
+                liquidationBooster: 5e16,
+                tokenAddress: Constants.TOKEN_0,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
         collateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: false, liquidationBooster: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+                depositingEnabled: false,
+                liquidationBooster: 1e16,
+                tokenAddress: Constants.TOKEN_1,
+                cap: Constants.TOKEN_1_CAP
             })
         );
 
@@ -160,46 +175,66 @@ contract CollateralConfigurationTest is Test {
 
     function test_CollateralEnabled() public {
         {
-            vm.expectRevert(abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_0));
+            vm.expectRevert(
+                abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_0)
+            );
             collateralConfiguration.collateralEnabled(Constants.TOKEN_0);
 
-            vm.expectRevert(abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_1));
+            vm.expectRevert(
+                abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_1)
+            );
             collateralConfiguration.collateralEnabled(Constants.TOKEN_1);
         }
 
         collateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 5e16, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true,
+                liquidationBooster: 5e16,
+                tokenAddress: Constants.TOKEN_0,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
         collateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: false, liquidationBooster: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: false,
+                liquidationBooster: 1e16,
+                tokenAddress: Constants.TOKEN_1,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
         {
             collateralConfiguration.collateralEnabled(Constants.TOKEN_0);
 
-            vm.expectRevert(abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_1));
+            vm.expectRevert(
+                abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_1)
+            );
             collateralConfiguration.collateralEnabled(Constants.TOKEN_1);
         }
 
         collateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: false, liquidationBooster: 5e16, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: false,
+                liquidationBooster: 5e16,
+                tokenAddress: Constants.TOKEN_0,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
         collateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true,
+                liquidationBooster: 1e16,
+                tokenAddress: Constants.TOKEN_1,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
         {
-            vm.expectRevert(abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_0));
+            vm.expectRevert(
+                abi.encodeWithSelector(CollateralConfiguration.CollateralDepositDisabled.selector, Constants.TOKEN_0)
+            );
             collateralConfiguration.collateralEnabled(Constants.TOKEN_0);
 
             collateralConfiguration.collateralEnabled(Constants.TOKEN_1);

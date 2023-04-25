@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../storage/Account.sol";
 
@@ -21,14 +21,12 @@ interface IProductModule {
     event ProductRegistered(address indexed product, uint128 indexed productId, address indexed sender);
 
     /// @notice returns the unrealized pnl in quote token terms for account
-    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType) external returns (int256);
+    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType)
+        external
+        returns (int256);
 
     /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
-    function getAccountAnnualizedExposures(
-        uint128 productId,
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountAnnualizedExposures(uint128 productId, uint128 accountId, address collateralType)
         external
         returns (Account.Exposure[] memory exposures);
 
@@ -47,15 +45,21 @@ interface IProductModule {
 
     // todo: is annualizedNotional supposed to be unsigned?
     function propagateTakerOrder(
-        uint128 accountId, uint128 productId, uint128 marketId, 
-        address collateralType, int256 annualizedNotional) 
-        external returns (uint256 fee);
+        uint128 accountId,
+        uint128 productId,
+        uint128 marketId,
+        address collateralType,
+        int256 annualizedNotional
+    ) external returns (uint256 fee);
 
     // todo: is annualizedNotional supposed to be unsigned?
     function propagateMakerOrder(
-        uint128 accountId, uint128 productId, uint128 marketId, 
-        address collateralType, int256 annualizedNotional) 
-        external returns (uint256 fee);
+        uint128 accountId,
+        uint128 productId,
+        uint128 marketId,
+        address collateralType,
+        int256 annualizedNotional
+    ) external returns (uint256 fee);
 
     function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount) external;
 }

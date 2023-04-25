@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../../src/storage/Account.sol";
 
@@ -21,9 +21,7 @@ contract MockAccountStorage {
         address owner,
         CollateralBalance[] memory balances,
         uint128[] memory activeProductIds
-    )
-        public
-    {
+    ) public {
         // Mock account
         Account.create(accountId, owner);
 

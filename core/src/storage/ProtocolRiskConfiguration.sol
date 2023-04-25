@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
-import { UD60x18 } from "@prb/math/UD60x18.sol";
+import {UD60x18} from "@prb/math/UD60x18.sol";
 
 /**
  * @title Tracks protocol-wide risk settings

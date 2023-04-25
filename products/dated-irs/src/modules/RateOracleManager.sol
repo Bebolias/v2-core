@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../interfaces/IRateOracleModule.sol";
 import "../interfaces/IRateOracle.sol";
@@ -21,10 +21,7 @@ contract RateOracleManager is IRateOracleModule {
      * @inheritdoc IRateOracleModule
      */
 
-    function getRateIndexCurrent(
-        uint128 marketId,
-        uint32 maturityTimestamp
-    )
+    function getRateIndexCurrent(uint128 marketId, uint32 maturityTimestamp)
         external
         view
         override
@@ -36,10 +33,7 @@ contract RateOracleManager is IRateOracleModule {
     /**
      * @inheritdoc IRateOracleModule
      */
-    function getRateIndexMaturity(
-        uint128 marketId,
-        uint32 maturityTimestamp
-    )
+    function getRateIndexMaturity(uint128 marketId, uint32 maturityTimestamp)
         external
         view
         override

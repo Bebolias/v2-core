@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../interfaces/external/IProduct.sol";
 import "../interfaces/IProductModule.sol";
@@ -13,7 +13,7 @@ import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 import "oz/utils/math/SignedMath.sol";
 
-import { mulUDxUint } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
+import {mulUDxUint} from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
 /**
  * @title Protocol-wide entry point for the management of products connected to the protocol.
@@ -33,11 +33,7 @@ contract ProductModule is IProductModule {
     /**
      * @inheritdoc IProductModule
      */
-    function getAccountUnrealizedPnL(
-        uint128 productId,
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType)
         external
         view
         override
@@ -49,11 +45,7 @@ contract ProductModule is IProductModule {
     /**
      * @inheritdoc IProductModule
      */
-    function getAccountAnnualizedExposures(
-        uint128 productId,
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountAnnualizedExposures(uint128 productId, uint128 accountId, address collateralType)
         external
         override
         returns (Account.Exposure[] memory exposures)
@@ -96,8 +88,11 @@ contract ProductModule is IProductModule {
      * @param annualizedNotional Traded annualized notional
      */
     function distributeFees(
-        uint128 payingAccountId, uint128 receivingAccountId, UD60x18 atomicFee, 
-        address collateralType, int256 annualizedNotional
+        uint128 payingAccountId,
+        uint128 receivingAccountId,
+        UD60x18 atomicFee,
+        address collateralType,
+        int256 annualizedNotional
     ) internal returns (uint256 fee) {
         fee = mulUDxUint(atomicFee, SignedMath.abs(annualizedNotional));
 
@@ -109,10 +104,12 @@ contract ProductModule is IProductModule {
     }
 
     function propagateTakerOrder(
-        uint128 accountId, uint128 productId, uint128 marketId, address collateralType, int256 annualizedNotional
-    ) 
-        external override returns (uint256 fee)
-    {
+        uint128 accountId,
+        uint128 productId,
+        uint128 marketId,
+        address collateralType,
+        int256 annualizedNotional
+    ) external override returns (uint256 fee) {
         Product.onlyProductAddress(productId, msg.sender);
 
         MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
@@ -130,27 +127,32 @@ contract ProductModule is IProductModule {
     }
 
     function propagateMakerOrder(
-        uint128 accountId, uint128 productId, uint128 marketId, address collateralType, int256 annualizedNotional
-    ) 
-        external override returns (uint256 fee)
-    {
+        uint128 accountId,
+        uint128 productId,
+        uint128 marketId,
+        address collateralType,
+        int256 annualizedNotional
+    ) external override returns (uint256 fee) {
         Product.onlyProductAddress(productId, msg.sender);
-        
+
         MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
         fee = distributeFees(
             accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicMakerFee, collateralType, annualizedNotional
         );
-        
+
         Account.Data storage account = Account.exists(accountId);
         account.imCheck(collateralType);
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
         }
 
-         //todo: emit event
+        //todo: emit event
     }
 
-    function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount) external override {
+    function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)
+        external
+        override
+    {
         Product.onlyProductAddress(productId, msg.sender);
 
         Account.Data storage account = Account.exists(accountId);

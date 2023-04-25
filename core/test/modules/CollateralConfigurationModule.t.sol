@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/modules/CollateralConfigurationModule.sol";
@@ -15,15 +15,19 @@ contract CollateralConfigurationModuleTest is Test {
         collateralConfigurationModule = new CollateralConfigurationModule();
 
         vm.store(
-            address(collateralConfigurationModule), keccak256(abi.encode("xyz.voltz.OwnableStorage")), bytes32(abi.encode(owner))
+            address(collateralConfigurationModule),
+            keccak256(abi.encode("xyz.voltz.OwnableStorage")),
+            bytes32(abi.encode(owner))
         );
     }
 
     function test_ConfigureCollateral() public {
-        CollateralConfiguration.Data memory config =
-            CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
-            });
+        CollateralConfiguration.Data memory config = CollateralConfiguration.Data({
+            depositingEnabled: true,
+            liquidationBooster: 1e18,
+            tokenAddress: Constants.TOKEN_0,
+            cap: Constants.TOKEN_0_CAP
+        });
 
         // Expect CollateralConfigured event
         vm.expectEmit(true, true, true, true, address(collateralConfigurationModule));
@@ -44,10 +48,12 @@ contract CollateralConfigurationModuleTest is Test {
     function testFuzz_RevertWhen_ConfigureCollateral_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
-        CollateralConfiguration.Data memory config =
-            CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
-            });
+        CollateralConfiguration.Data memory config = CollateralConfiguration.Data({
+            depositingEnabled: true,
+            liquidationBooster: 1e18,
+            tokenAddress: Constants.TOKEN_0,
+            cap: Constants.TOKEN_0_CAP
+        });
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
         vm.prank(otherAddress);
@@ -58,14 +64,20 @@ contract CollateralConfigurationModuleTest is Test {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true,
+                liquidationBooster: 1e18,
+                tokenAddress: Constants.TOKEN_0,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: false, liquidationBooster: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+                depositingEnabled: false,
+                liquidationBooster: 1e16,
+                tokenAddress: Constants.TOKEN_1,
+                cap: Constants.TOKEN_1_CAP
             })
         );
 
@@ -91,14 +103,20 @@ contract CollateralConfigurationModuleTest is Test {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true,
+                liquidationBooster: 1e18,
+                tokenAddress: Constants.TOKEN_0,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: false, liquidationBooster: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+                depositingEnabled: false,
+                liquidationBooster: 1e16,
+                tokenAddress: Constants.TOKEN_1,
+                cap: Constants.TOKEN_1_CAP
             })
         );
 
@@ -121,14 +139,20 @@ contract CollateralConfigurationModuleTest is Test {
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: 1e18, tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true,
+                liquidationBooster: 1e18,
+                tokenAddress: Constants.TOKEN_0,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(
             CollateralConfiguration.Data({
-                depositingEnabled: false, liquidationBooster: 1e16, tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+                depositingEnabled: false,
+                liquidationBooster: 1e16,
+                tokenAddress: Constants.TOKEN_1,
+                cap: Constants.TOKEN_1_CAP
             })
         );
 

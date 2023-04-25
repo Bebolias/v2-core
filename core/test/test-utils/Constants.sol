@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 library Constants {
     address public constant PROXY_OWNER = 0xa791FBF256B2cc08BD8a7C706f0A4498F96E8CBB;
@@ -10,7 +10,7 @@ library Constants {
 
     address public constant ALICE = 0x110846169b058F7d039cFd25E8fe14e903f96e7F;
     address public constant BOB = 0xD74B3Fa2D0e1753779C1a29F3F25f68fc4e4d68c;
-    
+
     address public constant TOKEN_0 = 0x9401F1dce663726B5c61D7022c3ADf89b6a7E9f6;
     address public constant TOKEN_1 = 0x53F5559AeCf0DAe6B03C743D374D93873549C1a5;
     address public constant TOKEN_UNKNOWN = 0x24b5Ab51907cB75374db2b16229B6f767FFf9E60;

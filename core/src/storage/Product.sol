@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "@voltz-protocol/util-contracts/src/errors/AccessError.sol";
 import "../interfaces/external/IProduct.sol";
@@ -60,8 +60,10 @@ library Product {
      * settlement token of the account, i.e. all the positions used in the unrealised pnl calculation should settle/quote in a token
      * that matches the settlement token of the account.
      */
-    function getAccountUnrealizedPnL(Data storage self, uint128 accountId, address collateralType) 
-        internal view returns (int256 accountUnrealizedPnL) 
+    function getAccountUnrealizedPnL(Data storage self, uint128 accountId, address collateralType)
+        internal
+        view
+        returns (int256 accountUnrealizedPnL)
     {
         return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId, collateralType);
     }
@@ -72,23 +74,22 @@ library Product {
      * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
-    function baseToAnnualizedExposure(Data storage self, int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp) 
-        internal view returns (int256[] memory exposures) 
-    {
+    function baseToAnnualizedExposure(
+        Data storage self,
+        int256[] memory baseAmounts,
+        uint128 marketId,
+        uint32 maturityTimestamp
+    ) internal view returns (int256[] memory exposures) {
         return IProduct(self.productAddress).baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
     }
 
     /**
-     * @dev The product at self.productAddress is expected to aggregate filled and 
+     * @dev The product at self.productAddress is expected to aggregate filled and
      * @dev unfilled notionals for all maturities and pools
-     * note: needs to be in terms of the collateralType token of the account given currently 
+     * note: needs to be in terms of the collateralType token of the account given currently
      * note only supporting single-token mode
      */
-    function getAccountAnnualizedExposures(
-        Data storage self,
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountAnnualizedExposures(Data storage self, uint128 accountId, address collateralType)
         internal
         returns (Account.Exposure[] memory exposures)
     {

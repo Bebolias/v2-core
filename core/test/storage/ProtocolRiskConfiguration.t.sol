@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/storage/ProtocolRiskConfiguration.sol";
 
-import { UD60x18 } from "@prb/math/UD60x18.sol";
+import {UD60x18} from "@prb/math/UD60x18.sol";
 
 contract ExposedProtocolRiskConfiguration {
     // Mock support
@@ -39,9 +39,12 @@ contract ProtocolRiskConfigurationTest is Test {
     }
 
     function test_Set() public {
-        protocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({
-            imMultiplier: UD60x18.wrap(2e18), liquidatorRewardParameter: UD60x18.wrap(5e16)
-        }));
+        protocolRiskConfiguration.set(
+            ProtocolRiskConfiguration.Data({
+                imMultiplier: UD60x18.wrap(2e18),
+                liquidatorRewardParameter: UD60x18.wrap(5e16)
+            })
+        );
 
         ProtocolRiskConfiguration.Data memory config = protocolRiskConfiguration.getProtocolRiskConfiguration();
 
@@ -52,13 +55,15 @@ contract ProtocolRiskConfigurationTest is Test {
     function test_Set_Twice() public {
         protocolRiskConfiguration.set(
             ProtocolRiskConfiguration.Data({
-                imMultiplier: UD60x18.wrap(2e18), liquidatorRewardParameter: UD60x18.wrap(5e16)
+                imMultiplier: UD60x18.wrap(2e18),
+                liquidatorRewardParameter: UD60x18.wrap(5e16)
             })
         );
 
         protocolRiskConfiguration.set(
             ProtocolRiskConfiguration.Data({
-                imMultiplier: UD60x18.wrap(4e18), liquidatorRewardParameter: UD60x18.wrap(10e16)
+                imMultiplier: UD60x18.wrap(4e18),
+                liquidatorRewardParameter: UD60x18.wrap(10e16)
             })
         );
 

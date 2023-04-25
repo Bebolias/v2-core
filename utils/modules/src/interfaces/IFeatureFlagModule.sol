@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 /**
  * @title Module for granular enabling and disabling of system features and functions.
@@ -15,7 +15,7 @@ interface IFeatureFlagModule {
     /**
      * @notice Emitted when general access has been given or removed for a feature.
      * @param feature The bytes32 id of the feature.
-     * @param allowAll True if the feature was allowed for everyone and false if it is only allowed for those 
+     * @param allowAll True if the feature was allowed for everyone and false if it is only allowed for those
      * included in the allowlist.
      */
     event FeatureFlagAllowAllSet(bytes32 indexed feature, bool allowAll);
@@ -23,7 +23,7 @@ interface IFeatureFlagModule {
     /**
      * @notice Emitted when general access has been blocked for a feature.
      * @param feature The bytes32 id of the feature.
-     * @param denyAll True if the feature was blocked for everyone and false if it is only allowed for those included in 
+     * @param denyAll True if the feature was blocked for everyone and false if it is only allowed for those included in
      * the allowlist or if allowAll is set to true.
      */
     event FeatureFlagDenyAllSet(bytes32 indexed feature, bool denyAll);
@@ -121,4 +121,3 @@ interface IFeatureFlagModule {
      */
     function isFeatureAllowed(bytes32 feature, address account) external view returns (bool);
 }
-

@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
 import "../storage/FeatureFlag.sol";
@@ -49,9 +49,7 @@ contract FeatureFlagModule is IFeatureFlagModule {
     function addToFeatureFlagAllowlist(bytes32 feature, address account) external override {
         OwnableStorage.onlyOwner();
 
-        SetUtil.AddressSet storage permissionedAddresses = FeatureFlag
-            .load(feature)
-            .permissionedAddresses;
+        SetUtil.AddressSet storage permissionedAddresses = FeatureFlag.load(feature).permissionedAddresses;
 
         if (!permissionedAddresses.contains(account)) {
             permissionedAddresses.add(account);
@@ -65,9 +63,7 @@ contract FeatureFlagModule is IFeatureFlagModule {
     function removeFromFeatureFlagAllowlist(bytes32 feature, address account) external override {
         OwnableStorage.onlyOwner();
 
-        SetUtil.AddressSet storage permissionedAddresses = FeatureFlag
-            .load(feature)
-            .permissionedAddresses;
+        SetUtil.AddressSet storage permissionedAddresses = FeatureFlag.load(feature).permissionedAddresses;
 
         if (permissionedAddresses.contains(account)) {
             FeatureFlag.load(feature).permissionedAddresses.remove(account);
@@ -83,12 +79,12 @@ contract FeatureFlagModule is IFeatureFlagModule {
         FeatureFlag.Data storage flag = FeatureFlag.load(feature);
 
         // resize array (its really dumb how you have to do this)
-        uint storageLen = flag.deniers.length;
-        for (uint i = storageLen; i > deniers.length; i--) {
+        uint256 storageLen = flag.deniers.length;
+        for (uint256 i = storageLen; i > deniers.length; i--) {
             flag.deniers.pop();
         }
 
-        for (uint i = 0; i < deniers.length; i++) {
+        for (uint256 i = 0; i < deniers.length; i++) {
             if (i >= storageLen) {
                 flag.deniers.push(deniers[i]);
             } else {
@@ -105,7 +101,7 @@ contract FeatureFlagModule is IFeatureFlagModule {
     function getDeniers(bytes32 feature) external view override returns (address[] memory) {
         FeatureFlag.Data storage flag = FeatureFlag.load(feature);
         address[] memory addrs = new address[](flag.deniers.length);
-        for (uint i = 0; i < addrs.length; i++) {
+        for (uint256 i = 0; i < addrs.length; i++) {
             addrs[i] = flag.deniers[i];
         }
 
@@ -129,19 +125,14 @@ contract FeatureFlagModule is IFeatureFlagModule {
     /**
      * @inheritdoc IFeatureFlagModule
      */
-    function getFeatureFlagAllowlist(
-        bytes32 feature
-    ) external view override returns (address[] memory) {
+    function getFeatureFlagAllowlist(bytes32 feature) external view override returns (address[] memory) {
         return FeatureFlag.load(feature).permissionedAddresses.values();
     }
 
     /**
      * @inheritdoc IFeatureFlagModule
      */
-    function isFeatureAllowed(
-        bytes32 feature,
-        address account
-    ) external view override returns (bool) {
+    function isFeatureAllowed(bytes32 feature, address account) external view override returns (bool) {
         return FeatureFlag.hasAccess(feature, account);
     }
 }

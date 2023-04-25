@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/modules/AccountModule.sol";
@@ -8,16 +8,10 @@ import "../../src/storage/AccountRBAC.sol";
 contract AccountModuleTest is Test {
     event AccountCreated(uint128 indexed accountId, address indexed owner);
     event PermissionGranted(
-        uint128 indexed accountId,
-        bytes32 indexed permission,
-        address indexed user,
-        address sender
+        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender
     );
     event PermissionRevoked(
-        uint128 indexed accountId,
-        bytes32 indexed permission,
-        address indexed user,
-        address sender
+        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender
     );
 
     AccountModule internal accountModule;
@@ -41,7 +35,9 @@ contract AccountModuleTest is Test {
     }
 
     function test_CreateAccount() public {
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
 
         // Expect AccountCreated event
         vm.expectEmit(true, true, true, true, address(accountModule));
@@ -56,19 +52,23 @@ contract AccountModuleTest is Test {
     }
 
     function test_GetAccountPermissions_AccountCreator() public {
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
         accountModule.createAccount(100);
 
         AccountModule.AccountPermissions[] memory accountPerms = accountModule.getAccountPermissions(100);
 
-        assertEq(accountModule.getAccountOwner(100),  address(this));
+        assertEq(accountModule.getAccountOwner(100), address(this));
         assertEq(accountPerms.length, 0);
     }
 
     function test_GrantPermission() public {
         address authorizedAddress = address(1);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
         accountModule.createAccount(100);
 
         vm.expectEmit(true, true, true, true, address(accountModule));
@@ -86,7 +86,9 @@ contract AccountModuleTest is Test {
     function test_RevertWhen_GrantPermission() public {
         address unauthorizedAddress = address(1);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
         accountModule.createAccount(100);
 
         vm.prank(unauthorizedAddress);
@@ -97,7 +99,9 @@ contract AccountModuleTest is Test {
     function test_RevertWhen_GrantPermissionFromAdmin() public {
         address adminAddress = address(1);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
         accountModule.createAccount(100);
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, adminAddress);
         assertEq(accountModule.hasPermission(100, AccountRBAC._ADMIN_PERMISSION, adminAddress), true);
@@ -111,7 +115,9 @@ contract AccountModuleTest is Test {
     function test_RevokePermission() public {
         address revokedAddress = address(1);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
         accountModule.createAccount(100);
 
         AccountModule.AccountPermissions[] memory accountPerms = accountModule.getAccountPermissions(100);
@@ -135,7 +141,9 @@ contract AccountModuleTest is Test {
         vm.assume(revokedAddress != address(this));
         vm.assume(revokedAddress != address(0));
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
         accountModule.createAccount(100);
 
         AccountModule.AccountPermissions[] memory accountPerms = accountModule.getAccountPermissions(100);
@@ -144,7 +152,7 @@ contract AccountModuleTest is Test {
         vm.expectRevert(abi.encodeWithSelector(SetUtil.ValueNotInSet.selector));
         accountModule.revokePermission(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress);
 
-        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector, bytes32("PER123")));
         accountModule.revokePermission(100, "PER123", revokedAddress);
     }
 
@@ -158,7 +166,9 @@ contract AccountModuleTest is Test {
         vm.assume(unauthorizedAddress != address(this));
         vm.assume(unauthorizedAddress != revokedAddress);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
         accountModule.createAccount(100);
 
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress);
@@ -172,7 +182,9 @@ contract AccountModuleTest is Test {
         address adminAddress = address(1);
         address otherAdminAddress = address(2);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
         accountModule.createAccount(100);
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, adminAddress);
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, otherAdminAddress);
@@ -187,7 +199,9 @@ contract AccountModuleTest is Test {
     function test_RenouncePermission() public {
         address renouncedAddress = address(1);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
         accountModule.createAccount(100);
 
         AccountModule.AccountPermissions[] memory accountPerms = accountModule.getAccountPermissions(100);
@@ -209,7 +223,9 @@ contract AccountModuleTest is Test {
     function test_RevertWhen_RenounceInexistentPermission() public {
         address renouncedAddress = address(1);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
         accountModule.createAccount(100);
 
         AccountModule.AccountPermissions[] memory accountPerms = accountModule.getAccountPermissions(100);
@@ -217,7 +233,9 @@ contract AccountModuleTest is Test {
 
         vm.prank(renouncedAddress);
         vm.expectRevert(
-            abi.encodeWithSelector(IAccountModule.PermissionNotGranted.selector, 100, AccountRBAC._ADMIN_PERMISSION, renouncedAddress)
+            abi.encodeWithSelector(
+                IAccountModule.PermissionNotGranted.selector, 100, AccountRBAC._ADMIN_PERMISSION, renouncedAddress
+            )
         );
         accountModule.renouncePermission(100, AccountRBAC._ADMIN_PERMISSION);
     }
@@ -243,7 +261,9 @@ contract AccountModuleTest is Test {
     function test_GetAccountOwner() public {
         address randomAddress = address(1);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
 
         vm.prank(randomAddress);
         accountModule.createAccount(100);
@@ -254,7 +274,9 @@ contract AccountModuleTest is Test {
     function test_IsAuthorized_True() public {
         address randomAddress = address(1);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
 
         vm.prank(randomAddress);
         accountModule.createAccount(100);
@@ -266,7 +288,9 @@ contract AccountModuleTest is Test {
         address randomAddress = address(1);
         address otherAddress = address(2);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
 
         vm.prank(randomAddress);
         accountModule.createAccount(100);
@@ -278,7 +302,9 @@ contract AccountModuleTest is Test {
         address randomAddress = address(1);
         address otherAddress = address(2);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
 
         vm.prank(randomAddress);
         accountModule.createAccount(100);
@@ -291,7 +317,9 @@ contract AccountModuleTest is Test {
     function test_HasPermission_False() public {
         address randomAddress = address(1);
 
-        vm.mockCall(proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode());
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
 
         vm.prank(randomAddress);
         accountModule.createAccount(100);

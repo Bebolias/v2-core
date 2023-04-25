@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
-import { UD60x18, mul as mulUD60x18 } from "@prb/math/UD60x18.sol";
-import { SD59x18, mul as mulSD59x18} from "@prb/math/SD59x18.sol";
+import {UD60x18, mul as mulUD60x18} from "@prb/math/UD60x18.sol";
+import {SD59x18, mul as mulSD59x18} from "@prb/math/SD59x18.sol";
 import "./SafeCast.sol";
 
 using SafeCastU256 for uint256;
@@ -15,7 +15,7 @@ using SafeCastI256 for int256;
 /// @param b denotes the unsigned number whose precision
 /// determines the precision of the result
 function mulUDxUint(UD60x18 a, uint256 b) pure returns (uint256) {
-  return UD60x18.unwrap(mulUD60x18(a, UD60x18.wrap(b)));
+    return UD60x18.unwrap(mulUD60x18(a, UD60x18.wrap(b)));
 }
 
 
@@ -26,7 +26,7 @@ function mulUDxUint(UD60x18 a, uint256 b) pure returns (uint256) {
 /// @param b denotes the signed number whose precision
 /// determines the precision of the result
 function mulUDxInt(UD60x18 a, int256 b) pure returns (int256) {
-  return mulSDxUint(SD59x18.wrap(b), UD60x18.unwrap(a));
+    return mulSDxUint(SD59x18.wrap(b), UD60x18.unwrap(a));
 }
 
 /// @notice Multiplies a signed wad number by a
@@ -36,7 +36,7 @@ function mulUDxInt(UD60x18 a, int256 b) pure returns (int256) {
 /// @param b denotes the signed number whose precision
 /// determines the precision of the result
 function mulSDxInt(SD59x18 a, int256 b) pure returns (int256) {
-  return SD59x18.unwrap(mulSD59x18(a, SD59x18.wrap(b)));
+    return SD59x18.unwrap(mulSD59x18(a, SD59x18.wrap(b)));
 }
 
 

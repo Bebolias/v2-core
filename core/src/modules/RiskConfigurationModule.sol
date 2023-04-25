@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../interfaces/IRiskConfigurationModule.sol";
 import "../storage/MarketRiskConfiguration.sol";
@@ -32,10 +32,7 @@ contract RiskConfigurationModule is IRiskConfigurationModule {
     /**
      * @inheritdoc IRiskConfigurationModule
      */
-    function getMarketRiskConfiguration(
-        uint128 productId,
-        uint128 marketId
-    )
+    function getMarketRiskConfiguration(uint128 productId, uint128 marketId)
         external
         pure
         override

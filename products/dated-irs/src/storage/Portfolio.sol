@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
@@ -10,9 +10,9 @@ import "./RateOracleReader.sol";
 import "./MarketConfiguration.sol";
 import "../interfaces/IPool.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
-import { UD60x18, UNIT } from "@prb/math/UD60x18.sol";
-import { SD59x18 } from "@prb/math/SD59x18.sol";
-import { mulUDxUint, mulUDxInt } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
+import {UD60x18, UNIT} from "@prb/math/UD60x18.sol";
+import {SD59x18} from "@prb/math/SD59x18.sol";
+import {mulUDxUint, mulUDxInt} from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
 /**
  * @title Object for tracking a portfolio of dated interest rate swap positions
@@ -77,11 +77,7 @@ library Portfolio {
      * consider avoiding pool if account is purely taker to save gas?
      * todo: this function looks expesive and feels like there's room for optimisations
      */
-    function getAccountUnrealizedPnL(
-        Data storage self,
-        address poolAddress,
-        address collateralType
-    )
+    function getAccountUnrealizedPnL(Data storage self, address poolAddress, address collateralType)
         internal
         view
         returns (int256 unrealizedPnL)
@@ -96,18 +92,14 @@ library Portfolio {
             (int256 baseBalancePool, int256 quoteBalancePool) =
                 IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
 
-            int256 unwindQuote = computeUnwindQuote(marketId, maturityTimestamp, poolAddress, baseBalance + baseBalancePool);
+            int256 unwindQuote =
+                computeUnwindQuote(marketId, maturityTimestamp, poolAddress, baseBalance + baseBalancePool);
 
             unrealizedPnL += unwindQuote + quoteBalance + quoteBalancePool;
         }
     }
 
-    function computeUnwindQuote(
-        uint128 marketId,
-        uint32 maturityTimestamp,
-        address poolAddress,
-        int256 baseAmount
-    )
+    function computeUnwindQuote(uint128 marketId, uint32 maturityTimestamp, address poolAddress, int256 baseAmount)
         internal
         view
         returns (int256 unwindQuote)
@@ -133,11 +125,7 @@ library Portfolio {
         factor = currentLiquidityIndex.mul(timeDeltaAnnualized);
     }
 
-    function baseToAnnualizedExposure(
-        int256[] memory baseAmounts,
-        uint128 marketId,
-        uint32 maturityTimestamp
-    )
+    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp)
         internal
         view
         returns (int256[] memory exposures)
@@ -154,11 +142,7 @@ library Portfolio {
      * @dev note: given that all the accounts are single-token, annualized exposures for a given account are in terms
      * of the settlement token of that account
      */
-    function getAccountAnnualizedExposures(
-        Data storage self,
-        address poolAddress,
-        address collateralType
-    )
+    function getAccountAnnualizedExposures(Data storage self, address poolAddress, address collateralType)
         internal
         view
         returns (Account.Exposure[] memory exposures)
@@ -170,7 +154,8 @@ library Portfolio {
             (uint128 marketId, uint32 maturityTimestamp) = self.getMarketAndMaturity(i + 1, collateralType);
 
             int256 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
-            (int256 baseBalancePool,) = IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
+            (int256 baseBalancePool,) =
+                IPool(poolAddress).getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
             (uint256 unfilledBaseLong, uint256 unfilledBaseShort) =
                 IPool(poolAddress).getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
             {
@@ -219,9 +204,7 @@ library Portfolio {
         uint32 maturityTimestamp,
         int256 baseDelta,
         int256 quoteDelta
-    )
-        internal
-    {
+    ) internal {
         Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
         // register active market
@@ -235,12 +218,7 @@ library Portfolio {
     /**
      * @dev create, edit or close an irs position for a given marketId (e.g. aUSDC lend) and maturityTimestamp (e.g. 31st Dec 2023)
      */
-    function settle(
-        Data storage self,
-        uint128 marketId,
-        uint32 maturityTimestamp,
-        address poolAddress
-    )
+    function settle(Data storage self, uint128 marketId, uint32 maturityTimestamp, address poolAddress)
         internal
         returns (int256 settlementCashflow)
     {
@@ -256,10 +234,11 @@ library Portfolio {
 
         IPool pool = IPool(poolAddress);
 
-        (int256 closedBasePool, int256 closedQuotePool) = pool.closePosition(marketId, maturityTimestamp, self.accountId);
+        (int256 closedBasePool, int256 closedQuotePool) =
+            pool.closePosition(marketId, maturityTimestamp, self.accountId);
 
-        settlementCashflow =
-            mulUDxInt(liquidityIndexMaturity, position.baseBalance + closedBasePool) + position.quoteBalance + closedQuotePool;
+        settlementCashflow = mulUDxInt(liquidityIndexMaturity, position.baseBalance + closedBasePool)
+            + position.quoteBalance + closedQuotePool;
 
         position.settle();
     }

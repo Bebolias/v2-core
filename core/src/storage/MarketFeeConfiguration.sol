@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
-import { UD60x18 } from "@prb/math/UD60x18.sol";
+import {UD60x18} from "@prb/math/UD60x18.sol";
 import "./Account.sol";
 
 /**
@@ -9,6 +9,7 @@ import "./Account.sol";
  */
 library MarketFeeConfiguration {
     using Account for Account.Data;
+
     struct Data {
         /**
          * @dev Id of the product for which we store fee configurations
@@ -41,10 +42,10 @@ library MarketFeeConfiguration {
      * @return config The MarketFeeConfiguration object.
      */
     function load(uint128 productId, uint128 marketId) internal pure returns (Data storage config) {
-      bytes32 s = keccak256(abi.encode("xyz.voltz.MarketFeeConfiguration", productId, marketId));
-      assembly {
-        config.slot := s
-      }
+        bytes32 s = keccak256(abi.encode("xyz.voltz.MarketFeeConfiguration", productId, marketId));
+        assembly {
+            config.slot := s
+        }
     }
 
     /**
@@ -52,14 +53,14 @@ library MarketFeeConfiguration {
      * @param config The MarketFeeConfiguration object
      */
     function set(Data memory config) internal {
-      Account.exists(config.feeCollectorAccountId);
+        Account.exists(config.feeCollectorAccountId);
 
-      Data storage storedConfig = load(config.productId, config.marketId);
+        Data storage storedConfig = load(config.productId, config.marketId);
 
-      storedConfig.productId = config.productId;
-      storedConfig.marketId = config.marketId;
-      storedConfig.feeCollectorAccountId = config.feeCollectorAccountId;
-      storedConfig.atomicMakerFee = config.atomicMakerFee;
-      storedConfig.atomicTakerFee = config.atomicTakerFee;
+        storedConfig.productId = config.productId;
+        storedConfig.marketId = config.marketId;
+        storedConfig.feeCollectorAccountId = config.feeCollectorAccountId;
+        storedConfig.atomicMakerFee = config.atomicMakerFee;
+        storedConfig.atomicTakerFee = config.atomicTakerFee;
     }
 }

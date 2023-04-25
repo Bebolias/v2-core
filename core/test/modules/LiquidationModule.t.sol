@@ -1,29 +1,37 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/modules/LiquidationModule.sol";
 import "../test-utils/MockCoreStorage.sol";
 
-contract EnhancedLiquidationModule is LiquidationModule, CoreState { 
-    function _extractLiquidatorReward(uint128 liquidatedAccountId, address collateralType, uint256 imPreClose, uint256 imPostClose) 
-        public returns (uint256) 
-    {
+contract EnhancedLiquidationModule is LiquidationModule, CoreState {
+    function _extractLiquidatorReward(
+        uint128 liquidatedAccountId,
+        address collateralType,
+        uint256 imPreClose,
+        uint256 imPostClose
+    ) public returns (uint256) {
         return extractLiquidatorReward(liquidatedAccountId, collateralType, imPreClose, imPostClose);
     }
 
     function setLiquidationBooster(uint128 accountId, address collateralType, uint256 liquidationBooster) public {
         CollateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: liquidationBooster, 
-                tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true,
+                liquidationBooster: liquidationBooster,
+                tokenAddress: Constants.TOKEN_0,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
         uint256 balance = this.getCollateralBalance(accountId, collateralType);
         changeAccountBalance(
-            100, MockAccountStorage.CollateralBalance({
-                token: Constants.TOKEN_0, balance: balance, liquidationBoosterBalance: liquidationBooster
+            100,
+            MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0,
+                balance: balance,
+                liquidationBoosterBalance: liquidationBooster
             })
         );
     }
@@ -60,8 +68,11 @@ contract LiquidationModuleTest is Test {
 
         // Set up the balance of token 0
         liquidationModule.changeAccountBalance(
-            accountId, MockAccountStorage.CollateralBalance({
-                token: Constants.TOKEN_0, balance: balance, liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER
+            accountId,
+            MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0,
+                balance: balance,
+                liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER
             })
         );
     }
@@ -173,7 +184,9 @@ contract LiquidationModuleTest is Test {
     }
 
     function test_RevertWhen_ExtractLiquidatorReward_SmallPosition_PartiallyLiquidated() public {
-        vm.expectRevert(abi.encodeWithSelector(ILiquidationModule.PartialLiquidationNotIncentivized.selector, 100, 100e18, 1));
+        vm.expectRevert(
+            abi.encodeWithSelector(ILiquidationModule.PartialLiquidationNotIncentivized.selector, 100, 100e18, 1)
+        );
         liquidationModule._extractLiquidatorReward(100, Constants.TOKEN_0, 100e18, 1);
     }
 
@@ -181,33 +194,47 @@ contract LiquidationModuleTest is Test {
         uint256 liquidatorReward = liquidationModule._extractLiquidatorReward(100, Constants.TOKEN_0, 300e18, 0);
         assertEq(liquidatorReward, 15e18);
         assertEq(liquidationModule.getCollateralBalance(100, Constants.TOKEN_0), LOW_COLLATERAL - 15e18);
-        assertEq(liquidationModule.getLiquidationBoosterBalance(100, Constants.TOKEN_0), Constants.TOKEN_0_LIQUIDATION_BOOSTER);
+        assertEq(
+            liquidationModule.getLiquidationBoosterBalance(100, Constants.TOKEN_0),
+            Constants.TOKEN_0_LIQUIDATION_BOOSTER
+        );
     }
 
     function test_ExtractLiquidatorReward_BigPosition_PartiallyLiquidated() public {
         uint256 liquidatorReward = liquidationModule._extractLiquidatorReward(100, Constants.TOKEN_0, 300e18, 200e18);
         assertEq(liquidatorReward, 5e18);
         assertEq(liquidationModule.getCollateralBalance(100, Constants.TOKEN_0), LOW_COLLATERAL - 5e18);
-        assertEq(liquidationModule.getLiquidationBoosterBalance(100, Constants.TOKEN_0), Constants.TOKEN_0_LIQUIDATION_BOOSTER);
+        assertEq(
+            liquidationModule.getLiquidationBoosterBalance(100, Constants.TOKEN_0),
+            Constants.TOKEN_0_LIQUIDATION_BOOSTER
+        );
     }
 
     function test_RevertWhen_ExtractLiquidatorReward_SmallPosition() public {
         liquidationModule.changeAccountBalance(
-            100, MockAccountStorage.CollateralBalance({
-                token: Constants.TOKEN_0, balance: 0, liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER - 1
+            100,
+            MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0,
+                balance: 0,
+                liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER - 1
             })
         );
 
-        vm.expectRevert(abi.encodeWithSelector(
-            Collateral.InsufficientLiquidationBoosterBalance.selector, Constants.TOKEN_0_LIQUIDATION_BOOSTER
-        ));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Collateral.InsufficientLiquidationBoosterBalance.selector, Constants.TOKEN_0_LIQUIDATION_BOOSTER
+            )
+        );
         liquidationModule._extractLiquidatorReward(100, Constants.TOKEN_0, 100e18, 0);
     }
 
     function test_RevertWhen_ExtractLiquidatorReward_BigPosition() public {
         liquidationModule.changeAccountBalance(
-            100, MockAccountStorage.CollateralBalance({
-                token: Constants.TOKEN_0, balance: 15e18 - 1, liquidationBoosterBalance: 0
+            100,
+            MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0,
+                balance: 15e18 - 1,
+                liquidationBoosterBalance: 0
             })
         );
 
@@ -283,7 +310,7 @@ contract LiquidationModuleTest is Test {
         // Trigger liquidation
         uint256 liquidatorReward = liquidationModule.liquidate(100, 888, Constants.TOKEN_0);
         assertEq(liquidatorReward, 101e18);
-        
+
         // Check balances after
         {
             uint256 balance = liquidationModule.getCollateralBalance(100, Constants.TOKEN_0);
@@ -311,7 +338,9 @@ contract LiquidationModuleTest is Test {
         mockLiquidatorAccount();
         liquidationModule.setLiquidationBooster(100, Constants.TOKEN_0, 101e18);
 
-        vm.expectRevert(abi.encodeWithSelector(ILiquidationModule.PartialLiquidationNotIncentivized.selector, 100, 1800e18, 34e18));
+        vm.expectRevert(
+            abi.encodeWithSelector(ILiquidationModule.PartialLiquidationNotIncentivized.selector, 100, 1800e18, 34e18)
+        );
         liquidationModule.liquidate(100, 888, Constants.TOKEN_0);
     }
 
@@ -338,7 +367,9 @@ contract LiquidationModuleTest is Test {
         mockLiquidatorAccount();
 
         // Trigger liquidation
-        vm.expectRevert(abi.encodeWithSelector(ILiquidationModule.AccountExposureNotReduced.selector, 100, 1800e18, 1800e18));
+        vm.expectRevert(
+            abi.encodeWithSelector(ILiquidationModule.AccountExposureNotReduced.selector, 100, 1800e18, 1800e18)
+        );
         liquidationModule.liquidate(100, 888, Constants.TOKEN_0);
     }
 

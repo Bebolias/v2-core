@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../../src/interfaces/external/IProduct.sol";
 
@@ -37,7 +37,12 @@ contract MockProduct is IProduct {
         }
     }
 
-    function getAccountUnrealizedPnL(uint128 accountId, address collateralType) public view override returns (int256 unrealizedPnL) {
+    function getAccountUnrealizedPnL(uint128 accountId, address collateralType)
+        public
+        view
+        override
+        returns (int256 unrealizedPnL)
+    {
         MockAccountUnrealizedPnL storage tmp = mockAccountUnrealizedPnL[accountId][collateralType];
 
         if (tmp.start >= tmp.end) {
@@ -47,14 +52,18 @@ contract MockProduct is IProduct {
         return tmp.returnValues[tmp.start];
     }
 
-    mapping(uint128 => mapping (uint256 => uint256)) internal mockBaseToAnnualizedFactor;
+    mapping(uint128 => mapping(uint256 => uint256)) internal mockBaseToAnnualizedFactor;
 
-    function mockBaseToAnnualizedExposure(uint128 marketId, uint32 maturityTimestamp, uint256 baseToAnnualizedFactor) public {
+    function mockBaseToAnnualizedExposure(uint128 marketId, uint32 maturityTimestamp, uint256 baseToAnnualizedFactor)
+        public
+    {
         mockBaseToAnnualizedFactor[marketId][maturityTimestamp] = baseToAnnualizedFactor;
     }
 
-    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp) 
-        external view returns (int256[] memory exposures) 
+    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp)
+        external
+        view
+        returns (int256[] memory exposures)
     {
         exposures = new int256[](baseAmounts.length);
         for (uint256 i = 0; i < baseAmounts.length; i += 1) {
@@ -72,7 +81,9 @@ contract MockProduct is IProduct {
     mapping(uint128 => mapping(address => MockAccountAnnualizedExposure)) internal mockAccountAnnualizedExposures;
 
     function mockGetAccountAnnualizedExposures(
-        uint128 accountId, address colalteralType, Account.Exposure[] memory returnValue
+        uint128 accountId,
+        address colalteralType,
+        Account.Exposure[] memory returnValue
     ) public {
         MockAccountAnnualizedExposure storage tmp = mockAccountAnnualizedExposures[accountId][colalteralType];
         for (uint256 i = 0; i < returnValue.length; i++) {
@@ -90,8 +101,10 @@ contract MockProduct is IProduct {
         }
     }
 
-    function getAccountAnnualizedExposures(uint128 accountId, address collateralType) 
-        public view returns (Account.Exposure[] memory exposures) 
+    function getAccountAnnualizedExposures(uint128 accountId, address collateralType)
+        public
+        view
+        returns (Account.Exposure[] memory exposures)
     {
         MockAccountAnnualizedExposure storage tmp = mockAccountAnnualizedExposures[accountId][collateralType];
 

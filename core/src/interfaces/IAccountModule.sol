@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 /**
  * @title Account Manager Interface.
@@ -32,10 +32,7 @@ interface IAccountModule {
      * @param sender The Address that granted the permission.
      */
     event PermissionGranted(
-        uint128 indexed accountId,
-        bytes32 indexed permission,
-        address indexed user,
-        address sender
+        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender
     );
 
     /**
@@ -46,10 +43,7 @@ interface IAccountModule {
      * @param sender The address that revoked the permission.
      */
     event PermissionRevoked(
-        uint128 indexed accountId,
-        bytes32 indexed permission,
-        address indexed user,
-        address sender
+        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender
     );
 
     /**
@@ -71,9 +65,10 @@ interface IAccountModule {
      * @param accountId The id of the account whose permissions are being retrieved.
      * @return accountPerms An array of AccountPermission objects describing the permissions granted to the account.
      */
-    function getAccountPermissions(
-        uint128 accountId
-    ) external view returns (AccountPermissions[] memory accountPerms);
+    function getAccountPermissions(uint128 accountId)
+        external
+        view
+        returns (AccountPermissions[] memory accountPerms);
 
     /**
      * @notice Mints an account token with id `requestedAccountId` to `msg.sender`.
@@ -143,11 +138,10 @@ interface IAccountModule {
      * @param user The target address whose permission is being queried.
      * @return hasPermission A boolean with the response of the query.
      */
-    function hasPermission(
-        uint128 accountId,
-        bytes32 permission,
-        address user
-    ) external view returns (bool hasPermission);
+    function hasPermission(uint128 accountId, bytes32 permission, address user)
+        external
+        view
+        returns (bool hasPermission);
 
     /**
      * @notice Returns the address for the account token used by the manager.
@@ -169,11 +163,10 @@ interface IAccountModule {
      * @param target The target address whose permission is being queried.
      * @return isAuthorized A boolean with the response of the query.
      */
-    function isAuthorized(
-        uint128 accountId,
-        bytes32 permission,
-        address target
-    ) external view returns (bool isAuthorized);
+    function isAuthorized(uint128 accountId, bytes32 permission, address target)
+        external
+        view
+        returns (bool isAuthorized);
 
     /**
      * @notice Reverts if `target` is not authorized to `permission` for account `accountId`.
@@ -181,9 +174,5 @@ interface IAccountModule {
      * @param permission The bytes32 identifier of the permission.
      * @param target The target address whose permission is being queried.
      */
-    function onlyAuthorized(
-        uint128 accountId,
-        bytes32 permission,
-        address target
-    ) external view;
+    function onlyAuthorized(uint128 accountId, bytes32 permission, address target) external view;
 }

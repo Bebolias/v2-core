@@ -1,17 +1,17 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 /**
  * @title Module for connecting a system with other associated systems.
- * Associated systems become available to all system modules for communication and interaction, 
+ * Associated systems become available to all system modules for communication and interaction,
  * but as opposed to inter-modular communications, interactions with associated systems will require the use of `CALL`.
  *
  * Associated systems can be managed or unmanaged.
- * - Managed systems are connected via a proxy, which means that their implementation can be updated, 
- * and the system controls the execution context of the associated system. Example, 
+ * - Managed systems are connected via a proxy, which means that their implementation can be updated,
+ * and the system controls the execution context of the associated system. Example,
  * account token connected to the system, and controlled by the system.
- * - Unmanaged systems are just addresses tracked by the system, for which it has no control whatsoever. 
- * Currently, we're not using these, however may consider using for interactions with external 
+ * - Unmanaged systems are just addresses tracked by the system, for which it has no control whatsoever.
+ * Currently, we're not using these, however may consider using for interactions with external
  * instruments and exchanges (e.g. dated irs instrument).
  *
  * Furthermore, associated systems are typed in the AssociatedSystem utility library (See AssociatedSystem.sol):
@@ -36,7 +36,7 @@ interface IBaseAssociatedSystemsModule {
 
     /**
      * @notice Creates or initializes a managed associated ERC721 token.
-     * @param id The bytes32 identifier of the associated system. If the id is new to the system, 
+     * @param id The bytes32 identifier of the associated system. If the id is new to the system,
      * it will create a new proxy for the associated system.
      * @param name The token name that will be used to initialize the proxy.
      * @param symbol The token symbol that will be used to initialize the proxy.

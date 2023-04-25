@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/storage/AccountRBAC.sol";
@@ -33,7 +33,7 @@ contract ExposedAccountRBAC {
         return item.permissionAddresses.values();
     }
 
-    function checkPermissionIsValid(bytes32 permission) external pure  {
+    function checkPermissionIsValid(bytes32 permission) external pure {
         AccountRBAC.checkPermissionIsValid(permission);
     }
 
@@ -49,17 +49,13 @@ contract ExposedAccountRBAC {
         item.revokeAllPermissions(target);
     }
 
-    function hasPermission(
-        bytes32 permission,
-        address target
-    ) external view returns (bool) {
+    function hasPermission(bytes32 permission, address target) external view returns (bool) {
         return item.hasPermission(permission, target);
     }
 
     function authorized(bytes32 permission, address target) external view returns (bool) {
         return AccountRBAC.authorized(item, permission, target);
     }
-
 }
 
 contract AccountRBACTest is Test {
@@ -108,14 +104,14 @@ contract AccountRBACTest is Test {
 
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(owner);
 
-        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector, bytes32("PER123")));
         accountRBAC.authorized("PER123", target);
     }
 
     function test_Authorized_SetOwner() public {
         address firstOwner = address(1);
         address secondOwner = address(2);
-        
+
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(firstOwner);
         assertEq(accountRBAC.authorized("ADMIN", firstOwner), true);
         assertEq(accountRBAC.authorized("ADMIN", secondOwner), false);
@@ -132,13 +128,13 @@ contract AccountRBACTest is Test {
 
     function test_RevertWhen_InvalidPermission() public {
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(address(1));
-        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector, bytes32("PER123")));
         accountRBAC.checkPermissionIsValid("PER123");
     }
 
     function test_RevertWhen_HasPermission() public {
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(address(1));
-        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector, bytes32("PER123")));
         accountRBAC.hasPermission("PER123", address(2));
     }
 
@@ -164,7 +160,7 @@ contract AccountRBACTest is Test {
 
         ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(address(1));
 
-        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector, bytes32("PER123")));
         accountRBAC.grantPermission("PER123", randomAddress);
 
         vm.expectRevert(abi.encodeWithSelector(AddressError.ZeroAddress.selector));
@@ -201,7 +197,7 @@ contract AccountRBACTest is Test {
         vm.expectRevert(abi.encodeWithSelector(SetUtil.ValueNotInSet.selector));
         accountRBAC.revokePermission("ADMIN", randomAddress);
 
-        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector, bytes32("PER123")));
         accountRBAC.revokePermission("PER123", randomAddress2);
     }
 
@@ -229,6 +225,5 @@ contract AccountRBACTest is Test {
         permissionAddresses = accountRBAC.getPermissionAddresses();
         assertEq(permissionAddresses.length, 1);
         assertEq(permissionAddresses[0], randomAddress2);
-
     }
 }

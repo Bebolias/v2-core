@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../interfaces/ICollateralModule.sol";
 import "../storage/Account.sol";
@@ -29,10 +29,11 @@ contract CollateralModule is ICollateralModule {
         address self = address(this);
 
         uint256 actualTokenAmount = tokenAmount;
-        
+
         uint256 liquidationBooster = CollateralConfiguration.load(collateralType).liquidationBooster;
         if (account.collaterals[collateralType].liquidationBoosterBalance < liquidationBooster) {
-            uint256 liquidationBoosterTopUp = liquidationBooster - account.collaterals[collateralType].liquidationBoosterBalance;
+            uint256 liquidationBoosterTopUp =
+                liquidationBooster - account.collaterals[collateralType].liquidationBoosterBalance;
             actualTokenAmount += liquidationBoosterTopUp;
             account.collaterals[collateralType].increaseLiquidationBoosterBalance(liquidationBoosterTopUp);
         }
@@ -45,7 +46,9 @@ contract CollateralModule is ICollateralModule {
         uint256 currentBalance = IERC20(collateralType).balanceOf(self);
         uint256 collateralCap = CollateralConfiguration.load(collateralType).cap;
         if (collateralCap < currentBalance + actualTokenAmount) {
-            revert CollateralCapExceeded(collateralType, collateralCap, currentBalance, tokenAmount, actualTokenAmount - tokenAmount);
+            revert CollateralCapExceeded(
+                collateralType, collateralCap, currentBalance, tokenAmount, actualTokenAmount - tokenAmount
+            );
         }
 
         collateralType.safeTransferFrom(depositFrom, self, actualTokenAmount);
@@ -57,16 +60,15 @@ contract CollateralModule is ICollateralModule {
      * @inheritdoc ICollateralModule
      */
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external override {
-        Account.Data storage account = Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+        Account.Data storage account =
+            Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
 
         if (tokenAmount > account.collaterals[collateralType].balance) {
             account.collaterals[collateralType].decreaseLiquidationBoosterBalance(
                 tokenAmount - account.collaterals[collateralType].balance
             );
 
-            account.collaterals[collateralType].decreaseCollateralBalance(
-                account.collaterals[collateralType].balance
-            );
+            account.collaterals[collateralType].decreaseCollateralBalance(account.collaterals[collateralType].balance);
         } else {
             account.collaterals[collateralType].decreaseCollateralBalance(tokenAmount);
         }
@@ -81,10 +83,7 @@ contract CollateralModule is ICollateralModule {
     /**
      * @inheritdoc ICollateralModule
      */
-    function getAccountCollateralBalance(
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountCollateralBalance(uint128 accountId, address collateralType)
         external
         view
         override
@@ -96,10 +95,7 @@ contract CollateralModule is ICollateralModule {
     /**
      * @inheritdoc ICollateralModule
      */
-    function getAccountCollateralBalanceAvailable(
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
         external
         override
         returns (uint256 collateralBalanceAvailable)
@@ -110,10 +106,7 @@ contract CollateralModule is ICollateralModule {
     /**
      * @inheritdoc ICollateralModule
      */
-    function getAccountLiquidationBoosterBalance(
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountLiquidationBoosterBalance(uint128 accountId, address collateralType)
         external
         view
         override
@@ -125,8 +118,11 @@ contract CollateralModule is ICollateralModule {
     /**
      * @inheritdoc ICollateralModule
      */
-    function getTotalAccountValue(uint128 accountId, address collateralType) 
-        external view override returns (int256 totalAccountValue) 
+    function getTotalAccountValue(uint128 accountId, address collateralType)
+        external
+        view
+        override
+        returns (int256 totalAccountValue)
     {
         return Account.load(accountId).getTotalAccountValue(collateralType);
     }

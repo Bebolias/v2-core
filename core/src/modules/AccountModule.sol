@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../interfaces/IAccountTokenModule.sol";
 import "../interfaces/IAccountModule.sol";
@@ -29,9 +29,11 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function getAccountPermissions(
-        uint128 accountId
-    ) external view returns (AccountPermissions[] memory accountPerms) {
+    function getAccountPermissions(uint128 accountId)
+        external
+        view
+        returns (AccountPermissions[] memory accountPerms)
+    {
         AccountRBAC.Data storage accountRbac = Account.load(accountId).rbac;
 
         uint256 allPermissionsLength = accountRbac.permissionAddresses.length();
@@ -68,11 +70,7 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function hasPermission(
-        uint128 accountId,
-        bytes32 permission,
-        address user
-    ) public view override returns (bool) {
+    function hasPermission(uint128 accountId, bytes32 permission, address user) public view override returns (bool) {
         return Account.load(accountId).rbac.hasPermission(permission, user);
     }
 
@@ -93,11 +91,7 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function onlyAuthorized(
-        uint128 accountId,
-        bytes32 permission,
-        address target
-    ) public view override {
+    function onlyAuthorized(uint128 accountId, bytes32 permission, address target) public view override {
         if (!isAuthorized(accountId, permission, target)) {
             revert PermissionNotGranted(accountId, AccountRBAC._ADMIN_PERMISSION, target);
         }
@@ -106,15 +100,8 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function grantPermission(
-        uint128 accountId,
-        bytes32 permission,
-        address user
-    ) external override {
-        Account.Data storage account = Account.loadAccountAndValidateOwnership(
-            accountId,
-            msg.sender
-        );
+    function grantPermission(uint128 accountId, bytes32 permission, address user) external override {
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, msg.sender);
 
         account.rbac.grantPermission(permission, user);
 
@@ -124,15 +111,8 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function revokePermission(
-        uint128 accountId,
-        bytes32 permission,
-        address user
-    ) external override {
-        Account.Data storage account = Account.loadAccountAndValidateOwnership(
-            accountId,
-            msg.sender
-        );
+    function revokePermission(uint128 accountId, bytes32 permission, address user) external override {
+        Account.Data storage account = Account.loadAccountAndValidateOwnership(accountId, msg.sender);
 
         account.rbac.revokePermission(permission, user);
 

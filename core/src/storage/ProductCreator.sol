@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "./Product.sol";
 
@@ -41,7 +41,10 @@ library ProductCreator {
      * tracks, resulting in multiple ids for the same address.
      * For example if a given Product works across maturities, each maturity internally will be represented as a unique Product id
      */
-    function create(address productAddress, string memory name, address owner) internal returns (Product.Data storage product) {
+    function create(address productAddress, string memory name, address owner)
+        internal
+        returns (Product.Data storage product)
+    {
         Data storage productStore = getProductStore();
 
         uint128 id = productStore.lastCreatedProductId;

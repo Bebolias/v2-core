@@ -1538,6 +1538,8 @@ __metadata:
     "@semantic-release/git": ^10.0.1
     "@semantic-release/github": ^8.0.7
     "@usecannon/cli": ^2.1.7
+    "@voltz-protocol/core": "workspace:^"
+    "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
     lcov-badge-generator: 1.0.5
@@ -1547,7 +1549,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@voltz-protocol/products-dated-irs@workspace:products/dated-irs":
+"@voltz-protocol/products-dated-irs@workspace:^, @voltz-protocol/products-dated-irs@workspace:products/dated-irs":
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/products-dated-irs@workspace:products/dated-irs"
   dependencies:

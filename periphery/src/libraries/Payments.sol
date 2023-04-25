@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "./Constants.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC20.sol";
+import "../storage/Config.sol";
 
 /**
  * @title Performs various operations around the payment of eth and tokens
@@ -20,7 +21,7 @@ library Payments {
                 value = IERC20(token).balanceOf(address(this));
             }
 
-            ERC20(token).safeTransfer(recipient, value);
+            IERC20(token).safeTransfer(recipient, value);
         }
     }
 
@@ -34,9 +35,9 @@ library Payments {
             revert InsufficientETH();
         }
         if (amount > 0) {
-            WETH9.deposit{value: amount}();
+            Config.load().WETH9.deposit{value: amount}();
             if (recipient != address(this)) {
-                WETH9.transfer(recipient, amount);
+                Config.load().WETH9.transfer(recipient, amount);
             }
         }
     }
@@ -45,12 +46,12 @@ library Payments {
     /// @param recipient The recipient of the ETH
     /// @param amountMinimum The minimum amount of ETH desired
     function unwrapWETH9(address recipient, uint256 amountMinimum) internal {
-        uint256 value = WETH9.balanceOf(address(this));
+        uint256 value = Config.load().WETH9.balanceOf(address(this));
         if (value < amountMinimum) {
             revert InsufficientETH();
         }
         if (value > 0) {
-            WETH9.withdraw(value);
+            Config.load().WETH9.withdraw(value);
             if (recipient != address(this)) {
                 recipient.safeTransferETH(value);
             }

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/modules/RiskConfigurationModule.sol";
 import "../test-utils/Constants.sol";
 
-import { SD59x18 } from "@prb/math/SD59x18.sol";
-import { UD60x18 } from "@prb/math/UD60x18.sol";
+import {SD59x18} from "@prb/math/SD59x18.sol";
+import {UD60x18} from "@prb/math/UD60x18.sol";
 
 contract RiskConfigurationModuleTest is Test {
     event MarketRiskConfigured(MarketRiskConfiguration.Data config);
@@ -18,13 +18,16 @@ contract RiskConfigurationModuleTest is Test {
     function setUp() public {
         riskConfigurationModule = new RiskConfigurationModule();
 
-        vm.store(address(riskConfigurationModule), keccak256(abi.encode("xyz.voltz.OwnableStorage")), bytes32(abi.encode(owner)));
+        vm.store(
+            address(riskConfigurationModule),
+            keccak256(abi.encode("xyz.voltz.OwnableStorage")),
+            bytes32(abi.encode(owner))
+        );
     }
 
     function test_ConfigureMarketRisk() public {
-        MarketRiskConfiguration.Data memory config = MarketRiskConfiguration.Data({
-            productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e16)
-        });
+        MarketRiskConfiguration.Data memory config =
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e16)});
 
         // Expect MarketRiskConfigured event
         vm.expectEmit(true, true, true, true, address(riskConfigurationModule));
@@ -43,9 +46,8 @@ contract RiskConfigurationModuleTest is Test {
     function testFuzz_RevertWhen_ConfigureMarketRisk_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
-        MarketRiskConfiguration.Data memory config = MarketRiskConfiguration.Data({
-            productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e16)
-        });
+        MarketRiskConfiguration.Data memory config =
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e16)});
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
         vm.prank(otherAddress);
@@ -54,14 +56,14 @@ contract RiskConfigurationModuleTest is Test {
 
     function test_GetMarketRiskConfiguration() public {
         vm.prank(owner);
-        riskConfigurationModule.configureMarketRisk(MarketRiskConfiguration.Data({
-            productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e16)
-        }));
+        riskConfigurationModule.configureMarketRisk(
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e16)})
+        );
 
         vm.prank(owner);
-        riskConfigurationModule.configureMarketRisk(MarketRiskConfiguration.Data({
-            productId: 2, marketId: 20, riskParameter: SD59x18.wrap(2e16)
-        }));
+        riskConfigurationModule.configureMarketRisk(
+            MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: SD59x18.wrap(2e16)})
+        );
 
         MarketRiskConfiguration.Data memory existingConfig = riskConfigurationModule.getMarketRiskConfiguration(2, 20);
 
@@ -79,8 +81,10 @@ contract RiskConfigurationModuleTest is Test {
     }
 
     function test_ConfigureProtocolRisk() public {
-        ProtocolRiskConfiguration.Data memory config =
-            ProtocolRiskConfiguration.Data({imMultiplier: UD60x18.wrap(2e18), liquidatorRewardParameter: UD60x18.wrap(5e16)});
+        ProtocolRiskConfiguration.Data memory config = ProtocolRiskConfiguration.Data({
+            imMultiplier: UD60x18.wrap(2e18),
+            liquidatorRewardParameter: UD60x18.wrap(5e16)
+        });
 
         // Expect ProtocolRiskConfigured event
         vm.expectEmit(true, true, true, true, address(riskConfigurationModule));
@@ -92,14 +96,18 @@ contract RiskConfigurationModuleTest is Test {
         ProtocolRiskConfiguration.Data memory existingConfig = riskConfigurationModule.getProtocolRiskConfiguration();
 
         assertEq(UD60x18.unwrap(existingConfig.imMultiplier), UD60x18.unwrap(config.imMultiplier));
-        assertEq(UD60x18.unwrap(existingConfig.liquidatorRewardParameter), UD60x18.unwrap(config.liquidatorRewardParameter));
+        assertEq(
+            UD60x18.unwrap(existingConfig.liquidatorRewardParameter), UD60x18.unwrap(config.liquidatorRewardParameter)
+        );
     }
 
     function testFuzz_RevertWhen_ConfigureProtocolRisk_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
-        ProtocolRiskConfiguration.Data memory config =
-            ProtocolRiskConfiguration.Data({imMultiplier: UD60x18.wrap(2e18), liquidatorRewardParameter: UD60x18.wrap(5e16)});
+        ProtocolRiskConfiguration.Data memory config = ProtocolRiskConfiguration.Data({
+            imMultiplier: UD60x18.wrap(2e18),
+            liquidatorRewardParameter: UD60x18.wrap(5e16)
+        });
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
         vm.prank(otherAddress);
@@ -109,12 +117,18 @@ contract RiskConfigurationModuleTest is Test {
     function test_GetProtocolRiskConfiguration() public {
         vm.prank(owner);
         riskConfigurationModule.configureProtocolRisk(
-            ProtocolRiskConfiguration.Data({imMultiplier: UD60x18.wrap(2e18), liquidatorRewardParameter: UD60x18.wrap(5e16)})
+            ProtocolRiskConfiguration.Data({
+                imMultiplier: UD60x18.wrap(2e18),
+                liquidatorRewardParameter: UD60x18.wrap(5e16)
+            })
         );
 
         vm.prank(owner);
         riskConfigurationModule.configureProtocolRisk(
-            ProtocolRiskConfiguration.Data({imMultiplier: UD60x18.wrap(4e18), liquidatorRewardParameter: UD60x18.wrap(10e16)})
+            ProtocolRiskConfiguration.Data({
+                imMultiplier: UD60x18.wrap(4e18),
+                liquidatorRewardParameter: UD60x18.wrap(10e16)
+            })
         );
 
         ProtocolRiskConfiguration.Data memory existingConfig = riskConfigurationModule.getProtocolRiskConfiguration();

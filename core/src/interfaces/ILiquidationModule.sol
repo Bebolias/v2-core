@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 /**
  * @title Liquidation Engine interface
@@ -55,11 +55,7 @@ interface ILiquidationModule {
      * @param liquidatorAccountId Account id that will receive the rewards from the liquidation.
      * @return liquidatorRewardAmount Liquidator reward amount in terms of the account's settlement token
      */
-    function liquidate(
-        uint128 liquidatedAccountId,
-        uint128 liquidatorAccountId,
-        address collateralType
-    )
+    function liquidate(uint128 liquidatedAccountId, uint128 liquidatorAccountId, address collateralType)
         external
         returns (uint256 liquidatorRewardAmount);
 }

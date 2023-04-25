@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 /**
  * @title ERC721 extension that allows contracts to receive tokens with `safeTransferFrom`.
@@ -14,5 +14,7 @@ interface IERC721Receiver {
      * @param data Optional additional data that may be passed by the operator, and could be used by the implementing contract.
      * @return The selector of this function (IERC721Receiver.onERC721Received.selector). Caller will revert if not returned.
      */
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes memory data) external returns (bytes4);
+    function onERC721Received(address operator, address from, uint256 tokenId, bytes memory data)
+        external
+        returns (bytes4);
 }

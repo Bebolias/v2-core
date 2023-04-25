@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 /**
  * @title Module for managing user collateral.
@@ -12,13 +12,13 @@ interface ICollateralModule {
      * @param collateralCap The cap limit of the collateral
      * @param currentBalance Protocol's total balance in the collateral type
      * @param tokenAmount The token amount of the unsuccessful deposit
-     * @param liquidationBoosterDeposit The amount paid towards the liquidation booster 
+     * @param liquidationBoosterDeposit The amount paid towards the liquidation booster
      * (up to ConfigurationConfiguration.liquidationBooster)
      */
     error CollateralCapExceeded(
-        address collateralType, 
-        uint256 collateralCap, 
-        uint256 currentBalance, 
+        address collateralType,
+        uint256 collateralCap,
+        uint256 currentBalance,
         uint256 tokenAmount,
         uint256 liquidationBoosterDeposit
     );
@@ -28,13 +28,13 @@ interface ICollateralModule {
      * @param accountId The id of the account that deposited collateral.
      * @param collateralType The address of the collateral that was deposited.
      * @param tokenAmount The amount of collateral that was deposited, denominated in the token's native decimal representation.
-     * @param liquidationBoosterDeposit The amount paid towards the liquidation booster 
+     * @param liquidationBoosterDeposit The amount paid towards the liquidation booster
      * (up to ConfigurationConfiguration.liquidationBooster)
      * @param sender The address of the account that triggered the deposit.
      */
     event Deposited(
-        uint128 indexed accountId, 
-        address indexed collateralType, 
+        uint128 indexed accountId,
+        address indexed collateralType,
         uint256 tokenAmount,
         uint256 liquidationBoosterDeposit,
         address indexed sender
@@ -47,19 +47,18 @@ interface ICollateralModule {
      * @param tokenAmount The amount of collateral that was withdrawn, denominated in the token's native decimal representation.
      * @param sender The address of the account that triggered the withdrawal.
      */
-    event Withdrawn(uint128 indexed accountId, address indexed collateralType, uint256 tokenAmount, address indexed sender);
+    event Withdrawn(
+        uint128 indexed accountId, address indexed collateralType, uint256 tokenAmount, address indexed sender
+    );
 
     /**
      * @notice Returns the total balance pertaining to account `accountId` for `collateralType`.
      * @param accountId The id of the account whose collateral is being queried.
      * @param collateralType The address of the collateral type whose amount is being queried.
-     * @return collateralBalance The total collateral deposited in the account, denominated in 
+     * @return collateralBalance The total collateral deposited in the account, denominated in
      * the token's native decimal representation.
      */
-    function getAccountCollateralBalance(
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountCollateralBalance(uint128 accountId, address collateralType)
         external
         view
         returns (uint256 collateralBalance);
@@ -68,22 +67,21 @@ interface ICollateralModule {
      * @notice Returns the amount of collateral of type `collateralType` deposited with account `accountId` that can be withdrawn
      * @param accountId The id of the account whose collateral is being queried.
      * @param collateralType The address of the collateral type whose amount is being queried.
-     * @return amount The amount of collateral that is available for withdrawal (difference between balance and IM), denominated 
+     * @return amount The amount of collateral that is available for withdrawal (difference between balance and IM), denominated
      * in the token's native decimal representation.
      */
-    function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType) external returns (uint256 amount);
+    function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
+        external
+        returns (uint256 amount);
 
     /**
      * @notice Returns the total liquidation booster pertaining to account `accountId` for `collateralType`.
      * @param accountId The id of the account whose collateral is being queried.
      * @param collateralType The address of the collateral type whose amount is being queried.
-     * @return liquidationBoosterBalance The total liquidation booster deposited in the account, denominated 
+     * @return liquidationBoosterBalance The total liquidation booster deposited in the account, denominated
      * in the token's native decimal representation.
      */
-    function getAccountLiquidationBoosterBalance(
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountLiquidationBoosterBalance(uint128 accountId, address collateralType)
         external
         view
         returns (uint256 liquidationBoosterBalance);
@@ -92,10 +90,13 @@ interface ICollateralModule {
      * @notice Returns the total account value pertaining to account `accountId` in terms of the quote token of the (single token)
      * account
      * @param accountId The id of the account whose total account value is being queried.
-     * @return totalAccountValue The total account value in terms of the quote token of the account, denominated in 
+     * @return totalAccountValue The total account value in terms of the quote token of the account, denominated in
      * the token's native decimal representation.
      */
-    function getTotalAccountValue(uint128 accountId, address collateralType) external view returns (int256 totalAccountValue);
+    function getTotalAccountValue(uint128 accountId, address collateralType)
+        external
+        view
+        returns (int256 totalAccountValue);
 
     /**
      * @notice Deposits `tokenAmount` of collateral of type `collateralType` into account `accountId`.

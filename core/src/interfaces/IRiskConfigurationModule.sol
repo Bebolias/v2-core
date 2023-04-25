@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../storage/MarketRiskConfiguration.sol";
 import "../storage/ProtocolRiskConfiguration.sol";
@@ -53,10 +53,7 @@ interface IRiskConfigurationModule {
      * @param marketId Id that uniquely identifies the market (e.g. aUSDC lend) for which we want to query the risk config
      * @return config The configuration object describing the given productId and marketId pair
      */
-    function getMarketRiskConfiguration(
-        uint128 productId,
-        uint128 marketId
-    )
+    function getMarketRiskConfiguration(uint128 productId, uint128 marketId)
         external
         pure
         returns (MarketRiskConfiguration.Data memory config);

@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../storage/Account.sol";
 import "../storage/ProtocolRiskConfiguration.sol";
@@ -9,7 +9,7 @@ import "../interfaces/ILiquidationModule.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "../storage/Collateral.sol";
 
-import { mulUDxUint } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
+import {mulUDxUint} from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
 /**
  * @title Module for liquidated accounts
@@ -24,9 +24,12 @@ contract LiquidationModule is ILiquidationModule {
     using SafeCastI256 for int256;
     using Collateral for Collateral.Data;
 
-    function extractLiquidatorReward(uint128 liquidatedAccountId, address collateralType, uint256 imPreClose, uint256 imPostClose) 
-        internal returns (uint256 liquidatorRewardAmount) 
-    {
+    function extractLiquidatorReward(
+        uint128 liquidatedAccountId,
+        address collateralType,
+        uint256 imPreClose,
+        uint256 imPostClose
+    ) internal returns (uint256 liquidatorRewardAmount) {
         Account.Data storage account = Account.load(liquidatedAccountId);
 
         UD60x18 liquidatorRewardParameter = ProtocolRiskConfiguration.load().liquidatorRewardParameter;
@@ -48,11 +51,7 @@ contract LiquidationModule is ILiquidationModule {
     /**
      * @inheritdoc ILiquidationModule
      */
-    function liquidate(
-        uint128 liquidatedAccountId,
-        uint128 liquidatorAccountId,
-        address collateralType
-    )
+    function liquidate(uint128 liquidatedAccountId, uint128 liquidatorAccountId, address collateralType)
         external
         returns (uint256 liquidatorRewardAmount)
     {

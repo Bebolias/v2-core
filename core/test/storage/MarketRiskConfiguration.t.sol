@@ -1,17 +1,14 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/storage/MarketRiskConfiguration.sol";
 
-import { SD59x18 } from "@prb/math/SD59x18.sol";
+import {SD59x18} from "@prb/math/SD59x18.sol";
 
 contract ExposedMarketRiskConfiguration {
     // Mock support
-    function getMarketRiskConfiguration(
-        uint128 productId,
-        uint128 marketId
-    )
+    function getMarketRiskConfiguration(uint128 productId, uint128 marketId)
         external
         pure
         returns (MarketRiskConfiguration.Data memory)
@@ -45,7 +42,9 @@ contract MarketRiskConfigurationTest is Test {
     }
 
     function test_Set() public {
-        marketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18)}));
+        marketRiskConfiguration.set(
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18)})
+        );
 
         MarketRiskConfiguration.Data memory data = marketRiskConfiguration.getMarketRiskConfiguration(1, 10);
 
@@ -55,9 +54,13 @@ contract MarketRiskConfigurationTest is Test {
     }
 
     function test_Set_Twice() public {
-        marketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18)}));
+        marketRiskConfiguration.set(
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18)})
+        );
 
-        marketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(2e18)}));
+        marketRiskConfiguration.set(
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(2e18)})
+        );
 
         MarketRiskConfiguration.Data memory data = marketRiskConfiguration.getMarketRiskConfiguration(1, 10);
 
@@ -67,9 +70,13 @@ contract MarketRiskConfigurationTest is Test {
     }
 
     function test_Set_MoreConfigurations() public {
-        marketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18)}));
+        marketRiskConfiguration.set(
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18)})
+        );
 
-        marketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: SD59x18.wrap(2e18)}));
+        marketRiskConfiguration.set(
+            MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: SD59x18.wrap(2e18)})
+        );
 
         {
             MarketRiskConfiguration.Data memory data = marketRiskConfiguration.getMarketRiskConfiguration(1, 10);

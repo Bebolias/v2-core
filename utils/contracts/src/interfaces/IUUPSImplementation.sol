@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 /**
  * @title Contract to be used as the implementation of a Universal Upgradeable Proxy Standard (UUPS) proxy.
  *

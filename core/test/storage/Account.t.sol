@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/storage/Account.sol";
 import "../test-utils/MockCoreStorage.sol";
 
-import { SD59x18 } from "@prb/math/SD59x18.sol";
+import {SD59x18} from "@prb/math/SD59x18.sol";
 
 contract ExposedAccounts is CoreState {
     using Account for Account.Data;
@@ -41,19 +41,17 @@ contract ExposedAccounts is CoreState {
         return account.getCollateralBalanceAvailable(collateralType);
     }
 
-    function loadAccountAndValidateOwnership(uint128 id, address senderAddress) 
-        external view 
-        returns (bytes32 s) 
-    {
+    function loadAccountAndValidateOwnership(uint128 id, address senderAddress) external view returns (bytes32 s) {
         Account.Data storage account = Account.loadAccountAndValidateOwnership(id, senderAddress);
         assembly {
             s := account.slot
         }
     }
 
-    function loadAccountAndValidatePermission(uint128 id, bytes32 permission, address senderAddress) 
-        external view 
-        returns (bytes32 s) 
+    function loadAccountAndValidatePermission(uint128 id, bytes32 permission, address senderAddress)
+        external
+        view
+        returns (bytes32 s)
     {
         Account.Data storage account = Account.loadAccountAndValidatePermission(id, permission, senderAddress);
         assembly {
@@ -61,8 +59,9 @@ contract ExposedAccounts is CoreState {
         }
     }
 
-    function getAnnualizedProductExposures(uint128 id, uint128 productId, address collateralType) 
-        external returns (Account.Exposure[] memory) 
+    function getAnnualizedProductExposures(uint128 id, uint128 productId, address collateralType)
+        external
+        returns (Account.Exposure[] memory)
     {
         Account.Data storage account = Account.load(id);
         return account.getAnnualizedProductExposures(productId, collateralType);
@@ -138,9 +137,14 @@ contract AccountTest is Test {
         if (high) balance = HIGH_COLLATERAL;
 
         // Set up the balance of token 0
-        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({
-            token: Constants.TOKEN_0, balance: balance, liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER
-        }));
+        accounts.changeAccountBalance(
+            accountId,
+            MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_0,
+                balance: balance,
+                liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER
+            })
+        );
     }
 
     function test_Exists() public {
@@ -204,7 +208,8 @@ contract AccountTest is Test {
 
     function test_LoadAccountAndValidatePermission() public {
         vm.prank(Constants.ALICE);
-        bytes32 slot = accounts.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, Constants.ALICE);
+        bytes32 slot =
+            accounts.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, Constants.ALICE);
 
         assertEq(slot, accountSlot);
     }
@@ -215,7 +220,7 @@ contract AccountTest is Test {
         vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, accountId, randomUser));
         accounts.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, randomUser);
 
-        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector,bytes32("PER123")));
+        vm.expectRevert(abi.encodeWithSelector(AccountRBAC.InvalidPermission.selector, bytes32("PER123")));
         accounts.loadAccountAndValidatePermission(accountId, bytes32("PER123"), Constants.ALICE);
     }
 
@@ -347,14 +352,23 @@ contract AccountTest is Test {
     }
 
     function test_GetLiquidationBoosterBalance() public {
-        assertEq(accounts.getLiquidationBoosterBalance(accountId, Constants.TOKEN_0), Constants.TOKEN_0_LIQUIDATION_BOOSTER);
-        assertEq(accounts.getLiquidationBoosterBalance(accountId, Constants.TOKEN_1), Constants.TOKEN_1_LIQUIDATION_BOOSTER);
+        assertEq(
+            accounts.getLiquidationBoosterBalance(accountId, Constants.TOKEN_0), Constants.TOKEN_0_LIQUIDATION_BOOSTER
+        );
+        assertEq(
+            accounts.getLiquidationBoosterBalance(accountId, Constants.TOKEN_1), Constants.TOKEN_1_LIQUIDATION_BOOSTER
+        );
     }
 
     function testFuzz_GetCollateralBalanceAvailable_NoSettlementToken() public {
-        accounts.changeAccountBalance(accountId, MockAccountStorage.CollateralBalance({
-            token: Constants.TOKEN_UNKNOWN, balance: 1e18, liquidationBoosterBalance: 0
-        }));
+        accounts.changeAccountBalance(
+            accountId,
+            MockAccountStorage.CollateralBalance({
+                token: Constants.TOKEN_UNKNOWN,
+                balance: 1e18,
+                liquidationBoosterBalance: 0
+            })
+        );
 
         uint256 collateralBalanceAvailable = accounts.getCollateralBalanceAvailable(accountId, Constants.TOKEN_UNKNOWN);
 

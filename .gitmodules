@@ -31,3 +31,6 @@
 [submodule "periphery/lib/openzeppelin-contracts"]
 	path = periphery/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "periphery/lib/prb-math"]
+	path = periphery/lib/prb-math
+	url = https://github.com/PaulRBerg/prb-math

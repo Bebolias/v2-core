@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "./MockAccountStorage.sol";
 import "./MockProductStorage.sol";
@@ -12,10 +12,10 @@ import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
 import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 
-import { UD60x18 } from "@prb/math/UD60x18.sol";
-import { SD59x18 } from "@prb/math/SD59x18.sol";
+import {UD60x18} from "@prb/math/UD60x18.sol";
+import {SD59x18} from "@prb/math/SD59x18.sol";
 
-contract MockCoreStorage is MockAccountStorage, MockProductStorage { }
+contract MockCoreStorage is MockAccountStorage, MockProductStorage {}
 
 /**
  * @dev Core storage mocks for accounts and products
@@ -85,7 +85,7 @@ contract MockCoreStorage is MockAccountStorage, MockProductStorage { }
  *              - unfilled long: 0
  *              - unfilled short: 0
  *
- *          - margin requirements: 
+ *          - margin requirements:
  *              - TOKEN_0: (im, 1800), (lm, 900)
  *              - TOKEN_0: (im, 3), (lm, 1)
  *
@@ -97,17 +97,17 @@ contract MockCoreStorage is MockAccountStorage, MockProductStorage { }
  *        - im multiplier: 2
  *        - liquidator reward: 0.05
  * @dev Protocol Fee configurations:
- *        - (productId: 1, marketId: 10):   
+ *        - (productId: 1, marketId: 10):
  *          - feeCollectorAccountId: 999
  *          - atomicMakerFee: 0.01
  *          - atomicTakerFee: 0.05
  *
- *        - (productId: 1, marketId: 11):      
+ *        - (productId: 1, marketId: 11):
  *          - feeCollectorAccountId: 999
  *          - atomicMakerFee: 0.02
  *          - atomicTakerFee: 0.04
  *
- *        - (productId: 2, marketId: 20):  
+ *        - (productId: 2, marketId: 20):
  *          - feeCollectorAccountId: 999
  *          - atomicMakerFee: 0.04
  *          - atomicTakerFee: 0.02
@@ -128,23 +128,30 @@ contract CoreState is MockCoreStorage, Ownable {
         permissionedAddresses.add(Constants.PRODUCT_CREATOR);
 
         // Set protocol risk configuration
-        ProtocolRiskConfiguration.set(ProtocolRiskConfiguration.Data({
-            imMultiplier: UD60x18.wrap(2e18), liquidatorRewardParameter: UD60x18.wrap(5e16)
-        }));
+        ProtocolRiskConfiguration.set(
+            ProtocolRiskConfiguration.Data({
+                imMultiplier: UD60x18.wrap(2e18),
+                liquidatorRewardParameter: UD60x18.wrap(5e16)
+            })
+        );
 
         // Mock collateral configuration (token 0)
         CollateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: true, liquidationBooster: Constants.TOKEN_0_LIQUIDATION_BOOSTER, 
-                tokenAddress: Constants.TOKEN_0, cap: Constants.TOKEN_0_CAP
+                depositingEnabled: true,
+                liquidationBooster: Constants.TOKEN_0_LIQUIDATION_BOOSTER,
+                tokenAddress: Constants.TOKEN_0,
+                cap: Constants.TOKEN_0_CAP
             })
         );
 
         // Mock collateral configuration (token 1)
         CollateralConfiguration.set(
             CollateralConfiguration.Data({
-                depositingEnabled: false, liquidationBooster: Constants.TOKEN_1_LIQUIDATION_BOOSTER, 
-                tokenAddress: Constants.TOKEN_1, cap: Constants.TOKEN_1_CAP
+                depositingEnabled: false,
+                liquidationBooster: Constants.TOKEN_1_LIQUIDATION_BOOSTER,
+                tokenAddress: Constants.TOKEN_1,
+                cap: Constants.TOKEN_1_CAP
             })
         );
 
@@ -166,11 +173,13 @@ contract CoreState is MockCoreStorage, Ownable {
         {
             CollateralBalance[] memory balances = new CollateralBalance[](2);
             balances[0] = CollateralBalance({
-                token: Constants.TOKEN_0, balance: Constants.DEFAULT_TOKEN_0_BALANCE, 
+                token: Constants.TOKEN_0,
+                balance: Constants.DEFAULT_TOKEN_0_BALANCE,
                 liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER
             });
             balances[1] = CollateralBalance({
-                token: Constants.TOKEN_1, balance: Constants.DEFAULT_TOKEN_1_BALANCE, 
+                token: Constants.TOKEN_1,
+                balance: Constants.DEFAULT_TOKEN_1_BALANCE,
                 liquidationBoosterBalance: Constants.TOKEN_1_LIQUIDATION_BOOSTER
             });
 
@@ -185,11 +194,13 @@ contract CoreState is MockCoreStorage, Ownable {
         {
             CollateralBalance[] memory balances = new CollateralBalance[](2);
             balances[0] = CollateralBalance({
-                token: Constants.TOKEN_0, balance: Constants.DEFAULT_TOKEN_0_BALANCE, 
+                token: Constants.TOKEN_0,
+                balance: Constants.DEFAULT_TOKEN_0_BALANCE,
                 liquidationBoosterBalance: Constants.TOKEN_0_LIQUIDATION_BOOSTER
             });
             balances[1] = CollateralBalance({
-                token: Constants.TOKEN_1, balance: Constants.DEFAULT_TOKEN_1_BALANCE, 
+                token: Constants.TOKEN_1,
+                balance: Constants.DEFAULT_TOKEN_1_BALANCE,
                 liquidationBoosterBalance: Constants.TOKEN_1_LIQUIDATION_BOOSTER
             });
 
@@ -208,29 +219,44 @@ contract CoreState is MockCoreStorage, Ownable {
         mockAliceCalls();
 
         // Set market risk configuration
-        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({
-            productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18)
-        }));
-        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({
-            productId: 1, marketId: 11, riskParameter: SD59x18.wrap(1e18)
-        }));
-        MarketRiskConfiguration.set(MarketRiskConfiguration.Data({
-            productId: 2, marketId: 20, riskParameter: SD59x18.wrap(1e18)
-        }));
+        MarketRiskConfiguration.set(
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18)})
+        );
+        MarketRiskConfiguration.set(
+            MarketRiskConfiguration.Data({productId: 1, marketId: 11, riskParameter: SD59x18.wrap(1e18)})
+        );
+        MarketRiskConfiguration.set(
+            MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: SD59x18.wrap(1e18)})
+        );
 
         // Set market fee configuration
-        MarketFeeConfiguration.set(MarketFeeConfiguration.Data({
-            productId: 1, marketId: 10, feeCollectorAccountId: 999, 
-            atomicMakerFee: UD60x18.wrap(1e16), atomicTakerFee: UD60x18.wrap(5e16)
-        }));
-        MarketFeeConfiguration.set(MarketFeeConfiguration.Data({
-            productId: 1, marketId: 11, feeCollectorAccountId: 999, 
-            atomicMakerFee: UD60x18.wrap(2e16), atomicTakerFee: UD60x18.wrap(4e16)
-        }));
-        MarketFeeConfiguration.set(MarketFeeConfiguration.Data({
-            productId: 2, marketId: 20, feeCollectorAccountId: 999, 
-            atomicMakerFee: UD60x18.wrap(4e16), atomicTakerFee: UD60x18.wrap(2e16)
-        }));
+        MarketFeeConfiguration.set(
+            MarketFeeConfiguration.Data({
+                productId: 1,
+                marketId: 10,
+                feeCollectorAccountId: 999,
+                atomicMakerFee: UD60x18.wrap(1e16),
+                atomicTakerFee: UD60x18.wrap(5e16)
+            })
+        );
+        MarketFeeConfiguration.set(
+            MarketFeeConfiguration.Data({
+                productId: 1,
+                marketId: 11,
+                feeCollectorAccountId: 999,
+                atomicMakerFee: UD60x18.wrap(2e16),
+                atomicTakerFee: UD60x18.wrap(4e16)
+            })
+        );
+        MarketFeeConfiguration.set(
+            MarketFeeConfiguration.Data({
+                productId: 2,
+                marketId: 20,
+                feeCollectorAccountId: 999,
+                atomicMakerFee: UD60x18.wrap(4e16),
+                atomicTakerFee: UD60x18.wrap(2e16)
+            })
+        );
 
         // todo: test single account single-token mode
         // Set market risk configuration
@@ -246,8 +272,10 @@ contract CoreState is MockCoreStorage, Ownable {
         {
             Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
 
-            mockExposures[0] = Account.Exposure({marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: 200e18});
-            mockExposures[1] = Account.Exposure({marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: 400e18});
+            mockExposures[0] =
+                Account.Exposure({marketId: 10, filled: 100e18, unfilledLong: 200e18, unfilledShort: 200e18});
+            mockExposures[1] =
+                Account.Exposure({marketId: 11, filled: 200e18, unfilledLong: 300e18, unfilledShort: 400e18});
 
             products[0].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
 
@@ -267,7 +295,8 @@ contract CoreState is MockCoreStorage, Ownable {
         {
             Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
 
-            mockExposures[0] = Account.Exposure({marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: 150e18});
+            mockExposures[0] =
+                Account.Exposure({marketId: 20, filled: -50e18, unfilledLong: 150e18, unfilledShort: 150e18});
 
             products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
 

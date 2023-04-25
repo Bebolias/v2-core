@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
 import "../../storage/Account.sol";
@@ -10,7 +10,10 @@ interface IProduct is IERC165 {
     function name() external view returns (string memory);
 
     /// @notice returns the unrealized pnl in quote token terms for account and collateral
-    function getAccountUnrealizedPnL(uint128 accountId, address collateralType) external view returns (int256 unrealizedPnL);
+    function getAccountUnrealizedPnL(uint128 accountId, address collateralType)
+        external
+        view
+        returns (int256 unrealizedPnL);
 
     /**
      * @dev in context of interest rate swaps, base refers to scaled variable tokens (e.g. scaled virtual aUSDC)
@@ -18,13 +21,16 @@ interface IProduct is IERC165 {
      * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
-    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp) 
-        external view returns (int256[] memory exposures);
+    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp)
+        external
+        view
+        returns (int256[] memory exposures);
 
-    /// @notice returns annualized filled notional, annualized unfilled notional long, 
+    /// @notice returns annualized filled notional, annualized unfilled notional long,
     /// annualized unfilled notional short for account and collateral
-    function getAccountAnnualizedExposures(uint128 accountId, address collateralType) 
-        external returns (Account.Exposure[] memory exposures);
+    function getAccountAnnualizedExposures(uint128 accountId, address collateralType)
+        external
+        returns (Account.Exposure[] memory exposures);
 
     // state-changing functions
 

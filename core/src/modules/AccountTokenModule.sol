@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../interfaces/IAccountTokenModule.sol";
 import "../interfaces/IAccountModule.sol";
@@ -20,11 +20,7 @@ contract AccountTokenModule is IAccountTokenModule, NFT {
         address, // from (unused)
         address to,
         uint256 tokenId
-    )
-        internal
-        virtual
-        override
-    {
+    ) internal virtual override {
         IAccountModule(OwnableStorage.getOwner()).notifyAccountTransfer(to, tokenId.to128());
     }
 }

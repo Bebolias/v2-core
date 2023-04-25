@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import "@voltz-protocol/util-contracts/src/errors/AddressError.sol";
@@ -11,7 +11,7 @@ import "@voltz-protocol/util-contracts/src/errors/AddressError.sol";
 library AccountRBAC {
     using SetUtil for SetUtil.Bytes32Set;
     using SetUtil for SetUtil.AddressSet;
-    
+
     /**
      * @dev All permissions used by the system
      * need to be hardcoded here.
@@ -42,9 +42,7 @@ library AccountRBAC {
      * @dev Reverts if the specified permission is unknown to the account RBAC system.
      */
     function checkPermissionIsValid(bytes32 permission) internal pure {
-        if (
-            permission != AccountRBAC._ADMIN_PERMISSION
-        ) {
+        if (permission != AccountRBAC._ADMIN_PERMISSION) {
             revert InvalidPermission(permission);
         }
     }
@@ -56,7 +54,7 @@ library AccountRBAC {
         self.owner = owner;
     }
 
-     /**
+    /**
      * @dev Grants a particular permission to the specified target address.
      */
     function grantPermission(Data storage self, bytes32 permission, address target) internal {
@@ -73,12 +71,12 @@ library AccountRBAC {
         self.permissions[target].add(permission);
     }
 
-     /**
+    /**
      * @dev Revokes a particular permission from the specified target address.
      */
     function revokePermission(Data storage self, bytes32 permission, address target) internal {
         checkPermissionIsValid(permission);
-        
+
         self.permissions[target].remove(permission);
 
         if (self.permissions[target].length() == 0) {
@@ -107,11 +105,7 @@ library AccountRBAC {
     /**
      * @dev Returns wether the specified address has the given permission.
      */
-    function hasPermission(
-        Data storage self,
-        bytes32 permission,
-        address target
-    ) internal view returns (bool) {
+    function hasPermission(Data storage self, bytes32 permission, address target) internal view returns (bool) {
         checkPermissionIsValid(permission);
 
         return target != address(0) && self.permissions[target].contains(permission);
@@ -120,15 +114,12 @@ library AccountRBAC {
     /**
      * @dev Returns wether the specified target address has the given permission, or has the high level admin permission.
      */
-    function authorized(
-        Data storage self,
-        bytes32 permission,
-        address target
-    ) internal view returns (bool) {
+    function authorized(Data storage self, bytes32 permission, address target) internal view returns (bool) {
         checkPermissionIsValid(permission);
 
-        return ((target == self.owner) ||
-            hasPermission(self, _ADMIN_PERMISSION, target) ||
-            hasPermission(self, permission, target));
+        return (
+            (target == self.owner) || hasPermission(self, _ADMIN_PERMISSION, target)
+                || hasPermission(self, permission, target)
+        );
     }
 }

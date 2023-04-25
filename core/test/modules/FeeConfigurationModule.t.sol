@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/modules/FeeConfigurationModule.sol";
 import "../test-utils/Constants.sol";
 
-import { UD60x18 } from "@prb/math/UD60x18.sol";
+import {UD60x18} from "@prb/math/UD60x18.sol";
 
 contract ExposedFeeConfigurationModule is FeeConfigurationModule {
     constructor() {
@@ -22,15 +22,21 @@ contract FeeConfigurationModuleTest is Test {
     function setUp() public {
         feeConfigurationModule = new ExposedFeeConfigurationModule();
 
-        vm.store(address(feeConfigurationModule), keccak256(abi.encode("xyz.voltz.OwnableStorage")), bytes32(abi.encode(owner)));
+        vm.store(
+            address(feeConfigurationModule),
+            keccak256(abi.encode("xyz.voltz.OwnableStorage")),
+            bytes32(abi.encode(owner))
+        );
     }
 
     function test_ConfigureMarketFee() public {
-        MarketFeeConfiguration.Data memory config = 
-            MarketFeeConfiguration.Data({
-                productId: 1, marketId: 10, feeCollectorAccountId: 13, 
-                atomicMakerFee: UD60x18.wrap(1e15), atomicTakerFee: UD60x18.wrap(2e15)
-            });
+        MarketFeeConfiguration.Data memory config = MarketFeeConfiguration.Data({
+            productId: 1,
+            marketId: 10,
+            feeCollectorAccountId: 13,
+            atomicMakerFee: UD60x18.wrap(1e15),
+            atomicTakerFee: UD60x18.wrap(2e15)
+        });
 
         // Expect MarketFeeConfigured event
         vm.expectEmit(true, true, true, true, address(feeConfigurationModule));
@@ -51,11 +57,13 @@ contract FeeConfigurationModuleTest is Test {
     function testFuzz_RevertWhen_ConfigureMarketFee_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
-        MarketFeeConfiguration.Data memory config = 
-            MarketFeeConfiguration.Data({
-                productId: 1, marketId: 10, feeCollectorAccountId: 13, 
-                atomicMakerFee: UD60x18.wrap(1e15), atomicTakerFee: UD60x18.wrap(2e15)
-            });
+        MarketFeeConfiguration.Data memory config = MarketFeeConfiguration.Data({
+            productId: 1,
+            marketId: 10,
+            feeCollectorAccountId: 13,
+            atomicMakerFee: UD60x18.wrap(1e15),
+            atomicTakerFee: UD60x18.wrap(2e15)
+        });
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
         vm.prank(otherAddress);
@@ -66,16 +74,22 @@ contract FeeConfigurationModuleTest is Test {
         vm.prank(owner);
         feeConfigurationModule.configureMarketFee(
             MarketFeeConfiguration.Data({
-                productId: 1, marketId: 10, feeCollectorAccountId: 13, 
-                atomicMakerFee: UD60x18.wrap(1e15), atomicTakerFee: UD60x18.wrap(2e15)
+                productId: 1,
+                marketId: 10,
+                feeCollectorAccountId: 13,
+                atomicMakerFee: UD60x18.wrap(1e15),
+                atomicTakerFee: UD60x18.wrap(2e15)
             })
         );
 
         vm.prank(owner);
         feeConfigurationModule.configureMarketFee(
             MarketFeeConfiguration.Data({
-                productId: 2, marketId: 20, feeCollectorAccountId: 13, 
-                atomicMakerFee: UD60x18.wrap(2e15), atomicTakerFee: UD60x18.wrap(1e15)
+                productId: 2,
+                marketId: 20,
+                feeCollectorAccountId: 13,
+                atomicMakerFee: UD60x18.wrap(2e15),
+                atomicTakerFee: UD60x18.wrap(1e15)
             })
         );
 

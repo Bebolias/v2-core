@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/storage/MarketFeeConfiguration.sol";
 
-import { UD60x18 } from "@prb/math/UD60x18.sol";
+import {UD60x18} from "@prb/math/UD60x18.sol";
 
 contract ExposedMarketFeeConfiguration {
     constructor() {
@@ -12,10 +12,8 @@ contract ExposedMarketFeeConfiguration {
         Account.create(15, address(1));
     }
     // Mock support
-    function getMarketFeeConfiguration(
-        uint128 productId,
-        uint128 marketId
-    )
+
+    function getMarketFeeConfiguration(uint128 productId, uint128 marketId)
         external
         pure
         returns (MarketFeeConfiguration.Data memory)
@@ -51,8 +49,11 @@ contract MarketFeeConfigurationTest is Test {
     function test_Set() public {
         marketFeeConfiguration.set(
             MarketFeeConfiguration.Data({
-                productId: 1, marketId: 10, feeCollectorAccountId: 13, 
-                atomicMakerFee: UD60x18.wrap(1e15), atomicTakerFee: UD60x18.wrap(2e15)
+                productId: 1,
+                marketId: 10,
+                feeCollectorAccountId: 13,
+                atomicMakerFee: UD60x18.wrap(1e15),
+                atomicTakerFee: UD60x18.wrap(2e15)
             })
         );
 
@@ -68,15 +69,21 @@ contract MarketFeeConfigurationTest is Test {
     function test_Set_Twice() public {
         marketFeeConfiguration.set(
             MarketFeeConfiguration.Data({
-                productId: 1, marketId: 10, feeCollectorAccountId: 13, 
-                atomicMakerFee: UD60x18.wrap(1e15), atomicTakerFee: UD60x18.wrap(2e15)
+                productId: 1,
+                marketId: 10,
+                feeCollectorAccountId: 13,
+                atomicMakerFee: UD60x18.wrap(1e15),
+                atomicTakerFee: UD60x18.wrap(2e15)
             })
         );
 
         marketFeeConfiguration.set(
             MarketFeeConfiguration.Data({
-                productId: 1, marketId: 10, feeCollectorAccountId: 15, 
-                atomicMakerFee: UD60x18.wrap(3e15), atomicTakerFee: UD60x18.wrap(4e15)
+                productId: 1,
+                marketId: 10,
+                feeCollectorAccountId: 15,
+                atomicMakerFee: UD60x18.wrap(3e15),
+                atomicTakerFee: UD60x18.wrap(4e15)
             })
         );
 
@@ -92,15 +99,21 @@ contract MarketFeeConfigurationTest is Test {
     function test_Set_MoreConfigurations() public {
         marketFeeConfiguration.set(
             MarketFeeConfiguration.Data({
-                productId: 1, marketId: 10, feeCollectorAccountId: 13, 
-                atomicMakerFee: UD60x18.wrap(1e15), atomicTakerFee: UD60x18.wrap(2e15)
+                productId: 1,
+                marketId: 10,
+                feeCollectorAccountId: 13,
+                atomicMakerFee: UD60x18.wrap(1e15),
+                atomicTakerFee: UD60x18.wrap(2e15)
             })
         );
 
         marketFeeConfiguration.set(
             MarketFeeConfiguration.Data({
-                productId: 2, marketId: 20, feeCollectorAccountId: 15, 
-                atomicMakerFee: UD60x18.wrap(2e15), atomicTakerFee: UD60x18.wrap(1e15)
+                productId: 2,
+                marketId: 20,
+                feeCollectorAccountId: 15,
+                atomicMakerFee: UD60x18.wrap(2e15),
+                atomicTakerFee: UD60x18.wrap(1e15)
             })
         );
 

@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 
@@ -40,7 +40,7 @@ library FeatureFlag {
     }
 
     function isDenier(Data storage self, address possibleDenier) internal view returns (bool) {
-        for (uint i = 0; i < self.deniers.length; i++) {
+        for (uint256 i = 0; i < self.deniers.length; i++) {
             if (self.deniers[i] == possibleDenier) {
                 return true;
             }

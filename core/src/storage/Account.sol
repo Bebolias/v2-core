@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "./MarketRiskConfiguration.sol";
 import "./ProtocolRiskConfiguration.sol";
@@ -12,7 +12,7 @@ import "./Product.sol";
 import "oz/utils/math/Math.sol";
 import "oz/utils/math/SignedMath.sol";
 
-import { mulUDxUint, mulSDxInt } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
+import {mulUDxUint, mulSDxInt} from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
 /**
  * @title Object for tracking accounts with access control and collateral tracking.
@@ -130,17 +130,18 @@ library Account {
     /**
      * @dev Given a collateral type, returns information about the total balance of the account
      */
-    function getCollateralBalance(Data storage self, address collateralType) internal view returns (uint256 collateralBalance) {
+    function getCollateralBalance(Data storage self, address collateralType)
+        internal
+        view
+        returns (uint256 collateralBalance)
+    {
         collateralBalance = self.collaterals[collateralType].balance;
     }
 
     /**
      * @dev Given a collateral type, returns information about the total balance of the account that's available to withdraw
      */
-    function getCollateralBalanceAvailable(
-        Data storage self,
-        address collateralType
-    )
+    function getCollateralBalanceAvailable(Data storage self, address collateralType)
         internal
         returns (uint256 collateralBalanceAvailable)
     {
@@ -154,8 +155,10 @@ library Account {
     /**
      * @dev Given a collateral type, returns information about the total liquidation booster balance of the account
      */
-    function getLiquidationBoosterBalance(Data storage self, address collateralType) 
-        internal view returns (uint256 liquidationBoosterBalance) 
+    function getLiquidationBoosterBalance(Data storage self, address collateralType)
+        internal
+        view
+        returns (uint256 liquidationBoosterBalance)
     {
         liquidationBoosterBalance = self.collaterals[collateralType].liquidationBoosterBalance;
     }
@@ -163,14 +166,11 @@ library Account {
     /**
      * @dev Loads the Account object for the specified accountId,
      * and validates that sender has the specified permission. It also resets
-     * the interaction timeout. These are different actions but they are merged 
-     * in a single function because loading an account and checking for a 
+     * the interaction timeout. These are different actions but they are merged
+     * in a single function because loading an account and checking for a
      * permission is a very common use case in other parts of the code.
      */
-    function loadAccountAndValidateOwnership(
-        uint128 accountId,
-        address senderAddress
-    )
+    function loadAccountAndValidateOwnership(uint128 accountId, address senderAddress)
         internal
         view
         returns (Data storage account)
@@ -184,15 +184,11 @@ library Account {
     /**
      * @dev Loads the Account object for the specified accountId,
      * and validates that sender has the specified permission. It also resets
-     * the interaction timeout. These are different actions but they are merged 
-     * in a single function because loading an account and checking for a 
+     * the interaction timeout. These are different actions but they are merged
+     * in a single function because loading an account and checking for a
      * permission is a very common use case in other parts of the code.
      */
-    function loadAccountAndValidatePermission(
-        uint128 accountId,
-        bytes32 permission,
-        address senderAddress
-    )
+    function loadAccountAndValidatePermission(uint128 accountId, bytes32 permission, address senderAddress)
         internal
         view
         returns (Data storage account)
@@ -210,11 +206,7 @@ library Account {
      * what if we do margin calculations per product for now, that'd help with bringing down the gas costs (since atm we're doing no
      * correlations)
      */
-    function getAnnualizedProductExposures(
-        Data storage self,
-        uint128 productId,
-        address collateralType
-    )
+    function getAnnualizedProductExposures(Data storage self, uint128 productId, address collateralType)
         internal
         returns (Exposure[] memory productExposures)
     {
@@ -240,7 +232,11 @@ library Account {
      * @dev Returns the total account value in terms of the quote token of the (single token) account
      */
 
-    function getTotalAccountValue(Data storage self, address collateralType) internal view returns (int256 totalAccountValue) {
+    function getTotalAccountValue(Data storage self, address collateralType)
+        internal
+        view
+        returns (int256 totalAccountValue)
+    {
         int256 unrealizedPnL = self.getUnrealizedPnL(collateralType);
         int256 collateralBalance = self.getCollateralBalance(collateralType).toInt();
         totalAccountValue = unrealizedPnL + collateralBalance;
@@ -277,21 +273,29 @@ library Account {
      * @dev Comes out as true if a given account is liquidatable, i.e. account value (collateral + unrealized pnl) < lm
      */
 
-    function isLiquidatable(Data storage self, address collateralType) internal returns (bool liquidatable, uint256 im, uint256 lm) {
+    function isLiquidatable(Data storage self, address collateralType)
+        internal
+        returns (bool liquidatable, uint256 im, uint256 lm)
+    {
         (im, lm) = self.getMarginRequirements(collateralType);
         liquidatable = self.getTotalAccountValue(collateralType) < lm.toInt();
     }
     /**
      * @dev Returns the initial (im) and liqudiation (lm) margin requirements of the account
      */
-    function getMarginRequirements(Data storage self, address collateralType) internal returns (uint256 im, uint256 lm) {
+
+    function getMarginRequirements(Data storage self, address collateralType)
+        internal
+        returns (uint256 im, uint256 lm)
+    {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;
 
         int256 worstCashflowUp;
         int256 worstCashflowDown;
         for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productId = _activeProducts.valueAt(i).to128();
-            Exposure[] memory annualizedProductMarketExposures = self.getAnnualizedProductExposures(productId, collateralType);
+            Exposure[] memory annualizedProductMarketExposures =
+                self.getAnnualizedProductExposures(productId, collateralType);
 
             for (uint256 j = 0; j < annualizedProductMarketExposures.length; j++) {
                 Exposure memory exposure = annualizedProductMarketExposures[j];
@@ -309,7 +313,7 @@ library Account {
             }
         }
 
-        (uint256 worstCashflowUpAbs, uint256 worstCashflowDownAbs) = 
+        (uint256 worstCashflowUpAbs, uint256 worstCashflowDownAbs) =
             (SignedMath.abs(worstCashflowUp), SignedMath.abs(worstCashflowDown));
 
         lm = Math.max(worstCashflowUpAbs, worstCashflowDownAbs);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/storage/Product.sol";
@@ -25,25 +25,26 @@ contract ExposedProduct is CoreState {
         Product.onlyProductAddress(productId, caller);
     }
 
-    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType) 
-        external view returns (int256 accountUnrealizedPnL) 
+    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType)
+        external
+        view
+        returns (int256 accountUnrealizedPnL)
     {
         Product.Data storage product = Product.load(productId);
         return product.getAccountUnrealizedPnL(accountId, collateralType);
     }
 
-    function baseToAnnualizedExposure(uint128 productId, int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp) 
-        external view returns (int256[] memory) 
-    {
+    function baseToAnnualizedExposure(
+        uint128 productId,
+        int256[] memory baseAmounts,
+        uint128 marketId,
+        uint32 maturityTimestamp
+    ) external view returns (int256[] memory) {
         Product.Data storage product = Product.load(productId);
         return product.baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
     }
 
-    function getAccountAnnualizedExposures(
-        uint128 productId,
-        uint128 accountId,
-        address collateralType
-    )
+    function getAccountAnnualizedExposures(uint128 productId, uint128 accountId, address collateralType)
         external
         returns (Account.Exposure[] memory exposures)
     {
@@ -103,7 +104,8 @@ contract ProductTest is Test {
     }
 
     function test_GetAnnualizedProductExposures() public {
-        Account.Exposure[] memory exposures = product.getAccountAnnualizedExposures(productId, accountId, Constants.TOKEN_0);
+        Account.Exposure[] memory exposures =
+            product.getAccountAnnualizedExposures(productId, accountId, Constants.TOKEN_0);
 
         assertEq(exposures.length, 2);
 

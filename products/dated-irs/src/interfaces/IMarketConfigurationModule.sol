@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.19;
 
 import "../storage/MarketConfiguration.sol";
 
@@ -32,5 +32,8 @@ interface IMarketConfigurationModule {
      * @notice Returns the market configuration
      * @return config The configuration object describing the market
      */
-    function getMarketConfiguration(uint128 irsMarketId) external view returns (MarketConfiguration.Data memory config);
+    function getMarketConfiguration(uint128 irsMarketId)
+        external
+        view
+        returns (MarketConfiguration.Data memory config);
 }
