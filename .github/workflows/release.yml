@@ -28,11 +28,10 @@ jobs:
           registry-url: https://npm.pkg.github.com/
       - name: Install dependencies
         run: yarn install
-      - name: Semantic Release
+      - name: Create Release
+        run: yarn release
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PUBLISHING_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_PUBLISHING_TOKEN }}
-        run: npx semantic-release
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn publish
         env:
             NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

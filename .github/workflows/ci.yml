@@ -60,7 +60,7 @@ jobs:
 
       - name: "Build the contracts and print their size"
         run: "yarn build"
-
+        
       - name: "Add build summary"
         run: |
           echo "## Build result" >> $GITHUB_STEP_SUMMARY

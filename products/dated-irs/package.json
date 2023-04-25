@@ -14,7 +14,8 @@
     "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
     "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",
     "build": "forge build",
-    "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
+    "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg",
+    "release": "semantic-release"
   },
   "devDependencies": {
     "@voltz-protocol/core": "workspace:^",

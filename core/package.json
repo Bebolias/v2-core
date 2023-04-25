@@ -18,7 +18,8 @@
     "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",
     "build": "forge build --sizes",
     "test": "forge test",
-    "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
+    "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg",
+    "release": "semantic-release"
   },
   "devDependencies": {
     "@semantic-release/git": "^10.0.1",

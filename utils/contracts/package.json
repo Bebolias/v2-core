@@ -15,7 +15,8 @@
     "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
     "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",
     "test": "forge test",
-    "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
+    "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg",
+    "release": "semantic-release"
   },
   "devDependencies": {
     "@prb/math": "3.0.0",
