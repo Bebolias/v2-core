@@ -53,4 +53,14 @@ contract PaymentsTest is Test {
         vm.expectCall(address(weth9), 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector));
         exposedPayments.wrapETH(address(2), 1 ether);
     }
+
+    function testWrapETHInsufficientEth() public {
+        IWETH9 weth9 = IWETH9(address(1));
+        vm.mockCall(address(weth9), 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector), abi.encode((0)));
+        vm.mockCall(
+            address(weth9), abi.encodeWithSelector(IERC20.transfer.selector, address(2), 1 ether), abi.encode((0))
+        );
+        vm.expectRevert(abi.encodeWithSelector(Payments.InsufficientETH.selector));
+        exposedPayments.wrapETH(address(2), 1 ether);
+    }
 }
