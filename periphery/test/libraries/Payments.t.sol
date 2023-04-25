@@ -3,6 +3,7 @@ pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../../src/libraries/Payments.sol";
+import "../../src/libraries/Constants.sol";
 import "../../src/storage/Config.sol";
 import "../../src/interfaces/external/IAllowanceTransfer.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC20.sol";
@@ -62,5 +63,17 @@ contract PaymentsTest is Test {
         );
         vm.expectRevert(abi.encodeWithSelector(Payments.InsufficientETH.selector));
         exposedPayments.wrapETH(address(2), 1 ether);
+    }
+
+    function testWrapETHContractBalance() public {
+        vm.deal(address(exposedPayments), 2 ether);
+        IWETH9 weth9 = IWETH9(address(1));
+        vm.mockCall(address(weth9), 2 ether, abi.encodeWithSelector(IWETH9.deposit.selector), abi.encode((0)));
+        vm.mockCall(
+            address(weth9), abi.encodeWithSelector(IERC20.transfer.selector, address(2), 2 ether), abi.encode((0))
+        );
+        vm.expectCall(address(weth9), abi.encodeWithSelector(IERC20.transfer.selector, address(2), 2 ether));
+        vm.expectCall(address(weth9), 2 ether, abi.encodeWithSelector(IWETH9.deposit.selector));
+        exposedPayments.wrapETH(address(2), Constants.CONTRACT_BALANCE);
     }
 }
