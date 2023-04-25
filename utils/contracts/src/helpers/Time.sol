@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity =0.8.17;
+pragma solidity >=0.8.19;
 
-import { UD60x18, toUD60x18, ud } from "@prb/math/UD60x18.sol";
+import {UD60x18, toUD60x18, ud} from "@prb/math/UD60x18.sol";
 
 library Time {
-
-    using { toUD60x18 } for uint256;
+    using {toUD60x18} for uint256;
 
     // uint256 public constant SECONDS_IN_DAY_WAD = 86400e18;
     uint256 public constant SECONDS_IN_YEAR = 31536000;
@@ -31,7 +30,6 @@ library Time {
         if (timestamp > blockTimestampTruncated()) {
             timeDeltaAnnualized = (uint256(timestamp) - block.timestamp).toUD60x18().div(SECONDS_IN_YEAR.toUD60x18());
         }
-        
     }
 
     // function isCloseToMaturityOrBeyondMaturity(uint256 termEndTimestampWad)

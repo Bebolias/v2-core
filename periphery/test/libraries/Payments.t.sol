@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "../../src/libraries/Payments.sol";
 import "../../src/storage/Config.sol";
 import "../../src/interfaces/external/IAllowanceTransfer.sol";
+import "@voltz-protocol/util-contracts/src/interfaces/IERC20.sol";
 
 contract ExposedPayments {
     function setUp(Config.Data memory config) external {
@@ -46,10 +47,10 @@ contract PaymentsTest is Test {
         IWETH9 weth9 = IWETH9(address(1));
         vm.mockCall(address(weth9), 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector), abi.encode((0)));
         vm.mockCall(
-            address(weth9), abi.encodeWithSelector(IWETH9.transfer.selector, address(2), 1 ether), abi.encode((0))
+            address(weth9), abi.encodeWithSelector(IERC20.transfer.selector, address(2), 1 ether), abi.encode((0))
         );
         exposedPayments.wrapETH(address(2), 1 ether);
         vm.expectCall(address(weth9), 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector));
-        vm.expectCall(address(weth9), abi.encodeWithSelector(IWETH9.transfer.selector, address(2), 1 ether));
+        vm.expectCall(address(weth9), abi.encodeWithSelector(IERC20.transfer.selector, address(2), 1 ether));
     }
 }
