@@ -9,6 +9,8 @@ import "../storage/Config.sol";
  * @title Performs various operations around the payment of eth and tokens
  */
 library Payments {
+    error InsufficientETH();
+
     /// @notice Pays an amount of ETH or ERC20 to a recipient
     /// @param token The token to pay (can be ETH using Constants.ETH)
     /// @param recipient The address that will receive the payment

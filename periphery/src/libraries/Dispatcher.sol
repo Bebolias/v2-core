@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
+import "./Constants.sol";
 import "./Commands.sol";
 import "./V2DatedIRS.sol";
 import "./V2Core.sol";
@@ -106,6 +107,19 @@ library Dispatcher {
         } else {
             // placeholder area for commands ...
             revert InvalidCommandType(command);
+        }
+    }
+
+    /// @notice Calculates the recipient address for a command
+    /// @param recipient The recipient or recipient-flag for the command
+    /// @return output The resultant recipient for the command
+    function map(address recipient) internal view returns (address) {
+        if (recipient == Constants.MSG_SENDER) {
+            return lockedBy;
+        } else if (recipient == Constants.ADDRESS_THIS) {
+            return address(this);
+        } else {
+            return recipient;
         }
     }
 }

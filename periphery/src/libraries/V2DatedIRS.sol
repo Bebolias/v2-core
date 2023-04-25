@@ -18,6 +18,6 @@ library V2DatedIRS {
     }
 
     function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) internal {
-        IProductIRSModule(Config.load().VOLTZ_V2_DATED_IRS_PROXY).settle(accountId, marketID, maturityTimestamp);
+        IProductIRSModule(Config.load().VOLTZ_V2_DATED_IRS_PROXY).settle(accountId, marketId, maturityTimestamp);
     }
 }
