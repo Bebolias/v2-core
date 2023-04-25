@@ -28,10 +28,8 @@ jobs:
           registry-url: https://npm.pkg.github.com/
       - name: Install dependencies
         run: yarn install
-      - name: Create Release
-        run: yarn release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Bump versions
+        run:
       - run: yarn publish
         env:
             NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

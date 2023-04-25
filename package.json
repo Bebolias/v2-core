@@ -33,7 +33,8 @@
         "lint": "npm run lint:js && npm run lint:sol",
         "check-packages": "node .github/check-packages.js",
         "version": "yarn install && git stage yarn.lock",
-        "release": "yarn workspaces foreach --no-private run release"
+        "release": "yarn workspaces foreach --no-private run release",
+        "bump": "yarn workspaces foreach --no-private run bump"
     },
     "devDependencies": {
         "@types/mocha": "10.0.1",
