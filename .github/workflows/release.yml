@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Bump versions
-        run:
+        run: yarn bump
       - run: yarn publish
         env:
             NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
