@@ -4,7 +4,6 @@
   "dependencies": {
     "core": "link:../../core"
   },
-  "private": true,
   "scripts": {
     "publish": "yarn npm publish --tolerate-republish",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
