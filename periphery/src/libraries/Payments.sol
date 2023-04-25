@@ -4,11 +4,15 @@ pragma solidity >=0.8.19;
 import "./Constants.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC20.sol";
 import "../storage/Config.sol";
+import "solmate/src/utils/SafeTransferLib.sol";
 
 /**
  * @title Performs various operations around the payment of eth and tokens
  */
 library Payments {
+    using SafeTransferLib for address;
+    using SafeTransferLib for IERC20;
+
     error InsufficientETH();
 
     /// @notice Pays an amount of ETH or ERC20 to a recipient

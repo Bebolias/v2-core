@@ -34,3 +34,6 @@
 [submodule "periphery/lib/prb-math"]
 	path = periphery/lib/prb-math
 	url = https://github.com/PaulRBerg/prb-math
+[submodule "periphery/lib/solmate"]
+	path = periphery/lib/solmate
+	url = https://github.com/transmissions11/solmate
