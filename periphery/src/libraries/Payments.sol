@@ -2,16 +2,16 @@
 pragma solidity >=0.8.19;
 
 import "./Constants.sol";
-import "@voltz-protocol/util-contracts/src/interfaces/IERC20.sol";
 import "../storage/Config.sol";
 import "solmate/src/utils/SafeTransferLib.sol";
+import "solmate/src/tokens/ERC20.sol";
 
 /**
  * @title Performs various operations around the payment of eth and tokens
  */
 library Payments {
     using SafeTransferLib for address;
-    using SafeTransferLib for IERC20;
+    using SafeTransferLib for ERC20;
 
     error InsufficientETH();
 
@@ -27,7 +27,7 @@ library Payments {
                 value = IERC20(token).balanceOf(address(this));
             }
 
-            IERC20(token).safeTransfer(recipient, value);
+            ERC20(token).safeTransfer(recipient, value);
         }
     }
 
