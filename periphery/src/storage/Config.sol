@@ -2,6 +2,7 @@
 pragma solidity >=0.8.19;
 
 import "../interfaces/external/IWETH9.sol";
+import "../interfaces/external/IAllowanceTransfer.sol";
 
 /**
  * @title Config
