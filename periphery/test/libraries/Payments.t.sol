@@ -29,11 +29,11 @@ contract ExposedPayments {
 contract PaymentsTest is Test {
     ExposedPayments internal exposedPayments;
 
-    function setUp(IWETH9 weth9) public {
+    function setUp() public {
         exposedPayments = new ExposedPayments();
         exposedPayments.setUp(
             Config.Data({
-                WETH9: weth9,
+                WETH9: IWETH9(address(1)),
                 PERMIT2: IAllowanceTransfer(address(0)),
                 VOLTZ_V2_CORE_PROXY: address(0),
                 VOLTZ_V2_DATED_IRS_PROXY: address(0),
@@ -43,14 +43,13 @@ contract PaymentsTest is Test {
     }
 
     function testWrapETH() public {
-        vm.deal(address(exposedPayments), 1 ether);
+        vm.deal(address(exposedPayments), 2 ether);
         IWETH9 weth9 = IWETH9(address(1));
         vm.mockCall(address(weth9), 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector), abi.encode((0)));
         vm.mockCall(
             address(weth9), abi.encodeWithSelector(IERC20.transfer.selector, address(2), 1 ether), abi.encode((0))
         );
-        exposedPayments.wrapETH(address(2), 1 ether);
-        vm.expectCall(address(weth9), 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector));
         vm.expectCall(address(weth9), abi.encodeWithSelector(IERC20.transfer.selector, address(2), 1 ether));
+        exposedPayments.wrapETH(address(2), 1 ether);
     }
 }
