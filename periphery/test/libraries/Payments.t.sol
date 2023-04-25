@@ -44,10 +44,12 @@ contract PaymentsTest is Test {
     function testWrapETH() public {
         vm.deal(address(exposedPayments), 1 ether);
         IWETH9 weth9 = IWETH9(address(1));
-        vm.mockCall(weth9, 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector), abi.encode((0)));
-        vm.mockCall(weth9, abi.encodeWithSelector(IWETH9.transfer.selector, address(2), 1 ether), abi.encode((0)));
+        vm.mockCall(address(weth9), 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector), abi.encode((0)));
+        vm.mockCall(
+            address(weth9), abi.encodeWithSelector(IWETH9.transfer.selector, address(2), 1 ether), abi.encode((0))
+        );
         exposedPayments.wrapETH(address(2), 1 ether);
-        vm.expectCall(weth9, 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector));
-        vm.expectCall(weth9, abi.encodeWithSelector(IWETH9.transfer.selector, address(2), 1 ether));
+        vm.expectCall(address(weth9), 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector));
+        vm.expectCall(address(weth9), abi.encodeWithSelector(IWETH9.transfer.selector, address(2), 1 ether));
     }
 }

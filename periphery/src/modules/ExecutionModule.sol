@@ -24,11 +24,6 @@ contract ExecutionModule is IExecutionModule {
         override
         checkDeadline(deadline)
     {
-        execute(commands, inputs);
-    }
-
-    /// @inheritdoc IExecutionModule
-    function execute(bytes calldata commands, bytes[] calldata inputs) public payable override {
         bool success;
         bytes memory output;
         uint256 numCommands = commands.length;
