@@ -17,7 +17,7 @@ contract ExposedPayments {
     }
 
     function wrapETH(address recipient, uint256 amount) external {
-        Payments.wrapETH(recpient, amount);
+        Payments.wrapETH(recipient, amount);
     }
 
     function unwrapWETH9(address recipient, uint256 amountMinimum) external {
@@ -43,7 +43,7 @@ contract PaymentsTest is Test {
 
     function testWrapETH() public {
         vm.deal(address(exposedPayments), 1 ether);
-        IWETH9 weth9 = WETH9(address(1));
+        IWETH9 weth9 = IWETH9(address(1));
         vm.mockCall(weth9, 1 ether, abi.encodeWithSelector(IWETH9.deposit.selector), abi.encode((0)));
         vm.mockCall(weth9, abi.encodeWithSelector(IWETH9.transfer.selector, address(2), 1 ether), abi.encode((0)));
         exposedPayments.wrapETH(address(2), 1 ether);

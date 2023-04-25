@@ -2,6 +2,8 @@
 pragma solidity >=0.8.19;
 
 import "../interfaces/IExecutionModule.sol";
+import "../libraries/Commands.sol";
+import "../libraries/Dispatcher.sol";
 
 /**
  * @title Execution Module is responsible for executing encoded commands along with provided inputs
