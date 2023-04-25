@@ -49,6 +49,17 @@ contract ExposePortfolio {
         return Portfolio.annualizedExposureFactor(marketId, maturityTimestamp);
     }
 
+    function baseToAnnualizedExposure(
+        int256[] memory baseAmounts,
+        uint128 marketId,
+        uint32 maturityTimestamp
+    )
+        external
+        returns (int256[] memory)
+    {
+        return Portfolio.baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
+    }
+
     function activateMarketMaturity(uint128 id, uint128 marketId, uint32 maturityTimestamp) external {
         Portfolio.load(id).activateMarketMaturity(marketId, maturityTimestamp);
     }
@@ -59,6 +70,18 @@ contract ExposePortfolio {
 
     function closeAccount(uint128 id, address poolAddress, address collateralType) external {
         Portfolio.load(id).closeAccount(poolAddress, collateralType);
+    }
+
+    function getMarketAndMaturity(
+        uint128 id,
+        uint256 index,
+        address collateralType
+    )
+        external
+        view
+        returns (uint128 marketId, uint32 maturityTimestamp)
+    {
+        (marketId, maturityTimestamp) = Portfolio.load(id).getMarketAndMaturity(index, collateralType);
     }
 
     function updatePosition(uint128 id, uint128 marketId, uint32 maturityTimestamp, int256 baseDelta, int256 quoteDelta) external {
@@ -77,6 +100,19 @@ contract ExposePortfolio {
     {
         Portfolio.Data storage portfolio = Portfolio.load(id);
         return portfolio.settle(marketId, maturityTimestamp, poolAddress);
+    }
+
+    function computeUnwindQuote(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        address poolAddress,
+        int256 baseAmount
+    )
+        external
+        view
+        returns (int256 unwindQuote)
+    {
+        unwindQuote = Portfolio.computeUnwindQuote(marketId, maturityTimestamp, poolAddress, baseAmount);
     }
 
     function updateCache(uint128 marketId, uint32 maturityTimestamp) external {
@@ -149,9 +185,14 @@ contract PortfolioTest is Test {
         portfolio.setMarket(marketId, MOCK_COLLATERAL_TYPE);
     }
 
-    function test_CreateAtCorrectSlot() public {
+    function test_LoadAtCorrectSlot() public {
         bytes32 slot = portfolio.load(accountId);
         assertEq(slot, portfolioSlot);
+    }
+
+    function test_CreatePortfolio() public {
+        bytes32 slot = portfolio.create(300);
+        assertEq(slot, keccak256(abi.encode("xyz.voltz.Portfolio", 300)));
     }
 
     function test_GetAccountUnrealizedPnLNoActivPositions() public {
@@ -239,6 +280,19 @@ contract PortfolioTest is Test {
         assertEq(unrealizedPnL, 48675 * 1e17);
     }
 
+    function test_ComputeUnwindQuote() public {
+        uint32 maturityTimestamp = currentTimestamp + ONE_YEAR;
+        uint256 liqudityIndex = 1e27;
+        UD60x18 gwap = ud(0.3e18);
+
+        mockPool.setDatedIRSGwap(marketId, maturityTimestamp, gwap);
+
+        mockRateOracle.setLastUpdatedIndex(liqudityIndex);
+        int256 unrealizedPnL = portfolio.computeUnwindQuote(marketId, maturityTimestamp, address(mockPool), 1000);
+
+        assertEq(unrealizedPnL, 1300);
+    }
+
     function test_CreateNewPosition() public {
         uint32 maturityTimestamp = currentTimestamp + 2;
         portfolio.updatePosition(accountId, marketId, maturityTimestamp, 10, 20);
@@ -264,13 +318,30 @@ contract PortfolioTest is Test {
         assertTrue(portfolio.isActiveMarketAndMaturity(accountId, marketId, maturityTimestamp, MOCK_COLLATERAL_TYPE));
     }
 
-    function test_CloseAccount() public {
+    function test_CloseAccountWithoutClosingInMarket() public {
         test_CreateNewPosition();
         uint32 maturityTimestamp = currentTimestamp + 2;
         vm.expectCall(
             address(mockPool), 0, abi.encodeWithSelector(mockPool.executeDatedTakerOrder.selector, marketId, maturityTimestamp, -10)
         );
         portfolio.closeAccount(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
+
+        // market not deactivated, executed amounts != position amounts
+        assertTrue(portfolio.isActiveMarketAndMaturity(accountId, marketId, maturityTimestamp, MOCK_COLLATERAL_TYPE));
+    }
+
+    function test_FullyCloseTraderAccount() public {
+        uint32 maturityTimestamp = currentTimestamp + 2;
+
+        portfolio.updatePosition(accountId, marketId, maturityTimestamp, 10, 10);
+
+        vm.expectCall(
+            address(mockPool), 0, abi.encodeWithSelector(mockPool.executeDatedTakerOrder.selector, marketId, maturityTimestamp, -10)
+        );
+        portfolio.closeAccount(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
+
+        // market deactivated, executed amounts == position amounts
+        assertFalse(portfolio.isActiveMarketAndMaturity(accountId, marketId, maturityTimestamp, MOCK_COLLATERAL_TYPE));
     }
 
     function test_Settle() public {
@@ -290,9 +361,30 @@ contract PortfolioTest is Test {
         assertEq(position.quoteBalance, 0);
     }
 
-    function test_ActivatePool() public {
+    function test_RevertWhen_SettleBeforeMaturity() public {
+        uint32 maturityTimestamp = currentTimestamp + 2;
+
+        vm.expectRevert(abi.encodeWithSelector(Portfolio.SettlementBeforeMaturity.selector, marketId, maturityTimestamp, accountId));
+        portfolio.settle(accountId, marketId, maturityTimestamp, address(mockPool));
+    }
+
+    function test_ActivateMarket() public {
         portfolio.activateMarketMaturity(accountId, marketId, 21988);
         assertTrue(portfolio.isActiveMarketAndMaturity(accountId, marketId, 21988, MOCK_COLLATERAL_TYPE));
+    }
+
+    function test_RevertWhen_ActivateUnknownMarket() public {
+        vm.expectRevert(abi.encodeWithSelector(Portfolio.UnknownMarket.selector, 47));
+        portfolio.activateMarketMaturity(accountId, 47, 21988);
+    }
+
+    function test_GetMarketAndMaturity() public {
+        portfolio.activateMarketMaturity(accountId, marketId, 21988);
+        assertTrue(portfolio.isActiveMarketAndMaturity(accountId, marketId, 21988, MOCK_COLLATERAL_TYPE));
+
+        (uint128 _marketId, uint32 _maturityTimestamp) = portfolio.getMarketAndMaturity(accountId, 1, MOCK_COLLATERAL_TYPE);
+        assertEq(_marketId, marketId);
+        assertEq(_maturityTimestamp, 21988);
     }
 
     function test_DeactivateActivePool() public {
@@ -341,6 +433,35 @@ contract PortfolioTest is Test {
         UD60x18 factor = portfolio.annualizedExposureFactor(marketId, maturityTimestamp);
 
         assertEq(factor.uUnwrap(), 0);
+    }
+
+    function test_BaseAnnualizedExposureBeforeMaturity() public {
+        uint32 maturityTimestamp = currentTimestamp + ONE_YEAR;
+        mockRateOracle.setLastUpdatedIndex(1.01e27);
+
+        int256[] memory baseAmounts = new int[](2);
+        baseAmounts[0] = 1000;
+        baseAmounts[1] = 10000;
+
+        int256[] memory exposures = portfolio.baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
+
+        assertEq(exposures[0], 1010);
+        assertEq(exposures[1], 10100);
+    }
+
+    function test_BaseAnnualizedExposureAfterMaturity() public {
+        uint32 maturityTimestamp = currentTimestamp - 1;
+        mockRateOracle.setLastUpdatedIndex(1e27);
+        portfolio.updateCache(marketId, maturityTimestamp);
+
+        int256[] memory baseAmounts = new int[](2);
+        baseAmounts[0] = 1000;
+        baseAmounts[1] = 10000;
+
+        int256[] memory exposures = portfolio.baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
+
+        assertEq(exposures[0], 0);
+        assertEq(exposures[1], 0);
     }
 
     function test_AccountAnnualizedExposureTaker() public {

@@ -9,7 +9,6 @@ import "./Position.sol";
 import "./RateOracleReader.sol";
 import "./MarketConfiguration.sol";
 import "../interfaces/IPool.sol";
-// todo: for now can import core workspace
 import "@voltz-protocol/core/src/storage/Account.sol";
 import { UD60x18, UNIT } from "@prb/math/UD60x18.sol";
 import { SD59x18 } from "@prb/math/SD59x18.sol";
@@ -89,8 +88,7 @@ library Portfolio {
     {
         // TODO: looks expensive - need to place limits on number of allowed markets and allowed maturities?
         for (uint256 i = 1; i <= self.activeMarketsAndMaturities[collateralType].length(); i++) {
-            uint256 marketMaturityPacked = self.activeMarketsAndMaturities[collateralType].valueAt(i);
-            (uint128 marketId, uint32 maturityTimestamp) = Pack.unpack(marketMaturityPacked);
+            (uint128 marketId, uint32 maturityTimestamp) = self.getMarketAndMaturity(i, collateralType);
 
             int256 baseBalance = self.positions[marketId][maturityTimestamp].baseBalance;
             int256 quoteBalance = self.positions[marketId][maturityTimestamp].quoteBalance;
@@ -130,7 +128,6 @@ library Portfolio {
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
     function annualizedExposureFactor(uint128 marketId, uint32 maturityTimestamp) internal view returns (UD60x18 factor) {
-        // TODO: use PRB math
         UD60x18 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp);
         UD60x18 timeDeltaAnnualized = Time.timeDeltaAnnualized(maturityTimestamp);
         factor = currentLiquidityIndex.mul(timeDeltaAnnualized);
@@ -145,6 +142,7 @@ library Portfolio {
         view
         returns (int256[] memory exposures)
     {
+        exposures = new int256[](baseAmounts.length);
         UD60x18 factor = annualizedExposureFactor(marketId, maturityTimestamp);
 
         for (uint256 i = 0; i < baseAmounts.length; i++) {
@@ -256,7 +254,6 @@ library Portfolio {
 
         self.deactivateMarketMaturity(marketId, maturityTimestamp);
 
-        // todo: do we need to pass pool address?
         IPool pool = IPool(poolAddress);
 
         (int256 closedBasePool, int256 closedQuotePool) = pool.closePosition(marketId, maturityTimestamp, self.accountId);

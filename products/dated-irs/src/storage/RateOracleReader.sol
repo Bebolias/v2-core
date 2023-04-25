@@ -53,7 +53,6 @@ library RateOracleReader {
                     self.rateIndexAtMaturity[maturityTimestamp] = currentIndex;
                 } else {
                     // We know a rate before settlment and now at/after settlement => interpolate between them
-
                     rateIndexMaturity = IRateOracle(self.oracleAddress).interpolateIndexValue({
                         beforeIndex: cache.lastKnownIndex,
                         beforeTimestamp: cache.lastKnownTimestamp,
@@ -118,7 +117,7 @@ library RateOracleReader {
     }
 
     function getRateIndexMaturity(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexMaturity) {
-        if (Time.blockTimestampTruncated() < maturityTimestamp) {
+        if (Time.blockTimestampTruncated() <= maturityTimestamp) {
             revert MaturityNotReached();
         }
 

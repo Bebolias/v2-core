@@ -18,7 +18,7 @@
     "license": "MIT",
     "homepage": "https://github.com/Voltz-Protocol/v2-core#readme",
     "scripts": {
-        "publish:all": "yarn workspaces foreach --no-private npm publish --tolerate-republish",
+        "publish": "yarn workspaces foreach --no-private run publish",
         "clean": "yarn workspaces foreach --parallel --verbose run clean",
         "test": "yarn workspaces foreach --parallel --verbose run test",
         "coverage": "yarn workspaces foreach --verbose run coverage",

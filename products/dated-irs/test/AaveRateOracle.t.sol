@@ -4,7 +4,9 @@ import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "./mocks/MockAaveLendingPool.sol";
 import "../src/oracles/AaveRateOracle.sol";
+import "../src/interfaces/IRateOracle.sol";
 import "oz/interfaces/IERC20.sol";
+import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
 contract AaveRateOracleTest is Test {
@@ -32,11 +34,11 @@ contract AaveRateOracleTest is Test {
         assertEq(mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS), initValue.unwrap() * 1e9);
     }
 
-    function test_CurrentIndex() public {
+    function test_InitCurrentIndex() public {
         assertEq(rateOracle.getCurrentIndex().unwrap(), initValue.unwrap());
     }
 
-    function test_LastUpdatedIndex() public {
+    function test_InitLastUpdatedIndex() public {
         (uint32 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
         assertEq(index.unwrap(), initValue.unwrap());
         assertEq(time, Time.blockTimestampTruncated());
@@ -51,6 +53,138 @@ contract AaveRateOracleTest is Test {
             50 // uint256 queryTimestamp
         );
         assertEq(index.unwrap(), 1.05e18);
+    }
+
+    function test_RevertWhen_InterpolateUnorderedBeforeTime() public {
+        vm.expectRevert(bytes("Unordered timestamps"));
+        rateOracle.interpolateIndexValue(
+            ud(1e18), // UD60x18 beforeIndex
+            51, // uint256 beforeTimestamp
+            ud(1.1e18), // UD60x18 atOrAfterIndex
+            100, // uint256 atOrAfterTimestamp
+            50 // uint256 queryTimestamp
+        );
+    }
+
+    function test_RevertWhen_InterpolateUnorderedAfterTime() public {
+        vm.expectRevert(bytes("Unordered timestamps"));
+        rateOracle.interpolateIndexValue(
+            ud(1e18), // UD60x18 beforeIndex
+            0, // uint256 beforeTimestamp
+            ud(1.1e18), // UD60x18 atOrAfterIndex
+            49, // uint256 atOrAfterTimestamp
+            50 // uint256 queryTimestamp
+        );
+    }
+
+    function test_InterpolateIndexValueAtKnownTime() public {
+        UD60x18 index = rateOracle.interpolateIndexValue(
+            ud(1e18), // UD60x18 beforeIndex
+            0, // uint256 beforeTimestamp
+            ud(1.1e18), // UD60x18 atOrAfterIndex
+            50, // uint256 atOrAfterTimestamp
+            50 // uint256 queryTimestamp
+        );
+        assertEq(index.unwrap(), 1.1e18);
+    }
+
+    function test_SetNonZeroIndexInMock() public {
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
+        vm.warp(Time.blockTimestampTruncated() + 10000);
+        assertApproxEqRel(
+            mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS),
+            INDEX_AFTER_SET_TIME * 1e9,
+            1e7 // 0.000000001% error
+        );
+    }
+
+    function test_NonZeroCurrentIndex() public {
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
+        vm.warp(Time.blockTimestampTruncated() + 10000);
+        assertApproxEqAbs(rateOracle.getCurrentIndex().unwrap(), INDEX_AFTER_SET_TIME, 1e7);
+    }
+
+    function test_NonZeroLastUpdatedIndex() public {
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
+        vm.warp(Time.blockTimestampTruncated() + 10000);
+
+        (uint32 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
+
+        assertApproxEqRel(index.unwrap(), INDEX_AFTER_SET_TIME, 1e17);
+        assertEq(time, Time.blockTimestampTruncated());
+    }
+
+    function test_SupportsInterfaceIERC165() public {
+        assertTrue(rateOracle.supportsInterface(type(IERC165).interfaceId));
+    }
+
+    function test_SupportsInterfaceIRateOracle() public {
+        assertTrue(rateOracle.supportsInterface(type(IRateOracle).interfaceId));
+    }
+
+    function test_SupportsOtherInterfaces() public {
+        assertFalse(rateOracle.supportsInterface(type(IERC20).interfaceId));
+    }
+
+    // ------------------- FUZZING -------------------
+
+    /**
+     * @dev should fail in the following cases:
+     * - give a negative index if before & at values are inverted (time & index)
+     * -
+     */
+    function testFuzz_RevertWhen_InterpolateIndexValueWithUnorderedValues(
+        UD60x18 beforeIndex,
+        uint256 beforeTimestamp,
+        UD60x18 atOrAfterIndex,
+        uint256 atOrAfterTimestamp,
+        uint256 queryTimestamp
+    )
+        public
+    {
+        vm.expectRevert();
+        vm.assume(atOrAfterTimestamp != queryTimestamp);
+        vm.assume(
+            beforeIndex.gt(atOrAfterIndex) || beforeTimestamp >= atOrAfterTimestamp
+                || (queryTimestamp > atOrAfterTimestamp || queryTimestamp <= beforeTimestamp)
+        );
+
+        UD60x18 index =
+            rateOracle.interpolateIndexValue(beforeIndex, beforeTimestamp, atOrAfterIndex, atOrAfterTimestamp, queryTimestamp);
+    }
+
+    function testFuzz_SetNonZeroIndexInMock(uint256 factorPerSecond, uint16 timePassed) public {
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
+        // not bigger than 72% apy per year
+        vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
+        vm.warp(Time.blockTimestampTruncated() + timePassed);
+        assertTrue(mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS) >= initValue.unwrap());
+    }
+
+    function testFuzz_NonZeroCurrentIndexAfterTimePasses(uint256 factorPerSecond, uint16 timePassed) public {
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
+        // not bigger than 72% apy per year
+        vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
+        vm.warp(Time.blockTimestampTruncated() + timePassed);
+
+        UD60x18 index = rateOracle.getCurrentIndex();
+
+        assertTrue(index.gte(initValue));
+    }
+
+    function testFuzz_NonZeroLatestUpdateAfterTimePasses(uint256 factorPerSecond, uint16 timePassed) public {
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
+        // not bigger than 72% apy per year
+        vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
+        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
+        vm.warp(Time.blockTimestampTruncated() + timePassed);
+
+        (uint32 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
+
+        assertTrue(index.gte(initValue));
+        assertEq(time, Time.blockTimestampTruncated());
     }
 
     // function testFuzz_success_interpolateIndexValue(
@@ -105,83 +239,4 @@ contract AaveRateOracleTest is Test {
     //     }
 
     // }
-
-    /**
-     * @dev should fail in the following cases:
-     * - give a negative index if before & at values are inverted (time & index)
-     * -
-     */
-    function testFuzz_RevertWhen_InterpolateIndexValueWithUnorderedValues(
-        UD60x18 beforeIndex,
-        uint256 beforeTimestamp,
-        UD60x18 atOrAfterIndex,
-        uint256 atOrAfterTimestamp,
-        uint256 queryTimestamp
-    )
-        public
-    {
-        vm.expectRevert();
-        vm.assume(atOrAfterTimestamp != queryTimestamp);
-        vm.assume(
-            beforeIndex.gt(atOrAfterIndex) || beforeTimestamp >= atOrAfterTimestamp
-                || (queryTimestamp > atOrAfterTimestamp || queryTimestamp <= beforeTimestamp)
-        );
-
-        UD60x18 index =
-            rateOracle.interpolateIndexValue(beforeIndex, beforeTimestamp, atOrAfterIndex, atOrAfterTimestamp, queryTimestamp);
-    }
-
-    function test_SetNonZeroIndexInMock() public {
-        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        vm.warp(Time.blockTimestampTruncated() + 10000);
-        assertApproxEqRel(
-            mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS),
-            INDEX_AFTER_SET_TIME * 1e9,
-            1e7 // 0.000000001% error
-        );
-    }
-
-    function test_NonZeroCurrentIndex() public {
-        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        vm.warp(Time.blockTimestampTruncated() + 10000);
-        assertApproxEqAbs(rateOracle.getCurrentIndex().unwrap(), INDEX_AFTER_SET_TIME, 1e7);
-    }
-
-    function test_NonZeroLastUpdatedIndex() public {
-        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        vm.warp(Time.blockTimestampTruncated() + 10000);
-        (uint32 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
-        assertApproxEqRel(index.unwrap(), INDEX_AFTER_SET_TIME, 1e17);
-        assertEq(time, Time.blockTimestampTruncated());
-    }
-
-    function testFuzz_etNonZeroIndexInMock(uint256 factorPerSecond, uint16 timePassed) public {
-        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        // not bigger than 72% apy per year
-        vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
-        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
-        vm.warp(Time.blockTimestampTruncated() + timePassed);
-        assertTrue(mockLendingPool.getReserveNormalizedIncome(TEST_UNDERLYING_ADDRESS) >= initValue.unwrap());
-    }
-
-    function testFuzz_NonZeroCurrentIndexAfterTimePasses(uint256 factorPerSecond, uint16 timePassed) public {
-        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        // not bigger than 72% apy per year
-        vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
-        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
-        vm.warp(Time.blockTimestampTruncated() + timePassed);
-        UD60x18 index = rateOracle.getCurrentIndex();
-        assertTrue(index.gte(initValue));
-    }
-
-    function testFuzz_NonZeroLatestUpdateAfterTimePasses(uint256 factorPerSecond, uint16 timePassed) public {
-        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
-        // not bigger than 72% apy per year
-        vm.assume(factorPerSecond <= 1.0015e18 && factorPerSecond >= 1e18);
-        mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(factorPerSecond));
-        vm.warp(Time.blockTimestampTruncated() + timePassed);
-        (uint32 time, UD60x18 index) = rateOracle.getLastUpdatedIndex();
-        assertTrue(index.gte(initValue));
-        assertEq(time, Time.blockTimestampTruncated());
-    }
 }

@@ -23,8 +23,8 @@ contract MockPool is IPool {
         external
         returns (int256 executedBaseAmount, int256 executedQuoteAmount)
     {
-        executedBaseAmount = 0;
-        executedQuoteAmount = 0;
+        executedBaseAmount = baseAmount;
+        executedQuoteAmount = baseAmount;
     }
 
     function setBalances(

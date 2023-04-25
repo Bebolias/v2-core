@@ -23,10 +23,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
+          always-auth: true
           node-version: 18
+          registry-url: https://npm.pkg.github.com/
       - name: Install dependencies
         run: yarn install
       - name: Semantic Release
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GH_PUBLISHING_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_PUBLISHING_TOKEN }}
         run: npx semantic-release
+      - run: yarn publish
+        env:
+            NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

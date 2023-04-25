@@ -2,7 +2,6 @@
 pragma solidity >=0.8.13;
 
 import "../interfaces/IProductIRSModule.sol";
-import "../interfaces/IMarketConfigurationModule.sol";
 import "@voltz-protocol/core/src/interfaces/IAccountModule.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
 import "@voltz-protocol/core/src/storage/AccountRBAC.sol";
@@ -53,7 +52,7 @@ contract ProductIRSModule is IProductIRSModule {
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
 
         // propagate order
-        address quoteToken = IMarketConfigurationModule(coreProxy).getMarketConfiguration(marketId).quoteToken;
+        address quoteToken = MarketConfiguration.load(marketId).quoteToken;
         int256[] memory baseAmounts = new int256[](1);
         baseAmounts[0] = executedBaseAmount;
         int256 annualizedBaseAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
@@ -76,7 +75,7 @@ contract ProductIRSModule is IProductIRSModule {
         address poolAddress = ProductConfiguration.getPoolAddress();
         int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp, poolAddress);
 
-        address quoteToken = IMarketConfigurationModule(coreProxy).getMarketConfiguration(marketId).quoteToken;
+        address quoteToken = MarketConfiguration.load(marketId).quoteToken;
 
         uint128 productId = ProductConfiguration.getProductId();
 
@@ -93,7 +92,6 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProduct
      */
-    // todo: override & add collateralType
     function getAccountUnrealizedPnL(
         uint128 accountId,
         address collateralType
@@ -120,13 +118,13 @@ contract ProductIRSModule is IProductIRSModule {
         view
         returns (int256[] memory exposures)
     {
-        Portfolio.baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
+        exposures = new int256[](baseAmounts.length);
+        exposures = Portfolio.baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
     }
 
     /**
      * @inheritdoc IProduct
      */
-    // todo: override & add collateralType
     function getAccountAnnualizedExposures(
         uint128 accountId,
         address collateralType

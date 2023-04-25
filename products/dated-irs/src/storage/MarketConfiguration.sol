@@ -6,6 +6,8 @@ pragma solidity >=0.8.13;
  * @title Tracks configurations for dated irs markets
  */
 library MarketConfiguration {
+    error MarketAlreadyExists(uint128 marketId);
+
     struct Data {
         // todo: new market ids should be created here
         /**
@@ -37,7 +39,13 @@ library MarketConfiguration {
      * @param config The MarketConfiguration object with all the settings for the irs market being configured.
      */
     function set(Data memory config) internal {
+        require(config.quoteToken != address(0), "Invalid Market");
+
         Data storage storedConfig = load(config.marketId);
+
+        if (storedConfig.quoteToken != address(0)) {
+            revert MarketAlreadyExists(config.marketId);
+        }
 
         storedConfig.marketId = config.marketId;
         storedConfig.quoteToken = config.quoteToken;
