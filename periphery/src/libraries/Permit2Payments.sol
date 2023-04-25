@@ -44,6 +44,6 @@ library Permit2Payments {
     /// @param amount The amount to transfer
     function payOrPermit2Transfer(address token, address payer, address recipient, uint256 amount) internal {
         if (payer == address(this)) Payments.pay(token, recipient, amount);
-        else permit2TransferFrom(token, payer, recipient, amount.toUint160());
+        else permit2TransferFrom(token, payer, recipient, amount.to160());
     }
 }
