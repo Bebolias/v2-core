@@ -20,7 +20,9 @@
     "bump": "yarn version minor"
   },
   "devDependencies": {
-    "@prb/math": "3.0.0",
     "solhint": "^3.4.1"
+  },
+  "dependencies": {
+    "@prb/math": "3.0.0"
   }
 }
