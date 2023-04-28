@@ -2,28 +2,44 @@
 pragma solidity >=0.8.19;
 
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
-import {UD60x18} from "@prb/math/UD60x18.sol";
+import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 /// @title Interface a Pool needs to adhere.
 interface IPool is IERC165 {
     /// @notice returns a human-readable name for a given pool
     function name(uint128 poolId) external view returns (string memory);
 
-    function executeDatedTakerOrder(uint128 marketId, uint32 maturityTimestamp, int256 baseAmount)
+    function executeDatedTakerOrder(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        int256 baseAmount
+    )
         external
         returns (int256 executedBaseAmount, int256 executedQuoteAmount);
 
-    function getAccountFilledBalances(uint128 marketId, uint32 maturityTimestamp, uint128 accountId)
+    function getAccountFilledBalances(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        uint128 accountId
+    )
         external
         view
         returns (int256 baseBalancePool, int256 quoteBalancePool);
 
-    function getAccountUnfilledBases(uint128 marketId, uint32 maturityTimestamp, uint128 accountId)
+    function getAccountUnfilledBases(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        uint128 accountId
+    )
         external
         view
         returns (uint256 unfilledBaseLong, uint256 unfilledBaseShort);
 
-    function closePosition(uint128 marketId, uint32 maturityTimestamp, uint128 accountId)
+    function closePosition(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        uint128 accountId
+    )
         external
         returns (int256 closedBasePool, int256 closedQuotePool);
 

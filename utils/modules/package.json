@@ -6,7 +6,7 @@
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "publish": "yarn config set npmRegistryServer https://npm.pkg.github.com && yarn npm publish --tolerate-republish && yarn config unset npmRegistryServer",
+    "publish": "yarn npm publish --tolerate-republish",
     "build": "forge build --sizes",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",

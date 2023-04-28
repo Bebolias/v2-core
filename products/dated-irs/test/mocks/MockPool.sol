@@ -15,7 +15,11 @@ contract MockPool is IPool {
         return "mockpool";
     }
 
-    function executeDatedTakerOrder(uint128 marketId, uint32 maturityTimestamp, int256 baseAmount)
+    function executeDatedTakerOrder(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        int256 baseAmount
+    )
         external
         returns (int256 executedBaseAmount, int256 executedQuoteAmount)
     {
@@ -28,14 +32,20 @@ contract MockPool is IPool {
         int256 _quoteBalancePool,
         uint256 _unfilledBaseLong,
         uint256 _unfilledBaseShort
-    ) external {
+    )
+        external
+    {
         baseBalancePool = _baseBalancePool;
         quoteBalancePool = _quoteBalancePool;
         unfilledBaseLong = _unfilledBaseLong;
         unfilledBaseShort = _unfilledBaseShort;
     }
 
-    function getAccountFilledBalances(uint128 marketId, uint32 maturityTimestamp, uint128 accountId)
+    function getAccountFilledBalances(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        uint128 accountId
+    )
         external
         view
         returns (int256, int256)
@@ -43,7 +53,11 @@ contract MockPool is IPool {
         return (baseBalancePool, quoteBalancePool);
     }
 
-    function getAccountUnfilledBases(uint128 marketId, uint32 maturityTimestamp, uint128 accountId)
+    function getAccountUnfilledBases(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        uint128 accountId
+    )
         external
         view
         returns (uint256, uint256)
@@ -51,7 +65,11 @@ contract MockPool is IPool {
         return (unfilledBaseLong, unfilledBaseShort);
     }
 
-    function closePosition(uint128 marketId, uint32 maturityTimestamp, uint128 accountId)
+    function closePosition(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        uint128 accountId
+    )
         external
         returns (int256 closedBasePool, int256 closedQuotePool)
     {

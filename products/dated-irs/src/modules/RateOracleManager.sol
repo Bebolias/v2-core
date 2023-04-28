@@ -21,7 +21,10 @@ contract RateOracleManager is IRateOracleModule {
      * @inheritdoc IRateOracleModule
      */
 
-    function getRateIndexCurrent(uint128 marketId, uint32 maturityTimestamp)
+    function getRateIndexCurrent(
+        uint128 marketId,
+        uint32 maturityTimestamp
+    )
         external
         view
         override
@@ -33,7 +36,10 @@ contract RateOracleManager is IRateOracleModule {
     /**
      * @inheritdoc IRateOracleModule
      */
-    function getRateIndexMaturity(uint128 marketId, uint32 maturityTimestamp)
+    function getRateIndexMaturity(
+        uint128 marketId,
+        uint32 maturityTimestamp
+    )
         external
         view
         override

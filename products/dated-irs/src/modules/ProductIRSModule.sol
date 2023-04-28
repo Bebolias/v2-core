@@ -26,7 +26,12 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProductIRSModule
      */
-    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint32 maturityTimestamp, int256 baseAmount)
+    function initiateTakerOrder(
+        uint128 accountId,
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        int256 baseAmount
+    )
         external
         override
         returns (int256 executedBaseAmount, int256 executedQuoteAmount)
@@ -104,7 +109,11 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProduct
      */
-    function baseToAnnualizedExposure(int256[] memory baseAmounts, uint128 marketId, uint32 maturityTimestamp)
+    function baseToAnnualizedExposure(
+        int256[] memory baseAmounts,
+        uint128 marketId,
+        uint32 maturityTimestamp
+    )
         public
         view
         returns (int256[] memory exposures)
@@ -116,15 +125,10 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProduct
      */
-<<<<<<< HEAD
     function getAccountAnnualizedExposures(
         uint128 accountId,
         address collateralType
     )
-=======
-    // todo: override & add collateralType
-    function getAccountAnnualizedExposures(uint128 accountId, address collateralType)
->>>>>>> ba62f32 (feat: update solidity versions)
         external
         view
         override

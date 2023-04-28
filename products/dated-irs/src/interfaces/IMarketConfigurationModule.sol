@@ -32,8 +32,5 @@ interface IMarketConfigurationModule {
      * @notice Returns the market configuration
      * @return config The configuration object describing the market
      */
-    function getMarketConfiguration(uint128 irsMarketId)
-        external
-        view
-        returns (MarketConfiguration.Data memory config);
+    function getMarketConfiguration(uint128 irsMarketId) external view returns (MarketConfiguration.Data memory config);
 }

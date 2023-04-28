@@ -30,6 +30,8 @@ jobs:
         run: yarn install
       - name: Bump versions
         run: yarn bump
+      - run: yarn config set npmRegistryServer https://npm.pkg.github.com
       - run: yarn publish
         env:
             NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - run: yarn config unset npmRegistryServer

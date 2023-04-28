@@ -5,7 +5,7 @@ import "../../src/interfaces/IRateOracle.sol";
 import "../../src/storage/RateOracleReader.sol";
 import "./MockRateOracle.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
-import {UD60x18} from "@prb/math/UD60x18.sol";
+import { UD60x18 } from "@prb/math/UD60x18.sol";
 
 contract MockRateOracleReader {
     using RateOracleReader for RateOracleReader.Data;

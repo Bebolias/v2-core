@@ -8,7 +8,7 @@ import "../src/storage/RateOracleReader.sol";
 import "./mocks/MockRateOracle.sol";
 import "./mocks/MockPool.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
-import {UD60x18, ud, unwrap as uUnwrap} from "@prb/math/UD60x18.sol";
+import { UD60x18, ud, unwrap as uUnwrap } from "@prb/math/UD60x18.sol";
 
 contract ExposePortfolio {
     using Portfolio for Portfolio.Data;
@@ -30,17 +30,18 @@ contract ExposePortfolio {
         }
     }
 
-    function getAccountAnnualizedExposures(uint128 id, address poolAddress, address collateralType)
+    function getAccountAnnualizedExposures(
+        uint128 id,
+        address poolAddress,
+        address collateralType
+    )
         external
         returns (Account.Exposure[] memory)
     {
         return Portfolio.load(id).getAccountAnnualizedExposures(poolAddress, collateralType);
     }
 
-    function getAccountUnrealizedPnL(uint128 id, address poolAddress, address collateralType)
-        external
-        returns (int256)
-    {
+    function getAccountUnrealizedPnL(uint128 id, address poolAddress, address collateralType) external returns (int256) {
         return Portfolio.load(id).getAccountUnrealizedPnL(poolAddress, collateralType);
     }
 
@@ -88,7 +89,12 @@ contract ExposePortfolio {
         return portfolio.updatePosition(marketId, maturityTimestamp, baseDelta, quoteDelta);
     }
 
-    function settle(uint128 id, uint128 marketId, uint32 maturityTimestamp, address poolAddress)
+    function settle(
+        uint128 id,
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        address poolAddress
+    )
         external
         returns (int256 settlementCashflow)
     {
@@ -118,12 +124,16 @@ contract ExposePortfolio {
     }
 
     function setMarket(uint128 marketId, address quoteToken) external {
-        MarketConfiguration.set(MarketConfiguration.Data({marketId: marketId, quoteToken: quoteToken}));
+        MarketConfiguration.set(MarketConfiguration.Data({ marketId: marketId, quoteToken: quoteToken }));
     }
 
     // EXTRA GETTERS
 
-    function getPositionData(uint128 id, uint128 marketId, uint32 maturityTimestamp)
+    function getPositionData(
+        uint128 id,
+        uint128 marketId,
+        uint32 maturityTimestamp
+    )
         external
         returns (Position.Data memory position)
     {
@@ -131,7 +141,12 @@ contract ExposePortfolio {
         position = portfolio.positions[marketId][maturityTimestamp];
     }
 
-    function isActiveMarketAndMaturity(uint128 id, uint128 marketId, uint32 maturityTimestamp, address collateralType)
+    function isActiveMarketAndMaturity(
+        uint128 id,
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        address collateralType
+    )
         external
         returns (bool)
     {
@@ -141,7 +156,7 @@ contract ExposePortfolio {
 }
 
 contract PortfolioTest is Test {
-    using {uUnwrap} for UD60x18;
+    using { uUnwrap } for UD60x18;
     using Portfolio for Portfolio.Data;
     using RateOracleReader for RateOracleReader.Data;
 
@@ -307,9 +322,7 @@ contract PortfolioTest is Test {
         test_CreateNewPosition();
         uint32 maturityTimestamp = currentTimestamp + 2;
         vm.expectCall(
-            address(mockPool),
-            0,
-            abi.encodeWithSelector(mockPool.executeDatedTakerOrder.selector, marketId, maturityTimestamp, -10)
+            address(mockPool), 0, abi.encodeWithSelector(mockPool.executeDatedTakerOrder.selector, marketId, maturityTimestamp, -10)
         );
         portfolio.closeAccount(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
 

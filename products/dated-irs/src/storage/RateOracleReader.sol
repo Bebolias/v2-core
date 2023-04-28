@@ -3,10 +3,10 @@ pragma solidity >=0.8.19;
 
 import "../interfaces/IRateOracle.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
-import {UD60x18, unwrap} from "@prb/math/UD60x18.sol";
+import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
 
 library RateOracleReader {
-    using {unwrap} for UD60x18;
+    using { unwrap } for UD60x18;
     /**
      * @dev Thrown if the index-at-maturity is requested before maturity.
      */
@@ -88,11 +88,7 @@ library RateOracleReader {
         }
     }
 
-    function getRateIndexCurrent(Data storage self, uint32 maturityTimestamp)
-        internal
-        view
-        returns (UD60x18 rateIndexCurrent)
-    {
+    function getRateIndexCurrent(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexCurrent) {
         if (Time.blockTimestampTruncated() >= maturityTimestamp) {
             // maturity timestamp has passed
             UD60x18 rateIndexMaturity = self.rateIndexAtMaturity[maturityTimestamp];

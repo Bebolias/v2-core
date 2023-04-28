@@ -5,7 +5,7 @@
     "core": "link:../../core"
   },
   "scripts": {
-    "publish": "yarn config set npmRegistryServer https://npm.pkg.github.com && yarn npm publish --tolerate-republish && yarn config unset npmRegistryServer",
+    "publish": "yarn npm publish --tolerate-republish",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",
     "lint:sol:check": "forge fmt --check && yarn solhint \"{src,test}/**/*.sol\" ",
