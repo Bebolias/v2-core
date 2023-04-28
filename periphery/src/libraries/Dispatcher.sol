@@ -83,7 +83,8 @@ library Dispatcher {
                 value := calldataload(add(inputs.offset, 0x40))
             }
             // todo: check why we need to do map(recipient)
-            // ref: https://github.com/Uniswap/universal-router/blob/3ccbe972fe6f7dc1347d6974e45ea331321de714/contracts/base/Dispatcher.sol#L113
+            // ref: https://github.com/Uniswap/universal-router/
+            // blob/3ccbe972fe6f7dc1347d6974e45ea331321de714/contracts/base/Dispatcher.sol#L113
             Payments.pay(token, map(recipient), value);
         } else if (command == Commands.WRAP_ETH) {
             // equivalent: abi.decode(inputs, (address, uint256))
@@ -115,7 +116,8 @@ library Dispatcher {
     function map(address recipient) internal view returns (address) {
         if (recipient == Constants.MSG_SENDER) {
             // todo: check the purpose of the locked flow:
-            // https://github.com/Uniswap/universal-router/blob/a88bc6e15af738b61d7bee8feb7df8d2a6e26347/contracts/base/LockAndMsgSender.sol#L26
+            // https://github.com/Uniswap/universal-router/
+            // blob/a88bc6e15af738b61d7bee8feb7df8d2a6e26347/contracts/base/LockAndMsgSender.sol#L26
             return msg.sender;
         } else if (recipient == Constants.ADDRESS_THIS) {
             return address(this);

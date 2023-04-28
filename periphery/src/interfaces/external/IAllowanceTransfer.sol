@@ -2,7 +2,8 @@
 pragma solidity >=0.8.19;
 
 /// @title AllowanceTransfer
-/// @notice Handles ERC20 token permissions through signature based allowance setting and ERC20 token transfers by checking allowed amounts
+/// @notice Handles ERC20 token permissions through signature based allowance 
+/// setting and ERC20 token transfers by checking allowed amounts
 /// @dev Requires user's token approval on the Permit2 contract
 interface IAllowanceTransfer {
     /// @notice Thrown when an allowance on a token has expired.
@@ -103,9 +104,13 @@ interface IAllowanceTransfer {
         address token;
     }
 
-    /// @notice A mapping from owner address to token address to spender address to PackedAllowance struct, which contains details and conditions of the approval.
-    /// @notice The mapping is indexed in the above order see: allowance[ownerAddress][tokenAddress][spenderAddress]
-    /// @dev The packed slot holds the allowed amount, expiration at which the allowed amount is no longer valid, and current nonce thats updated on any signature based approvals.
+    /**
+    * @notice A mapping from owner address to token address
+    * to spender address to PackedAllowance struct, which contains details and conditions of the approval.
+    * @notice The mapping is indexed in the above order see: allowance[ownerAddress][tokenAddress][spenderAddress]
+    * @dev The packed slot holds the allowed amount, expiration at which the allowed amount is no longer valid, 
+    * and current nonce thats updated on any signature based approvals.
+     */
     function allowance(address, address, address) external view returns (uint160, uint48, uint48);
 
     /// @notice Approves the spender to use up to amount of the specified token up until the expiration
