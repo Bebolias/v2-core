@@ -1,111 +1,111 @@
 {
-    "name": "@voltz-protocol/periphery",
-    "version": "2.0.0",
-    "publishConfig": {
-        "access": "restricted",
-        "@voltz-protocol:registry": "https://npm.pkg.github.com"
-    },
-    "dependencies": {
-        "@usecannon/cli": "^2.1.7"
-    },
-    "scripts": {
-        "lint:check": "yarn lint:sol:check && yarn prettier:check",
-        "lint:write": "yarn lint:sol:write && yarn prettier:write",
-        "lint:sol:check": "yarn solhint \"{src,test}/**/*.sol\"",
-        "lint:sol:write": "yarn solhint --fix \"{src,test}/**/*.sol\"",
-        "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
-        "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",
-        "build": "forge build --sizes",
-        "test": "forge test",
-        "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
-    },
-    "devDependencies": {
-        "@semantic-release/git": "^10.0.1",
-        "@semantic-release/github": "^8.0.7",
-        "@voltz-protocol/core": "workspace:^",
-        "@voltz-protocol/products-dated-irs": "workspace:^",
-        "@voltz-protocol/util-contracts": "workspace:^",
-        "@voltz-protocol/util-modules": "workspace:^",
-        "lcov-badge-generator": "1.0.5",
-        "prettier": "2.8.4",
-        "semantic-release": "^20.1.1",
-        "solhint": "3.4.0"
-    },
-    "release": {
-        "branches": [
-            "main"
-        ],
-        "plugins": [
-            [
-                "@semantic-release/commit-analyzer",
-                {
-                    "preset": "angular",
-                    "releaseRules": [
-                        {
-                            "type": "build",
-                            "release": "patch"
-                        },
-                        {
-                            "type": "chore",
-                            "release": "patch"
-                        },
-                        {
-                            "type": "ci",
-                            "release": "patch"
-                        },
-                        {
-                            "type": "docs",
-                            "release": "patch"
-                        },
-                        {
-                            "type": "feat",
-                            "release": "minor"
-                        },
-                        {
-                            "type": "fix",
-                            "release": "patch"
-                        },
-                        {
-                            "type": "perf",
-                            "release": "patch"
-                        },
-                        {
-                            "type": "refactor",
-                            "release": "patch"
-                        },
-                        {
-                            "type": "revert",
-                            "release": "patch"
-                        },
-                        {
-                            "type": "style",
-                            "release": "patch"
-                        },
-                        {
-                            "type": "test",
-                            "release": "patch"
-                        }
-                    ],
-                    "parserOpts": {
-                        "noteKeywords": [
-                            "BREAKING CHANGE",
-                            "BREAKING CHANGES"
-                        ]
-                    }
-                }
-            ],
-            "@semantic-release/release-notes-generator",
-            "@semantic-release/github",
-            "@semantic-release/npm",
-            [
-                "@semantic-release/git",
-                {
-                    "assets": [
-                        "package.json"
-                    ],
-                    "message": "chore: Release ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-                }
+  "name": "@voltz-protocol/periphery",
+  "version": "2.0.0",
+  "publishConfig": {
+    "access": "restricted",
+    "@voltz-protocol:registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "@usecannon/cli": "^2.1.7"
+  },
+  "scripts": {
+    "lint:check": "yarn lint:sol:check && yarn prettier:check",
+    "lint:write": "yarn lint:sol:write && yarn prettier:write",
+    "lint:sol:check": "yarn solhint \"{src,test}/**/*.sol\"",
+    "lint:sol:write": "yarn solhint --fix \"{src,test}/**/*.sol\"",
+    "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
+    "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",
+    "build": "forge build --sizes",
+    "test": "forge test",
+    "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
+  },
+  "devDependencies": {
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^8.0.7",
+    "@voltz-protocol/core": "workspace:^",
+    "@voltz-protocol/products-dated-irs": "workspace:^",
+    "@voltz-protocol/util-contracts": "workspace:^",
+    "@voltz-protocol/util-modules": "workspace:^",
+    "lcov-badge-generator": "1.0.5",
+    "prettier": "2.8.4",
+    "semantic-release": "^20.1.1",
+    "solhint": "3.4.0"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "preset": "angular",
+          "releaseRules": [
+            {
+              "type": "build",
+              "release": "patch"
+            },
+            {
+              "type": "chore",
+              "release": "patch"
+            },
+            {
+              "type": "ci",
+              "release": "patch"
+            },
+            {
+              "type": "docs",
+              "release": "patch"
+            },
+            {
+              "type": "feat",
+              "release": "minor"
+            },
+            {
+              "type": "fix",
+              "release": "patch"
+            },
+            {
+              "type": "perf",
+              "release": "patch"
+            },
+            {
+              "type": "refactor",
+              "release": "patch"
+            },
+            {
+              "type": "revert",
+              "release": "patch"
+            },
+            {
+              "type": "style",
+              "release": "patch"
+            },
+            {
+              "type": "test",
+              "release": "patch"
+            }
+          ],
+          "parserOpts": {
+            "noteKeywords": [
+              "BREAKING CHANGE",
+              "BREAKING CHANGES"
             ]
-        ]
-    }
+          }
+        }
+      ],
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/github",
+      "@semantic-release/npm",
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json"
+          ],
+          "message": "chore: Release ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ]
+    ]
+  }
 }

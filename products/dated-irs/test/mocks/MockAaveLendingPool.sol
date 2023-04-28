@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity =0.8.17;
+pragma solidity =0.8.19;
 
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "../../src/externalInterfaces/IAaveV3LendingPool.sol";

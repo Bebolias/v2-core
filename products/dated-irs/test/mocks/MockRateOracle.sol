@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity =0.8.17;
+pragma solidity =0.8.19;
 
 import "../../src/oracles/AaveRateOracle.sol";
 import "../../src/interfaces/IRateOracle.sol";
