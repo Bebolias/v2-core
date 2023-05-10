@@ -22,7 +22,7 @@ contract CollateralConfigurationModule is ICollateralConfigurationModule {
 
         CollateralConfiguration.set(config);
 
-        emit CollateralConfigured(config.tokenAddress, config);
+        emit CollateralConfigured(config.tokenAddress, config, block.timestamp);
     }
 
     /**

@@ -24,6 +24,7 @@ contract ProductModule is IProductModule {
     using Product for Product.Data;
     using MarketFeeConfiguration for MarketFeeConfiguration.Data;
     using SafeCastI256 for int256;
+    using SafeCastU256 for uint256;
     using AssociatedSystem for AssociatedSystem.Data;
     using Collateral for Collateral.Data;
     using SetUtil for SetUtil.UintSet;
@@ -65,7 +66,7 @@ contract ProductModule is IProductModule {
 
         productId = ProductCreator.create(product, name, msg.sender).id;
 
-        emit ProductRegistered(product, productId, msg.sender);
+        emit ProductRegistered(product, productId, name, msg.sender, block.timestamp);
     }
 
     /**
@@ -73,10 +74,12 @@ contract ProductModule is IProductModule {
      */
 
     function closeAccount(uint128 productId, uint128 accountId, address collateralType) external override {
-        Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
         // todo: consider returning data that might be useful in the future
-        // todo: emit event
+
+        Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
         Product.load(productId).closeAccount(accountId, collateralType);
+
+        emit AccountClosed(accountId, productId, collateralType, block.timestamp);
     }
 
     /**
@@ -98,9 +101,11 @@ contract ProductModule is IProductModule {
 
         Account.Data storage payingAccount = Account.exists(payingAccountId);
         payingAccount.collaterals[collateralType].decreaseCollateralBalance(fee);
+        emit Collateral.CollateralUpdate(payingAccountId, collateralType, -fee.toInt(), block.timestamp);
 
         Account.Data storage receivingAccount = Account.exists(receivingAccountId);
         receivingAccount.collaterals[collateralType].increaseCollateralBalance(fee);
+        emit Collateral.CollateralUpdate(receivingAccountId, collateralType, fee.toInt(), block.timestamp);
     }
 
     function propagateTakerOrder(
@@ -121,9 +126,10 @@ contract ProductModule is IProductModule {
         account.imCheck(collateralType);
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
+            emit NewActiveProduct(accountId, productId, block.timestamp);
         }
 
-        //todo: emit event
+        emit TakerOrderPropagated(accountId, productId, marketId, collateralType, annualizedNotional, fee, block.timestamp);
     }
 
     function propagateMakerOrder(
@@ -144,9 +150,10 @@ contract ProductModule is IProductModule {
         account.imCheck(collateralType);
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
+            emit NewActiveProduct(accountId, productId, block.timestamp);
         }
 
-        //todo: emit event
+        emit MakerOrderPropagated(accountId, productId, marketId, collateralType, annualizedNotional, fee, block.timestamp);
     }
 
     function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)
@@ -158,11 +165,15 @@ contract ProductModule is IProductModule {
         Account.Data storage account = Account.exists(accountId);
         if (amount > 0) {
             account.collaterals[collateralType].increaseCollateralBalance(amount.toUint());
+            emit Collateral.CollateralUpdate(accountId, collateralType, amount, block.timestamp);
         } else {
             account.collaterals[collateralType].decreaseCollateralBalance((-amount).toUint());
+            emit Collateral.CollateralUpdate(accountId, collateralType, amount, block.timestamp);
         }
 
+
         //todo: imcheck?
-        //todo: emit event
+
+        emit CashflowPropagated(accountId, productId, collateralType, amount, block.timestamp);
     }
 }

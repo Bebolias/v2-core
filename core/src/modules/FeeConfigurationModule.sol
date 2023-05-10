@@ -12,7 +12,7 @@ contract FeeConfigurationModule is IFeeConfigurationModule {
     function configureMarketFee(MarketFeeConfiguration.Data memory config) external override {
         OwnableStorage.onlyOwner();
         MarketFeeConfiguration.set(config);
-        emit MarketFeeConfigured(config);
+        emit MarketFeeConfigured(config, block.timestamp);
     }
 
     /**

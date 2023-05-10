@@ -36,7 +36,13 @@ contract EnhancedProductModule is ProductModule, CoreState {
 }
 
 contract ProductModuleTest is Test {
-    event ProductRegistered(address indexed product, uint128 indexed productId, address indexed sender);
+    event ProductRegistered(
+        address indexed product, 
+        uint128 indexed productId,
+        string name, 
+        address indexed sender, 
+        uint256 blockTimestamp
+    );
 
     EnhancedProductModule internal productModule;
 
@@ -70,7 +76,13 @@ contract ProductModuleTest is Test {
         vm.prank(Constants.PRODUCT_CREATOR);
 
         vm.expectEmit(true, true, true, true, address(productModule));
-        emit ProductRegistered(address(product3), 3, Constants.PRODUCT_CREATOR);
+        emit ProductRegistered(
+            address(product3), 
+            3, 
+            "Product 3", 
+            Constants.PRODUCT_CREATOR, 
+            block.timestamp
+        );
 
         productModule.registerProduct(address(product3), "Product 3");
     }

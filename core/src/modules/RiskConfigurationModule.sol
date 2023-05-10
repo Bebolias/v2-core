@@ -17,7 +17,7 @@ contract RiskConfigurationModule is IRiskConfigurationModule {
     function configureMarketRisk(MarketRiskConfiguration.Data memory config) external override {
         OwnableStorage.onlyOwner();
         MarketRiskConfiguration.set(config);
-        emit MarketRiskConfigured(config);
+        emit MarketRiskConfigured(config, block.timestamp);
     }
 
     /**
@@ -26,7 +26,7 @@ contract RiskConfigurationModule is IRiskConfigurationModule {
     function configureProtocolRisk(ProtocolRiskConfiguration.Data memory config) external override {
         OwnableStorage.onlyOwner();
         ProtocolRiskConfiguration.set(config);
-        emit ProtocolRiskConfigured(config);
+        emit ProtocolRiskConfigured(config, block.timestamp);
     }
 
     /**

@@ -54,7 +54,7 @@ contract AccountModule is IAccountModule {
         IAccountTokenModule accountTokenModule = IAccountTokenModule(getAccountTokenAddress());
         accountTokenModule.safeMint(msg.sender, requestedAccountId, "");
         Account.create(requestedAccountId, msg.sender);
-        emit AccountCreated(requestedAccountId, msg.sender);
+        emit AccountCreated(requestedAccountId, msg.sender, block.timestamp);
     }
 
     /**
@@ -65,6 +65,7 @@ contract AccountModule is IAccountModule {
 
         Account.Data storage account = Account.load(accountId);
         account.rbac.setOwner(to);
+        emit AccountOwnerUpdate(accountId, to, block.timestamp);
     }
 
     /**
@@ -105,7 +106,7 @@ contract AccountModule is IAccountModule {
 
         account.rbac.grantPermission(permission, user);
 
-        emit PermissionGranted(accountId, permission, user, msg.sender);
+        emit PermissionGranted(accountId, permission, user, msg.sender, block.timestamp);
     }
 
     /**
@@ -116,7 +117,7 @@ contract AccountModule is IAccountModule {
 
         account.rbac.revokePermission(permission, user);
 
-        emit PermissionRevoked(accountId, permission, user, msg.sender);
+        emit PermissionRevoked(accountId, permission, user, msg.sender, block.timestamp);
     }
 
     /**
@@ -129,7 +130,7 @@ contract AccountModule is IAccountModule {
 
         Account.load(accountId).rbac.revokePermission(permission, msg.sender);
 
-        emit PermissionRevoked(accountId, permission, msg.sender, msg.sender);
+        emit PermissionRevoked(accountId, permission, msg.sender, msg.sender, block.timestamp);
     }
 
     /**

@@ -47,9 +47,7 @@ library ProductCreator {
     {
         Data storage productStore = getProductStore();
 
-        uint128 id = productStore.lastCreatedProductId;
-        id++;
-
+        uint128 id = productStore.lastCreatedProductId + 1;
         product = Product.load(id);
 
         product.id = id;

@@ -12,14 +12,16 @@ interface IRiskConfigurationModule {
     /**
      * @notice Emitted when a market risk configuration is created or updated
      * @param config The object with the newly configured details.
+     * @param blockTimestamp The current block timestamp.
      */
-    event MarketRiskConfigured(MarketRiskConfiguration.Data config);
+    event MarketRiskConfigured(MarketRiskConfiguration.Data config, uint256 blockTimestamp);
 
     /**
      * @notice Emitted when the protocol risk configuration is created or updated
      * @param config The object with the newly configured details.
+     * @param blockTimestamp The current block timestamp.
      */
-    event ProtocolRiskConfigured(ProtocolRiskConfiguration.Data config);
+    event ProtocolRiskConfigured(ProtocolRiskConfiguration.Data config, uint256 blockTimestamp);
 
     /**
      * @notice Creates or updates the configuration for the given `productId` and `marketId` pair

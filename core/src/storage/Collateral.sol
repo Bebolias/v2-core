@@ -17,6 +17,29 @@ library Collateral {
      */
     error InsufficientLiquidationBoosterBalance(uint256 requestedAmount);
 
+    /**
+     * @notice Emitted when collateral balance of account token with id `accountId` is updated.
+     * @param accountId The id of the account.
+     * @param collateralType The address of the collateral type.
+     * @param tokenAmount The change delta of the collateral balance.
+     * @param blockTimestamp The current block timestamp.
+     */
+    event CollateralUpdate(uint128 indexed accountId, address indexed collateralType, int256 tokenAmount, uint256 blockTimestamp);
+
+    /**
+     * @notice Emitted when liquidator booster deposit of `accountId` is updated.
+     * @param accountId The id of the account.
+     * @param collateralType The address of the collateral type.
+     * @param tokenAmount The change delta of the collateral balance.
+     * @param blockTimestamp The current block timestamp.
+     */
+    event LiquidatorBoosterUpdate(
+        uint128 indexed accountId, 
+        address indexed collateralType, 
+        int256 tokenAmount, 
+        uint256 blockTimestamp
+    );
+
     struct Data {
         /**
          * @dev The net amount that is deposited in this collateral

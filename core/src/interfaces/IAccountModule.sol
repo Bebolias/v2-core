@@ -21,8 +21,21 @@ interface IAccountModule {
      * @notice Emitted when an account token with id `accountId` is minted to `owner`.
      * @param accountId The id of the account.
      * @param owner The address that owns the created account.
+     * @param blockTimestamp The current block timestamp.
      */
-    event AccountCreated(uint128 indexed accountId, address indexed owner);
+    event AccountCreated(uint128 indexed accountId, address indexed owner, uint256 blockTimestamp);
+
+    /**
+     * @notice Emitted when an account token with id `accountId` is transferred to `newOwner`.
+     * @param accountId The id of the account.
+     * @param newOwner The address of the new owner.
+     * @param blockTimestamp The current block timestamp.
+     */
+    event AccountOwnerUpdate(
+        uint128 indexed accountId, 
+        address indexed newOwner, 
+        uint256 blockTimestamp
+    );
 
     /**
      * @notice Emitted when `user` is granted `permission` by `sender` for account `accountId`.
@@ -30,9 +43,10 @@ interface IAccountModule {
      * @param permission The bytes32 identifier of the permission.
      * @param user The target address to whom the permission was granted.
      * @param sender The Address that granted the permission.
+     * @param blockTimestamp The current block timestamp.
      */
     event PermissionGranted(
-        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender
+        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender, uint256 blockTimestamp
     );
 
     /**
@@ -41,9 +55,10 @@ interface IAccountModule {
      * @param permission The bytes32 identifier of the permission.
      * @param user The target address for which the permission was revoked.
      * @param sender The address that revoked the permission.
+     * @param blockTimestamp The current block timestamp.
      */
     event PermissionRevoked(
-        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender
+        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender, uint256 blockTimestamp
     );
 
     /**

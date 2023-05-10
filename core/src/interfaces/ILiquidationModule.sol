@@ -26,28 +26,21 @@ interface ILiquidationModule {
      * @notice Emitted when an account is liquidated.
      * @param accountId The id of the account that was liquidated.
      * @param collateralType The collateral type of the account that was liquidated
-     * @param liquidationData Relevant liquidation data (e.g. liquidator reward amount)
-     * @param liquidateAsAccountId Account id that will receive the rewards from the liquidation.
-     * @param sender The address of the account that is triggering the liquidation.
+     * @param liquidatorAccountId Account id that will receive the rewards from the liquidation.
+     * @param liquidatorRewardAmount The liquidator reward amount
+     * @param sender The address that triggers the liquidation.
+     * @param blockTimestamp The current block timestamp.
      */
     event Liquidation(
         uint128 indexed accountId,
-        uint128 indexed poolId,
         address indexed collateralType,
-        LiquidationData liquidationData,
-        uint128 liquidateAsAccountId,
-        address sender
+        address sender,
+        uint128 liquidatorAccountId,
+        uint256 liquidatorRewardAmount,
+        uint256 imPreClose,
+        uint256 imPostClose,
+        uint256 blockTimestamp
     );
-
-    /**
-     * @notice Data structure that holds liquidation information, used in events and in return statements.
-     */
-    struct LiquidationData {
-        /**
-         * @dev The amount rewarded in the liquidation.
-         */
-        uint256 amountRewarded;
-    }
 
     /**
      * @notice Liquidates an account

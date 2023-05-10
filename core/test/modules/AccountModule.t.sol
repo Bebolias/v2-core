@@ -6,12 +6,12 @@ import "../../src/modules/AccountModule.sol";
 import "../../src/storage/AccountRBAC.sol";
 
 contract AccountModuleTest is Test {
-    event AccountCreated(uint128 indexed accountId, address indexed owner);
+    event AccountCreated(uint128 indexed accountId, address indexed owner, uint256 blockTimestamp);
     event PermissionGranted(
-        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender
+        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender, uint256 blockTimestamp
     );
     event PermissionRevoked(
-        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender
+        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender, uint256 blockTimestamp
     );
 
     AccountModule internal accountModule;
@@ -41,7 +41,7 @@ contract AccountModuleTest is Test {
 
         // Expect AccountCreated event
         vm.expectEmit(true, true, true, true, address(accountModule));
-        emit AccountCreated(100, address(this));
+        emit AccountCreated(100, address(this), block.timestamp);
 
         accountModule.createAccount(100);
     }
@@ -72,7 +72,7 @@ contract AccountModuleTest is Test {
         accountModule.createAccount(100);
 
         vm.expectEmit(true, true, true, true, address(accountModule));
-        emit PermissionGranted(100, AccountRBAC._ADMIN_PERMISSION, authorizedAddress, address(this));
+        emit PermissionGranted(100, AccountRBAC._ADMIN_PERMISSION, authorizedAddress, address(this), block.timestamp);
 
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, authorizedAddress);
 
@@ -128,7 +128,7 @@ contract AccountModuleTest is Test {
         assertEq(accountPerms.length, 1);
 
         vm.expectEmit(true, true, true, true, address(accountModule));
-        emit PermissionRevoked(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress, address(this));
+        emit PermissionRevoked(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress, address(this), block.timestamp);
 
         accountModule.revokePermission(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress);
         accountPerms = accountModule.getAccountPermissions(100);
@@ -212,7 +212,7 @@ contract AccountModuleTest is Test {
         assertEq(accountPerms.length, 1);
 
         vm.expectEmit(true, true, true, true, address(accountModule));
-        emit PermissionRevoked(100, AccountRBAC._ADMIN_PERMISSION, renouncedAddress, renouncedAddress);
+        emit PermissionRevoked(100, AccountRBAC._ADMIN_PERMISSION, renouncedAddress, renouncedAddress, block.timestamp);
 
         vm.prank(renouncedAddress);
         accountModule.renouncePermission(100, AccountRBAC._ADMIN_PERMISSION);

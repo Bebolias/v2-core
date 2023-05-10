@@ -6,7 +6,7 @@ import "../../src/modules/CollateralConfigurationModule.sol";
 import "../test-utils/Constants.sol";
 
 contract CollateralConfigurationModuleTest is Test {
-    event CollateralConfigured(address indexed collateralType, CollateralConfiguration.Data config);
+    event CollateralConfigured(address indexed collateralType, CollateralConfiguration.Data config, uint256 blockTimestamp);
 
     CollateralConfigurationModule internal collateralConfigurationModule;
     address internal owner = vm.addr(1);
@@ -31,7 +31,7 @@ contract CollateralConfigurationModuleTest is Test {
 
         // Expect CollateralConfigured event
         vm.expectEmit(true, true, true, true, address(collateralConfigurationModule));
-        emit CollateralConfigured(Constants.TOKEN_0, config);
+        emit CollateralConfigured(Constants.TOKEN_0, config, block.timestamp);
 
         vm.prank(owner);
         collateralConfigurationModule.configureCollateral(config);

@@ -11,8 +11,9 @@ interface IFeeConfigurationModule {
     /**
      * @notice Emitted when a market fee configuration is created or updated
      * @param config The object with the newly configured details.
+     * @param blockTimestamp The current block timestamp.
      */
-    event MarketFeeConfigured(MarketFeeConfiguration.Data config);
+    event MarketFeeConfigured(MarketFeeConfiguration.Data config, uint256 blockTimestamp);
 
     /**
      * @notice Creates or updates the fee configuration for the given `productId` and `marketId` pair

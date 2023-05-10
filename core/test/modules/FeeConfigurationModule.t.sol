@@ -14,7 +14,7 @@ contract ExposedFeeConfigurationModule is FeeConfigurationModule {
 }
 
 contract FeeConfigurationModuleTest is Test {
-    event MarketFeeConfigured(MarketFeeConfiguration.Data config);
+    event MarketFeeConfigured(MarketFeeConfiguration.Data config, uint256 blockTimestamp);
 
     ExposedFeeConfigurationModule internal feeConfigurationModule;
     address internal owner = vm.addr(1);
@@ -40,7 +40,7 @@ contract FeeConfigurationModuleTest is Test {
 
         // Expect MarketFeeConfigured event
         vm.expectEmit(true, true, true, true, address(feeConfigurationModule));
-        emit MarketFeeConfigured(config);
+        emit MarketFeeConfigured(config, block.timestamp);
 
         vm.prank(owner);
         feeConfigurationModule.configureMarketFee(config);

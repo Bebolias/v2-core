@@ -26,7 +26,6 @@ contract MarketConfigurationModule is IMarketConfigurationModule {
     /**
      * @inheritdoc IMarketConfigurationModule
      */
-    // solc-ignore-next-line func-mutability
     function getMarketConfiguration(uint128 irsMarketId) external pure returns (MarketConfiguration.Data memory config) {
         return MarketConfiguration.load(irsMarketId);
     }

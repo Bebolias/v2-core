@@ -9,8 +9,8 @@ import {SD59x18} from "@prb/math/SD59x18.sol";
 import {UD60x18} from "@prb/math/UD60x18.sol";
 
 contract RiskConfigurationModuleTest is Test {
-    event MarketRiskConfigured(MarketRiskConfiguration.Data config);
-    event ProtocolRiskConfigured(ProtocolRiskConfiguration.Data config);
+    event MarketRiskConfigured(MarketRiskConfiguration.Data config, uint256 blockTimestamp);
+    event ProtocolRiskConfigured(ProtocolRiskConfiguration.Data config, uint256 blockTimestamp);
 
     RiskConfigurationModule internal riskConfigurationModule;
     address internal owner = vm.addr(1);
@@ -31,7 +31,7 @@ contract RiskConfigurationModuleTest is Test {
 
         // Expect MarketRiskConfigured event
         vm.expectEmit(true, true, true, true, address(riskConfigurationModule));
-        emit MarketRiskConfigured(config);
+        emit MarketRiskConfigured(config, block.timestamp);
 
         vm.prank(owner);
         riskConfigurationModule.configureMarketRisk(config);
@@ -88,7 +88,7 @@ contract RiskConfigurationModuleTest is Test {
 
         // Expect ProtocolRiskConfigured event
         vm.expectEmit(true, true, true, true, address(riskConfigurationModule));
-        emit ProtocolRiskConfigured(config);
+        emit ProtocolRiskConfigured(config, block.timestamp);
 
         vm.prank(owner);
         riskConfigurationModule.configureProtocolRisk(config);
