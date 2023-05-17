@@ -1,4 +1,3 @@
-//SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
 import "../interfaces/ICollateralModule.sol";
@@ -37,7 +36,9 @@ contract CollateralModule is ICollateralModule {
                 liquidationBooster - account.collaterals[collateralType].liquidationBoosterBalance;
             actualTokenAmount += liquidationBoosterTopUp;
             account.collaterals[collateralType].increaseLiquidationBoosterBalance(liquidationBoosterTopUp);
-            emit Collateral.LiquidatorBoosterUpdate(accountId, collateralType, liquidationBoosterTopUp.toInt(), block.timestamp);
+            emit Collateral.LiquidatorBoosterUpdate(
+                accountId, collateralType, liquidationBoosterTopUp.toInt(), block.timestamp
+            );
         }
 
         uint256 allowance = IERC20(collateralType).allowance(depositFrom, self);
@@ -54,11 +55,13 @@ contract CollateralModule is ICollateralModule {
         }
 
         collateralType.safeTransferFrom(depositFrom, self, actualTokenAmount);
-        
+
         account.collaterals[collateralType].increaseCollateralBalance(tokenAmount);
         emit Collateral.CollateralUpdate(accountId, collateralType, tokenAmount.toInt(), block.timestamp);
 
-        emit Deposited(accountId, collateralType, tokenAmount, actualTokenAmount - tokenAmount, msg.sender, block.timestamp);
+        emit Deposited(
+            accountId, collateralType, tokenAmount, actualTokenAmount - tokenAmount, msg.sender, block.timestamp
+        );
     }
 
     /**
@@ -72,7 +75,9 @@ contract CollateralModule is ICollateralModule {
         if (tokenAmount > collateralBalance) {
             uint256 liquidatorBoosterWithdrawal = tokenAmount - collateralBalance;
             account.collaterals[collateralType].decreaseLiquidationBoosterBalance(liquidatorBoosterWithdrawal);
-            emit Collateral.LiquidatorBoosterUpdate(accountId, collateralType, -liquidatorBoosterWithdrawal.toInt(), block.timestamp);
+            emit Collateral.LiquidatorBoosterUpdate(
+                accountId, collateralType, -liquidatorBoosterWithdrawal.toInt(), block.timestamp
+            );
 
             account.collaterals[collateralType].decreaseCollateralBalance(collateralBalance);
             emit Collateral.CollateralUpdate(accountId, collateralType, -collateralBalance.toInt(), block.timestamp);

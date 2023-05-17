@@ -1,4 +1,3 @@
-//SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
 import "../storage/Account.sol";
@@ -38,7 +37,9 @@ contract LiquidationModule is ILiquidationModule {
         if (mulUDxUint(liquidatorRewardParameter, imPreClose) >= liquidationBooster) {
             liquidatorRewardAmount = mulUDxUint(liquidatorRewardParameter, imPreClose - imPostClose);
             account.collaterals[collateralType].decreaseCollateralBalance(liquidatorRewardAmount);
-            emit Collateral.CollateralUpdate(liquidatedAccountId, collateralType, -liquidatorRewardAmount.toInt(), block.timestamp);
+            emit Collateral.CollateralUpdate(
+                liquidatedAccountId, collateralType, -liquidatorRewardAmount.toInt(), block.timestamp
+            );
         } else {
             if (imPostClose != 0) {
                 revert PartialLiquidationNotIncentivized(liquidatedAccountId, imPreClose, imPostClose);
@@ -47,10 +48,7 @@ contract LiquidationModule is ILiquidationModule {
             liquidatorRewardAmount = liquidationBooster;
             account.collaterals[collateralType].decreaseLiquidationBoosterBalance(liquidatorRewardAmount);
             emit Collateral.LiquidatorBoosterUpdate(
-                liquidatedAccountId, 
-                collateralType,
-                -liquidatorRewardAmount.toInt(), 
-                block.timestamp
+                liquidatedAccountId, collateralType, -liquidatorRewardAmount.toInt(), block.timestamp
             );
         }
     }
@@ -80,16 +78,18 @@ contract LiquidationModule is ILiquidationModule {
 
         Account.Data storage liquidatorAccount = Account.exists(liquidatorAccountId);
         liquidatorAccount.collaterals[collateralType].increaseCollateralBalance(liquidatorRewardAmount);
-        emit Collateral.CollateralUpdate(liquidatorAccountId, collateralType, liquidatorRewardAmount.toInt(), block.timestamp);
+        emit Collateral.CollateralUpdate(
+            liquidatorAccountId, collateralType, liquidatorRewardAmount.toInt(), block.timestamp
+        );
 
         emit Liquidation(
-            liquidatedAccountId, 
-            collateralType, 
-            msg.sender, 
-            liquidatorAccountId, 
-            liquidatorRewardAmount, 
-            imPreClose, 
-            imPostClose, 
+            liquidatedAccountId,
+            collateralType,
+            msg.sender,
+            liquidatorAccountId,
+            liquidatorRewardAmount,
+            imPreClose,
+            imPostClose,
             block.timestamp
         );
     }

@@ -1,4 +1,3 @@
-//SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
 import "./CoreProxy.sol";
@@ -7,14 +6,14 @@ import "./modules/OwnerUpgradeModule.sol";
 import "oz/utils/cryptography/MerkleProof.sol";
 
 contract CommunityDeployer {
-    /// @notice Timelock Period In Seconds, once the deployment is queued, 
+    /// @notice Timelock Period In Seconds, once the deployment is queued,
     /// 2 days need to pass in order to make deployment of the Voltz Factory possible
     uint256 public constant TIMELOCK_PERIOD_IN_SECONDS = 2 days;
 
     /// @notice Multisig owner address
     address public ownerAddress;
 
-    /// @notice The number of votes in support of a proposal required in order for a quorum 
+    /// @notice The number of votes in support of a proposal required in order for a quorum
     /// to be reached and for a vote to succeed
     uint256 public quorumVotes;
 
@@ -28,12 +27,12 @@ contract CommunityDeployer {
     bytes32 public accountNftId;
 
     /// @notice Name of Voltz Protocol V2 Account NFT
-    string public accountNftName; 
+    string public accountNftName;
 
     /// @notice Symbol of Voltz Protocol V2 Account NFT
-    string public accountNftSymbol; 
+    string public accountNftSymbol;
 
-    /// @notice Uri of Voltz Protocol V2 Account NFT 
+    /// @notice Uri of Voltz Protocol V2 Account NFT
     string public accountNftUri;
 
     /// @notice Total number of votes in favour of deploying Voltz Protocol V2 Core
@@ -42,11 +41,11 @@ contract CommunityDeployer {
     /// @notice Total number of votes against the deployment of Voltz Protocol V2 Core
     uint256 public noVoteCount;
 
-    /// @notice voting end block timestamp (once this contract is deployed, voting is considered 
+    /// @notice voting end block timestamp (once this contract is deployed, voting is considered
     /// to be officially started)
     uint256 public blockTimestampVotingEnd;
 
-    /// @notice timelock end block timestamp (once the proposal is queued, the timelock period pre-deployment 
+    /// @notice timelock end block timestamp (once the proposal is queued, the timelock period pre-deployment
     /// is considered to be officially started)
     uint256 public blockTimestampTimelockEnd;
 
@@ -56,7 +55,7 @@ contract CommunityDeployer {
     /// @notice isDeployed makes sure contract is deploying at most one Core Proxy
     bool public isDeployed;
 
-    /// @notice Voltz V2 Core Proxy to be deployed in a scenario where a successful vote is followed by the 
+    /// @notice Voltz V2 Core Proxy to be deployed in a scenario where a successful vote is followed by the
     /// queue and deployment
     CoreProxy public coreProxy;
 
@@ -67,19 +66,14 @@ contract CommunityDeployer {
     mapping(uint256 => uint256) private votedBitMap;
 
     // This event is triggered whenever a call to cast a vote succeeds
-    event Voted(
-        uint256 index,
-        address account,
-        uint256 numberOfVotes,
-        bool yesVote
-    );
+    event Voted(uint256 index, address account, uint256 numberOfVotes, bool yesVote);
 
     constructor(
         address _coreRouter,
         address _accountNftRouter,
-        bytes32 _accountNftId, 
-        string memory _accountNftName, 
-        string memory _accountNftSymbol, 
+        bytes32 _accountNftId,
+        string memory _accountNftName,
+        string memory _accountNftSymbol,
         string memory _accountNftUri,
         uint256 _quorumVotes,
         address _ownerAddress,
@@ -109,28 +103,19 @@ contract CommunityDeployer {
     function _setVoted(uint256 index) private {
         uint256 votedWordIndex = index / 256;
         uint256 votedBitIndex = index % 256;
-        votedBitMap[votedWordIndex] =
-            votedBitMap[votedWordIndex] |
-            (1 << votedBitIndex);
+        votedBitMap[votedWordIndex] = votedBitMap[votedWordIndex] | (1 << votedBitIndex);
     }
 
-    /// @notice Deploy the Voltz Factory by passing the masterVAMM and the masterMarginEngine 
+    /// @notice Deploy the Voltz Factory by passing the masterVAMM and the masterMarginEngine
     /// into the Factory constructor
     function deploy() external {
         require(isQueued, "not queued");
-        require(
-            block.timestamp > blockTimestampTimelockEnd,
-            "timelock is ongoing"
-        );
+        require(block.timestamp > blockTimestampTimelockEnd, "timelock is ongoing");
         require(isDeployed == false, "already deployed");
-       
+
         coreProxy = new CoreProxy(coreRouter, address(this));
         AssociatedSystemsModule(address(coreProxy)).initOrUpgradeNft(
-            accountNftId,
-            accountNftName,
-            accountNftSymbol,
-            accountNftUri,
-            accountNftRouter
+            accountNftId, accountNftName, accountNftSymbol, accountNftUri, accountNftRouter
         );
         OwnerUpgradeModule(address(coreProxy)).nominateNewOwner(ownerAddress);
 
@@ -144,40 +129,27 @@ contract CommunityDeployer {
         require(yesVoteCount > noVoteCount, "no >= yes");
         require(isQueued == false, "already queued");
         isQueued = true;
-        blockTimestampTimelockEnd =
-            block.timestamp +
-            TIMELOCK_PERIOD_IN_SECONDS;
+        blockTimestampTimelockEnd = block.timestamp + TIMELOCK_PERIOD_IN_SECONDS;
     }
 
     /// @notice Vote for the proposal to deploy the Voltz Factory contract
     /// @param _index index of the voter
     /// @param _numberOfVotes number of voltz genesis nfts held by the msg.sender before the snapshot was taken
-    /// @param _yesVote if this boolean is true then the msg.sender is casting a yes vote, 
+    /// @param _yesVote if this boolean is true then the msg.sender is casting a yes vote,
     /// if the boolean is false the msg.sender is casting a no vote
-    /// @param _merkleProof merkle proof that needs to be verified against the merkle root to 
+    /// @param _merkleProof merkle proof that needs to be verified against the merkle root to
     /// check the msg.sender against the snapshot
-    function castVote(
-        uint256 _index,
-        uint256 _numberOfVotes,
-        bool _yesVote,
-        bytes32[] calldata _merkleProof
-    ) external {
-        require(
-            block.timestamp <= blockTimestampVotingEnd,
-            "voting period over"
-        );
+    function castVote(uint256 _index, uint256 _numberOfVotes, bool _yesVote, bytes32[] calldata _merkleProof)
+        external
+    {
+        require(block.timestamp <= blockTimestampVotingEnd, "voting period over");
 
         // check if msg.sender has already voted
         require(!hasVoted(_index), "duplicate vote");
 
         // verify the merkle proof
-        bytes32 _node = keccak256(
-            abi.encodePacked(_index, msg.sender, _numberOfVotes)
-        );
-        require(
-            MerkleProof.verify(_merkleProof, merkleRoot, _node),
-            "invalid merkle proof"
-        );
+        bytes32 _node = keccak256(abi.encodePacked(_index, msg.sender, _numberOfVotes));
+        require(MerkleProof.verify(_merkleProof, merkleRoot, _node), "invalid merkle proof");
 
         // mark hasVoted
         _setVoted(_index);

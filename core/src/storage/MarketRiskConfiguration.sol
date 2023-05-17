@@ -1,4 +1,3 @@
-//SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
 import { SD59x18 } from "@prb/math/SD59x18.sol";

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
 import "../storage/Account.sol";
@@ -20,11 +19,7 @@ interface IProductModule {
      * @param blockTimestamp The current block timestamp.
      */
     event ProductRegistered(
-        address indexed product, 
-        uint128 indexed productId, 
-        string name, 
-        address indexed sender, 
-        uint256 blockTimestamp
+        address indexed product, uint128 indexed productId, string name, address indexed sender, uint256 blockTimestamp
     );
 
     /**
@@ -42,7 +37,9 @@ interface IProductModule {
      * @param collateralType The address of the collateral token.
      * @param blockTimestamp The current block timestamp.
      */
-    event AccountClosed(uint128 indexed accountId, uint128 indexed productId, address collateralType, uint256 blockTimestamp);
+    event AccountClosed(
+        uint128 indexed accountId, uint128 indexed productId, address collateralType, uint256 blockTimestamp
+    );
 
     /**
      * @notice Emitted when a taker order of the account token with id `accountId` is propagated by the product.
@@ -55,12 +52,12 @@ interface IProductModule {
      * @param blockTimestamp The current block timestamp.
      */
     event TakerOrderPropagated(
-        uint128 indexed accountId, 
-        uint128 indexed productId, 
-        uint128 indexed marketId, 
-        address collateralType, 
-        int256 annualizedNotional, 
-        uint256 fee, 
+        uint128 indexed accountId,
+        uint128 indexed productId,
+        uint128 indexed marketId,
+        address collateralType,
+        int256 annualizedNotional,
+        uint256 fee,
         uint256 blockTimestamp
     );
 
@@ -75,12 +72,12 @@ interface IProductModule {
      * @param blockTimestamp The current block timestamp.
      */
     event MakerOrderPropagated(
-        uint128 indexed accountId, 
-        uint128 indexed productId, 
-        uint128 indexed marketId, 
-        address collateralType, 
-        int256 annualizedNotional, 
-        uint256 fee, 
+        uint128 indexed accountId,
+        uint128 indexed productId,
+        uint128 indexed marketId,
+        address collateralType,
+        int256 annualizedNotional,
+        uint256 fee,
         uint256 blockTimestamp
     );
 
@@ -93,10 +90,10 @@ interface IProductModule {
      * @param blockTimestamp The current block timestamp.
      */
     event CashflowPropagated(
-        uint128 indexed accountId, 
-        uint128 indexed productId, 
-        address collateralType, 
-        int256 amount, 
+        uint128 indexed accountId,
+        uint128 indexed productId,
+        address collateralType,
+        int256 amount,
         uint256 blockTimestamp
     );
 

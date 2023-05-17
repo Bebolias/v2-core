@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
 /**
@@ -31,11 +30,7 @@ interface IAccountModule {
      * @param newOwner The address of the new owner.
      * @param blockTimestamp The current block timestamp.
      */
-    event AccountOwnerUpdate(
-        uint128 indexed accountId, 
-        address indexed newOwner, 
-        uint256 blockTimestamp
-    );
+    event AccountOwnerUpdate(uint128 indexed accountId, address indexed newOwner, uint256 blockTimestamp);
 
     /**
      * @notice Emitted when `user` is granted `permission` by `sender` for account `accountId`.
@@ -46,7 +41,11 @@ interface IAccountModule {
      * @param blockTimestamp The current block timestamp.
      */
     event PermissionGranted(
-        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender, uint256 blockTimestamp
+        uint128 indexed accountId,
+        bytes32 indexed permission,
+        address indexed user,
+        address sender,
+        uint256 blockTimestamp
     );
 
     /**
@@ -58,7 +57,11 @@ interface IAccountModule {
      * @param blockTimestamp The current block timestamp.
      */
     event PermissionRevoked(
-        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender, uint256 blockTimestamp
+        uint128 indexed accountId,
+        bytes32 indexed permission,
+        address indexed user,
+        address sender,
+        uint256 blockTimestamp
     );
 
     /**

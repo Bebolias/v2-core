@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
@@ -8,10 +7,18 @@ import "../../src/storage/AccountRBAC.sol";
 contract AccountModuleTest is Test {
     event AccountCreated(uint128 indexed accountId, address indexed owner, uint256 blockTimestamp);
     event PermissionGranted(
-        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender, uint256 blockTimestamp
+        uint128 indexed accountId,
+        bytes32 indexed permission,
+        address indexed user,
+        address sender,
+        uint256 blockTimestamp
     );
     event PermissionRevoked(
-        uint128 indexed accountId, bytes32 indexed permission, address indexed user, address sender, uint256 blockTimestamp
+        uint128 indexed accountId,
+        bytes32 indexed permission,
+        address indexed user,
+        address sender,
+        uint256 blockTimestamp
     );
 
     AccountModule internal accountModule;

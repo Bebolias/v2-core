@@ -1,4 +1,3 @@
-//SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
 import "../storage/CollateralConfiguration.sol";
@@ -14,7 +13,9 @@ interface ICollateralConfigurationModule {
      * @param config The object with the newly configured details.
      * @param blockTimestamp The current block timestamp.
      */
-    event CollateralConfigured(address indexed collateralType, CollateralConfiguration.Data config, uint256 blockTimestamp);
+    event CollateralConfigured(
+        address indexed collateralType, CollateralConfiguration.Data config, uint256 blockTimestamp
+    );
 
     /**
      * @notice Creates or updates the configuration for the given `collateralType`.

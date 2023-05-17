@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";

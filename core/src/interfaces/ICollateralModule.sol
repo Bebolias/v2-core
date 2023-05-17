@@ -1,4 +1,3 @@
-//SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
 /**
@@ -51,7 +50,11 @@ interface ICollateralModule {
      * @param blockTimestamp The current block timestamp.
      */
     event Withdrawn(
-        uint128 indexed accountId, address indexed collateralType, uint256 tokenAmount, address indexed sender, uint256 blockTimestamp
+        uint128 indexed accountId,
+        address indexed collateralType,
+        uint256 tokenAmount,
+        address indexed sender,
+        uint256 blockTimestamp
     );
 
     /**

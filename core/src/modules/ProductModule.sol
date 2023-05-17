@@ -1,4 +1,3 @@
-//SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
 import "../interfaces/external/IProduct.sol";
@@ -129,7 +128,9 @@ contract ProductModule is IProductModule {
             emit NewActiveProduct(accountId, productId, block.timestamp);
         }
 
-        emit TakerOrderPropagated(accountId, productId, marketId, collateralType, annualizedNotional, fee, block.timestamp);
+        emit TakerOrderPropagated(
+            accountId, productId, marketId, collateralType, annualizedNotional, fee, block.timestamp
+        );
     }
 
     function propagateMakerOrder(
@@ -153,7 +154,9 @@ contract ProductModule is IProductModule {
             emit NewActiveProduct(accountId, productId, block.timestamp);
         }
 
-        emit MakerOrderPropagated(accountId, productId, marketId, collateralType, annualizedNotional, fee, block.timestamp);
+        emit MakerOrderPropagated(
+            accountId, productId, marketId, collateralType, annualizedNotional, fee, block.timestamp
+        );
     }
 
     function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)
@@ -170,7 +173,6 @@ contract ProductModule is IProductModule {
             account.collaterals[collateralType].decreaseCollateralBalance((-amount).toUint());
             emit Collateral.CollateralUpdate(accountId, collateralType, amount, block.timestamp);
         }
-
 
         //todo: imcheck?
 
