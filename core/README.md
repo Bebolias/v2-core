@@ -8,8 +8,6 @@
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
 [coverage-badge]: ./coverage.svg
 
-
 ## License
 
 The license for Voltz V2 is detailed in [`LICENSE`](./LICENSE).
-
