@@ -1,6 +1,7 @@
 {
   "name": "@voltz-protocol/core",
   "version": "2.0.7",
+  "license": "Voltz V2 License",
   "publishConfig": {
     "access": "restricted",
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
