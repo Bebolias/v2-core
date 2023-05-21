@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.19;
 
-// todo: test this library
+// todo: is this library used anywhere?
 library Pack {
     function pack(uint128 a, uint32 b) internal pure returns (uint256) {
         return (a << 32) | b;

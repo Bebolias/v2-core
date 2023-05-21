@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
 pragma solidity >=0.8.19;
 
 import {UD60x18, toUD60x18, ud} from "@prb/math/UD60x18.sol";
