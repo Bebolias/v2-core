@@ -18,8 +18,10 @@ export async function dumpStorage(
     throw new Error('No solidity files found');
   }
 
+  // todo: double check the impact of commenting out the spdx text since we don't want to have it
+  // if all good, can just remove instead of leaving commented out
   const result = [
-    `// SPDX-License-Identifier: ${license}`,
+    // `// SPDX-License-Identifier: ${license}`,
     version ? `pragma solidity ${version};` : _renderPragmaDirective(astNodes),
     '',
   ];
