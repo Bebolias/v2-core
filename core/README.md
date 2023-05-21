@@ -1,3 +1,5 @@
+# Voltz V2 - Core Margining and Liqiuidation System
+
 [![GitHub Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] ![Coverage:Core][coverage-badge]
 
 [gha]: https://github.com/Voltz-Protocol/v2-core/actions
@@ -7,5 +9,7 @@
 [coverage-badge]: ./coverage.svg
 
 
+## License
 
+The license for Voltz V2 is detailed in [`LICENSE`](./LICENSE).
 

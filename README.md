@@ -10,7 +10,7 @@ This is a monorepo with the following folder structure and packages:
 │   ├── dated-irs                // Dated Interest Rate Swap Product
 │
 ├── periphery                    // Voltz v2 Periphery
-├── core                         // Voltz V2 Core (voltz v2 margining and liqiuidation system)
+├── core                         // Voltz V2 Core (Margining and Liqiuidation System)
 │
 └── utils                        // Utilities, plugins, tooling
     ├── common-config            // ..
@@ -20,4 +20,3 @@ This is a monorepo with the following folder structure and packages:
     ├── modules                  // Modules that are reused between multiple router based projects
     └── router                   // Cannon plugin that merges multiple modules into a router contract.
 ```
-
