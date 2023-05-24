@@ -9,6 +9,7 @@
     "@usecannon/cli": "^2.1.7"
   },
   "scripts": {
+    "publish": "echo \"Cannot publish periphery yet\"",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",
     "lint:sol:check": "yarn solhint \"{src,test}/**/*.sol\"",
