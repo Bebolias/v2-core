@@ -31,7 +31,12 @@ interface IProductIRSModule is IProduct {
      * @param baseAmount Amount of notional that the account wants to trade in either long (+) or short (-) direction depending on
      * sign
      */
-    function initiateTakerOrder(uint128 accountId, uint128 marketId, uint32 maturityTimestamp, int256 baseAmount)
+    function initiateTakerOrder(
+        uint128 accountId,
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        int256 baseAmount
+    )
         external
         returns (int256 executedBaseAmount, int256 executedQuoteAmount);
 
