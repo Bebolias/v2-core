@@ -4,12 +4,15 @@ import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Pack.sol";
+import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
 import "./Position.sol";
 import "./RateOracleReader.sol";
 import "./MarketConfiguration.sol";
+import "./ProductConfiguration.sol";
 import "../interfaces/IPool.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
-import { UD60x18, UNIT } from "@prb/math/UD60x18.sol";
+import "@voltz-protocol/core/src/interfaces/IRiskConfigurationModule.sol";
+import { UD60x18, UNIT, unwrap } from "@prb/math/UD60x18.sol";
 import { SD59x18 } from "@prb/math/SD59x18.sol";
 import { mulUDxUint, mulUDxInt } from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
@@ -115,9 +118,14 @@ library Portfolio {
 
         UD60x18 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp);
 
-        UD60x18 gwap = IPool(poolAddress).getDatedIRSGwap(marketId, maturityTimestamp);
+        address coreProxy = ProductConfiguration.getCoreProxyAddress();
+        uint128 productId = ProductConfiguration.getProductId();
+        uint32 lookbackWindow =
+            IRiskConfigurationModule(coreProxy).getMarketRiskConfiguration(productId, marketId).twapLookbackWindow;
 
-        unwindQuote = mulUDxInt(gwap.mul(timeDeltaAnnualized).add(UNIT), mulUDxInt(currentLiquidityIndex, baseAmount));
+        UD60x18 twap = IPool(poolAddress).getAdjustedDatedIRSTwap(marketId, maturityTimestamp, baseAmount, lookbackWindow);
+
+        unwindQuote = mulUDxInt(twap.mul(timeDeltaAnnualized).add(UNIT), mulUDxInt(currentLiquidityIndex, baseAmount));
     }
 
     /**
@@ -197,11 +205,27 @@ library Portfolio {
 
             Position.Data storage position = self.positions[marketId][maturityTimestamp];
 
-            (int256 executedBaseAmount, int256 executedQuoteAmount) =
-                pool.executeDatedTakerOrder(marketId, maturityTimestamp, -position.baseBalance);
-            position.update(executedBaseAmount, executedQuoteAmount);
+            pool.closeUnfilledBase(marketId, maturityTimestamp, self.accountId);
 
-            pool.closePosition(marketId, maturityTimestamp, self.accountId);
+            // left-over exposure in pool
+            (int256 filledBasePool,) = pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
+
+            int256 unwindBase = -(position.baseBalance + filledBasePool);
+
+            (int256 executedBaseAmount, int256 executedQuoteAmount) =
+                pool.executeDatedTakerOrder(marketId, maturityTimestamp, unwindBase, 0);
+
+            UD60x18 annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
+            IProductModule(ProductConfiguration.getCoreProxyAddress()).propagateTakerOrder(
+                self.accountId,
+                ProductConfiguration.getProductId(),
+                marketId,
+                collateralType,
+                mulUDxInt(annualizedExposureFactor, executedBaseAmount)
+            );
+
+            // todo: trader position balance can get out of line if LP
+            position.update(executedBaseAmount, executedQuoteAmount);
 
             if (position.baseBalance == 0 && position.quoteBalance == 0) {
                 self.deactivateMarketMaturity(marketId, maturityTimestamp);
@@ -255,10 +279,10 @@ library Portfolio {
 
         IPool pool = IPool(poolAddress);
 
-        (int256 closedBasePool, int256 closedQuotePool) = pool.closePosition(marketId, maturityTimestamp, self.accountId);
+        (int256 filledBase, int256 filledQuote) = pool.getAccountFilledBalances(marketId, maturityTimestamp, self.accountId);
 
         settlementCashflow =
-            mulUDxInt(liquidityIndexMaturity, position.baseBalance + closedBasePool) + position.quoteBalance + closedQuotePool;
+            mulUDxInt(liquidityIndexMaturity, position.baseBalance + filledBase) + position.quoteBalance + filledQuote;
 
         position.settle();
     }

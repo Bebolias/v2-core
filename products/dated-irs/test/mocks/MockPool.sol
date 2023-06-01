@@ -8,7 +8,7 @@ contract MockPool is IPool {
     int256 quoteBalancePool;
     uint256 unfilledBaseLong;
     uint256 unfilledBaseShort;
-    mapping(uint256 => UD60x18) datedIRSGwaps;
+    mapping(uint256 => UD60x18) datedIRSTwaps;
 
     function name(uint128 poolId) external view returns (string memory) {
         return "mockpool";
@@ -17,7 +17,8 @@ contract MockPool is IPool {
     function executeDatedTakerOrder(
         uint128 marketId,
         uint32 maturityTimestamp,
-        int256 baseAmount
+        int256 baseAmount,
+        uint160 priceLimit
     )
         external
         returns (int256 executedBaseAmount, int256 executedQuoteAmount)
@@ -64,27 +65,35 @@ contract MockPool is IPool {
         return (unfilledBaseLong, unfilledBaseShort);
     }
 
-    function closePosition(
+    function closeUnfilledBase(
         uint128 marketId,
         uint32 maturityTimestamp,
         uint128 accountId
     )
         external
-        returns (int256 closedBasePool, int256 closedQuotePool)
+        returns (int256 closedBasePool)
     {
         closedBasePool = baseBalancePool;
-        closedQuotePool = quoteBalancePool;
 
         baseBalancePool = 0;
         quoteBalancePool = 0;
     }
 
-    function getDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp) external view returns (UD60x18) {
-        return datedIRSGwaps[(marketId << 32) | maturityTimestamp];
+    function getAdjustedDatedIRSTwap(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        int256 orderSize,
+        uint32 lookbackWindow
+    )
+        external
+        view
+        returns (UD60x18)
+    {
+        return datedIRSTwaps[(marketId << 32) | maturityTimestamp];
     }
 
-    function setDatedIRSGwap(uint128 marketId, uint32 maturityTimestamp, UD60x18 _datedIRSGwap) external {
-        datedIRSGwaps[(marketId << 32) | maturityTimestamp] = _datedIRSGwap;
+    function setDatedIRSTwap(uint128 marketId, uint32 maturityTimestamp, UD60x18 _datedIRSTwap) external {
+        datedIRSTwaps[(marketId << 32) | maturityTimestamp] = _datedIRSTwap;
     }
 
     function supportsInterface(bytes4 interfaceID) external view returns (bool) {

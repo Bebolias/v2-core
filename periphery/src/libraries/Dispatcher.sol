@@ -24,21 +24,22 @@ library Dispatcher {
         success = true;
 
         if (command == Commands.V2_DATED_IRS_INSTRUMENT_SWAP) {
-            // equivalent: abi.decode(inputs, (uint128, uint128, uint32, int256))
-
+            // equivalent: abi.decode(inputs, (uint128, uint128, uint32, int256, uint160))
             uint128 accountId;
             uint128 marketId;
             uint32 maturityTimestamp;
             int256 baseAmount;
+            uint160 priceLimit;
 
             assembly {
                 accountId := calldataload(inputs.offset)
-                marketId := calldataload(add(inputs.offset, 0x20))
-                maturityTimestamp := calldataload(add(inputs.offset, 0x40))
-                baseAmount := calldataload(add(inputs.offset, 0x60))
+                marketId := calldataload(add(inputs.offset, 0x10))
+                maturityTimestamp := calldataload(add(inputs.offset, 0x20))
+                baseAmount := calldataload(add(inputs.offset, 0x40))
+                priceLimit := calldataload(add(inputs.offset, 0x60))
             }
 
-            V2DatedIRS.swap(accountId, marketId, maturityTimestamp, baseAmount);
+            V2DatedIRS.swap(accountId, marketId, maturityTimestamp, baseAmount, priceLimit);
         } else if (command == Commands.V2_DATED_IRS_INSTRUMENT_SETTLE) {
             // equivalent: abi.decode(inputs, (uint128, uint128, uint32))
             uint128 accountId;
@@ -46,8 +47,8 @@ library Dispatcher {
             uint32 maturityTimestamp;
             assembly {
                 accountId := calldataload(inputs.offset)
-                marketId := calldataload(add(inputs.offset, 0x20))
-                maturityTimestamp := calldataload(add(inputs.offset, 0x40))
+                marketId := calldataload(add(inputs.offset, 0x10))
+                maturityTimestamp := calldataload(add(inputs.offset, 0x20))
             }
             V2DatedIRS.settle(accountId, marketId, maturityTimestamp);
         } else if (command == Commands.V2_CORE_DEPOSIT) {

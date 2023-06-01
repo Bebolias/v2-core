@@ -14,7 +14,9 @@ import "@voltz-protocol/core/src/modules/ProductModule.sol";
 import "oz/interfaces/IERC20.sol";
 import "./mocks/MockRateOracle.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
+import "@voltz-protocol/core/src/modules/RiskConfigurationModule.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
+import { sd } from "@prb/math/SD59x18.sol";
 
 contract ProductIRSModuleExtended is ProductIRSModule {
     function setOwner(address account) external {
@@ -42,7 +44,7 @@ contract ProductIRSModuleExtended is ProductIRSModule {
     }
 }
 
-contract MockCoreStorage is AccountModule, ProductModule { }
+contract MockCoreStorage is AccountModule, ProductModule, RiskConfigurationModule { }
 
 contract ProductIRSModuleTest is Test {
     using ProductConfiguration for ProductConfiguration.Data;
@@ -133,7 +135,7 @@ contract ProductIRSModuleTest is Test {
         );
         vm.mockCall(
             address(2),
-            abi.encodeWithSelector(IPool.executeDatedTakerOrder.selector, MOCK_MARKET_ID, maturityTimestamp, 100),
+            abi.encodeWithSelector(IPool.executeDatedTakerOrder.selector, MOCK_MARKET_ID, maturityTimestamp, 100, 0),
             abi.encode(10, -10)
         );
         vm.mockCall(
@@ -145,7 +147,7 @@ contract ProductIRSModuleTest is Test {
         );
         vm.startPrank(MOCK_USER);
 
-        productIrs.initiateTakerOrder(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp, 100);
+        productIrs.initiateTakerOrder(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp, 100, 0);
         vm.stopPrank();
     }
 
@@ -155,13 +157,18 @@ contract ProductIRSModuleTest is Test {
 
         vm.mockCall(
             address(2),
-            abi.encodeWithSelector(IPool.executeDatedTakerOrder.selector, MOCK_MARKET_ID, maturityTimestamp, -10),
+            abi.encodeWithSelector(IPool.executeDatedTakerOrder.selector, MOCK_MARKET_ID, maturityTimestamp, -20, 0),
             abi.encode(10, -10)
         );
         vm.mockCall(
             address(2),
-            abi.encodeWithSelector(IPool.closePosition.selector, MOCK_MARKET_ID, maturityTimestamp, MOCK_ACCOUNT_ID),
+            abi.encodeWithSelector(IPool.getAccountFilledBalances.selector, MOCK_MARKET_ID, maturityTimestamp, MOCK_ACCOUNT_ID),
             abi.encode(10, -10)
+        );
+        vm.mockCall(
+            address(2),
+            abi.encodeWithSelector(IPool.closeUnfilledBase.selector, MOCK_MARKET_ID, maturityTimestamp, MOCK_ACCOUNT_ID),
+            abi.encode(10)
         );
 
         vm.prank(address(mockCoreStorage));
@@ -217,8 +224,20 @@ contract ProductIRSModuleTest is Test {
             abi.encode(10, 12)
         );
         vm.mockCall(
+            address(mockCoreStorage),
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, MOCK_PRODUCT_ID, MOCK_MARKET_ID),
+            abi.encode(
+                MarketRiskConfiguration.Data({
+                    productId: MOCK_PRODUCT_ID,
+                    marketId: MOCK_MARKET_ID,
+                    riskParameter: sd(0),
+                    twapLookbackWindow: 86400
+                })
+            )
+        );
+        vm.mockCall(
             address(2),
-            abi.encodeWithSelector(IPool.getDatedIRSGwap.selector, MOCK_MARKET_ID, maturityTimestamp),
+            abi.encodeWithSelector(IPool.getAdjustedDatedIRSTwap.selector, MOCK_MARKET_ID, maturityTimestamp, 20, 86400),
             abi.encode(UD60x18.wrap(1e18))
         );
 
@@ -239,13 +258,13 @@ contract ProductIRSModuleTest is Test {
 
         vm.mockCall(
             address(2),
-            abi.encodeWithSelector(IPool.closePosition.selector, MOCK_MARKET_ID, maturityTimestamp, MOCK_ACCOUNT_ID),
-            abi.encode(10, -11)
+            abi.encodeWithSelector(IPool.getAccountFilledBalances.selector, MOCK_MARKET_ID, maturityTimestamp, MOCK_ACCOUNT_ID),
+            abi.encode(10, -20)
         );
         vm.mockCall(
             address(mockCoreStorage),
             abi.encodeWithSelector(
-                IProductModule.propagateCashflow.selector, MOCK_ACCOUNT_ID, MOCK_PRODUCT_ID, MOCK_QUOTE_TOKEN, -1
+                IProductModule.propagateCashflow.selector, MOCK_ACCOUNT_ID, MOCK_PRODUCT_ID, MOCK_QUOTE_TOKEN, -10
             ),
             abi.encode()
         );

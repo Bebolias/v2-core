@@ -8,7 +8,11 @@ import "../src/storage/RateOracleReader.sol";
 import "./mocks/MockRateOracle.sol";
 import "./mocks/MockPool.sol";
 import "@voltz-protocol/core/src/storage/Account.sol";
+import "@voltz-protocol/core/src/storage/MarketRiskConfiguration.sol";
+import "@voltz-protocol/core/src/interfaces/IRiskConfigurationModule.sol";
+import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
 import { UD60x18, ud, unwrap as uUnwrap } from "@prb/math/UD60x18.sol";
+import { sd } from "@prb/math/SD59x18.sol";
 
 contract ExposePortfolio {
     using Portfolio for Portfolio.Data;
@@ -21,6 +25,10 @@ contract ExposePortfolio {
         assembly {
             s := portfolio.slot
         }
+    }
+
+    function setProductConfig(address pool) external {
+        ProductConfiguration.set(ProductConfiguration.Data({ productId: 1, coreProxy: address(12), poolAddress: pool }));
     }
 
     function create(uint128 id) external returns (bytes32 s) {
@@ -171,6 +179,8 @@ contract PortfolioTest is Test {
     uint128 internal constant marketId = 100;
     uint128 internal constant accountId = 200;
     bytes32 internal constant portfolioSlot = keccak256(abi.encode("xyz.voltz.Portfolio", accountId));
+    MarketRiskConfiguration.Data mockCoreMarketConfig =
+        MarketRiskConfiguration.Data({ productId: 0, marketId: marketId, riskParameter: sd(0), twapLookbackWindow: 86400 });
 
     function setUp() public virtual {
         currentTimestamp = Time.blockTimestampTruncated();
@@ -205,16 +215,21 @@ contract PortfolioTest is Test {
         uint32 maturityTimestamp1 = currentTimestamp + ONE_YEAR;
         uint32 maturityTimestamp2 = currentTimestamp + ONE_YEAR / 2;
         uint256 liqudityIndex = 1e27;
-        UD60x18 gwap1 = ud(0.3e18); // 30% -> 1.3 * base
-        UD60x18 gwap2 = ud(0.05e18); // 5% ->1 + (0.05 * 1/2) * base
+        UD60x18 twap1 = ud(0.3e18); // 30% -> 1.3 * base
+        UD60x18 twap2 = ud(0.05e18); // 5% ->1 + (0.05 * 1/2) * base
 
         portfolio.updatePosition(accountId, marketId, maturityTimestamp1, 1000 * 1e18, 500 * 1e18);
         portfolio.updatePosition(accountId, marketId, maturityTimestamp2, 100 * 1e18, 20 * 1e18);
-        mockPool.setDatedIRSGwap(marketId, maturityTimestamp1, gwap1);
-        mockPool.setDatedIRSGwap(marketId, maturityTimestamp2, gwap2);
+        mockPool.setDatedIRSTwap(marketId, maturityTimestamp1, twap1);
+        mockPool.setDatedIRSTwap(marketId, maturityTimestamp2, twap2);
 
         mockRateOracle.setLastUpdatedIndex(liqudityIndex);
-        // set gwap
+        vm.mockCall(
+            address(0),
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 0, marketId),
+            abi.encode(mockCoreMarketConfig)
+        );
+
         int256 unrealizedPnL = portfolio.getAccountUnrealizedPnL(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
 
         assertEq(unrealizedPnL, 19225 * 1e17);
@@ -224,8 +239,8 @@ contract PortfolioTest is Test {
         uint32 maturityTimestamp1 = currentTimestamp + ONE_YEAR;
         uint32 maturityTimestamp2 = currentTimestamp + ONE_YEAR / 2;
         uint256 liqudityIndex = 1e27;
-        UD60x18 gwap1 = ud(0.3e18);
-        UD60x18 gwap2 = ud(0.05e18);
+        UD60x18 twap1 = ud(0.3e18);
+        UD60x18 twap2 = ud(0.05e18);
 
         portfolio.activateMarketMaturity(accountId, marketId, maturityTimestamp1);
         portfolio.activateMarketMaturity(accountId, marketId, maturityTimestamp2);
@@ -238,11 +253,16 @@ contract PortfolioTest is Test {
             0 // _unfilledBaseShort
         );
 
-        mockPool.setDatedIRSGwap(marketId, maturityTimestamp1, gwap1);
-        mockPool.setDatedIRSGwap(marketId, maturityTimestamp2, gwap2);
+        mockPool.setDatedIRSTwap(marketId, maturityTimestamp1, twap1);
+        mockPool.setDatedIRSTwap(marketId, maturityTimestamp2, twap2);
 
         mockRateOracle.setLastUpdatedIndex(liqudityIndex);
-        // set gwap
+        vm.mockCall(
+            address(0),
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 0, marketId),
+            abi.encode(mockCoreMarketConfig)
+        );
+
         int256 unrealizedPnL = portfolio.getAccountUnrealizedPnL(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
 
         assertEq(unrealizedPnL, 30675 * 1e17);
@@ -252,8 +272,8 @@ contract PortfolioTest is Test {
         uint32 maturityTimestamp1 = currentTimestamp + ONE_YEAR;
         uint32 maturityTimestamp2 = currentTimestamp + ONE_YEAR / 2;
         uint256 liqudityIndex = 1e27;
-        UD60x18 gwap1 = ud(0.3e18);
-        UD60x18 gwap2 = ud(0.05e18);
+        UD60x18 twap1 = ud(0.3e18);
+        UD60x18 twap2 = ud(0.05e18);
 
         // trader position
         portfolio.updatePosition(accountId, marketId, maturityTimestamp1, 1000 * 1e18, 500 * 1e18);
@@ -268,11 +288,16 @@ contract PortfolioTest is Test {
             0 // _unfilledBaseShort
         );
 
-        mockPool.setDatedIRSGwap(marketId, maturityTimestamp1, gwap1);
-        mockPool.setDatedIRSGwap(marketId, maturityTimestamp2, gwap2);
+        mockPool.setDatedIRSTwap(marketId, maturityTimestamp1, twap1);
+        mockPool.setDatedIRSTwap(marketId, maturityTimestamp2, twap2);
 
         mockRateOracle.setLastUpdatedIndex(liqudityIndex);
-        // set gwap
+        vm.mockCall(
+            address(0),
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 0, marketId),
+            abi.encode(mockCoreMarketConfig)
+        );
+
         int256 unrealizedPnL = portfolio.getAccountUnrealizedPnL(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
 
         // 1300 + 1950 + 500 - 210 = 3540
@@ -283,11 +308,18 @@ contract PortfolioTest is Test {
     function test_ComputeUnwindQuote() public {
         uint32 maturityTimestamp = currentTimestamp + ONE_YEAR;
         uint256 liqudityIndex = 1e27;
-        UD60x18 gwap = ud(0.3e18);
+        UD60x18 twap = ud(0.3e18);
 
-        mockPool.setDatedIRSGwap(marketId, maturityTimestamp, gwap);
+        mockPool.setDatedIRSTwap(marketId, maturityTimestamp, twap);
 
         mockRateOracle.setLastUpdatedIndex(liqudityIndex);
+
+        vm.mockCall(
+            address(0),
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 0, marketId),
+            abi.encode(mockCoreMarketConfig)
+        );
+
         int256 unrealizedPnL = portfolio.computeUnwindQuote(marketId, maturityTimestamp, address(mockPool), 1000);
 
         assertEq(unrealizedPnL, 1300);
@@ -321,6 +353,14 @@ contract PortfolioTest is Test {
     function test_CloseAccountWithoutClosingInMarket() public {
         test_CreateNewPosition();
         uint32 maturityTimestamp = currentTimestamp + 2;
+        portfolio.setProductConfig(address(mockPool));
+
+        vm.mockCall(
+            address(12),
+            abi.encodeWithSelector(IProductModule.propagateTakerOrder.selector, accountId, 1, marketId, MOCK_COLLATERAL_TYPE, 0),
+            abi.encode(0)
+        );
+
         vm.expectCall(
             address(mockPool), 0, abi.encodeWithSelector(mockPool.executeDatedTakerOrder.selector, marketId, maturityTimestamp, -10)
         );
@@ -334,6 +374,13 @@ contract PortfolioTest is Test {
         uint32 maturityTimestamp = currentTimestamp + 2;
 
         portfolio.updatePosition(accountId, marketId, maturityTimestamp, 10, 10);
+
+        portfolio.setProductConfig(address(mockPool));
+        vm.mockCall(
+            address(12),
+            abi.encodeWithSelector(IProductModule.propagateTakerOrder.selector, accountId, 1, marketId, MOCK_COLLATERAL_TYPE, 0),
+            abi.encode(0)
+        );
 
         vm.expectCall(
             address(mockPool), 0, abi.encodeWithSelector(mockPool.executeDatedTakerOrder.selector, marketId, maturityTimestamp, -10)

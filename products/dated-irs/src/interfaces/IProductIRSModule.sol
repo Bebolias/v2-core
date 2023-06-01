@@ -28,6 +28,7 @@ interface IProductIRSModule is IProduct {
      * @param accountId Id of the account that wants to initiate a taker order
      * @param marketId Id of the market in which the account wants to initiate a taker order (e.g. 1 for aUSDC lend)
      * @param maturityTimestamp Maturity timestamp of the market in which the account wants to initiate a taker order
+     * @param priceLimit The Q64.96 sqrt price limit. If !isFT, the price cannot be less than this
      * @param baseAmount Amount of notional that the account wants to trade in either long (+) or short (-) direction depending on
      * sign
      */
@@ -35,7 +36,8 @@ interface IProductIRSModule is IProduct {
         uint128 accountId,
         uint128 marketId,
         uint32 maturityTimestamp,
-        int256 baseAmount
+        int256 baseAmount,
+        uint160 priceLimit
     )
         external
         returns (int256 executedBaseAmount, int256 executedQuoteAmount);
@@ -52,4 +54,20 @@ interface IProductIRSModule is IProduct {
      *
      */
     function configureProduct(ProductConfiguration.Data memory config) external;
+
+    /**
+     * @notice Propagates maker order to core to check margin requirements
+     * @param accountId Id of the account that wants to initiate a taker order
+     * @param marketId Id of the market in which the account wants to initiate a taker order (e.g. 1 for aUSDC lend)
+     * @param annualizedBaseAmount The annualized notional of the order
+     * todo: pool propagates to product and product to core. allowing the
+     * pool to interact directly with the core would save gas.
+     * this means the Core should have knowledge about the pool for access
+     */
+    function propagateMakerOrder(uint128 accountId, uint128 marketId, int256 annualizedBaseAmount) external;
+
+    /**
+     * @notice Returns core proxy address from ProductConfigruation
+     */
+    function getCoreProxyAddress() external returns (address);
 }

@@ -10,6 +10,7 @@ import "../storage/ProductConfiguration.sol";
 import "../storage/RateOracleReader.sol";
 import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
+import "@voltz-protocol/core/src/interfaces/IRiskConfigurationModule.sol";
 import "@voltz-protocol/util-contracts/src/storage/OwnableStorage.sol";
 
 /**
@@ -29,7 +30,8 @@ contract ProductIRSModule is IProductIRSModule {
         uint128 accountId,
         uint128 marketId,
         uint32 maturityTimestamp,
-        int256 baseAmount
+        int256 baseAmount,
+        uint160 priceLimit
     )
         external
         override
@@ -46,8 +48,8 @@ contract ProductIRSModule is IProductIRSModule {
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         address poolAddress = ProductConfiguration.getPoolAddress();
         Portfolio.Data storage portfolio = Portfolio.load(accountId);
-        IPool pool = IPool(poolAddress);
-        (executedBaseAmount, executedQuoteAmount) = pool.executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount);
+        (executedBaseAmount, executedQuoteAmount) =
+            IPool(poolAddress).executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount, priceLimit);
         portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
 
         // propagate order
@@ -161,6 +163,30 @@ contract ProductIRSModule is IProductIRSModule {
 
         ProductConfiguration.set(config);
         emit ProductConfigured(config);
+    }
+
+    /**
+     * @inheritdoc IProductIRSModule
+     */
+    function getCoreProxyAddress() external returns (address) {
+        return ProductConfiguration.getCoreProxyAddress();
+    }
+
+    /**
+     * @inheritdoc IProductIRSModule
+     */
+    function propagateMakerOrder(uint128 accountId, uint128 marketId, int256 annualizedBaseAmount) external {
+        if (msg.sender != ProductConfiguration.getPoolAddress()) {
+            revert NotAuthorized(msg.sender, "propagateMakerOrder");
+        }
+        address coreProxy = ProductConfiguration.getCoreProxyAddress();
+        IProductModule(coreProxy).propagateMakerOrder(
+            accountId,
+            ProductConfiguration.getProductId(),
+            marketId,
+            MarketConfiguration.load(marketId).quoteToken,
+            annualizedBaseAmount
+        );
     }
 
     /**

@@ -19,6 +19,10 @@ library MarketRiskConfiguration {
          * @dev Risk Parameters are multiplied by notional exposures to derived shocked cashflow calculations
          */
         SD59x18 riskParameter;
+        /**
+         * @dev Number of seconds in the past from which to calculate the time-weighted average fixed rate (average = geometric mean)
+         */
+        uint32 twapLookbackWindow;
     }
 
     /**
@@ -44,5 +48,6 @@ library MarketRiskConfiguration {
         storedConfig.productId = config.productId;
         storedConfig.marketId = config.marketId;
         storedConfig.riskParameter = config.riskParameter;
+        storedConfig.twapLookbackWindow = config.twapLookbackWindow;
     }
 }
