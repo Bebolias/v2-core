@@ -43,8 +43,7 @@ contract RateOracleManagerTest is Test {
 
     using RateOracleReader for RateOracleReader.Data;
 
-    event RateOracleRegistered(uint128 indexed marketId, address indexed oracleAddress);
-    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress);
+    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp);
 
     MockRateOracle mockRateOracle;
     uint32 public maturityTimestamp;
@@ -63,9 +62,9 @@ contract RateOracleManagerTest is Test {
     }
 
     function test_InitRegisterVariableOracle() public {
-        // expect RateOracleRegistered event
+        // expect RateOracleConfigured event
         vm.expectEmit(true, true, false, true);
-        emit RateOracleRegistered(200, address(mockRateOracle));
+        emit RateOracleConfigured(200, address(mockRateOracle), block.timestamp);
 
         rateOracleManager.registerVariableOracle(200, address(mockRateOracle));
     }
@@ -85,9 +84,9 @@ contract RateOracleManagerTest is Test {
     }
 
     function test_ConfigureVariableOracle() public {
-        // expect RateOracleRegistered event
+        // expect RateOracleConfigured event
         vm.expectEmit(true, true, false, true);
-        emit RateOracleConfigured(marketId, address(mockRateOracle));
+        emit RateOracleConfigured(marketId, address(mockRateOracle), block.timestamp);
 
         rateOracleManager.configureVariableOracle(marketId, address(mockRateOracle));
     }

@@ -17,10 +17,4 @@ contract PositionTest is Test {
         assertEq(position.baseBalance, 177);
         assertEq(position.quoteBalance, -47);
     }
-
-    function test_Settle() public {
-        position.settle();
-        assertEq(position.baseBalance, 0);
-        assertEq(position.quoteBalance, 0);
-    }
 }

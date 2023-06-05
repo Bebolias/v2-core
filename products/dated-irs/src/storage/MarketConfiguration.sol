@@ -38,6 +38,7 @@ library MarketConfiguration {
      * @param config The MarketConfiguration object with all the settings for the irs market being configured.
      */
     function set(Data memory config) internal {
+        // todo: replace this by custom error (e.g. ZERO_ADDRESS)
         require(config.quoteToken != address(0), "Invalid Market");
 
         Data storage storedConfig = load(config.marketId);

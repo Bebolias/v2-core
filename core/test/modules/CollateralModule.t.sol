@@ -26,7 +26,6 @@ contract CollateralModuleTest is Test {
         uint128 indexed accountId,
         address indexed collateralType,
         uint256 tokenAmount,
-        uint256 liquidationBoosterDeposit,
         address indexed sender,
         uint256 blockTimestamp
     );
@@ -165,7 +164,7 @@ contract CollateralModuleTest is Test {
 
         // Expect Deposited event
         vm.expectEmit(true, true, true, true, address(collateralModule));
-        emit Deposited(100, Constants.TOKEN_0, depositAmount, boosterAmount, depositor, block.timestamp);
+        emit Deposited(100, Constants.TOKEN_0, depositAmount + boosterAmount, depositor, block.timestamp);
 
         // Deposit
         collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
@@ -207,7 +206,7 @@ contract CollateralModuleTest is Test {
 
         // Expect Deposited event
         vm.expectEmit(true, true, true, true, address(collateralModule));
-        emit Deposited(100, Constants.TOKEN_0, depositAmount, boosterAmount, depositor, block.timestamp);
+        emit Deposited(100, Constants.TOKEN_0, depositAmount + boosterAmount, depositor, block.timestamp);
 
         // Deposit
         collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
@@ -249,7 +248,7 @@ contract CollateralModuleTest is Test {
 
         // Expect Deposited event
         vm.expectEmit(true, true, true, true, address(collateralModule));
-        emit Deposited(100, Constants.TOKEN_0, depositAmount, boosterAmount, depositor, block.timestamp);
+        emit Deposited(100, Constants.TOKEN_0, depositAmount + boosterAmount, depositor, block.timestamp);
 
         // Deposit
         collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
@@ -291,7 +290,7 @@ contract CollateralModuleTest is Test {
 
         // Expect Deposited event
         vm.expectEmit(true, true, true, true, address(collateralModule));
-        emit Deposited(100, Constants.TOKEN_0, depositAmount, boosterAmount, depositor, block.timestamp);
+        emit Deposited(100, Constants.TOKEN_0, depositAmount + boosterAmount, depositor, block.timestamp);
 
         // Deposit
         collateralModule.deposit(100, Constants.TOKEN_0, depositAmount);
@@ -454,7 +453,7 @@ contract CollateralModuleTest is Test {
 
         // Expect Deposited event
         vm.expectEmit(true, true, true, true, address(collateralModule));
-        emit Deposited(100, Constants.TOKEN_0, amount, 0, depositor, block.timestamp);
+        emit Deposited(100, Constants.TOKEN_0, amount, depositor, block.timestamp);
 
         // Deposit
         collateralModule.deposit(100, Constants.TOKEN_0, amount);
@@ -676,7 +675,7 @@ contract CollateralModuleTest is Test {
         );
         vm.prank(depositor);
         vm.expectEmit(true, true, true, true, address(collateralModule));
-        emit Deposited(100, Constants.TOKEN_0, amount, 0, depositor, block.timestamp);
+        emit Deposited(100, Constants.TOKEN_0, amount, depositor, block.timestamp);
         collateralModule.deposit(100, Constants.TOKEN_0, amount);
 
         // Second Deposit
@@ -728,7 +727,7 @@ contract CollateralModuleTest is Test {
 
         vm.prank(depositor);
         vm.expectEmit(true, true, true, true, address(collateralModule));
-        emit Deposited(100, Constants.TOKEN_0, amount, 0, depositor, block.timestamp);
+        emit Deposited(100, Constants.TOKEN_0, amount, depositor, block.timestamp);
         collateralModule.deposit(100, Constants.TOKEN_0, amount);
 
         assertEq(
@@ -755,7 +754,7 @@ contract CollateralModuleTest is Test {
 
         vm.prank(depositor);
         vm.expectEmit(true, true, true, true, address(collateralModule));
-        emit Deposited(100, Constants.TOKEN_1, amount, 0, depositor, block.timestamp);
+        emit Deposited(100, Constants.TOKEN_1, amount, depositor, block.timestamp);
         collateralModule.deposit(100, Constants.TOKEN_1, amount);
 
         assertEq(

@@ -19,7 +19,7 @@ contract MarketConfigurationModule is IMarketConfigurationModule {
 
         MarketConfiguration.set(config);
 
-        emit MarketConfigured(config);
+        emit MarketConfigured(config, block.timestamp);
     }
 
     /**

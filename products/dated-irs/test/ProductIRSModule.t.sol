@@ -49,7 +49,7 @@ contract MockCoreStorage is AccountModule, ProductModule, RiskConfigurationModul
 contract ProductIRSModuleTest is Test {
     using ProductConfiguration for ProductConfiguration.Data;
 
-    event ProductConfigured(ProductConfiguration.Data config);
+    event ProductConfigured(ProductConfiguration.Data config, uint256 blockTimestamp);
 
     address constant MOCK_QUOTE_TOKEN = 0x1122334455667788990011223344556677889900;
     uint32 maturityTimestamp;
@@ -85,12 +85,12 @@ contract ProductIRSModuleTest is Test {
     }
 
     function test_ProductConfiguredCorrectly() public {
-        // expect RateOracleRegistered event
+        // expect ProductConfigured event
         ProductConfiguration.Data memory config =
             ProductConfiguration.Data({ productId: 124, coreProxy: address(3), poolAddress: address(4) });
 
         vm.expectEmit(true, true, false, true);
-        emit ProductConfigured(config);
+        emit ProductConfigured(config, block.timestamp);
 
         productIrs.configureProduct(config);
 

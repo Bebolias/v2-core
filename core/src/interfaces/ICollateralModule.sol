@@ -27,8 +27,6 @@ interface ICollateralModule {
      * @param accountId The id of the account that deposited collateral.
      * @param collateralType The address of the collateral that was deposited.
      * @param tokenAmount The amount of collateral that was deposited, denominated in the token's native decimal representation.
-     * @param liquidationBoosterDeposit The amount paid towards the liquidation booster
-     * (up to ConfigurationConfiguration.liquidationBooster)
      * @param sender The address of the account that triggered the deposit.
      * @param blockTimestamp The current block timestamp.
      */
@@ -36,7 +34,6 @@ interface ICollateralModule {
         uint128 indexed accountId,
         address indexed collateralType,
         uint256 tokenAmount,
-        uint256 liquidationBoosterDeposit,
         address indexed sender,
         uint256 blockTimestamp
     );
@@ -50,10 +47,10 @@ interface ICollateralModule {
      * @param blockTimestamp The current block timestamp.
      */
     event Withdrawn(
-        uint128 indexed accountId,
-        address indexed collateralType,
-        uint256 tokenAmount,
-        address indexed sender,
+        uint128 indexed accountId, 
+        address indexed collateralType, 
+        uint256 tokenAmount, 
+        address indexed sender, 
         uint256 blockTimestamp
     );
 

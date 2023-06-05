@@ -11,8 +11,9 @@ interface IMarketConfigurationModule {
     /**
      * @notice Emitted when a market configuration is created or updated
      * @param config The object with the newly configured details.
+     * @param blockTimestamp The current block timestamp.
      */
-    event MarketConfigured(MarketConfiguration.Data config);
+    event MarketConfigured(MarketConfiguration.Data config, uint256 blockTimestamp);
 
     /**
      * @notice Creates or updates the market configuration

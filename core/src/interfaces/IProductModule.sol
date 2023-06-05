@@ -23,79 +23,13 @@ interface IProductModule {
     );
 
     /**
-     * @notice Emitted when account token with id `accountId` deals with new product.
-     * @param accountId The id of the account.
-     * @param productId The id of the product.
-     * @param blockTimestamp The current block timestamp.
-     */
-    event NewActiveProduct(uint128 indexed accountId, uint128 indexed productId, uint256 blockTimestamp);
-
-    /**
      * @notice Emitted when account token with id `accountId` is closed.
      * @param accountId The id of the account.
-     * @param productId The id of the product.
      * @param collateralType The address of the collateral token.
+     * @param sender The initiator of the account closure.
      * @param blockTimestamp The current block timestamp.
      */
-    event AccountClosed(
-        uint128 indexed accountId, uint128 indexed productId, address collateralType, uint256 blockTimestamp
-    );
-
-    /**
-     * @notice Emitted when a taker order of the account token with id `accountId` is propagated by the product.
-     * @param accountId The id of the account.
-     * @param productId The id of the product.
-     * @param marketId The id of the market.
-     * @param collateralType The address of the collateral.
-     * @param annualizedNotional The annualized notional of the order.
-     * @param fee The amount of fees paid for the order.
-     * @param blockTimestamp The current block timestamp.
-     */
-    event TakerOrderPropagated(
-        uint128 indexed accountId,
-        uint128 indexed productId,
-        uint128 indexed marketId,
-        address collateralType,
-        int256 annualizedNotional,
-        uint256 fee,
-        uint256 blockTimestamp
-    );
-
-    /**
-     * @notice Emitted when a maker order of the account token with id `accountId` is propagated by the product.
-     * @param accountId The id of the account.
-     * @param productId The id of the product.
-     * @param marketId The id of the market.
-     * @param collateralType The address of the collateral.
-     * @param annualizedNotional The annualized notional of the order.
-     * @param fee The amount of fees paid for the order.
-     * @param blockTimestamp The current block timestamp.
-     */
-    event MakerOrderPropagated(
-        uint128 indexed accountId,
-        uint128 indexed productId,
-        uint128 indexed marketId,
-        address collateralType,
-        int256 annualizedNotional,
-        uint256 fee,
-        uint256 blockTimestamp
-    );
-
-    /**
-     * @notice Emitted when cashflow is propagated by the product.
-     * @param accountId The id of the account.
-     * @param productId The id of the product.
-     * @param collateralType The address of the collateral.
-     * @param amount The cashflow amount.
-     * @param blockTimestamp The current block timestamp.
-     */
-    event CashflowPropagated(
-        uint128 indexed accountId,
-        uint128 indexed productId,
-        address collateralType,
-        int256 amount,
-        uint256 blockTimestamp
-    );
+    event AccountClosed(uint128 indexed accountId, address collateralType, address sender, uint256 blockTimestamp);
 
     /// @notice returns the unrealized pnl in quote token terms for account
     function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType)

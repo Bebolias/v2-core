@@ -13,6 +13,18 @@ library RateOracleReader {
     error MaturityNotReached();
     error MissingRateIndexAtMaturity();
 
+    /**
+     * @notice Emitted when new rate is cached in the rate oracle or when maturity rate is calculated.
+     * @param marketId The id of the market.
+     * @param oracleAddress The address of the oracle.
+     * @param timestamp The timestamp of the rate.
+     * @param rate The value of the rate.
+     * @param blockTimestamp The current block timestamp.
+     */
+    event RateOracleCacheUpdated(
+        uint128 indexed marketId, address oracleAddress, uint32 timestamp, uint256 rate, uint256 blockTimestamp
+    );
+
     struct PreMaturityData {
         uint32 lastKnownTimestamp;
         UD60x18 lastKnownIndex; // TODO - truncate indices to UD40x18 (nned to define this and faciliate checked casting) to save a
@@ -61,6 +73,14 @@ library RateOracleReader {
                     });
                     self.rateIndexAtMaturity[maturityTimestamp] = rateIndexMaturity;
                 }
+
+                emit RateOracleCacheUpdated(
+                    self.marketId,
+                    self.oracleAddress,
+                    maturityTimestamp,
+                    self.rateIndexAtMaturity[maturityTimestamp].unwrap(),
+                    block.timestamp
+                    );
             }
         } else {
             // timestamp has not yet passed
@@ -83,10 +103,16 @@ library RateOracleReader {
             if (shouldUpdateCache) {
                 cache.lastKnownTimestamp = Time.blockTimestampTruncated();
                 cache.lastKnownIndex = currentIndex;
+
+                emit RateOracleCacheUpdated(
+                    self.marketId, self.oracleAddress, cache.lastKnownTimestamp, cache.lastKnownIndex.unwrap(), block.timestamp
+                    );
             }
         }
     }
 
+    // note: need thoughts here for protocols where current index does not correspond to the current timestamp (block.timestamp)
+    // ref. Lido and Rocket
     function getRateIndexCurrent(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexCurrent) {
         if (Time.blockTimestampTruncated() >= maturityTimestamp) {
             // maturity timestamp has passed

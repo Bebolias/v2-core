@@ -29,7 +29,7 @@ contract MarketConfigurationModuleTest is Test {
 
     MarketConfigurationModuleExtended marketConfiguration;
 
-    event MarketConfigured(MarketConfiguration.Data data);
+    event MarketConfigured(MarketConfiguration.Data data, uint256 blockTimestamp);
 
     address constant MOCK_QUOTE_TOKEN = 0x1122334455667788990011223344556677889900;
     uint128 constant MOCK_MARKET_ID = 100;
@@ -42,9 +42,9 @@ contract MarketConfigurationModuleTest is Test {
     }
 
     function test_InitRegisterMarket() public {
-        // expect RateOracleRegistered event
+        // expect MarketConfigured event
         vm.expectEmit(true, true, false, true);
-        emit MarketConfigured(MarketConfiguration.Data({ marketId: 200, quoteToken: MOCK_QUOTE_TOKEN }));
+        emit MarketConfigured(MarketConfiguration.Data({ marketId: 200, quoteToken: MOCK_QUOTE_TOKEN }), block.timestamp);
 
         marketConfiguration.configureMarket(MarketConfiguration.Data({ marketId: 200, quoteToken: MOCK_QUOTE_TOKEN }));
     }

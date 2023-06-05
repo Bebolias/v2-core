@@ -59,9 +59,7 @@ contract CollateralModule is ICollateralModule {
         account.collaterals[collateralType].increaseCollateralBalance(tokenAmount);
         emit Collateral.CollateralUpdate(accountId, collateralType, tokenAmount.toInt(), block.timestamp);
 
-        emit Deposited(
-            accountId, collateralType, tokenAmount, actualTokenAmount - tokenAmount, msg.sender, block.timestamp
-        );
+        emit Deposited(accountId, collateralType, actualTokenAmount, msg.sender, block.timestamp);
     }
 
     /**

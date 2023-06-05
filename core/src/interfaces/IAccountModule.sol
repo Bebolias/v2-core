@@ -30,7 +30,11 @@ interface IAccountModule {
      * @param newOwner The address of the new owner.
      * @param blockTimestamp The current block timestamp.
      */
-    event AccountOwnerUpdate(uint128 indexed accountId, address indexed newOwner, uint256 blockTimestamp);
+    event AccountOwnerUpdate(
+        uint128 indexed accountId, 
+        address indexed newOwner,
+        uint256 blockTimestamp
+    );
 
     /**
      * @notice Emitted when `user` is granted `permission` by `sender` for account `accountId`.

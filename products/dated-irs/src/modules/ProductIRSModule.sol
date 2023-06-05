@@ -47,25 +47,35 @@ contract ProductIRSModule is IProductIRSModule {
 
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         address poolAddress = ProductConfiguration.getPoolAddress();
-        Portfolio.Data storage portfolio = Portfolio.load(accountId);
         (executedBaseAmount, executedQuoteAmount) =
             IPool(poolAddress).executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount, priceLimit);
-        portfolio.updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
+        Portfolio.load(accountId).updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
 
         // propagate order
         address quoteToken = MarketConfiguration.load(marketId).quoteToken;
         int256[] memory baseAmounts = new int256[](1);
         baseAmounts[0] = executedBaseAmount;
-        int256 annualizedBaseAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
-        IProductModule(coreProxy).propagateTakerOrder(
-            accountId, ProductConfiguration.getProductId(), marketId, quoteToken, annualizedBaseAmount
-        );
+        int256 annualizedNotionalAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
+        uint128 productId = ProductConfiguration.getProductId();
+        IProductModule(coreProxy).propagateTakerOrder(accountId, productId, marketId, quoteToken, annualizedNotionalAmount);
+
+        emit TakerOrder(
+            accountId,
+            productId,
+            marketId,
+            maturityTimestamp,
+            quoteToken,
+            executedBaseAmount,
+            executedQuoteAmount,
+            annualizedNotionalAmount,
+            block.timestamp
+            );
     }
 
     /**
      * @inheritdoc IProductIRSModule
      */
-
+    // note: return settlementCashflowInQuote?
     function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) external override {
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
@@ -81,6 +91,10 @@ contract ProductIRSModule is IProductIRSModule {
         uint128 productId = ProductConfiguration.getProductId();
 
         IProductModule(coreProxy).propagateCashflow(accountId, productId, quoteToken, settlementCashflowInQuote);
+
+        emit DatedIRSPositionSettled(
+            accountId, productId, marketId, maturityTimestamp, quoteToken, settlementCashflowInQuote, block.timestamp
+            );
     }
 
     /**
@@ -162,7 +176,7 @@ contract ProductIRSModule is IProductIRSModule {
         OwnableStorage.onlyOwner();
 
         ProductConfiguration.set(config);
-        emit ProductConfigured(config);
+        emit ProductConfigured(config, block.timestamp);
     }
 
     /**

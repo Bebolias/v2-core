@@ -5,7 +5,50 @@ import "../storage/ProductConfiguration.sol";
 
 /// @title Interface of a dated irs product
 interface IProductIRSModule is IProduct {
-    event ProductConfigured(ProductConfiguration.Data config);
+    event ProductConfigured(ProductConfiguration.Data config, uint256 blockTimestamp);
+
+    /**
+     * @notice Emitted when a taker order of the account token with id `accountId` is initiated.
+     * @param accountId The id of the account.
+     * @param productId The id of the product.
+     * @param marketId The id of the market.
+     * @param maturityTimestamp The maturity timestamp of the position.
+     * @param collateralType The address of the collateral.
+     * @param executedBaseAmount The executed base amount of the order.
+     * @param executedQuoteAmount The executed quote amount of the order.
+     * @param annualizedNotionalAmount The annualized base of the order.
+     * @param blockTimestamp The current block timestamp.
+     */
+    event TakerOrder(
+        uint128 indexed accountId,
+        uint128 productId,
+        uint128 indexed marketId,
+        uint32 indexed maturityTimestamp,
+        address collateralType,
+        int256 executedBaseAmount,
+        int256 executedQuoteAmount,
+        int256 annualizedNotionalAmount,
+        uint256 blockTimestamp
+    );
+
+    /**
+     * @notice Emitted when a position is settled.
+     * @param accountId The id of the account.
+     * @param productId The id of the product.
+     * @param marketId The id of the market.
+     * @param maturityTimestamp The maturity timestamp of the position.
+     * @param collateralType The address of the collateral.
+     * @param blockTimestamp The current block timestamp.
+     */
+    event DatedIRSPositionSettled(
+        uint128 indexed accountId,
+        uint128 productId,
+        uint128 indexed marketId,
+        uint32 indexed maturityTimestamp,
+        address collateralType,
+        int256 settlementCashflowInQuote,
+        uint256 blockTimestamp
+    );
 
     /**
      * @notice Thrown when an attempt to access a function without authorization.

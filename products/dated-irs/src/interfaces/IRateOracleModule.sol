@@ -21,18 +21,12 @@ interface IRateOracleModule {
     error AlreadyRegisteredVariableOracle(address oracleAddress);
 
     /**
-     * @notice Emitted when `registerRateOracle` is called.
+     * @notice Emitted when an oracle is configured for a market.
      * @param marketId The id of the market (e.g. aUSDC lend) associated with the rate oracle
      * @param oracleAddress Address of the variable rate oracle contract
+     * @param blockTimestamp The current block timestamp.
      */
-    event RateOracleRegistered(uint128 indexed marketId, address indexed oracleAddress);
-
-    /**
-     * @notice Emitted when `configureRateOracle` is called.
-     * @param marketId The id of the market (e.g. aUSDC lend) associated with the rate oracle
-     * @param oracleAddress Address of the variable rate oracle contract
-     */
-    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress);
+    event RateOracleConfigured(uint128 indexed marketId, address indexed oracleAddress, uint256 blockTimestamp);
 
     /**
      * @notice Requests a rate index snapshot at a maturity timestamp of a given interest rate market (e.g. aUSDC lend)

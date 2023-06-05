@@ -23,7 +23,7 @@ interface ILiquidationModule {
 
     /**
      * @notice Emitted when an account is liquidated.
-     * @param accountId The id of the account that was liquidated.
+     * @param liquidatedAccountId The id of the account that was liquidated.
      * @param collateralType The collateral type of the account that was liquidated
      * @param liquidatorAccountId Account id that will receive the rewards from the liquidation.
      * @param liquidatorRewardAmount The liquidator reward amount
@@ -31,7 +31,7 @@ interface ILiquidationModule {
      * @param blockTimestamp The current block timestamp.
      */
     event Liquidation(
-        uint128 indexed accountId,
+        uint128 indexed liquidatedAccountId,
         address indexed collateralType,
         address sender,
         uint128 liquidatorAccountId,
