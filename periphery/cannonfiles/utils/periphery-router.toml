@@ -1,0 +1,20 @@
+#####################################
+# Deploy Periphery Router Modules
+#####################################
+[contract.ConfigurationModule]
+artifact = "ConfigurationModule"
+[contract.ExecutionModule]
+artifact = "ExecutionModule"
+
+# Deploys Periphery Router
+[router.PeripheryRouter]
+contracts = [
+  "OwnerUpgradeModule",
+  "ConfigurationModule",
+  "ExecutionModule",
+]
+depends = [
+  "contract.OwnerUpgradeModule",
+  "contract.ConfigurationModule",
+  "contract.ExecutionModule",
+]

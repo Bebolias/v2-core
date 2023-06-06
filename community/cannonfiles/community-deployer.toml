@@ -1,0 +1,45 @@
+name = "voltz-community-deployer"
+version = "2.0.0"
+description = "Voltz V2 Community Deployer"
+
+# General Community Deployer Configs
+[setting.quorumVotes]
+[setting.ownerAddress]
+[setting.merkleRoot]
+[setting.blockTimestampVotingEnd]
+
+# Core Configs
+[setting.voltzCorePackage]
+[import.voltzCore]
+source="<%= settings.voltzCorePackage %>"
+[setting.accountNftId]
+[setting.accountNftName]
+[setting.accountNftSymbol]
+[setting.accountNftUri]
+
+# Dated IRS Configs
+[setting.datedIrsPackage]
+[import.datedIrs]
+source="<%= settings.datedIrsPackage %>"
+
+# Periphery Configs
+[setting.peripheryPackage]
+[import.periphery]
+source="<%= settings.peripheryPackage %>"
+
+[contract.VoltzV2CommunityDeployer]
+artifact="CommunityDeployer"
+args=[
+  "<%= settings.quorumVotes %>", # quorumVotes
+  "<%= settings.ownerAddress %>", # ownerAddress
+  "<%= settings.merkleRoot %>", # merkleRoot
+  "<%= settings.blockTimestampVotingEnd %>", # blockTimestampVotingEnd
+  { coreRouter = "<%= imports.voltzCore.contracts.CoreRouter.address %>", accountNftRouter = "<%= imports.voltzCore.contracts.AccountNFTRouter.address %>", accountNftId = "<%= settings.accountNftId %>", accountNftName = "<%= settings.accountNftName %>", accountNftSymbol = "<%= settings.accountNftSymbol %>", accountNftUri = "<%= settings.accountNftUri %>" },
+  { datedIrsRouter =  "<%= imports.datedIrs.contracts.DatedIrsRouter.address %>" },
+  { peripheryRouter = "<%= imports.periphery.contracts.PeripheryRouter.address %>" }
+]
+depends = [
+  "import.voltzCore",
+  "import.datedIrs",
+  "import.periphery",
+]

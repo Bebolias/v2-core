@@ -1,4 +1,5 @@
-pragma solidity 0.8.19;
+// https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
+pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";

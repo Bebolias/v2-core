@@ -20,18 +20,24 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: "Setup GitHub package registry"
+        run: yarn config set npmRegistries --json '{"https://npm.pkg.github.com/":{"npmAuthToken":"${{secrets.NPM_AUTH_TOKEN}}"}}'
+      
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           always-auth: true
           node-version: 18
           registry-url: https://npm.pkg.github.com/
+      
       - name: Install dependencies
         run: yarn install
+      
       - name: Bump versions
         run: yarn bump
-      - run: yarn config set npmRegistryServer https://npm.pkg.github.com
+
+      - name: "Change npm registry server"
+        run: "yarn config set npmRegistryServer https://npm.pkg.github.com"
+      
       - run: yarn publish
-        env:
-            NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - run: yarn config unset npmRegistryServer

@@ -1,5 +1,0 @@
-include = [
-  "utils/commons.toml",
-  "utils/product-irs-router.toml",
-  "utils/product-irs-proxy.toml"
-]

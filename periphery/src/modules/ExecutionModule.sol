@@ -50,7 +50,4 @@ contract ExecutionModule is IExecutionModule {
         // todo: add flag allow revert
         return command & Commands.FLAG_ALLOW_REVERT == 0;
     }
-
-    /// @notice To receive ETH from WETH
-    receive() external payable {}
 }

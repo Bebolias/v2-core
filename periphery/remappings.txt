@@ -5,5 +5,6 @@ solmate=lib/solmate
 @prb/math/=lib/prb-math/src/
 @prb/test/=lib/prb-test/src/
 @voltz-protocol/util-contracts/=../node_modules/@voltz-protocol/util-contracts/
+@voltz-protocol/util-modules/=../node_modules/@voltz-protocol/util-modules/
 @voltz-protocol/core/=../node_modules/@voltz-protocol/core/
 @voltz-protocol/products-dated-irs/=../node_modules/@voltz-protocol/products-dated-irs/

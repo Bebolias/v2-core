@@ -56,7 +56,8 @@
         "core",
         "utils/contracts",
         "utils/modules",
-        "products/dated-irs"
+        "products/dated-irs",
+        "community"
     ],
     "engines": {
         "node": "^18.14.0",

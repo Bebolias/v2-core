@@ -1,0 +1,24 @@
+#####################################
+# Deploy Dated IRS Router Modules
+#####################################
+[contract.MarketConfigurationModule]
+artifact = "MarketConfigurationModule"
+[contract.ProductIRSModule]
+artifact = "ProductIRSModule"
+[contract.RateOracleManager]
+artifact = "RateOracleManager"
+
+# Deploys Dated IRS Router
+[router.DatedIrsRouter]
+contracts = [
+  "OwnerUpgradeModule",
+  "MarketConfigurationModule",
+  "ProductIRSModule",
+  "RateOracleManager",
+]
+depends = [
+  "contract.OwnerUpgradeModule",
+  "contract.MarketConfigurationModule",
+  "contract.ProductIRSModule",
+  "contract.RateOracleManager",
+]

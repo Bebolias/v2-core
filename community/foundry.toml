@@ -1,0 +1,19 @@
+[profile.default]
+  allow_paths = ["../", "../node_modules/"]
+  auto_detect_solc = false
+  bytecode_hash = "none"
+  cbor_metadata = false
+  fuzz = { runs = 256 }
+  libs = ["lib"]
+  optimizer = true
+  optimizer_runs = 10_000
+  out = "out"
+  solc = "0.8.19"
+  src = "src"
+  test = "test"
+  auto_detect_remappings = false
+  fs_permissions = [{ access = "read", path = "./"}]
+
+[profile.ci]
+  fuzz = { runs = 1_000 }
+  verbosity = 4

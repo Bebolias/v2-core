@@ -1,7 +1,8 @@
-pragma solidity =0.8.19;
+// https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
+pragma solidity >=0.8.19;
 
 import "../interfaces/IRateOracle.sol";
-import "../externalInterfaces/IAaveV3LendingPool.sol";
+import "../interfaces/external/IAaveV3LendingPool.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 // import "../rate_oracles/CompoundingRateOracle.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";

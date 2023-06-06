@@ -1,4 +1,5 @@
-pragma solidity >=0.8.13;
+// https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
+pragma solidity >=0.8.19;
 
 import { OwnerUpgradeModule as BaseOwnerUpgradeModule } from "@voltz-protocol/util-modules/src/modules/OwnerUpgradeModule.sol";
 

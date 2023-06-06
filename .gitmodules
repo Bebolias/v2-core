@@ -37,3 +37,9 @@
 [submodule "periphery/lib/solmate"]
 	path = periphery/lib/solmate
 	url = https://github.com/transmissions11/solmate
+[submodule "community/lib/forge-std"]
+	path = community/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "community/lib/openzeppelin-contracts"]
+	path = community/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts

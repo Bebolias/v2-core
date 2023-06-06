@@ -1,4 +1,5 @@
-pragma solidity =0.8.19;
+// https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
+pragma solidity >=0.8.19;
 
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
 import { UD60x18 } from "@prb/math/UD60x18.sol";
