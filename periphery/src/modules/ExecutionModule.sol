@@ -37,7 +37,7 @@ contract ExecutionModule is IExecutionModule {
             success = Dispatcher.dispatch(command, input);
 
             if (!success && successRequired(command)) {
-                revert ExecutionFailed({commandIndex: commandIndex, message: output});
+                revert ExecutionFailed(commandIndex);
             }
 
             unchecked {

@@ -31,6 +31,14 @@ library Payments {
         }
     }
 
+    /// @notice Approves CORE to spend ERC20s in the router
+    /// @param token The token to approve
+    /// @param value amount approved to spend
+    function approveERC20Core(address token, uint256 value) internal {
+        // set approval
+        ERC20(token).safeApprove(Config.load().VOLTZ_V2_CORE_PROXY, value);
+    }
+
     /// @notice Wraps an amount of ETH into WETH
     /// @param recipient The recipient of the WETH
     /// @param amount The amount to wrap (can be CONTRACT_BALANCE)
