@@ -124,6 +124,35 @@ contract ProductIRSModuleTest is Test {
         productIrs.closeAccount(178, MOCK_QUOTE_TOKEN);
     }
 
+    function test_CloseAccount_Periphery() public {
+        address peripheryAddress = address(1234);
+        uint128 accountId = 178;
+        vm.mockCall(
+            address(mockCoreStorage),
+            abi.encodeWithSelector(
+                IAccountModule.isAuthorized.selector,
+                accountId, AccountRBAC._ADMIN_PERMISSION, address(this)
+            ),
+            abi.encode(true)
+        );
+        productIrs.closeAccount(accountId, MOCK_QUOTE_TOKEN);
+    }
+
+    function test_RevertWhen_CloseAccount_NotAllowed() public {
+        address peripheryAddress = address(1234);
+        uint128 accountId = 178;
+        vm.mockCall(
+            address(mockCoreStorage),
+            abi.encodeWithSelector(
+                IAccountModule.isAuthorized.selector,
+                accountId, AccountRBAC._ADMIN_PERMISSION, address(this)
+            ),
+            abi.encode(false)
+        );
+        vm.expectRevert();
+        productIrs.closeAccount(accountId, MOCK_QUOTE_TOKEN);
+    }
+
     function test_InitiateTakerOrder() public {
         address thisAddress = address(this);
 
@@ -150,6 +179,16 @@ contract ProductIRSModuleTest is Test {
 
         productIrs.initiateTakerOrder(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp, 100, 0);
         vm.stopPrank();
+    }
+
+    function test_RevertWhen_InitiateTakerOrder_NotAllowed() public {
+        address thisAddress = address(this);
+
+        vm.expectRevert(abi.encodeWithSelector(
+            IAccountModule.PermissionNotGranted.selector,
+            MOCK_ACCOUNT_ID, AccountRBAC._ADMIN_PERMISSION, address(this)
+        ));
+        productIrs.initiateTakerOrder(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp, 100, 0);
     }
 
     function test_CloseExistingAccount() public {
@@ -272,6 +311,14 @@ contract ProductIRSModuleTest is Test {
 
         vm.warp(maturityTimestamp + 1);
         vm.prank(MOCK_USER);
+        productIrs.settle(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp);
+    }
+
+    function test_RevertWhen_Settle_NotAllowed() public {
+        vm.expectRevert(abi.encodeWithSelector(
+            IAccountModule.PermissionNotGranted.selector,
+            MOCK_ACCOUNT_ID, AccountRBAC._ADMIN_PERMISSION, address(this)
+        ));
         productIrs.settle(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp);
     }
 }

@@ -27,6 +27,7 @@ contract ExecutionModuleTest is Test {
     address core = address(111);
     address instrument = address(112);
     address exchange = address(113);
+    address accountNFT = address(114);
 
     MockWeth mockWeth = new MockWeth("MockWeth", "Mock WETH");
 
@@ -38,7 +39,8 @@ contract ExecutionModuleTest is Test {
             PERMIT2: new MockAllowanceTransfer(),
             VOLTZ_V2_CORE_PROXY: core,
             VOLTZ_V2_DATED_IRS_PROXY: instrument,
-            VOLTZ_V2_DATED_IRS_VAMM_PROXY: exchange
+            VOLTZ_V2_DATED_IRS_VAMM_PROXY: exchange,
+            VOLTZ_V2_ACCOUNT_NFT_PROXY: accountNFT
         }));
     }
 
@@ -160,6 +162,33 @@ contract ExecutionModuleTest is Test {
             abi.encodeWithSelector(
                 ICollateralModule.deposit.selector,
                 address(this), 1, address(56), 100000
+            ),
+            abi.encode()
+        );
+
+        exec.execute(commands, inputs, deadline);
+    }
+
+    function testExecCommand_CreateAccount() public {
+        uint256 deadline = block.timestamp + 1;
+        bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)));
+        bytes[] memory inputs = new bytes[](1);
+        inputs[0] = abi.encode(127637236);
+
+        vm.mockCall(
+            core,
+            abi.encodeWithSelector(
+                IAccountModule.createAccount.selector,
+                127637236
+            ),
+            abi.encode()
+        );
+
+        vm.mockCall(
+            accountNFT,
+            abi.encodeWithSelector(
+                bytes4(abi.encodeWithSignature("safeTransferFrom(address from, address to, uint256 tokenId)")),
+                address(exec), address(this), 127637236
             ),
             abi.encode()
         );

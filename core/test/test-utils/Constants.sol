@@ -4,6 +4,7 @@ pragma solidity >=0.8.19;
 library Constants {
     address public constant PROXY_OWNER = 0xa791FBF256B2cc08BD8a7C706f0A4498F96E8CBB;
     address public constant FEES_COLLECTOR = 0xF9198fAA1A54A0099BA59E50fE3Aa143E0fdAA53;
+    address public constant PERIPHERY = 0x3038aD857D884385e28659Ec2a668A03E3ad9FfD;
 
     address public constant PRODUCT_CREATOR = 0xDa5dC27D8e107AbAFd9D91A77508d3EC139B8b12;
     address public constant PRODUCT_OWNER = 0xE33e34229C7a487c5534eCd969C251F46EAf9e29;

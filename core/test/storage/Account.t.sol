@@ -216,6 +216,7 @@ contract AccountTest is Test {
 
     function testFuzz_RevertWhen_LoadAccountAndValidatePermission(address randomUser) public {
         vm.assume(randomUser != Constants.ALICE);
+        vm.assume(randomUser != Constants.PERIPHERY);
 
         vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, accountId, randomUser));
         accounts.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, randomUser);

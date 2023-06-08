@@ -70,6 +70,13 @@ library Dispatcher {
                 liquidityDelta := calldataload(add(inputs.offset, 0xA0))
             }
             V2DatedIRSVamm.initiateDatedMakerOrder(accountId, marketId, maturityTimestamp, tickLower, tickUpper, liquidityDelta);
+        } else if (command == Commands.V2_CORE_CREATE_ACCOUNT) {
+            // equivalent: abi.decode(inputs, (address, address, uint160))
+            uint128 requestedId;
+            assembly {
+                requestedId := calldataload(inputs.offset)
+            }
+            V2Core.createAccount(requestedId);
         } else if (command == Commands.V2_CORE_DEPOSIT) {
             // equivalent: abi.decode(inputs, (uint128, address, uint256))
             uint128 accountId;

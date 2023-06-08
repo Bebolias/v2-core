@@ -8,6 +8,7 @@ import "./Constants.sol";
 import "../../src/storage/MarketRiskConfiguration.sol";
 import "../../src/storage/CollateralConfiguration.sol";
 import "../../src/storage/MarketFeeConfiguration.sol";
+import "../../src/storage/Periphery.sol";
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
 import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
@@ -154,6 +155,9 @@ contract CoreState is MockCoreStorage, Ownable {
                 cap: Constants.TOKEN_1_CAP
             })
         );
+
+        // set periphery address
+        Periphery.setPeriphery(Constants.PERIPHERY);
 
         // Create product (id: 1)
         {

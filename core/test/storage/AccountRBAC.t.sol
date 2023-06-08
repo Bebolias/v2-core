@@ -56,6 +56,12 @@ contract ExposedAccountRBAC {
     function authorized(bytes32 permission, address target) external view returns (bool) {
         return AccountRBAC.authorized(item, permission, target);
     }
+
+    /// HELPERS
+
+    function setPeriphery(address _peripheryAddress) external {
+        Periphery.setPeriphery(_peripheryAddress);
+    }
 }
 
 contract AccountRBACTest is Test {
@@ -96,6 +102,21 @@ contract AccountRBACTest is Test {
         bool authorized = accountRBAC.authorized("ADMIN", target);
 
         assertEq(authorized, false);
+    }
+
+    function test_Authorized_Periphery() public {
+        address owner = address(1);
+        address periphery = address(2);
+
+        ExposedAccountRBAC accountRBAC = new ExposedAccountRBAC(owner);
+        accountRBAC.setPeriphery(periphery);
+
+        bool authorized = accountRBAC.authorized("ADMIN", periphery);
+
+        assertEq(authorized, true);
+
+        bool authorized2 = accountRBAC.authorized("ADMIN", address(3));
+        assertEq(authorized2, false);
     }
 
     function test_RevertWhen_InvalidAuthorized() public {

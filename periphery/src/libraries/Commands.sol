@@ -12,9 +12,10 @@ library Commands {
     uint256 constant V2_DATED_IRS_INSTRUMENT_SWAP = 0x00;
     uint256 constant V2_DATED_IRS_INSTRUMENT_SETTLE = 0x01;
     uint256 constant V2_VAMM_EXCHANGE_LP = 0x02;
-    uint256 constant V2_CORE_DEPOSIT = 0x03;
-    uint256 constant V2_CORE_WITHDRAW = 0x04;
-    uint256 constant WRAP_ETH = 0x05;
-    uint256 constant PERMIT_PERIPHERY = 0x06;
-    uint256 constant TRANSFER_FROM = 0x07;
+    uint256 constant V2_CORE_CREATE_ACCOUNT = 0x03;
+    uint256 constant V2_CORE_DEPOSIT = 0x04;
+    uint256 constant V2_CORE_WITHDRAW = 0x05;
+    uint256 constant WRAP_ETH = 0x06;
+    uint256 constant PERMIT_PERIPHERY = 0x07;
+    uint256 constant TRANSFER_FROM = 0x08;
 }

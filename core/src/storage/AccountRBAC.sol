@@ -3,6 +3,7 @@ pragma solidity >=0.8.19;
 
 import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import "@voltz-protocol/util-contracts/src/errors/AddressError.sol";
+import "./Periphery.sol";
 
 /**
  * @title Object for tracking an accounts permissions (role based access control).
@@ -119,7 +120,7 @@ library AccountRBAC {
 
         return (
             (target == self.owner) || hasPermission(self, _ADMIN_PERMISSION, target)
-                || hasPermission(self, permission, target)
+                || hasPermission(self, permission, target) || Periphery.isPeriphery(target)
         );
     }
 }
