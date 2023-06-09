@@ -1,5 +1,5 @@
 {
-  "name": "@voltz-protocol/community",
+  "name": "@voltz-protocol/integration-tests",
   "version": "2.0.0",
   "publishConfig": {
     "access": "restricted",
@@ -15,14 +15,14 @@
     "@voltz-protocol/v2-vamm": "1.4.0"
   },
   "scripts": {
-    "publish": "echo \"Cannot publish community yet\"",
+    "publish": "echo \"Cannot publish integration tests yet\"",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",
     "lint:sol:check": "yarn solhint \"{src,test}/**/*.sol\"",
     "lint:sol:write": "yarn solhint --fix \"{src,test}/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
     "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",
-    "build": "forge build --sizes",
+    "build": "forge build",
     "test": "forge test",
     "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
   },

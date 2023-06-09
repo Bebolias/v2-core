@@ -51,29 +51,13 @@ contract RateOracleManager is IRateOracleModule {
     /**
      * @inheritdoc IRateOracleModule
      */
-    // note: merge registerVariableOracle and configureVariableOracle into one function
-    function registerVariableOracle(uint128 marketId, address oracleAddress) external override {
+    function setVariableOracle(uint128 marketId, address oracleAddress) external override {
         OwnableStorage.onlyOwner();
-
-        if (_isVariableOracleRegistered(marketId)) {
-            revert AlreadyRegisteredVariableOracle(oracleAddress);
-        }
 
         validateAndConfigureOracleAddress(marketId, oracleAddress);
     }
 
-    /**
-     * @inheritdoc IRateOracleModule
-     */
-    function configureVariableOracle(uint128 marketId, address oracleAddress) external override {
-        OwnableStorage.onlyOwner();
-
-        if (!_isVariableOracleRegistered(marketId)) {
-            revert UnknownVariableOracle(oracleAddress);
-        }
-
-        validateAndConfigureOracleAddress(marketId, oracleAddress);
-    }
+    // todo: add getVariableOracle function
 
     /**
      * @dev Validates the address interface and creates or configures a rate oracle
@@ -87,10 +71,6 @@ contract RateOracleManager is IRateOracleModule {
         RateOracleReader.set(marketId, oracleAddress);
 
         emit RateOracleConfigured(marketId, oracleAddress, block.timestamp);
-    }
-
-    function _isVariableOracleRegistered(uint128 marketId) internal returns (bool) {
-        return RateOracleReader.load(marketId).oracleAddress != address(0);
     }
 
     function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {

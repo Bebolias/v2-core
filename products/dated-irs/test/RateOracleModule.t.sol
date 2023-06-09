@@ -59,51 +59,29 @@ contract RateOracleManagerTest is Test {
         maturityTimestamp = Time.blockTimestampTruncated() + 31536000;
         marketId = 100;
 
-        rateOracleManager.registerVariableOracle(marketId, address(mockRateOracle));
+        rateOracleManager.setVariableOracle(marketId, address(mockRateOracle));
     }
 
-    function test_InitRegisterVariableOracle() public {
+    function test_InitSetVariableOracle() public {
         // expect RateOracleConfigured event
         vm.expectEmit(true, true, false, true);
         emit RateOracleConfigured(200, address(mockRateOracle), block.timestamp);
 
-        rateOracleManager.registerVariableOracle(200, address(mockRateOracle));
+        rateOracleManager.setVariableOracle(200, address(mockRateOracle));
     }
 
-    function test_RevertWhen_RegisterExistingOracle() public {
-        vm.expectRevert(abi.encodeWithSelector(IRateOracleModule.AlreadyRegisteredVariableOracle.selector, address(mockRateOracle)));
-
-        rateOracleManager.registerVariableOracle(marketId, address(mockRateOracle));
+    function test_ResetExistingOracle() public {
+        address newRateOracle = address(new MockRateOracle());
+        rateOracleManager.setVariableOracle(marketId, address(newRateOracle));
+        // todo: check set variable oracle once we add getter function
     }
 
-    function test_RevertWhen_RegisterOracleWrongInterface() public {
+    function test_RevertWhen_SetOracleWrongInterface() public {
         ERC165 fakeOracle = new ERC165();
 
         vm.expectRevert(abi.encodeWithSelector(IRateOracleModule.InvalidVariableOracleAddress.selector, address(fakeOracle)));
 
-        rateOracleManager.registerVariableOracle(200, address(fakeOracle));
-    }
-
-    function test_ConfigureVariableOracle() public {
-        // expect RateOracleConfigured event
-        vm.expectEmit(true, true, false, true);
-        emit RateOracleConfigured(marketId, address(mockRateOracle), block.timestamp);
-
-        rateOracleManager.configureVariableOracle(marketId, address(mockRateOracle));
-    }
-
-    function test_RevertWhen_ConfigureUnknownOracle() public {
-        vm.expectRevert(abi.encodeWithSelector(IRateOracleModule.UnknownVariableOracle.selector, address(mockRateOracle)));
-
-        rateOracleManager.configureVariableOracle(200, address(mockRateOracle));
-    }
-
-    function test_RevertWhen_ConfigureOracleWrongInterface() public {
-        ERC165 fakeOracle = new ERC165();
-
-        vm.expectRevert(abi.encodeWithSelector(IRateOracleModule.InvalidVariableOracleAddress.selector, address(fakeOracle)));
-
-        rateOracleManager.configureVariableOracle(marketId, address(fakeOracle));
+        rateOracleManager.setVariableOracle(200, address(fakeOracle));
     }
 
     function test_InitGetRateIndexCurrent() public {

@@ -1,9 +1,8 @@
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
-oz=lib/openzeppelin-contracts/contracts/
-@prb/math/=lib/prb-math/src/
-src=src
-@prb/test/=lib/prb-test/src/
+oz=../../node_modules/@openzeppelin/contracts/
+@prb/math/=../../node_modules/@prb/math/src/
+@prb/test/=../../node_modules/@prb/test/src/
 @voltz-protocol/core/=../../node_modules/@voltz-protocol/core/
 @voltz-protocol/util-contracts/=../../node_modules/@voltz-protocol/util-contracts/
 @voltz-protocol/util-modules/=../../node_modules/@voltz-protocol/util-modules/

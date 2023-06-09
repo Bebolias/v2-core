@@ -1,9 +1,12 @@
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
-oz=../node_modules/@openzeppelin/contracts/
 @voltz-protocol/core/=../node_modules/@voltz-protocol/core/
 @voltz-protocol/util-contracts/=../node_modules/@voltz-protocol/util-contracts/
 @voltz-protocol/util-modules/=../node_modules/@voltz-protocol/util-modules/
 @voltz-protocol/products-dated-irs/=../node_modules/@voltz-protocol/products-dated-irs/
 @voltz-protocol/periphery/=../node_modules/@voltz-protocol/periphery/
 @voltz-protocol/v2-vamm/=../node_modules/@voltz-protocol/v2-vamm/
+oz=../node_modules/@openzeppelin/contracts/
+@prb/math/=../node_modules/@prb/math/src/
+@prb/test/=../node_modules/@prb/test/src/
+solmate=../node_modules/solmate

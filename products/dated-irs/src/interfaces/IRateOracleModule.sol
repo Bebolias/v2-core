@@ -10,16 +10,6 @@ interface IRateOracleModule {
      * @param oracleAddress Invalid oracle address
      */
     error InvalidVariableOracleAddress(address oracleAddress);
-    /**
-     * @notice Emitted when attempting to configure an unregistered oracle
-     * @param oracleAddress Invalid oracle address
-     */
-    error UnknownVariableOracle(address oracleAddress);
-    /**
-     * @notice Emitted when attempting to register an already registered oracle
-     * @param oracleAddress Invalid oracle address
-     */
-    error AlreadyRegisteredVariableOracle(address oracleAddress);
 
     /**
      * @notice Emitted when an oracle is configured for a market.
@@ -50,12 +40,5 @@ interface IRateOracleModule {
      * @param marketId Market Id
      * @param oracleAddress Oracle Address
      */
-    function registerVariableOracle(uint128 marketId, address oracleAddress) external;
-
-    /**
-     * @notice Configure a variable rate oralce
-     * @param marketId Market Id
-     * @param oracleAddress Oracle Address
-     */
-    function configureVariableOracle(uint128 marketId, address oracleAddress) external;
+    function setVariableOracle(uint128 marketId, address oracleAddress) external;
 }

@@ -6,7 +6,15 @@
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@usecannon/cli": "^2.1.7"
+    "@openzeppelin/contracts": "4.9.0",
+    "@prb/math": "3.3.0",
+    "@prb/test": "^0.6.0",
+    "@voltz-protocol/core": "workspace:^",
+    "@voltz-protocol/products-dated-irs": "workspace:^",
+    "@voltz-protocol/util-contracts": "workspace:^",
+    "@voltz-protocol/util-modules": "workspace:^",
+    "@voltz-protocol/v2-vamm": "1.4.0",
+    "solmate": "6.7.0"
   },
   "scripts": {
     "publish": "echo \"Cannot publish periphery yet\"",
@@ -23,11 +31,6 @@
   "devDependencies": {
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^8.0.7",
-    "@voltz-protocol/core": "workspace:^",
-    "@voltz-protocol/products-dated-irs": "workspace:^",
-    "@voltz-protocol/util-contracts": "workspace:^",
-    "@voltz-protocol/util-modules": "workspace:^",
-    "@voltz-protocol/v2-vamm": "1.4.0",
     "lcov-badge-generator": "1.0.5",
     "prettier": "2.8.4",
     "semantic-release": "^20.1.1",

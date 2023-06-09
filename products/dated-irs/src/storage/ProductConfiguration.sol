@@ -10,7 +10,7 @@ library ProductConfiguration {
 
     struct Data {
         /**
-         * @dev Id fo a given interest rate swap market
+         * @dev Id for a given interest rate swap market
          */
         uint128 productId;
         /**
@@ -40,6 +40,8 @@ library ProductConfiguration {
      */
     function set(Data memory config) internal {
         Data storage storedConfig = load();
+
+        //todo: check interface id of pool address
 
         storedConfig.productId = config.productId;
         storedConfig.coreProxy = config.coreProxy;
