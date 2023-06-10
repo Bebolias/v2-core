@@ -16,9 +16,9 @@ library V2DatedIRSVamm {
         int24 tickUpper,
         int128 liquidityDelta
     )
-        internal
+        internal returns (uint256 fee, uint256 im)
      {
-        IPoolModule(Config.load().VOLTZ_V2_DATED_IRS_VAMM_PROXY)
+        (fee, im) = IPoolModule(Config.load().VOLTZ_V2_DATED_IRS_VAMM_PROXY)
             .initiateDatedMakerOrder(accountId, marketId, maturityTimestamp, tickLower, tickUpper, liquidityDelta);
     }
 }

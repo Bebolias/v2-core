@@ -1583,26 +1583,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@voltz-protocol/integration-tests@workspace:integration-tests":
-  version: 0.0.0-use.local
-  resolution: "@voltz-protocol/integration-tests@workspace:integration-tests"
-  dependencies:
-    "@openzeppelin/contracts": 4.9.0
-    "@semantic-release/git": ^10.0.1
-    "@semantic-release/github": ^8.0.7
-    "@voltz-protocol/core": "workspace:^"
-    "@voltz-protocol/periphery": "workspace:^"
-    "@voltz-protocol/products-dated-irs": "workspace:^"
-    "@voltz-protocol/util-contracts": "workspace:^"
-    "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.4.0
-    lcov-badge-generator: 1.0.5
-    prettier: 2.8.4
-    semantic-release: ^20.1.1
-    solhint: 3.4.0
-  languageName: unknown
-  linkType: soft
-
 "@voltz-protocol/periphery@workspace:^, @voltz-protocol/periphery@workspace:periphery":
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/periphery@workspace:periphery"
@@ -1616,7 +1596,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.4.0
+    "@voltz-protocol/v2-vamm": 1.5.1
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1686,6 +1666,20 @@ __metadata:
     "@voltz-protocol/util-contracts": 1.1.0
     "@voltz-protocol/util-modules": 1.0.3
   checksum: 801d54489e1ea59c85b7fa1a5934d9b0b14f8f2dcf226766eec102f92df22abf8060d8477ab6b16c61056bb982928aea88b6d8dc3f0f5406a7be8cf564543f33
+  languageName: node
+  linkType: hard
+
+"@voltz-protocol/v2-vamm@npm:1.5.1":
+  version: 1.5.1
+  resolution: "@voltz-protocol/v2-vamm@npm:1.5.1::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fv2-vamm%2F1.5.1%2F601504bec93da01c1ac4af2a795aade878858fea"
+  dependencies:
+    "@openzeppelin/contracts": ^4.8.3
+    "@prb/math": 3.3.0
+    "@voltz-protocol/core": ^2.0.8
+    "@voltz-protocol/products-dated-irs": ^2.0.7
+    "@voltz-protocol/util-contracts": 1.1.0
+    "@voltz-protocol/util-modules": 1.0.3
+  checksum: 89efeea6f7ca2a37be51cc35fb8c68e47eaaff9b22993cdd547f9a4dd84ac068ff2722e8280e24ed34d1ae04036170fda0a5f0dc75f1e3cc27688e3a284965eb
   languageName: node
   linkType: hard
 

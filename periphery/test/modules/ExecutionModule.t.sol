@@ -59,6 +59,15 @@ contract ExecutionModuleTest is Test {
             abi.encode(100, -100, 25, 55)
         );
 
+        vm.mockCall(
+            exchange,
+            abi.encodeWithSelector(
+                IVammModule.getVammTick.selector,
+                101, 1678786786
+            ),
+            abi.encode(660)
+        );
+
         exec.execute(commands, inputs, deadline);
     }
 
@@ -92,10 +101,71 @@ contract ExecutionModuleTest is Test {
                 IPoolModule.initiateDatedMakerOrder.selector,
                 1, 101, 1678786786, -6600, -6000, 10389000
             ),
-            abi.encode()
+            abi.encode(163656, 187267678)
         );
 
-        exec.execute(commands, inputs, deadline);
+        bytes[] memory output = exec.execute(commands, inputs, deadline);
+        (uint256 fee, uint256 im) = abi.decode(output[0], (uint256, uint256));
+        assertEq(output.length, 1);
+        assertEq(fee, 163656);
+        assertEq(im, 187267678);
+    }
+
+    function testExecCommand_TwoOutputs() public {
+        uint256 deadline = block.timestamp + 1;
+        bytes memory commands = abi.encodePacked(
+            bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP)),
+            bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
+        );
+        bytes[] memory inputs = new bytes[](2);
+        inputs[0] = abi.encode(1, 101, 1678786786, -6600, -6000, 10389000);
+        inputs[1] = abi.encode(1, 101, 1678786786, 100, 0);
+
+        vm.mockCall(
+            exchange,
+            abi.encodeWithSelector(
+                IPoolModule.initiateDatedMakerOrder.selector,
+                1, 101, 1678786786, -6600, -6000, 10389000
+            ),
+            abi.encode(163656, 187267678)
+        );
+
+        vm.mockCall(
+            instrument,
+            abi.encodeWithSelector(
+                IProductIRSModule.initiateTakerOrder.selector,
+                1, 101, 1678786786, 100, 0
+            ),
+            abi.encode(100, -100, 25, 55)
+        );
+
+        vm.mockCall(
+            exchange,
+            abi.encodeWithSelector(
+                IVammModule.getVammTick.selector,
+                101, 1678786786
+            ),
+            abi.encode(660)
+        );
+
+        bytes[] memory output = exec.execute(commands, inputs, deadline);
+
+        (uint256 fee, uint256 im) = abi.decode(output[0], (uint256, uint256));
+        (
+            int256 executedBaseAmount,
+            int256 executedQuoteAmount,
+            uint256 fee1,
+            uint256 im1,
+            int24 currentTick
+        ) = abi.decode(output[1], (int256, int256, uint256, uint256, int24));
+        assertEq(output.length, 2);
+        assertEq(fee, 163656);
+        assertEq(im, 187267678);
+        assertEq(executedBaseAmount, 100);
+        assertEq(executedQuoteAmount, -100);
+        assertEq(fee1, 25);
+        assertEq(im1, 55);
+        assertEq(currentTick, 660);
     }
 
     function testExecCommand_Withdraw() public {

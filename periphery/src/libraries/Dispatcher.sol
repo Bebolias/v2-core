@@ -20,10 +20,9 @@ library Dispatcher {
     /// @notice Decodes and executes the given command with the given inputs
     /// @param commandType The command type to execute
     /// @param inputs The inputs to execute the command with
-    /// @return success True on success of the command, false on failure
-    function dispatch(bytes1 commandType, bytes calldata inputs) internal returns (bool success) {
+    /// @return output Abi encoding of command output if any
+    function dispatch(bytes1 commandType, bytes calldata inputs) internal returns (bytes memory output) {
         uint256 command = uint8(commandType & Commands.COMMAND_TYPE_MASK);
-        success = true;
 
         if (command == Commands.V2_DATED_IRS_INSTRUMENT_SWAP) {
             // equivalent: abi.decode(inputs, (uint128, uint128, uint32, int256, uint160))
@@ -41,7 +40,14 @@ library Dispatcher {
                 priceLimit := calldataload(add(inputs.offset, 0x80))
             }
 
-            V2DatedIRS.swap(accountId, marketId, maturityTimestamp, baseAmount, priceLimit);
+            (
+                int256 executedBaseAmount,
+                int256 executedQuoteAmount,
+                uint256 fee,
+                uint256 im,
+                int24 currentTick
+            ) = V2DatedIRS.swap(accountId, marketId, maturityTimestamp, baseAmount, priceLimit);
+            output = abi.encode(executedBaseAmount, executedQuoteAmount, fee, im, currentTick);
         } else if (command == Commands.V2_DATED_IRS_INSTRUMENT_SETTLE) {
             // equivalent: abi.decode(inputs, (uint128, uint128, uint32))
             uint128 accountId;
@@ -69,7 +75,15 @@ library Dispatcher {
                 tickUpper := calldataload(add(inputs.offset, 0x80))
                 liquidityDelta := calldataload(add(inputs.offset, 0xA0))
             }
-            V2DatedIRSVamm.initiateDatedMakerOrder(accountId, marketId, maturityTimestamp, tickLower, tickUpper, liquidityDelta);
+            (uint256 fee, uint256 im) = V2DatedIRSVamm.initiateDatedMakerOrder(
+                accountId,
+                marketId,
+                maturityTimestamp,
+                tickLower,
+                tickUpper,
+                liquidityDelta
+            );
+            output = abi.encode(fee, im);
         } else if (command == Commands.V2_CORE_CREATE_ACCOUNT) {
             // equivalent: abi.decode(inputs, (address, address, uint160))
             uint128 requestedId;

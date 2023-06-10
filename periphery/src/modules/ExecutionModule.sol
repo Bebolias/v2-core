@@ -22,11 +22,11 @@ contract ExecutionModule is IExecutionModule {
         payable
         override
         checkDeadline(deadline)
+        returns (bytes[] memory outputs)
     {
-        bool success;
-        bytes memory output;
         uint256 numCommands = commands.length;
         if (inputs.length != numCommands) revert LengthMismatch();
+        outputs = new bytes[](numCommands);
 
         // loop through all given commands, execute them and pass along outputs as defined
         for (uint256 commandIndex = 0; commandIndex < numCommands;) {
@@ -34,20 +34,12 @@ contract ExecutionModule is IExecutionModule {
 
             bytes calldata input = inputs[commandIndex];
 
-            success = Dispatcher.dispatch(command, input);
-
-            if (!success && successRequired(command)) {
-                revert ExecutionFailed(commandIndex);
-            }
+            bytes memory output = Dispatcher.dispatch(command, input);
+            outputs[commandIndex] = output;
 
             unchecked {
                 commandIndex++;
             }
         }
-    }
-
-    function successRequired(bytes1 command) internal pure returns (bool) {
-        // todo: add flag allow revert
-        return command & Commands.FLAG_ALLOW_REVERT == 0;
     }
 }
