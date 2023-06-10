@@ -11,9 +11,9 @@ library V2DatedIRS {
     // todo: add price limit in here once implemented in the dated irs instrument
     function swap(uint128 accountId, uint128 marketId, uint32 maturityTimestamp, int256 baseAmount, uint160 priceLimit)
         internal
-        returns (int256 executedBaseAmount, int256 executedQuoteAmount)
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount, uint256 fee, uint256 im)
     {
-        (executedBaseAmount, executedQuoteAmount) = IProductIRSModule(Config.load().VOLTZ_V2_DATED_IRS_PROXY)
+        (executedBaseAmount, executedQuoteAmount, fee, im) = IProductIRSModule(Config.load().VOLTZ_V2_DATED_IRS_PROXY)
             .initiateTakerOrder(accountId, marketId, maturityTimestamp, baseAmount, priceLimit);
     }
 

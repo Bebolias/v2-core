@@ -36,7 +36,7 @@ contract ProductIRSModule is IProductIRSModule {
     )
         external
         override
-        returns (int256 executedBaseAmount, int256 executedQuoteAmount)
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount, uint256 fee, uint256 im)
     {
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
@@ -47,18 +47,22 @@ contract ProductIRSModule is IProductIRSModule {
         RateOracleReader.load(marketId).updateCache(maturityTimestamp);
 
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
-        address poolAddress = ProductConfiguration.getPoolAddress();
         (executedBaseAmount, executedQuoteAmount) =
-            IPool(poolAddress).executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount, priceLimit);
+            IPool(ProductConfiguration.getPoolAddress()).executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount, priceLimit);
         Portfolio.load(accountId).updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
 
         // propagate order
         address quoteToken = MarketConfiguration.load(marketId).quoteToken;
-        int256[] memory baseAmounts = new int256[](1);
-        baseAmounts[0] = executedBaseAmount;
-        int256 annualizedNotionalAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
+        int256 annualizedNotionalAmount = getSingleAnnualizedExposure(executedBaseAmount, marketId, maturityTimestamp);
+        
         uint128 productId = ProductConfiguration.getProductId();
-        IProductModule(coreProxy).propagateTakerOrder(accountId, productId, marketId, quoteToken, annualizedNotionalAmount);
+        (fee, im) = IProductModule(coreProxy).propagateTakerOrder(
+            accountId,
+            productId,
+            marketId,
+            quoteToken,
+            annualizedNotionalAmount
+        );
 
         emit TakerOrder(
             accountId,
@@ -71,6 +75,16 @@ contract ProductIRSModule is IProductIRSModule {
             annualizedNotionalAmount,
             block.timestamp
             );
+    }
+
+    function getSingleAnnualizedExposure(
+        int256 executedBaseAmount,
+        uint128 marketId,
+        uint32 maturityTimestamp
+    ) internal returns (int256 annualizedNotionalAmount) {
+        int256[] memory baseAmounts = new int256[](1);
+        baseAmounts[0] = executedBaseAmount;
+        annualizedNotionalAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
     }
 
     /**
@@ -190,12 +204,16 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProductIRSModule
      */
-    function propagateMakerOrder(uint128 accountId, uint128 marketId, int256 annualizedBaseAmount) external {
+    function propagateMakerOrder(
+        uint128 accountId,
+        uint128 marketId,
+        int256 annualizedBaseAmount
+    ) external returns (uint256 fee, uint256 im) {
         if (msg.sender != ProductConfiguration.getPoolAddress()) {
             revert NotAuthorized(msg.sender, "propagateMakerOrder");
         }
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
-        IProductModule(coreProxy).propagateMakerOrder(
+        (fee, im) = IProductModule(coreProxy).propagateMakerOrder(
             accountId,
             ProductConfiguration.getProductId(),
             marketId,

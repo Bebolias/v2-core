@@ -173,7 +173,7 @@ contract ProductIRSModuleTest is Test {
             abi.encodeWithSelector(
                 IProductModule.propagateTakerOrder.selector, MOCK_ACCOUNT_ID, MOCK_PRODUCT_ID, MOCK_MARKET_ID, MOCK_QUOTE_TOKEN, 10
             ),
-            abi.encode(0)
+            abi.encode(0, 0)
         );
         vm.startPrank(MOCK_USER);
 

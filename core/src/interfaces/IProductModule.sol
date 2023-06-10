@@ -55,23 +55,21 @@ interface IProductModule {
     /// @notice attempts to close all the unfilled and filled positions of a given account in a given product (productId)
     function closeAccount(uint128 productId, uint128 accountId, address collateralType) external;
 
-    // todo: is annualizedNotional supposed to be unsigned?
     function propagateTakerOrder(
         uint128 accountId,
         uint128 productId,
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external returns (uint256 fee);
+    ) external returns (uint256 fee, uint256 im);
 
-    // todo: is annualizedNotional supposed to be unsigned?
     function propagateMakerOrder(
         uint128 accountId,
         uint128 productId,
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external returns (uint256 fee);
+    ) external returns (uint256 fee, uint256 im);
 
     function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount) external;
 }

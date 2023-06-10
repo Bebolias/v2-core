@@ -112,7 +112,7 @@ contract ProductModule is IProductModule {
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external override returns (uint256 fee) {
+    ) external override returns (uint256 fee, uint256 im) {
         Product.onlyProductAddress(productId, msg.sender);
 
         MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
@@ -121,7 +121,7 @@ contract ProductModule is IProductModule {
         );
 
         Account.Data storage account = Account.exists(accountId);
-        account.imCheck(collateralType);
+        im = account.imCheck(collateralType);
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
         }
@@ -133,7 +133,7 @@ contract ProductModule is IProductModule {
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external override returns (uint256 fee) {
+    ) external override returns (uint256 fee, uint256 im) {
         Product.onlyProductAddress(productId, msg.sender);
 
         MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
@@ -142,7 +142,7 @@ contract ProductModule is IProductModule {
         );
 
         Account.Data storage account = Account.exists(accountId);
-        account.imCheck(collateralType);
+        im = account.imCheck(collateralType);
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
         }

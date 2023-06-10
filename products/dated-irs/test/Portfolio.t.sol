@@ -359,7 +359,7 @@ contract PortfolioTest is Test {
         vm.mockCall(
             address(12),
             abi.encodeWithSelector(IProductModule.propagateTakerOrder.selector, accountId, 1, marketId, MOCK_COLLATERAL_TYPE, 0),
-            abi.encode(0)
+            abi.encode(0, 0)
         );
 
         vm.expectCall(
@@ -380,7 +380,7 @@ contract PortfolioTest is Test {
         vm.mockCall(
             address(12),
             abi.encodeWithSelector(IProductModule.propagateTakerOrder.selector, accountId, 1, marketId, MOCK_COLLATERAL_TYPE, 0),
-            abi.encode(0)
+            abi.encode(0, 0)
         );
 
         vm.expectCall(

@@ -56,7 +56,7 @@ contract ExecutionModuleTest is Test {
                 IProductIRSModule.initiateTakerOrder.selector,
                 1, 101, 1678786786, 100, 0
             ),
-            abi.encode(100, -100)
+            abi.encode(100, -100, 25, 55)
         );
 
         exec.execute(commands, inputs, deadline);

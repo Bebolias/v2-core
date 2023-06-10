@@ -243,7 +243,6 @@ library Portfolio {
                 mulUDxInt(annualizedExposureFactor, executedBaseAmount)
             );
 
-            // todo: trader position balance can get out of line if LP
             position.update(executedBaseAmount, executedQuoteAmount);
 
             emit ProductPositionUpdated(

@@ -253,11 +253,12 @@ library Account {
         return ProtocolRiskConfiguration.load().imMultiplier;
     }
 
-    function imCheck(Data storage self, address collateralType) internal {
-        (bool isSatisfied,) = self.isIMSatisfied(collateralType);
+    function imCheck(Data storage self, address collateralType) internal returns (uint256) {
+        (bool isSatisfied, uint256 im) = self.isIMSatisfied(collateralType);
         if (!isSatisfied) {
             revert AccountBelowIM(self.id);
         }
+        return im;
     }
 
     /**
