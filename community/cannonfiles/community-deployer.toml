@@ -27,6 +27,11 @@ source="<%= settings.datedIrsPackage %>"
 [import.periphery]
 source="<%= settings.peripheryPackage %>"
 
+# Dated IRS VAMM Configs
+[setting.vammPackage]
+[import.vamm]
+source="<%= settings.vammPackage %>"
+
 [contract.VoltzV2CommunityDeployer]
 artifact="CommunityDeployer"
 args=[
@@ -36,10 +41,12 @@ args=[
   "<%= settings.blockTimestampVotingEnd %>", # blockTimestampVotingEnd
   { coreRouter = "<%= imports.voltzCore.contracts.CoreRouter.address %>", accountNftRouter = "<%= imports.voltzCore.contracts.AccountNFTRouter.address %>", accountNftId = "<%= settings.accountNftId %>", accountNftName = "<%= settings.accountNftName %>", accountNftSymbol = "<%= settings.accountNftSymbol %>", accountNftUri = "<%= settings.accountNftUri %>" },
   { datedIrsRouter =  "<%= imports.datedIrs.contracts.DatedIrsRouter.address %>" },
-  { peripheryRouter = "<%= imports.periphery.contracts.PeripheryRouter.address %>" }
+  { peripheryRouter = "<%= imports.periphery.contracts.PeripheryRouter.address %>" },
+  { vammRouter = "<%= imports.vamm.contracts.VammRouter.address %>" }
 ]
 depends = [
   "import.voltzCore",
   "import.datedIrs",
   "import.periphery",
+  "import.vamm"
 ]

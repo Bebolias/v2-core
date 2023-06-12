@@ -1,8 +1,8 @@
-name = "voltz-core"
-version = "0.0.4"
-description = "Voltz V2 Core"
+name = "voltz-margin-engine"
+version = "2.0.0"
+description = "Voltz V2 Margin Engine"
 
-# `salt` here only affects the InitialModuleBunde and CoreProxy contracts
+# `salt` here only affects the OwnerUpgradeModule and CoreProxy contracts
 [setting.salt]
 description = "Change this to a unique string when deploying multiple instances of the protocol. Note that only the proxy contract will be unique."
 defaultValue = "main"

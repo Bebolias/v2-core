@@ -1,8 +1,8 @@
 name = "voltz-periphery"
-version = "0.0.4"
+version = "2.0.0"
 description = "Voltz V2 Periphery"
 
-# `salt` here only affects the InitialModuleBunde and ProductIRSProxy contracts
+# `salt` here only affects the OwnerUpgradeModule and ProductIRSProxy contracts
 [setting.salt]
 description = "Change this to a unique string when deploying multiple instances of the protocol. Note that only the proxy contract will be unique."
 defaultValue = "main"
