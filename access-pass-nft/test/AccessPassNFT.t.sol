@@ -6,10 +6,10 @@ import "../src/AccessPassNFT.sol";
 contract AccessPassNFTTest is Test {
 
     AccessPassNFT internal accessPassNFT;
-    constant string ACCESS_PASS_NFT_NAME = "AccessPassNFT";
-    constant string ACCESS_PASS_NFT_SYMBOL = "APNFT";
-    constant bytes32 MERKLE_ROOT = bytes32(0x1234);
-    constant string BASE_METADATA_URI = "ipfs://QmWKUhiBh7efyvRDDfeyDXKh9KrzchEGCJAVMcTqZezSPg/";
+    string internal constant ACCESS_PASS_NFT_NAME = "AccessPassNFT";
+    string internal constant ACCESS_PASS_NFT_SYMBOL = "APNFT";
+    bytes32 internal constant MERKLE_ROOT = "0x1234";
+    string internal constant BASE_METADATA_URI = "ipfs://QmWKUhiBh7efyvRDDfeyDXKh9KrzchEGCJAVMcTqZezSPg/";
 
     function setUp() public {
         accessPassNFT = new AccessPassNFT(ACCESS_PASS_NFT_NAME, ACCESS_PASS_NFT_SYMBOL);
@@ -17,18 +17,16 @@ contract AccessPassNFTTest is Test {
 
     function testSuccessfulAddNewRoot() public {
 
-        RootInfoStruct memory rootInfo = {
+        AccessPassNFT.RootInfo memory rootInfo = AccessPassNFT.RootInfo({
             merkleRoot: MERKLE_ROOT,
             baseMetadataURI: BASE_METADATA_URI,
             startTimestamp: 0,
             endTimestamp: 1
-        };
+        });
 
         accessPassNFT.addNewRoot(rootInfo);
-        baseMetadataURI = accessPassNFT.rootData(MERKLE_ROOT);
-        assert(baseMetadataURI == BASE_METADATA_URI);
-
-    }
+        string memory baseMetadataURI = accessPassNFT.rootData(MERKLE_ROOT);
+        assertEq(baseMetadataURI, BASE_METADATA_URI);
 
     }
 
