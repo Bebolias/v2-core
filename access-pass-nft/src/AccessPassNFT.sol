@@ -11,13 +11,10 @@ import "oz/access/Ownable.sol";
 
 contract AccessPassNFT is Ownable, ERC721URIStorage {
 
-    /// @dev mapping used to track whitelisted merkle roots
-    mapping(bytes32 => string) public rootData;
+    mapping(bytes32 => string) public whitelistedMerkleRootToURI;
 
-    // the root used to claim a given token ID. Required to get the base URI.
-    mapping(uint256 => bytes32) public tokenData;
+    mapping(uint256 => bytes32) public tokenIdToRoot;
 
-    /// @notice tracks the number of minted access passes
     using Counters for Counters.Counter;
     Counters.Counter private _tokenSupply;
 
@@ -46,10 +43,10 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
             "cannot set empty root URI"
         );
         require(
-            bytes(rootData[rootInfo.merkleRoot]).length == 0,
+            bytes(whitelistedMerkleRootToURI[rootInfo.merkleRoot]).length == 0,
             "cannot overwrite non-empty URI"
         );
-        rootData[rootInfo.merkleRoot] = rootInfo.baseMetadataURI;
+        whitelistedMerkleRootToURI[rootInfo.merkleRoot] = rootInfo.baseMetadataURI;
         emit NewValidRoot(rootInfo);
     }
 
@@ -59,7 +56,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
      * the badge cannot be burnt.
      */
     function deleteRoot(bytes32 merkleRoot) public onlyOwner {
-        delete rootData[merkleRoot];
+        delete whitelistedMerkleRootToURI[merkleRoot];
         emit InvalidatedRoot(merkleRoot);
     }
 
@@ -85,7 +82,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
     function tokenURI(
         uint256 tokenId
     ) public view override(ERC721URIStorage) returns (string memory) {
-        string memory rootURI = rootData[tokenData[tokenId]];
+        string memory rootURI = whitelistedMerkleRootToURI[tokenData[tokenId]];
         return
         string(
             abi.encodePacked(
@@ -147,7 +144,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         bytes32[] memory proof,
         bytes32 merkleRoot
     ) internal view returns (bool) {
-        require(bytes(rootData[merkleRoot]).length > 0, "Unrecognised merkle root");
+        require(bytes(whitelistedMerkleRootToURI[merkleRoot]).length > 0, "Unrecognised merkle root");
         return MerkleProof.verify(proof, merkleRoot, encodedLeaf);
     }
 }
