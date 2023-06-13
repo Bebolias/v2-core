@@ -2,6 +2,8 @@ pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "../src/AccessPassNFT.sol";
+import "oz/utils/cryptography/MerkleProof.sol";
+
 
 contract AccessPassNFTTest is Test {
 

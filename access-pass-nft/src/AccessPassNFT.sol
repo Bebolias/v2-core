@@ -10,16 +10,11 @@ import "forge-std/console.sol";
 
 contract AccessPassNFT is Ownable, ERC721URIStorage {
 
-    struct TokenData {
-        uint96 accessPassId;
-        bytes32 merkleRoot;
-    }
-
     /// @dev mapping used to track whitelisted merkle roots
     mapping(bytes32 => string) public rootData;
 
     // the root used to claim a given token ID. Required to get the base URI.
-    mapping(uint256 => TokenData) public tokenData;
+    mapping(uint256 => bytes32) public tokenData;
 
     /// @notice tracks the number of minted access passes
     using Counters for Counters.Counter;
@@ -36,8 +31,6 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
     struct RootInfo {
         bytes32 merkleRoot;
         string baseMetadataURI; // The folder URI from which individual token URIs can be derived. Must therefore end with a slash.
-        uint32 startTimestamp; // Only logged, not stored
-        uint32 endTimestamp; // Only logged, not stored
     }
 
     event RedeemAccessPassNFT(LeafInfo leafInfo, uint256 tokenId);
@@ -97,12 +90,11 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
     function tokenURI(
         uint256 tokenId
     ) public view override(ERC721URIStorage) returns (string memory) {
-        string memory rootURI = rootData[tokenData[tokenId].merkleRoot];
+        string memory rootURI = rootData[tokenData[tokenId]];
         return
         string(
             abi.encodePacked(
                 rootURI,
-                Strings.toString(uint256(tokenData[tokenId].accessPassId)),
                 ".json"
             )
         );
