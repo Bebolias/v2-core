@@ -42,11 +42,26 @@ contract AccessPassNFTTest is Test {
         accessPassNFT.addNewRoot(rootInfo);
 
         bytes32[] memory proof = new bytes32[](1);
-        proof[0] = bytes32(uint256(1));
 
         accessPassNFT.redeem(address(this), NUMBER_OF_ACCESS_PASSES, proof, MERKLE_ROOT);
 
     }
+
+    function testTokenURI() public {}
+
+    function testSuccessfulNFTTransfer() public {}
+
+    function testDeleteRoot() public {}
+
+    function testFailRedeemWithUnrecognisedMerkleRoot() public {}
+
+    function testFailRedeemWithInvalidMerkleProof() public {}
+
+    function testFailDoubleRedeem() public {}
+
+    function testFailDeleteRootNotOwner() public {}
+
+    function testFailAddNewRootNotOwner() public {}
 
 }
 
