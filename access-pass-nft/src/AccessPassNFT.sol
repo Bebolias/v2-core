@@ -8,6 +8,8 @@ import "oz/utils/Counters.sol";
 import "oz/access/Ownable.sol";
 import "forge-std/console.sol";
 
+// todo: rename variables post refactor
+
 contract AccessPassNFT is Ownable, ERC721URIStorage {
 
     /// @dev mapping used to track whitelisted merkle roots
@@ -20,12 +22,6 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenSupply;
 
-    /// @notice leaf details that seat at the bottom of each merkle tree
-    struct LeafInfo {
-        address account;
-        uint96 accessPassId;
-    }
-
     /** @notice Information needed for the NewValidRoot event.
      */
     struct RootInfo {
@@ -33,7 +29,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         string baseMetadataURI; // The folder URI from which individual token URIs can be derived. Must therefore end with a slash.
     }
 
-    event RedeemAccessPassNFT(LeafInfo leafInfo, uint256 tokenId);
+    event RedeemAccessPassNFT(address account, uint256 tokenId);
     event NewValidRoot(RootInfo rootInfo);
     event InvalidatedRoot(bytes32 merkleRoot);
 
@@ -102,12 +98,12 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
 
 
     /** @notice Total supply getter. Returns the total number of minted badges so far.
-     * @param leafInfo: merkle tree leaf with badge information
+     * @param account: merkle tree leaf account address
      * @param proof: merkle tree proof of the leaf
      * @param merkleRoot: merkle tree root based on which the proof is verified
      */
     function redeem(
-        LeafInfo memory leafInfo,
+        address account,
         bytes32[] calldata proof,
         bytes32 merkleRoot
     ) public returns (uint256) {
@@ -117,18 +113,16 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         );
 
         bytes32 tokenIdHash = getTokenIdHash(
-            leafInfo.account,
-            merkleRoot,
-            leafInfo.accessPassId
+            account,
+            merkleRoot
         );
         uint256 tokenId = uint256(tokenIdHash);
         console.log(tokenId);
 
         _tokenSupply.increment();
-        _safeMint(leafInfo.account, tokenId);
+        _safeMint(account, tokenId);
 
-        tokenData[tokenId].merkleRoot = merkleRoot;
-        tokenData[tokenId].accessPassId = leafInfo.accessPassId;
+        tokenData[tokenId] = merkleRoot;
 
         emit RedeemAccessPassNFT(leafInfo, tokenId);
 
@@ -142,28 +136,23 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
      * @param merkleRoots the merkel roots - one bytes32 for each leaf
      */
     function multiRedeem(
-        LeafInfo[] memory leafInfos,
+        address account,
         bytes32[][] calldata proofs,
         bytes32[] memory merkleRoots
     ) public returns (uint256[] memory tokenIds) {
-        require(
-            leafInfos.length == proofs.length &&
-            leafInfos.length == merkleRoots.length,
-            "Bad input"
-        );
         tokenIds = new uint256[](leafInfos.length);
 
         for (uint256 i = 0; i < leafInfos.length; i++) {
-            tokenIds[i] = redeem(leafInfos[i], proofs[i], merkleRoots[i]);
+            tokenIds[i] = redeem(account, proofs[i], merkleRoots[i]);
         }
         return tokenIds;
     }
 
     /** @notice Encoded the leaf information
-     * @param leafInfo: merkle tree leaf with access pass information
+     * @param account: account address
      */
-    function _leaf(LeafInfo memory leafInfo) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(leafInfo.account, leafInfo.accessPassId));
+    function _leaf(address account) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(account));
     }
 
     /** @notice Verification that the hash of the actor address and information
