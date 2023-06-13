@@ -21,9 +21,13 @@
     "@openzeppelin/contracts": "4.9.0"
   },
   "devDependencies": {
+    "@google-cloud/bigquery": "6.2.0",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^8.0.7",
+    "ethers": "^5.7.2",
+    "keccak256": "^1.0.6",
     "lcov-badge-generator": "1.0.5",
+    "merkletreejs": "^0.2.32",
     "prettier": "2.8.4",
     "semantic-release": "^20.1.1",
     "solhint": "3.4.0"

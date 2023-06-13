@@ -1,0 +1,26 @@
+name = "voltz-access-pass-add-root"
+version = "2.0.0"
+description = "Voltz V2 Access Pass add root"
+
+# Access Pass NFT Configs
+[setting.accessPassNftPackage]
+[import.accessPassNft]
+source="<%= settings.accessPassNftPackage %>"
+
+[setting.owner]
+[setting.merkleRoot]
+[setting.baseMetadataURI]
+[setting.startTimestamp]
+[setting.endTimestamp]
+
+# Add root
+[invoke.addRoot]
+target = ["accessPassNft.AccessPassNft"]
+from = "<%= settings.owner %>"
+func = "addNewRoot"
+args = [
+    { merkleRoot =  "<%= settings.merkleRoot %>", baseMetadataURI = "<%= settings.baseMetadataURI %>", startTimestamp = "<%= settings.startTimestamp %>", endTimestamp =  "<%= settings.endTimestamp %>"},
+]
+depends = [
+  "import.accessPassNft"
+]
