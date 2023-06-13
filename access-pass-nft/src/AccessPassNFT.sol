@@ -68,15 +68,15 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
 
     /** @notice Total supply getter. Returns the total number of minted access passes so far.
      * @param account: user's address
+     * @param accountPassCounter
      * @param merkleRoot: merkle root associated with this badge
-     * @param accessPassId: access pass ID
      */
     function getTokenIdHash(
         address account,
-        bytes32 merkleRoot,
-        uint96 accessPassId
+        uint256 accountPassCounter,
+        bytes32 merkleRoot
     ) public view returns (bytes32) {
-        return keccak256(abi.encodePacked(account, merkleRoot, accessPassId));
+        return keccak256(abi.encodePacked(account, merkleRoot, accountPassCounter));
     }
 
     function tokenURI(
