@@ -6,6 +6,7 @@ import "oz/utils/Strings.sol";
 import "oz/utils/cryptography/MerkleProof.sol";
 import "oz/utils/Counters.sol";
 import "oz/access/Ownable.sol";
+import "forge-std/console.sol";
 
 contract AccessPassNFT is Ownable, ERC721URIStorage {
 
@@ -129,6 +130,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
             leafInfo.accessPassId
         );
         uint256 tokenId = uint256(tokenIdHash);
+        console.log(tokenId);
 
         _tokenSupply.increment();
         _safeMint(leafInfo.account, tokenId);
