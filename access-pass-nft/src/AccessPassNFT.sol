@@ -6,7 +6,6 @@ import "oz/utils/Strings.sol";
 import "oz/utils/cryptography/MerkleProof.sol";
 import "oz/utils/Counters.sol";
 import "oz/access/Ownable.sol";
-import "forge-std/console.sol";
 
 // todo: rename variables post refactor
 
@@ -104,6 +103,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
      */
     function redeem(
         address account,
+        uint256 numberOfAccessPasses,
         bytes32[] calldata proof,
         bytes32 merkleRoot
     ) public returns (uint256) {
@@ -112,39 +112,23 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
             "Invalid Merkle proof"
         );
 
-        bytes32 tokenIdHash = getTokenIdHash(
-            account,
-            merkleRoot
-        );
-        uint256 tokenId = uint256(tokenIdHash);
-//        console.log(tokenId);
+        tokenIds = new uint256[](numberOfAccessPasses);
 
-        _tokenSupply.increment();
-        _safeMint(account, tokenId);
+        for (uint256 i = 0; i < numberOfAccessPasses; i++) {
+            bytes32 tokenIdHash = getTokenIdHash(
+                account,
+                i,
+                merkleRoot
+            );
+            uint256 tokenId = uint256(tokenIdHash);
+            tokenIds[i] = _mint(account, merkleRoot);
+            _tokenSupply.increment();
+            _safeMint(account, tokenId);
+            tokenData[tokenId] = merkleRoot;
 
-        tokenData[tokenId] = merkleRoot;
-
-        emit RedeemAccessPassNFT(account, tokenId);
-
-        return tokenId;
-    }
-
-    /** @notice Supports redemption of multiple access passes in one transaction
-     * @dev Each claim must present its own root and a full proof, even if this involves duplication
-     * @param account is the address of the user
-     * @param proofs are the one bytes32[] proofs for each leaf
-     * @param merkleRoot - the merkle root
-     */
-    function multiRedeem(
-        address account,
-        bytes32[][] calldata proofs,
-        bytes32 merkleRoot
-    ) public returns (uint256[] memory tokenIds) {
-        tokenIds = new uint256[](proofs.length);
-
-        for (uint256 i = 0; i < proofs.length; i++) {
-            tokenIds[i] = redeem(account, proofs[i], merkleRoot);
+            emit RedeemAccessPassNFT(account, tokenId);
         }
+
         return tokenIds;
     }
 

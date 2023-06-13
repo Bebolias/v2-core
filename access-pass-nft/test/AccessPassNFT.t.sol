@@ -21,9 +21,7 @@ contract AccessPassNFTTest is Test {
 
         AccessPassNFT.RootInfo memory rootInfo = AccessPassNFT.RootInfo({
             merkleRoot: MERKLE_ROOT,
-            baseMetadataURI: BASE_METADATA_URI,
-            startTimestamp: 0,
-            endTimestamp: 1
+            baseMetadataURI: BASE_METADATA_URI
         });
 
         accessPassNFT.addNewRoot(rootInfo);
@@ -36,22 +34,15 @@ contract AccessPassNFTTest is Test {
 
         AccessPassNFT.RootInfo memory rootInfo = AccessPassNFT.RootInfo({
             merkleRoot: MERKLE_ROOT,
-            baseMetadataURI: BASE_METADATA_URI,
-            startTimestamp: 0,
-            endTimestamp: 1
+            baseMetadataURI: BASE_METADATA_URI
         });
 
         accessPassNFT.addNewRoot(rootInfo);
 
-        AccessPassNFT.LeafInfo memory leafInfo = AccessPassNFT.LeafInfo({
-            account: address(this),
-            accessPassId: 1
-        });
-
         bytes32[] memory proof = new bytes32[](1);
         proof[0] = bytes32(uint256(1));
 
-        accessPassNFT.redeem(leafInfo, proof, MERKLE_ROOT);
+        accessPassNFT.redeem(address(this), proof, MERKLE_ROOT);
 
 //        uint256 tokenId = accessPassNFT.tokenOfOwnerByIndex(address(this), 0);
 //        assertEq(tokenId, 1);
