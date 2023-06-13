@@ -57,7 +57,8 @@
         "utils/contracts",
         "utils/modules",
         "products/dated-irs",
-        "community"
+        "community",
+        "access-pass-nft"
     ],
     "engines": {
         "node": "^18.14.0",

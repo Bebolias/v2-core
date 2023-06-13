@@ -13,3 +13,6 @@
 [submodule "integration-tests/lib/forge-std"]
 	path = integration-tests/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "access-pass-nft/lib/forge-std"]
+	path = access-pass-nft/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std

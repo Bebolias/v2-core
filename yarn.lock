@@ -1073,6 +1073,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@voltz-protocol/access-pass-nft@workspace:access-pass-nft":
+  version: 0.0.0-use.local
+  resolution: "@voltz-protocol/access-pass-nft@workspace:access-pass-nft"
+  dependencies:
+    "@openzeppelin/contracts": 4.9.0
+    "@semantic-release/git": ^10.0.1
+    "@semantic-release/github": ^8.0.7
+    lcov-badge-generator: 1.0.5
+    prettier: 2.8.4
+    semantic-release: ^20.1.1
+    solhint: 3.4.0
+  languageName: unknown
+  linkType: soft
+
 "@voltz-protocol/community@workspace:community":
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/community@workspace:community"

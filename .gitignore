@@ -23,6 +23,8 @@ bin/
 .DS_Store
 yarn-error.log
 
+.idea/
+
 # Yarn
 .yarn/*
 !.yarn/cache
