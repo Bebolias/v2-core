@@ -68,7 +68,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
 
     /** @notice Total supply getter. Returns the total number of minted access passes so far.
      * @param account: user's address
-     * @param accountPassCounter
+     * @param accountPassCounter: user's pass counter
      * @param merkleRoot: merkle root associated with this badge
      */
     function getTokenIdHash(
@@ -82,7 +82,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
     function tokenURI(
         uint256 tokenId
     ) public view override(ERC721URIStorage) returns (string memory) {
-        string memory rootURI = whitelistedMerkleRootToURI[tokenData[tokenId]];
+        string memory rootURI = whitelistedMerkleRootToURI[tokenIdToRoot[tokenId]];
         return
         string(
             abi.encodePacked(
@@ -103,7 +103,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         uint256 numberOfAccessPasses,
         bytes32[] calldata proof,
         bytes32 merkleRoot
-    ) public returns (uint256) {
+    ) public returns (uint256[] memory tokenIds) {
         require(
             _verify(_leaf(account, numberOfAccessPasses), proof, merkleRoot),
             "Invalid Merkle proof"
@@ -118,11 +118,10 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
                 merkleRoot
             );
             uint256 tokenId = uint256(tokenIdHash);
-            tokenIds[i] = _mint(account, merkleRoot);
             _tokenSupply.increment();
             _safeMint(account, tokenId);
-            tokenData[tokenId] = merkleRoot;
-
+            tokenIdToRoot[tokenId] = merkleRoot;
+            tokenIds[i] = tokenId;
             emit RedeemAccessPassNFT(account, tokenId);
         }
 
