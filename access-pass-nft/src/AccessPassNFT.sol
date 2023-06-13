@@ -108,7 +108,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         bytes32 merkleRoot
     ) public returns (uint256) {
         require(
-            _verify(_leaf(account), proof, merkleRoot),
+            _verify(_leaf(account, numberOfAccessPasses), proof, merkleRoot),
             "Invalid Merkle proof"
         );
 
@@ -135,8 +135,8 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
     /** @notice Encoded the leaf information
      * @param account: account address
      */
-    function _leaf(address account) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(account));
+    function _leaf(address account, uint256 numberOfAccessPasses) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(account, numberOfAccessPasses));
     }
 
     /** @notice Verification that the hash of the actor address and information
