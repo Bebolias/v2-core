@@ -133,17 +133,17 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
      * @dev Each claim must present its own root and a full proof, even if this involves duplication
      * @param account is the address of the user
      * @param proofs are the one bytes32[] proofs for each leaf
-     * @param merkleRoots the merkel roots - one bytes32 for each leaf
+     * @param merkleRoot - the merkle root
      */
     function multiRedeem(
         address account,
         bytes32[][] calldata proofs,
-        bytes32[] memory merkleRoots
+        bytes32 merkleRoot
     ) public returns (uint256[] memory tokenIds) {
         tokenIds = new uint256[](proofs.length);
 
         for (uint256 i = 0; i < proofs.length; i++) {
-            tokenIds[i] = redeem(account, proofs[i], merkleRoots[i]);
+            tokenIds[i] = redeem(account, proofs[i], merkleRoot);
         }
         return tokenIds;
     }
