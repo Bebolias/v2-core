@@ -108,7 +108,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         bytes32 merkleRoot
     ) public returns (uint256) {
         require(
-            _verify(_leaf(leafInfo), proof, merkleRoot),
+            _verify(_leaf(account), proof, merkleRoot),
             "Invalid Merkle proof"
         );
 
@@ -117,21 +117,21 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
             merkleRoot
         );
         uint256 tokenId = uint256(tokenIdHash);
-        console.log(tokenId);
+//        console.log(tokenId);
 
         _tokenSupply.increment();
         _safeMint(account, tokenId);
 
         tokenData[tokenId] = merkleRoot;
 
-        emit RedeemAccessPassNFT(leafInfo, tokenId);
+        emit RedeemAccessPassNFT(account, tokenId);
 
         return tokenId;
     }
 
     /** @notice Supports redemption of multiple access passes in one transaction
      * @dev Each claim must present its own root and a full proof, even if this involves duplication
-     * @param leafInfos are the leaves of the merkle trees from which to claim an access pass
+     * @param account is the address of the user
      * @param proofs are the one bytes32[] proofs for each leaf
      * @param merkleRoots the merkel roots - one bytes32 for each leaf
      */
@@ -140,9 +140,9 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         bytes32[][] calldata proofs,
         bytes32[] memory merkleRoots
     ) public returns (uint256[] memory tokenIds) {
-        tokenIds = new uint256[](leafInfos.length);
+        tokenIds = new uint256[](proofs.length);
 
-        for (uint256 i = 0; i < leafInfos.length; i++) {
+        for (uint256 i = 0; i < proofs.length; i++) {
             tokenIds[i] = redeem(account, proofs[i], merkleRoots[i]);
         }
         return tokenIds;
