@@ -18,6 +18,7 @@ args=[
   "<%= settings.name %>", # name
   "<%= settings.symbol %>", # symbol
 ]
+from = "<%= settings.owner %>"
 
 [invoke.transfer_ownership]
 target = ["AccessPassNft"]

@@ -1647,6 +1647,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@voltz-protocol/integration-tests@workspace:integration-tests":
+  version: 0.0.0-use.local
+  resolution: "@voltz-protocol/integration-tests@workspace:integration-tests"
+  dependencies:
+    "@openzeppelin/contracts": 4.9.0
+    "@semantic-release/git": ^10.0.1
+    "@semantic-release/github": ^8.0.7
+    "@voltz-protocol/core": "workspace:^"
+    "@voltz-protocol/periphery": "workspace:^"
+    "@voltz-protocol/products-dated-irs": "workspace:^"
+    "@voltz-protocol/util-contracts": "workspace:^"
+    "@voltz-protocol/util-modules": "workspace:^"
+    "@voltz-protocol/v2-vamm": 1.7.1
+    lcov-badge-generator: 1.0.5
+    prettier: 2.8.4
+    semantic-release: ^20.1.1
+    solhint: 3.4.0
+  languageName: unknown
+  linkType: soft
+
 "@voltz-protocol/periphery@workspace:^, @voltz-protocol/periphery@workspace:periphery":
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/periphery@workspace:periphery"

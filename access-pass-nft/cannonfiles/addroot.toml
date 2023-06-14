@@ -10,8 +10,6 @@ source="<%= settings.accessPassNftPackage %>"
 [setting.owner]
 [setting.merkleRoot]
 [setting.baseMetadataURI]
-[setting.startTimestamp]
-[setting.endTimestamp]
 
 # Add root
 [invoke.add_root]
@@ -19,7 +17,7 @@ target = ["accessPassNft.AccessPassNft"]
 from = "<%= settings.owner %>"
 func = "addNewRoot"
 args = [
-    { merkleRoot =  "<%= settings.merkleRoot %>", baseMetadataURI = "<%= settings.baseMetadataURI %>", startTimestamp = "<%= settings.startTimestamp %>", endTimestamp =  "<%= settings.endTimestamp %>"},
+    { merkleRoot =  "<%= settings.merkleRoot %>", baseMetadataURI = "<%= settings.baseMetadataURI %>"},
 ]
 depends = [
   "import.accessPassNft"

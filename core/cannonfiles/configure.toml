@@ -1,0 +1,76 @@
+name = "voltz-margin-engine-config"
+version = "2.0.0"
+description = "Voltz V2 Margin Engine Configurations"
+
+# Core Configs
+[setting.voltzCorePackage]
+[import.voltzCore]
+source="<%= settings.voltzCorePackage %>"
+
+[setting.depositingEnabled]
+[setting.liquidationBooster]
+[setting.tokenAddress]
+[setting.cap]
+[invoke.configure_collateral]
+target = ["voltzCore.CoreProxy"]
+from = "0xF8F6B70a36f4398f0853a311dC6699Aba8333Cc1"
+func = "configureCollateral"
+args = [
+  { depositingEnabled = "<%= settings.depositingEnabled %>", liquidationBooster = "<%= settings.liquidationBooster %>", tokenAddress = "<%= settings.tokenAddress %>", cap = "<%= settings.cap %>"}
+]
+depends = [
+  "import.voltzCore"
+]
+
+[setting.imMultiplier]
+[setting.liquidatorRewardParameter]
+target = ["voltzCore.CoreProxy"]
+func = "configureProtocolRisk"
+args = [
+  { imMultiplier = "<%= settings.imMultiplier %>", liquidatorRewardParameter = "<%= settings.liquidatorRewardParameter %>"}
+]
+depends = [
+  "import.voltzCore"
+]
+
+[setting.productProxy]
+[setting.productName]
+[invoke.register_product]
+target = ["voltzCore.CoreProxy"]
+func = "registerProduct"
+args = [
+  "<%= settings.productProxy %>",
+  "<%= settings.productName %>"
+]
+depends = [
+  "import.voltzCore"
+]
+
+# shared by multiple commands
+[setting.productId]
+[setting.marketId]
+
+[setting.feeCollectorAccountId]
+[setting.atomicMakerFee]
+[setting.atomicTakerFee]
+[invoke.configure_market_fee]
+target = ["voltzCore.CoreProxy"]
+func = "configureMarketFee"
+args = [
+  { productId = "<%= settings.productId %>", marketId = "<%= settings.marketId %>", feeCollectorAccountId = "<%= settings.feeCollectorAccountId %>", atomicMakerFee = "<%= settings.atomicMakerFee %>", atomicTakerFee = "<%= settings.atomicTakerFee %>"}
+]
+depends = [
+  "import.voltzCore"
+]
+
+[setting.riskParameter]
+[setting.twapLookbackWindow]
+[invoke.configure_market_risk]
+target = ["voltzCore.CoreProxy"]
+func = "configureMarketRisk"
+args = [
+  { productId = "<%= settings.productId %>", marketId = "<%= settings.marketId %>", riskParameter = "<%= settings.riskParameter %>", twapLookbackWindow = "<%= settings.twapLookbackWindow %>"}
+]
+depends = [
+  "import.voltzCore"
+]
