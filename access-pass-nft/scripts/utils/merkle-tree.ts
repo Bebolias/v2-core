@@ -18,7 +18,10 @@ export const getLeaf = (address: string, badgesCount: number): Buffer => {
   );
 };
 
-export const getMerkleTree = async (projectId: string, tableName: string): Promise<MerkleTree> => {
+export const getMerkleTree = async (projectId: string, tableName: string): Promise<{
+  merkleTree: MerkleTree,
+  leaves: LeafEntry[]
+}> => {
 
   // get info from bigQ
   const leafEntry = await getLeaves(projectId, tableName);
@@ -29,13 +32,13 @@ export const getMerkleTree = async (projectId: string, tableName: string): Promi
 
   const merkleTree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
 
-  return merkleTree;
+  return {merkleTree: merkleTree, leaves: leafEntry};
 };
 
-export const getRoot = async (projectId: string, tableName: string): Promise<string> => {
-  const merkleTree = await getMerkleTree(projectId, tableName);
+export const getRoot = async (projectId: string, tableName: string): Promise<{root: string, leaves: LeafEntry[]}> => {
+  const { merkleTree, leaves} = await getMerkleTree(projectId, tableName);
 
-  return merkleTree.getHexRoot();
+  return {root: merkleTree.getHexRoot(), leaves: leaves};
 };
 
 export const getProof = async (
@@ -44,7 +47,7 @@ export const getProof = async (
   projectId: string,
   tableName: string
 ): Promise<string[]> => {
-  const merkleTree = await getMerkleTree(projectId, tableName);
+  const merkleTree = (await getMerkleTree(projectId, tableName)).merkleTree;
 
   const proof = merkleTree.getHexProof(getLeaf(address, badgesCount));
 
@@ -88,17 +91,19 @@ export const mockGetMerkleTree = async (owners: string[], badgesCounts: number[]
   return merkleTree;
 };
 
-export const mockGetRoot = async (): Promise<string> => {
-  const merkleTree = await mockGetMerkleTree();
+export const mockGetRoot = async (owners: string[], badgesCounts: number[]): Promise<string> => {
+  const merkleTree = await mockGetMerkleTree(owners, badgesCounts);
 
   return merkleTree.getHexRoot();
 };
 
 export const mockGetProof = async (
+  owners: string[],
+  badgesCounts: number[],
   address: string,
   badgesCount: number
 ): Promise<string[]> => {
-  const merkleTree = await mockGetMerkleTree();
+  const merkleTree = await mockGetMerkleTree(owners, badgesCounts);
 
   const proof = merkleTree.getHexProof(getLeaf(address, badgesCount));
 

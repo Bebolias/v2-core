@@ -83,13 +83,7 @@ contract AccessPassNFT is Ownable, ERC721URIStorage {
         uint256 tokenId
     ) public view override(ERC721URIStorage) returns (string memory) {
         string memory rootURI = whitelistedMerkleRootToURI[tokenIdToRoot[tokenId]];
-        return
-        string(
-            abi.encodePacked(
-                rootURI,
-                ".json"
-            )
-        );
+        return rootURI;
     }
 
 

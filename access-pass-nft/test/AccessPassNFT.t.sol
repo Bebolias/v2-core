@@ -69,21 +69,23 @@ contract AccessPassNFTTest is Test, IERC721Receiver {
 
     }
 
-    function testTokenURI() public {}
+    // todo: complete following tests
 
-    function testSuccessfulNFTTransfer() public {}
+    // function testTokenURI() public {}
 
-    function testDeleteRoot() public {}
+    // function testSuccessfulNFTTransfer() public {}
 
-    function testFailRedeemWithUnrecognisedMerkleRoot() public {}
+    // function testDeleteRoot() public {}
 
-    function testFailRedeemWithInvalidMerkleProof() public {}
+    // function testFailRedeemWithUnrecognisedMerkleRoot() public {}
 
-    function testFailDoubleRedeem() public {}
+    // function testFailRedeemWithInvalidMerkleProof() public {}
 
-    function testFailDeleteRootNotOwner() public {}
+    // function testFailDoubleRedeem() public {}
 
-    function testFailAddNewRootNotOwner() public {}
+    // function testFailDeleteRootNotOwner() public {}
+
+    // function testFailAddNewRootNotOwner() public {}
 
 }
 
