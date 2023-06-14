@@ -2,11 +2,9 @@ name = "voltz-access-pass-nft" # package name
 version = "2.0.0"
 description = "Voltz V2 Access Pass NFT"
 
-# `salt` here only affects the OwnerUpgradeModule and CoreProxy contracts
-[setting.salt]
-description = "Change this to a unique string when deploying multiple instances of the protocol. Note that only the proxy contract will be unique."
-defaultValue = "main"
-
+# owner is required and must be overridden
+[setting.owner]
+description = "NFT owner"
 # name is required and must be overridden
 [setting.name]
 description = "NFT name"
@@ -16,9 +14,17 @@ description = "NFT symbol"
 
 [contract.AccessPassNft]
 artifact = "AccessPassNFT"
-salt = "<%= settings.salt %>"
-create2 = true
 args=[
   "<%= settings.name %>", # name
   "<%= settings.symbol %>", # symbol
+]
+
+[invoke.transfer_ownership]
+target = ["AccessPassNft"]
+func = "transferOwnership"
+args = [
+    "<%= settings.owner %>"
+]
+depends = [
+  "contract.AccessPassNft"
 ]

@@ -14,7 +14,7 @@ source="<%= settings.accessPassNftPackage %>"
 [setting.endTimestamp]
 
 # Add root
-[invoke.addRoot]
+[invoke.add_root]
 target = ["accessPassNft.AccessPassNft"]
 from = "<%= settings.owner %>"
 func = "addNewRoot"
