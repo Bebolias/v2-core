@@ -11,8 +11,8 @@ import "./storage/VammDeployment.sol";
 
 contract CommunityDeployer is ICommunityDeployer {
     /// @notice Timelock Period In Seconds, once the deployment is queued,
-    /// 2 days need to pass in order to make deployment of the Voltz Factory possible
-    uint256 public constant TIMELOCK_PERIOD_IN_SECONDS = 2 days;
+    /// 1 day needs to pass in order to make deployment of the Voltz Factory possible
+    uint256 public constant TIMELOCK_PERIOD_IN_SECONDS = 1 days;
 
     /// @notice Multisig owner address
     address public ownerAddress;

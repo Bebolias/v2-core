@@ -117,5 +117,10 @@ contract CommunityDeployerTest is Test {
     vm.prank(ownerAddress);
     Ownable(vammProxy).acceptOwnership();
     assertEq(Ownable(vammProxy).owner(), ownerAddress);
+
+    vm.startPrank(ownerAddress);
+    address coreRouter2 = address(new MockCoreRouter());
+    OwnerUpgradeModule(coreProxy).upgradeTo(coreRouter2);
+    assertEq(OwnerUpgradeModule(coreProxy).getImplementation(), coreRouter2);
   }
 }
