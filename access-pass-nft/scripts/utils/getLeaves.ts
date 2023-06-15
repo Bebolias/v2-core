@@ -45,8 +45,6 @@ export async function getLeaves(projectId: string, tableName: string) : Promise<
         })
     });
 
-    console.log(snapshot)
-
     return snapshot;
 }
 

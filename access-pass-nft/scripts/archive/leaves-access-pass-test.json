@@ -1,0 +1,12 @@
+{
+  "root": "0x0c901bbb4b14a4a4f9d4084e67db7e36bf312f6abca5268eb50cbed7a1e21508",
+  "snapshot": [
+    {
+      "owner": "0x2fa11ef008c4b585ccf0a76861794ac7ae5a3a67",
+      "badgesCount": 12
+    },
+    { "owner": "0x45556408e543158f74403e882e3c8c23ecd9f732", "badgesCount": 3 },
+    { "owner": "0x5173cc04a12d1fc7c83293ed71fbfa6bc0f87739", "badgesCount": 5 },
+    { "owner": "0xf8f6b70a36f4398f0853a311dc6699aba8333cc1", "badgesCount": 8 }
+  ]
+}

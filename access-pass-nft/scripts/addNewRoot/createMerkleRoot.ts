@@ -27,11 +27,12 @@ export async function createMerkleRoot() {
 
     const leavesCid = await uploadFileIpfs(
       `./scripts/archive/leaves-${ROOT_NAME}.json`,
-      `${ROOT_NAME} Leaves`
+      `${ROOT_NAME} TEST Leaves`
     );
 
     console.log("LEAVES CID: ", leavesCid);
 
+    /// UNCOMMENT IF YOU WISH TO SUBMIT A ROOT 
     // exec(`sh ${scriptPath} ${root} ${METADATA_URI}`, (error, stdout, stderr) => {
     //     if (error) {
     //       console.error(`Error executing script: ${error}`);

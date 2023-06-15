@@ -1,5 +1,6 @@
 import pinataSDK, { PinataPinOptions } from "@pinata/sdk";
 import * as fs from "fs";
+import { PINATA_JWT } from "../addNewRoot/config";
 
 /**
  *
@@ -8,7 +9,7 @@ import * as fs from "fs";
  */
  export async function uploadFileIpfs(filePath: string, ipfsFileName: string) {
     const readableStreamForFile = fs.createReadStream(filePath);
-    const pinata = new pinataSDK({ pinataJWTKey: process.env.PINATA_JWT });
+    const pinata = new pinataSDK({ pinataJWTKey: PINATA_JWT });
     const options: PinataPinOptions = {
       pinataMetadata: {
         name: ipfsFileName,
