@@ -1,6 +1,6 @@
 {
   "name": "@voltz-protocol/products-dated-irs",
-  "version": "2.1.2",
+  "version": "2.2.1",
   "license": "Voltz V2 License",
   "dependencies": {
     "@openzeppelin/contracts": "4.9.0",

@@ -1,6 +1,6 @@
 {
   "name": "@voltz-protocol/periphery",
-  "version": "2.0.1",
+  "version": "2.0.0",
   "publishConfig": {
     "access": "restricted",
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
@@ -13,7 +13,7 @@
     "@voltz-protocol/products-dated-irs": "workspace:^",
     "@voltz-protocol/util-contracts": "workspace:^",
     "@voltz-protocol/util-modules": "workspace:^",
-    "@voltz-protocol/v2-vamm": "1.7.1",
+    "@voltz-protocol/v2-vamm": "1.8.0",
     "solmate": "6.7.0"
   },
   "scripts": {
