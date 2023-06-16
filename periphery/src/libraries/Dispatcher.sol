@@ -7,7 +7,6 @@ import "./V2DatedIRS.sol";
 import "./V2DatedIRSVamm.sol";
 import "./V2Core.sol";
 import "./Payments.sol";
-import "./Permit2Payments.sol";
 
 /**
  * @title This library decodes and executes commands
@@ -121,16 +120,14 @@ library Dispatcher {
             }
             Payments.wrapETH(address(this), amountMin);
         } else if (command == Commands.TRANSFER_FROM) {
-            // equivalent: abi.decode(inputs, (address, address, uint160))
+            // equivalent: abi.decode(inputs, (address, uint160))
             address token;
-            address from;
             uint160 value;
             assembly {
                 token := calldataload(inputs.offset)
-                from := calldataload(add(inputs.offset, 0x20))
-                value := calldataload(add(inputs.offset, 0x40))
+                value := calldataload(add(inputs.offset, 0x20))
             }
-            Permit2Payments.permit2TransferFrom(token, from, address(this), value);
+            Payments.transferFrom(token, msg.sender, address(this), value);
         } else {
             // placeholder area for commands ...
             revert InvalidCommandType(command);

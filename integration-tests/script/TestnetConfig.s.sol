@@ -22,7 +22,6 @@ import {MarketConfiguration} from "@voltz-protocol/products-dated-irs/src/storag
 
 import {Config} from "@voltz-protocol/periphery/src/storage/Config.sol";
 import {Commands} from "@voltz-protocol/periphery/src/libraries/Commands.sol";
-import {IAllowanceTransfer} from "@voltz-protocol/periphery/src/interfaces/external/IAllowanceTransfer.sol";
 import {IWETH9} from "@voltz-protocol/periphery/src/interfaces/external/IWETH9.sol";
 
 import {TickMath} from "@voltz-protocol/v2-vamm/utils/vamm-math/TickMath.sol";
@@ -138,7 +137,6 @@ contract TestnetConfig is Script {
     peripheryProxy.configure(
       Config.Data({
         WETH9: IWETH9(address(0)),  // todo: deploy weth9 mock
-        PERMIT2: IAllowanceTransfer(address(0)), // todo: deploy permit2
         VOLTZ_V2_CORE_PROXY: address(coreProxy),
         VOLTZ_V2_DATED_IRS_PROXY: address(datedIrsProxy),
         VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(vammProxy),

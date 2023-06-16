@@ -38,11 +38,16 @@ contract ExposePortfolio {
         ProductConfiguration.set(ProductConfiguration.Data({ productId: 1, coreProxy: address(12), poolAddress: pool }));
     }
 
-    function create(uint128 id) external returns (bytes32 s) {
-        Portfolio.Data storage portfolio = Portfolio.create(id);
+    function loadOrCreate(uint128 id) external returns (bytes32 s) {
+        Portfolio.Data storage portfolio = Portfolio.loadOrCreate(id);
         assembly {
             s := portfolio.slot
         }
+    }
+
+    function exists(uint128 id) external returns (bool) {
+        Portfolio.Data storage portfolio = Portfolio.exists(id);
+        return portfolio.accountId == id;
     }
 
     function getAccountAnnualizedExposures(
@@ -196,7 +201,7 @@ contract PortfolioTest is Test {
         mockRateOracle = new MockRateOracle();
 
         portfolio = new ExposePortfolio();
-        portfolio.create(accountId);
+        portfolio.loadOrCreate(accountId);
         portfolio.createRateOracle(marketId, address(mockRateOracle));
 
         portfolio.setMarket(marketId, MOCK_COLLATERAL_TYPE);
@@ -207,9 +212,19 @@ contract PortfolioTest is Test {
         assertEq(slot, portfolioSlot);
     }
 
-    function test_CreatePortfolio() public {
-        bytes32 slot = portfolio.create(300);
+    function test_LoadOrCreatePortfolio() public {
+        bytes32 slot = portfolio.loadOrCreate(300);
         assertEq(slot, keccak256(abi.encode("xyz.voltz.Portfolio", 300)));
+    }
+
+    function test_ExistsPortfolio() public {
+        bytes32 slot = portfolio.loadOrCreate(300);
+        assertEq(portfolio.exists(300), true);
+    }
+
+    function test_RevertWhen_ExistsNoPortfolio() public {
+        vm.expectRevert(abi.encodeWithSelector(Portfolio.PortfolioNotFound.selector, 300));
+        portfolio.exists(300);
     }
 
     function test_GetAccountUnrealizedPnLNoActivPositions() public {

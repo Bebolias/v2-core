@@ -109,11 +109,13 @@ interface IProductIRSModule is IProduct {
      * @notice Propagates maker order to core to check margin requirements
      * @param accountId Id of the account that wants to initiate a taker order
      * @param marketId Id of the market in which the account wants to initiate a taker order (e.g. 1 for aUSDC lend)
+     * @param maturityTimestamp Maturity of the market's pool in which the account want to initiate a taker order
      * @param annualizedBaseAmount The annualized notional of the order
      */
     function propagateMakerOrder(
         uint128 accountId,
         uint128 marketId,
+        uint32 maturityTimestamp,
         int256 annualizedBaseAmount
     ) external returns (uint256 fee, uint256 im);
 

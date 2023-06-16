@@ -1629,7 +1629,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@voltz-protocol/core@2.1.1, @voltz-protocol/core@workspace:^, @voltz-protocol/core@workspace:core":
+"@voltz-protocol/core@2.1.1, @voltz-protocol/core@^2.1.1, @voltz-protocol/core@workspace:^, @voltz-protocol/core@workspace:core":
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/core@workspace:core"
   dependencies:
@@ -1689,7 +1689,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@voltz-protocol/products-dated-irs@2.1.1, @voltz-protocol/products-dated-irs@workspace:^, @voltz-protocol/products-dated-irs@workspace:products/dated-irs":
+"@voltz-protocol/products-dated-irs@npm:2.1.1":
+  version: 2.1.1
+  resolution: "@voltz-protocol/products-dated-irs@npm:2.1.1::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fproducts-dated-irs%2F2.1.1%2F8623cb7b24bd4a52b165bfb2d3695af5a1a04f83"
+  dependencies:
+    "@openzeppelin/contracts": 4.9.0
+    "@prb/math": 3.3.0
+    "@prb/test": ^0.6.0
+    "@voltz-protocol/core": ^2.1.1
+    "@voltz-protocol/util-contracts": ^1.1.0
+    "@voltz-protocol/util-modules": ^1.0.2
+  checksum: 14dc7324274608117b475d9f23d41bcecedd6fd67134d51a68bf4c9b4d0181b3ba8d3d5651027abf9cae5c6cb6bf068a0130446bc8acce7c3e147fe9ec2d8893
+  languageName: node
+  linkType: hard
+
+"@voltz-protocol/products-dated-irs@workspace:^, @voltz-protocol/products-dated-irs@workspace:products/dated-irs":
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/products-dated-irs@workspace:products/dated-irs"
   dependencies:
@@ -1705,7 +1719,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@voltz-protocol/util-contracts@1.2.0, @voltz-protocol/util-contracts@workspace:^, @voltz-protocol/util-contracts@workspace:utils/contracts":
+"@voltz-protocol/util-contracts@1.2.0, @voltz-protocol/util-contracts@^1.1.0, @voltz-protocol/util-contracts@workspace:^, @voltz-protocol/util-contracts@workspace:utils/contracts":
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/util-contracts@workspace:utils/contracts"
   dependencies:
@@ -1714,7 +1728,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@voltz-protocol/util-modules@1.1.0, @voltz-protocol/util-modules@workspace:^, @voltz-protocol/util-modules@workspace:utils/modules":
+"@voltz-protocol/util-modules@1.1.0, @voltz-protocol/util-modules@^1.0.2, @voltz-protocol/util-modules@workspace:^, @voltz-protocol/util-modules@workspace:utils/modules":
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/util-modules@workspace:utils/modules"
   dependencies:

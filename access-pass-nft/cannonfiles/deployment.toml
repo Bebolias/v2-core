@@ -19,13 +19,3 @@ args=[
   "<%= settings.symbol %>", # symbol
 ]
 from = "<%= settings.owner %>"
-
-[invoke.transfer_ownership]
-target = ["AccessPassNft"]
-func = "transferOwnership"
-args = [
-    "<%= settings.owner %>"
-]
-depends = [
-  "contract.AccessPassNft"
-]

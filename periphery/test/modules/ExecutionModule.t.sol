@@ -4,7 +4,6 @@ import "forge-std/Test.sol";
 import "../../src/modules/ExecutionModule.sol";
 import "../../src/interfaces/external/IWETH9.sol";
 import "../../src/modules/ConfigurationModule.sol";
-import "../utils/MockAllowanceTransfer.sol";
 import "../utils/MockWeth.sol";
 
 contract MockERC20 is ERC20 {
@@ -36,7 +35,6 @@ contract ExecutionModuleTest is Test {
         exec.setOwner(address(this));
         exec.configure(Config.Data({
             WETH9: mockWeth,
-            PERMIT2: new MockAllowanceTransfer(),
             VOLTZ_V2_CORE_PROXY: core,
             VOLTZ_V2_DATED_IRS_PROXY: instrument,
             VOLTZ_V2_DATED_IRS_VAMM_PROXY: exchange,
@@ -230,6 +228,22 @@ contract ExecutionModuleTest is Test {
         vm.mockCall(
             core,
             abi.encodeWithSelector(
+                ICollateralConfigurationModule.getCollateralConfiguration.selector,
+                address(56)
+            ),
+            abi.encode(
+                CollateralConfiguration.Data({
+                    depositingEnabled: true,
+                    liquidationBooster: 1e3,
+                    tokenAddress: address(56),
+                    cap: 1e18
+                })
+            )
+        );
+
+        vm.mockCall(
+            core,
+            abi.encodeWithSelector(
                 ICollateralModule.deposit.selector,
                 address(this), 1, address(56), 100000
             ),
@@ -274,16 +288,19 @@ contract ExecutionModuleTest is Test {
         MockERC20 token = new MockERC20();
         token.transfer(address(56), 500);
 
-        vm.mockCall(
-            core,
-            abi.encodeWithSelector(
-                bytes4(abi.encodeWithSignature("transferFrom(address,address,uint160,address)")),
-                address(56), address(exec), 50, address(token)
-            ),
-            abi.encode()
-        );
-        inputs[0] = abi.encode(address(token), address(56), 50);
+        vm.prank(address(56));
+        token.approve(address(exec), 50);
 
+        vm.expectCall(
+            address(token),
+            abi.encodeWithSelector(
+                bytes4(abi.encodeWithSignature("transferFrom(address,address,uint256)")),
+                address(56), address(exec), 50
+            )
+        );
+        inputs[0] = abi.encode(address(token), 50);
+
+        vm.prank(address(56));
         exec.execute(commands, inputs, deadline);
     }
 
@@ -321,6 +338,21 @@ contract ExecutionModuleTest is Test {
             20000,
             abi.encodeWithSelector(IWETH9.deposit.selector),
             abi.encode()
+        );
+        vm.mockCall(
+            core,
+            abi.encodeWithSelector(
+                ICollateralConfigurationModule.getCollateralConfiguration.selector,
+                address(56)
+            ),
+            abi.encode(
+                CollateralConfiguration.Data({
+                    depositingEnabled: true,
+                    liquidationBooster: 1e3,
+                    tokenAddress: address(56),
+                    cap: 1e18
+                })
+            )
         );
         vm.mockCall(
             core,

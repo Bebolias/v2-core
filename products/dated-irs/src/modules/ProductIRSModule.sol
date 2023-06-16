@@ -55,7 +55,7 @@ contract ProductIRSModule is IProductIRSModule {
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         (executedBaseAmount, executedQuoteAmount) =
             IPool(ProductConfiguration.getPoolAddress()).executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount, priceLimit);
-        Portfolio.load(accountId).updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
+        Portfolio.loadOrCreate(accountId).updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
 
         // propagate order
         address quoteToken = MarketConfiguration.load(marketId).quoteToken;
@@ -103,7 +103,7 @@ contract ProductIRSModule is IProductIRSModule {
         // check account access permissions
         IAccountModule(coreProxy).onlyAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
 
-        Portfolio.Data storage portfolio = Portfolio.load(accountId);
+        Portfolio.Data storage portfolio = Portfolio.exists(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
         int256 settlementCashflowInQuote = portfolio.settle(marketId, maturityTimestamp, poolAddress);
 
@@ -137,7 +137,7 @@ contract ProductIRSModule is IProductIRSModule {
         override
         returns (int256 unrealizedPnL)
     {
-        Portfolio.Data storage portfolio = Portfolio.load(accountId);
+        Portfolio.Data storage portfolio = Portfolio.exists(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
         return portfolio.getAccountUnrealizedPnL(poolAddress, collateralType);
     }
@@ -170,7 +170,7 @@ contract ProductIRSModule is IProductIRSModule {
         override
         returns (Account.Exposure[] memory exposures)
     {
-        Portfolio.Data storage portfolio = Portfolio.load(accountId);
+        Portfolio.Data storage portfolio = Portfolio.exists(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
         return portfolio.getAccountAnnualizedExposures(poolAddress, collateralType);
     }
@@ -188,7 +188,7 @@ contract ProductIRSModule is IProductIRSModule {
             revert NotAuthorized(msg.sender, "closeAccount");
         }
 
-        Portfolio.Data storage portfolio = Portfolio.load(accountId);
+        Portfolio.Data storage portfolio = Portfolio.exists(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
         portfolio.closeAccount(poolAddress, collateralType);
     }
@@ -213,6 +213,7 @@ contract ProductIRSModule is IProductIRSModule {
     function propagateMakerOrder(
         uint128 accountId,
         uint128 marketId,
+        uint32 maturityTimestamp,
         int256 annualizedBaseAmount
     ) external returns (uint256 fee, uint256 im) {
         if (msg.sender != ProductConfiguration.getPoolAddress()) {
@@ -226,6 +227,8 @@ contract ProductIRSModule is IProductIRSModule {
             MarketConfiguration.load(marketId).quoteToken,
             annualizedBaseAmount
         );
+
+        Portfolio.loadOrCreate(accountId).updatePosition(marketId, maturityTimestamp, 0, 0);
     }
 
     /**

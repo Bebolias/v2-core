@@ -34,6 +34,11 @@ library Portfolio {
     using RateOracleReader for RateOracleReader.Data;
 
     /**
+     * @dev Thrown when a portfolio cannot be found.
+     */
+    error PortfolioNotFound(uint128 accountId);
+
+    /**
      * @notice Emitted when attempting to settle before maturity
      */
     error SettlementBeforeMaturity(uint128 marketId, uint32 maturityTimestamp, uint256 accountId);
@@ -89,13 +94,21 @@ library Portfolio {
         }
     }
 
-    /**
-     * @dev Creates a portfolio for a given id, the id of the portfolio and the account that owns it are the same
-     */
-    function create(uint128 id) internal returns (Data storage portfolio) {
+    function loadOrCreate(uint128 id) internal returns (Data storage portfolio) {
         portfolio = load(id);
-        // note, the portfolio id is the same as the account id that owns this portfolio
-        portfolio.accountId = id;
+        if (portfolio.accountId == 0)  {
+            portfolio.accountId = id;
+        }
+    }
+
+    /**
+     * @dev Reverts if the portfolio does not exist with appropriate error. Otherwise, returns the portfolio.
+     */
+    function exists(uint128 id) internal view returns (Data storage portfolio) {
+        portfolio = load(id);
+        if (portfolio.accountId != id) {
+            revert PortfolioNotFound(id);
+        }
     }
 
     /**
@@ -206,12 +219,12 @@ library Portfolio {
             (uint256 unfilledBaseLong, uint256 unfilledBaseShort) =
                 IPool(poolAddress).getAccountUnfilledBases(marketId, maturityTimestamp, self.accountId);
             {
-                UD60x18 annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
+                UD60x18 _annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
                 exposures[i] = Account.Exposure({
                     marketId: marketId,
-                    filled: mulUDxInt(annualizedExposureFactor, baseBalance + baseBalancePool),
-                    unfilledLong: mulUDxUint(annualizedExposureFactor, unfilledBaseLong),
-                    unfilledShort: mulUDxUint(annualizedExposureFactor, unfilledBaseShort)
+                    filled: mulUDxInt(_annualizedExposureFactor, baseBalance + baseBalancePool),
+                    unfilledLong: mulUDxUint(_annualizedExposureFactor, unfilledBaseLong),
+                    unfilledShort: mulUDxUint(_annualizedExposureFactor, unfilledBaseShort)
                 });
             }
         }
@@ -240,13 +253,13 @@ library Portfolio {
             (int256 executedBaseAmount, int256 executedQuoteAmount) =
                 pool.executeDatedTakerOrder(marketId, maturityTimestamp, unwindBase, 0);
 
-            UD60x18 annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
+            UD60x18 _annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
             IProductModule(ProductConfiguration.getCoreProxyAddress()).propagateTakerOrder(
                 self.accountId,
                 ProductConfiguration.getProductId(),
                 marketId,
                 collateralType,
-                mulUDxInt(annualizedExposureFactor, executedBaseAmount)
+                mulUDxInt(_annualizedExposureFactor, executedBaseAmount)
             );
 
             position.update(executedBaseAmount, executedQuoteAmount);

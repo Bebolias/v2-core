@@ -3,6 +3,7 @@ pragma solidity >=0.8.19;
 
 import "@voltz-protocol/core/src/interfaces/ICollateralModule.sol";
 import "@voltz-protocol/core/src/interfaces/IAccountModule.sol";
+import "@voltz-protocol/core/src/interfaces/ICollateralConfigurationModule.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC721.sol";
 import "../storage/Config.sol";
 import "./Payments.sol";
@@ -12,8 +13,12 @@ import "./Payments.sol";
  */
 library V2Core {
     function deposit(uint128 accountId, address collateralType, uint256 tokenAmount) internal {
-        Payments.approveERC20Core(collateralType, tokenAmount);
-        ICollateralModule(Config.load().VOLTZ_V2_CORE_PROXY).deposit(accountId, collateralType, tokenAmount);
+        address coreProxyAddress = Config.load().VOLTZ_V2_CORE_PROXY;
+        uint256 liquidationBooster = ICollateralConfigurationModule(
+            coreProxyAddress
+        ).getCollateralConfiguration(collateralType).liquidationBooster;
+        Payments.approveERC20Core(collateralType, tokenAmount + liquidationBooster);
+        ICollateralModule(coreProxyAddress).deposit(accountId, collateralType, tokenAmount);
     }
 
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) internal {

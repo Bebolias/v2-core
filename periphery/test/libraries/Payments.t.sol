@@ -4,7 +4,6 @@ import "forge-std/Test.sol";
 import "../../src/libraries/Payments.sol";
 import "../../src/libraries/Constants.sol";
 import "../../src/storage/Config.sol";
-import "../../src/interfaces/external/IAllowanceTransfer.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC20.sol";
 import "solmate/src/utils/SafeTransferLib.sol";
 
@@ -35,7 +34,6 @@ contract PaymentsTest is Test {
         exposedPayments.setUp(
             Config.Data({
                 WETH9: IWETH9(address(1)),
-                PERMIT2: IAllowanceTransfer(address(0)),
                 VOLTZ_V2_CORE_PROXY: address(0),
                 VOLTZ_V2_DATED_IRS_PROXY: address(0),
                 VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(0),

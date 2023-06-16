@@ -11,14 +11,13 @@ import "@voltz-protocol/products-dated-irs/src/storage/MarketConfiguration.sol";
 
 import {Config} from "@voltz-protocol/periphery/src/storage/Config.sol";
 import {Commands} from "@voltz-protocol/periphery/src/libraries/Commands.sol";
-import "@voltz-protocol/periphery/src/interfaces/external/IAllowanceTransfer.sol";
 import {IWETH9} from "@voltz-protocol/periphery/src/interfaces/external/IWETH9.sol";
 
 import "@voltz-protocol/v2-vamm/utils/vamm-math/TickMath.sol";
 import {ExtendedPoolModule} from "@voltz-protocol/v2-vamm/test/PoolModule.t.sol";
 import {VammConfiguration, IRateOracle} from "@voltz-protocol/v2-vamm/utils/vamm-math/VammConfiguration.sol";
 
-import { ud60x18 } from "@prb/math/UD60x18.sol";
+import { ud60x18, div } from "@prb/math/UD60x18.sol";
 
 contract Scenario1 is BaseScenario {
   uint128 productId;
@@ -114,7 +113,6 @@ contract Scenario1 is BaseScenario {
     peripheryProxy.configure(
       Config.Data({
         WETH9: IWETH9(address(874392112)),  // todo: deploy weth9 mock
-        PERMIT2: IAllowanceTransfer(address(0)), // todo: deploy permit2
         VOLTZ_V2_CORE_PROXY: address(coreProxy),
         VOLTZ_V2_DATED_IRS_PROXY: address(datedIrsProxy),
         VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(vammProxy),
@@ -124,7 +122,7 @@ contract Scenario1 is BaseScenario {
 
     vm.stopPrank();
 
-    //todo: set initial aave lending pool index to 1 (maybe in base?)
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(1e18));
   }
 
   function test() public {
@@ -135,27 +133,25 @@ contract Scenario1 is BaseScenario {
 
     token.mint(user1, 1001e18);
 
-    // todo: remove when periphery is fixed
-    coreProxy.createAccount(1);
-    token.approve(address(coreProxy), 1001e18);
-    coreProxy.deposit(1, address(token), 1000e18);
-    coreProxy.grantPermission(1, bytes32("ADMIN"), address(peripheryProxy));
+    token.approve(address(peripheryProxy), 1001e18);
 
     bytes memory commands = abi.encodePacked(
-      // bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
-      // bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+      bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
+      bytes1(uint8(Commands.TRANSFER_FROM)),
+      bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
       bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
     );
-    bytes[] memory inputs = new bytes[](1);
-    // inputs[0] = abi.encode(1);
-    // inputs[1] = abi.encode(1, address(token), 1000);
-    inputs[0] = abi.encode(
+    bytes[] memory inputs = new bytes[](4);
+    inputs[0] = abi.encode(1);
+    inputs[1] = abi.encode(address(token), 1001e18);
+    inputs[2] = abi.encode(1, address(token), 1000e18);
+    inputs[3] = abi.encode(
       1,  // accountId
       marketId,
       maturityTimestamp,
       -14100, // 4.1%
       -13620, // 3.9% 
-      extendedPoolModule.getLiquidityForBase(-14100, -13620, 1000)    
+      extendedPoolModule.getLiquidityForBase(-14100, -13620, 10000e18)    
     );
     peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 
@@ -166,19 +162,19 @@ contract Scenario1 is BaseScenario {
 
     token.mint(user2, 501e18);
 
-    // todo: remove when periphery is fixed
-    coreProxy.createAccount(2);
-    token.approve(address(coreProxy), 501e18);
-    coreProxy.deposit(2, address(token), 500e18);
-    coreProxy.grantPermission(2, bytes32("ADMIN"), address(peripheryProxy));
+    token.approve(address(peripheryProxy), 501e18);
 
     commands = abi.encodePacked(
-      // bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+      bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
+      bytes1(uint8(Commands.TRANSFER_FROM)),
+      bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
       bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
     );
-    inputs = new bytes[](1);
-    // inputs[0] = abi.encode(1, address(token), 1000);
-    inputs[0] = abi.encode(
+    inputs = new bytes[](4);
+    inputs[0] = abi.encode(2);
+    inputs[1] = abi.encode(address(token), 501e18);
+    inputs[2] = abi.encode(2, address(token), 500e18);
+    inputs[3] = abi.encode(
       2,  // accountId
       marketId,
       maturityTimestamp,
@@ -187,7 +183,15 @@ contract Scenario1 is BaseScenario {
     );
     peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 
-    // console.logInt(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled);
-    // console.logInt(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled);
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(101e16));
+
+    uint256 traderExposure = div(ud60x18(500e18 * 2 * 1.01), ud60x18(365 * 1e18)).unwrap();
+    uint256 eps = 1000; // 1e-15 * 1e18
+
+    assertLe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, -int256(traderExposure - eps));
+    assertGe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, -int256(traderExposure + eps));
+
+    assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure - eps));
+    assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure + eps));
   }
 }

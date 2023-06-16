@@ -3,6 +3,8 @@
 #####################################
 [contract.ConfigurationModule]
 artifact = "ConfigurationModule"
+[contract.ERC721ReceiverModule]
+artifact = "ERC721ReceiverModule"
 [contract.ExecutionModule]
 artifact = "ExecutionModule"
 
@@ -11,10 +13,12 @@ artifact = "ExecutionModule"
 contracts = [
   "OwnerUpgradeModule",
   "ConfigurationModule",
+  "ERC721ReceiverModule",
   "ExecutionModule",
 ]
 depends = [
   "contract.OwnerUpgradeModule",
   "contract.ConfigurationModule",
+  "contract.ERC721ReceiverModule",
   "contract.ExecutionModule",
 ]

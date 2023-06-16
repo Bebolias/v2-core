@@ -46,8 +46,8 @@ contract ProductIRSModuleExtended is ProductIRSModule {
         MarketConfiguration.set(MarketConfiguration.Data({ marketId: marketId, quoteToken: quoteToken }));
     }
 
-    function createPortfolio(uint128 accountId) external {
-        Portfolio.create(accountId);
+    function loadOrCreatePortfolio(uint128 accountId) external {
+        Portfolio.loadOrCreate(accountId);
     }
 }
 
@@ -127,11 +127,25 @@ contract ProductIRSModuleTest is Test {
 
     function test_CloseEmptyAccount() public {
         vm.prank(address(mockCoreStorage));
+        vm.expectRevert(abi.encodeWithSelector(Portfolio.PortfolioNotFound.selector, 178));
         productIrs.closeAccount(178, MOCK_QUOTE_TOKEN);
     }
 
-    function test_CloseAccount_Periphery() public {
-        address peripheryAddress = address(1234);
+    function test_CloseAccount() public {
+        uint128 accountId = 178;
+        productIrs.loadOrCreatePortfolio(accountId);
+        vm.mockCall(
+            address(mockCoreStorage),
+            abi.encodeWithSelector(
+                IAccountModule.isAuthorized.selector,
+                accountId, AccountRBAC._ADMIN_PERMISSION, address(this)
+            ),
+            abi.encode(true)
+        );
+        productIrs.closeAccount(accountId, MOCK_QUOTE_TOKEN);
+    }
+
+    function test_CloseAccount_NoAccount() public {
         uint128 accountId = 178;
         vm.mockCall(
             address(mockCoreStorage),
@@ -141,6 +155,7 @@ contract ProductIRSModuleTest is Test {
             ),
             abi.encode(true)
         );
+        vm.expectRevert(abi.encodeWithSelector(Portfolio.PortfolioNotFound.selector, accountId));
         productIrs.closeAccount(accountId, MOCK_QUOTE_TOKEN);
     }
 
@@ -198,7 +213,7 @@ contract ProductIRSModuleTest is Test {
     }
 
     function test_CloseExistingAccount() public {
-        productIrs.createPortfolio(MOCK_ACCOUNT_ID);
+        productIrs.loadOrCreatePortfolio(MOCK_ACCOUNT_ID);
         test_InitiateTakerOrder();
 
         vm.mockCall(
@@ -222,7 +237,7 @@ contract ProductIRSModuleTest is Test {
     }
 
     function test_AccountAnnualizedExposures() public {
-        productIrs.createPortfolio(MOCK_ACCOUNT_ID);
+        productIrs.loadOrCreatePortfolio(MOCK_ACCOUNT_ID);
         test_InitiateTakerOrder();
 
         vm.mockCall(
@@ -261,7 +276,7 @@ contract ProductIRSModuleTest is Test {
     }
 
     function test_AccountUnrealizedPnL() public {
-        productIrs.createPortfolio(MOCK_ACCOUNT_ID);
+        productIrs.loadOrCreatePortfolio(MOCK_ACCOUNT_ID);
         test_InitiateTakerOrder();
 
         vm.mockCall(
@@ -299,7 +314,7 @@ contract ProductIRSModuleTest is Test {
     }
 
     function test_Settle() public {
-        productIrs.createPortfolio(MOCK_ACCOUNT_ID);
+        productIrs.loadOrCreatePortfolio(MOCK_ACCOUNT_ID);
         test_InitiateTakerOrder();
 
         vm.mockCall(

@@ -2,7 +2,6 @@
 pragma solidity >=0.8.19;
 
 import "../interfaces/external/IWETH9.sol";
-import "../interfaces/external/IAllowanceTransfer.sol";
 
 /**
  * @title Config
@@ -11,8 +10,6 @@ library Config {
     struct Data {
         /// @dev WETH9 address
         IWETH9 WETH9;
-        /// @dev Permit2 address
-        IAllowanceTransfer PERMIT2;
         /// @dev Voltz V2 core proxy address
         address VOLTZ_V2_CORE_PROXY;
         address VOLTZ_V2_DATED_IRS_PROXY;
@@ -27,7 +24,6 @@ library Config {
     function set(Data memory config) internal {
         Data storage storedConfig = load();
         storedConfig.WETH9 = config.WETH9;
-        storedConfig.PERMIT2 = config.PERMIT2;
         storedConfig.VOLTZ_V2_CORE_PROXY = config.VOLTZ_V2_CORE_PROXY;
         storedConfig.VOLTZ_V2_DATED_IRS_PROXY = config.VOLTZ_V2_DATED_IRS_PROXY;
         storedConfig.VOLTZ_V2_DATED_IRS_VAMM_PROXY = config.VOLTZ_V2_DATED_IRS_VAMM_PROXY;

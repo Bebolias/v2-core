@@ -71,4 +71,13 @@ library Payments {
             }
         }
     }
+
+    /// @notice Transfers ERC20 between two addresses (given sufficient allowance)
+    /// @param token The ERC20 token to be transferred
+    /// @param from The address from where to send the ERC20 tokens
+    /// @param to The address to which to send the ERC20 tokens
+    /// @param value The value of the transfer
+    function transferFrom(address token, address from, address to, uint160 value) internal {
+        ERC20(token).safeTransferFrom(from, to, value);
+    }
 }
