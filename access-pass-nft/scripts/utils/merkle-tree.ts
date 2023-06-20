@@ -73,7 +73,10 @@ export const getTokenId = (
 
 //// MOCKS USED FOR TESTING
 
-export const mockGetMerkleTree = async (owners: string[], badgesCounts: number[]): Promise<MerkleTree> => {
+export const mockGetMerkleTree = async (owners: string[], badgesCounts: number[]): Promise<{
+  merkleTree: MerkleTree,
+  leaves: LeafEntry[]
+}> => {
 
   // get info from bigQ
   const leafEntry = owners.map((_, i) => {
@@ -83,18 +86,19 @@ export const mockGetMerkleTree = async (owners: string[], badgesCounts: number[]
   }});
 
   const leafNodes = leafEntry.map((entry) => {
+    console.log(entry.owner, entry.badgesCount)
     return getLeaf(entry.owner, entry.badgesCount);
   });
 
   const merkleTree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
 
-  return merkleTree;
+  return {merkleTree, leaves: leafEntry};
 };
 
-export const mockGetRoot = async (owners: string[], badgesCounts: number[]): Promise<string> => {
-  const merkleTree = await mockGetMerkleTree(owners, badgesCounts);
+export const mockGetRoot = async (owners: string[], badgesCounts: number[]): Promise<{root: string, leaves: LeafEntry[]}> => {
+  const {merkleTree, leaves} = await mockGetMerkleTree(owners, badgesCounts);
 
-  return merkleTree.getHexRoot();
+  return {root: merkleTree.getHexRoot(), leaves};
 };
 
 export const mockGetProof = async (
@@ -103,7 +107,7 @@ export const mockGetProof = async (
   address: string,
   badgesCount: number
 ): Promise<string[]> => {
-  const merkleTree = await mockGetMerkleTree(owners, badgesCounts);
+  const merkleTree = (await mockGetMerkleTree(owners, badgesCounts)).merkleTree;
 
   const proof = merkleTree.getHexProof(getLeaf(address, badgesCount));
 
