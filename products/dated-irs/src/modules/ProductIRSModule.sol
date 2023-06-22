@@ -219,6 +219,9 @@ contract ProductIRSModule is IProductIRSModule {
         if (msg.sender != ProductConfiguration.getPoolAddress()) {
             revert NotAuthorized(msg.sender, "propagateMakerOrder");
         }
+
+        Portfolio.loadOrCreate(accountId).updatePosition(marketId, maturityTimestamp, 0, 0);
+
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
         (fee, im) = IProductModule(coreProxy).propagateMakerOrder(
             accountId,
@@ -227,8 +230,6 @@ contract ProductIRSModule is IProductIRSModule {
             MarketConfiguration.load(marketId).quoteToken,
             annualizedBaseAmount
         );
-
-        Portfolio.loadOrCreate(accountId).updatePosition(marketId, maturityTimestamp, 0, 0);
     }
 
     /**
