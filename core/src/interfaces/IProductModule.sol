@@ -77,5 +77,5 @@ interface IProductModule {
         int256 annualizedNotional
     ) external returns (uint256 fee, uint256 im);
 
-    function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount) external;
+    function propagateSettlementCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount) external;
 }

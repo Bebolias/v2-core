@@ -12,6 +12,7 @@ import "../storage/Account.sol";
 import "../storage/CollateralConfiguration.sol";
 import "@voltz-protocol/util-contracts/src/token/ERC20Helper.sol";
 import "../storage/Collateral.sol";
+import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 
 /**
  * @title Module for managing user collateral.
@@ -26,10 +27,13 @@ contract CollateralModule is ICollateralModule {
     using SafeCastI256 for int256;
     using SafeCastU256 for uint256;
 
+    bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+
     /**
      * @inheritdoc ICollateralModule
      */
     function deposit(uint128 accountId, address collateralType, uint256 tokenAmount) external override {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         CollateralConfiguration.collateralEnabled(collateralType);
         Account.Data storage account = Account.exists(accountId);
         address depositFrom = msg.sender;
@@ -73,6 +77,7 @@ contract CollateralModule is ICollateralModule {
      * @inheritdoc ICollateralModule
      */
     function withdraw(uint128 accountId, address collateralType, uint256 tokenAmount) external override {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Account.Data storage account =
             Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
 
@@ -118,6 +123,7 @@ contract CollateralModule is ICollateralModule {
         override
         returns (uint256 collateralBalanceAvailable)
     {
+        // todo: turn this into a view function
         return Account.load(accountId).getCollateralBalanceAvailable(collateralType);
     }
 

@@ -10,6 +10,7 @@ pragma solidity >=0.8.19;
 import "forge-std/Test.sol";
 import "../../src/modules/LiquidationModule.sol";
 import "../test-utils/MockCoreStorage.sol";
+import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 
 contract EnhancedLiquidationModule is LiquidationModule, CoreState {
     function _extractLiquidatorReward(
@@ -48,6 +49,8 @@ contract LiquidationModuleTest is Test {
     using SafeCastI256 for int256;
 
     EnhancedLiquidationModule internal liquidationModule;
+    bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+    address internal owner = vm.addr(1);
 
     uint128 internal constant accountId = 100;
 
@@ -57,6 +60,11 @@ contract LiquidationModuleTest is Test {
 
     function setUp() public {
         liquidationModule = new EnhancedLiquidationModule();
+        vm.store(
+            address(liquidationModule),
+            keccak256(abi.encode("xyz.voltz.OwnableStorage")),
+            bytes32(abi.encode(owner))
+        );
         setCollateralProfile("low");
     }
 
@@ -337,6 +345,20 @@ contract LiquidationModuleTest is Test {
             uint256 balance = liquidationModule.getCollateralBalance(888, Constants.TOKEN_1);
             assertEq(balance, 0);
         }
+    }
+
+    function test_RevertWhen_Liquidate_Global_Deny_All() public {
+        vm.prank(owner);
+        liquidationModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        liquidationModule.liquidate(1, 2, Constants.TOKEN_0);
+
     }
 
     function test_RevertWhen_Liquidate_SmallPosition_Partial() public {

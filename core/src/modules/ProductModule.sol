@@ -36,6 +36,7 @@ contract ProductModule is IProductModule {
     using SetUtil for SetUtil.UintSet;
 
     bytes32 private constant _REGISTER_PRODUCT_FEATURE_FLAG = "registerProduct";
+    bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
 
     /**
      * @inheritdoc IProductModule
@@ -57,6 +58,7 @@ contract ProductModule is IProductModule {
         override
         returns (Account.Exposure[] memory exposures)
     {
+        // todo: worth turning this into a view function?
         exposures = Product.load(productId).getAccountAnnualizedExposures(accountId, collateralType);
     }
 
@@ -64,6 +66,7 @@ contract ProductModule is IProductModule {
      * @inheritdoc IProductModule
      */
     function registerProduct(address product, string memory name) external override returns (uint128 productId) {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         FeatureFlag.ensureAccessToFeature(_REGISTER_PRODUCT_FEATURE_FLAG);
 
         if (!ERC165Helper.safeSupportsInterface(product, type(IProduct).interfaceId)) {
@@ -80,8 +83,9 @@ contract ProductModule is IProductModule {
      */
 
     function closeAccount(uint128 productId, uint128 accountId, address collateralType) external override {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         // todo: consider returning data that might be useful in the future
-
+        // todo: double check permissions and validation
         Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
         Product.load(productId).closeAccount(accountId, collateralType);
     }
@@ -119,6 +123,7 @@ contract ProductModule is IProductModule {
         address collateralType,
         int256 annualizedNotional
     ) external override returns (uint256 fee, uint256 im) {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Product.onlyProductAddress(productId, msg.sender);
 
         MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
@@ -140,6 +145,7 @@ contract ProductModule is IProductModule {
         address collateralType,
         int256 annualizedNotional
     ) external override returns (uint256 fee, uint256 im) {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Product.onlyProductAddress(productId, msg.sender);
 
         MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
@@ -154,10 +160,11 @@ contract ProductModule is IProductModule {
         }
     }
 
-    function propagateCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)
+    function propagateSettlementCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)
         external
         override
     {
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Product.onlyProductAddress(productId, msg.sender);
 
         Account.Data storage account = Account.exists(accountId);
@@ -169,6 +176,5 @@ contract ProductModule is IProductModule {
             emit Collateral.CollateralUpdate(accountId, collateralType, amount, block.timestamp);
         }
 
-        //todo: imcheck?
     }
 }

@@ -111,7 +111,7 @@ contract ProductIRSModule is IProductIRSModule {
 
         uint128 productId = ProductConfiguration.getProductId();
 
-        IProductModule(coreProxy).propagateCashflow(accountId, productId, quoteToken, settlementCashflowInQuote);
+        IProductModule(coreProxy).propagateSettlementCashflow(accountId, productId, quoteToken, settlementCashflowInQuote);
 
         emit DatedIRSPositionSettled(
             accountId, productId, marketId, maturityTimestamp, quoteToken, settlementCashflowInQuote, block.timestamp

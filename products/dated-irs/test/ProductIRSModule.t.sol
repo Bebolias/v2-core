@@ -325,7 +325,7 @@ contract ProductIRSModuleTest is Test {
         vm.mockCall(
             address(mockCoreStorage),
             abi.encodeWithSelector(
-                IProductModule.propagateCashflow.selector, MOCK_ACCOUNT_ID, MOCK_PRODUCT_ID, MOCK_QUOTE_TOKEN, -10
+                IProductModule.propagateSettlementCashflow.selector, MOCK_ACCOUNT_ID, MOCK_PRODUCT_ID, MOCK_QUOTE_TOKEN, -10
             ),
             abi.encode()
         );

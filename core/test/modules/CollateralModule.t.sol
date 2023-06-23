@@ -10,6 +10,7 @@ pragma solidity >=0.8.19;
 import "forge-std/Test.sol";
 import "../../src/modules/CollateralModule.sol";
 import "../test-utils/MockCoreStorage.sol";
+import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 
 contract EnhancedCollateralModule is CollateralModule, CoreState {
     function enableDepositing(address tokenAddress) public {
@@ -29,6 +30,10 @@ contract CollateralModuleTest is Test {
     using SafeCastU256 for uint256;
     using SafeCastI256 for int256;
 
+    bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+
+    address internal owner = vm.addr(1);
+
     event Deposited(
         uint128 indexed accountId,
         address indexed collateralType,
@@ -41,6 +46,16 @@ contract CollateralModuleTest is Test {
     );
 
     EnhancedCollateralModule internal collateralModule;
+
+    function setUp() public {
+        collateralModule = new EnhancedCollateralModule();
+
+        vm.store(
+            address(collateralModule),
+            keccak256(abi.encode("xyz.voltz.OwnableStorage")),
+            bytes32(abi.encode(owner))
+        );
+    }
 
     function changeIMRequirementToZero() internal {
         // Mock second calls to products
@@ -90,10 +105,6 @@ contract CollateralModuleTest is Test {
         }
     }
 
-    function setUp() public {
-        collateralModule = new EnhancedCollateralModule();
-    }
-
     function test_GetAccountCollateralBalance() public {
         assertEq(
             collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE
@@ -136,6 +147,7 @@ contract CollateralModuleTest is Test {
     }
 
     function test_deposit_Collateral() public {
+
         uint256 depositAmount = 500e18;
         uint256 boosterAmount = 0;
         uint256 depositAndBoosterAmount = depositAmount + boosterAmount;
@@ -180,6 +192,38 @@ contract CollateralModuleTest is Test {
         assertEq(collateralModule.getAccountCollateralBalance(100, Constants.TOKEN_0), depositAmount);
         assertEq(collateralModule.getAccountLiquidationBoosterBalance(100, Constants.TOKEN_0), 10e18);
     }
+
+    function test_depositCollateralDenyAllExpectReverts() public {
+
+        vm.prank(owner);
+        collateralModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        collateralModule.deposit(1,address(0),1e18);
+
+    }
+
+    function test_withdrawCollateralDenyAllExpectReverts() public {
+
+        vm.prank(owner);
+        collateralModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        collateralModule.withdraw(1,address(0),1e18);
+
+    }
+
+
 
     function test_deposit_CollateralAndLiquidationBooster() public {
         uint256 depositAmount = 500e18;

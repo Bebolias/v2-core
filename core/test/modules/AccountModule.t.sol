@@ -10,6 +10,9 @@ pragma solidity >=0.8.19;
 import "forge-std/Test.sol";
 import "../../src/modules/AccountModule.sol";
 import "../../src/storage/AccountRBAC.sol";
+import "../test-utils/MockCoreStorage.sol";
+
+contract EnhancedAccountModuleTest is AccountModule, CoreState {}
 
 contract AccountModuleTest is Test {
     event AccountCreated(uint128 indexed accountId, address indexed owner, uint256 blockTimestamp);
@@ -28,11 +31,21 @@ contract AccountModuleTest is Test {
         uint256 blockTimestamp
     );
 
-    AccountModule internal accountModule;
+    EnhancedAccountModuleTest internal accountModule;
     address internal proxyAddress = vm.addr(1);
 
+    bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+
+    address internal owner = vm.addr(2);
+
     function setUp() public {
-        accountModule = new AccountModule();
+        accountModule = new EnhancedAccountModuleTest();
+
+        vm.store(
+            address(accountModule),
+            keccak256(abi.encode("xyz.voltz.OwnableStorage")),
+            bytes32(abi.encode(owner))
+        );
 
         mockAssociatedSystem();
     }
@@ -59,6 +72,21 @@ contract AccountModuleTest is Test {
 
         accountModule.createAccount(100);
     }
+
+    function test_RevertWhen_CreateAccount_Global_Deny_All() public {
+        vm.prank(owner);
+        accountModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        accountModule.createAccount(100);
+    }
+
+//test_RevertWhen_RevokePermission_Global_Deny_All
 
     function test_RevertWhen_CreateAccount_UnmockedMint() public {
         vm.expectRevert();
@@ -95,6 +123,20 @@ contract AccountModuleTest is Test {
         assertEq(accountPerms[0].user, authorizedAddress);
         assertEq(accountPerms[0].permissions.length, 1);
         assertEq(accountPerms[0].permissions[0], AccountRBAC._ADMIN_PERMISSION);
+    }
+
+    function test_RevertWhen_GrantPermission_Global_Deny_All() public {
+        vm.prank(owner);
+        accountModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        address authorizedAddress = address(1);
+        accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, authorizedAddress);
     }
 
     function test_RevertWhen_GrantPermission() public {
@@ -147,6 +189,19 @@ contract AccountModuleTest is Test {
         accountModule.revokePermission(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress);
         accountPerms = accountModule.getAccountPermissions(100);
         assertEq(accountPerms.length, 0);
+    }
+
+    function test_RevertWhen_RevokePermission_Global_Deny_All() public {
+        vm.prank(owner);
+        accountModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+        address revokedAddress = address(1);
+        accountModule.revokePermission(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress);
     }
 
     function test_RevertWhen_RevokeInexistentPermission() public {
@@ -232,6 +287,19 @@ contract AccountModuleTest is Test {
         accountModule.renouncePermission(100, AccountRBAC._ADMIN_PERMISSION);
         accountPerms = accountModule.getAccountPermissions(100);
         assertEq(accountPerms.length, 0);
+    }
+
+    function test_RevertWhen_RenouncePermission_Global_Deny_All() public {
+        vm.prank(owner);
+        accountModule.setFeatureFlagDenyAll(_GLOBAL_FEATURE_FLAG, true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                FeatureFlag.FeatureUnavailable.selector, _GLOBAL_FEATURE_FLAG
+            )
+        );
+
+        accountModule.renouncePermission(100, AccountRBAC._ADMIN_PERMISSION);
     }
 
     function test_RevertWhen_RenounceInexistentPermission() public {

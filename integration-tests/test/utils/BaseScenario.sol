@@ -23,15 +23,19 @@ contract BaseScenario is Test {
 
   uint128 constant feeCollectorAccountId = 999;
 
+  bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+
   address owner;
 
   function _setUp() public {
+
     owner = vm.addr(55555);
 
     vm.startPrank(owner);
 
     CoreRouter coreRouter = new CoreRouter();
     coreProxy = new CoreProxy(address(coreRouter), owner);
+    coreProxy.setFeatureFlagAllowAll(_GLOBAL_FEATURE_FLAG, true);
 
     AccountNftRouter accountNftRouter = new AccountNftRouter();
     coreProxy.initOrUpgradeNft(
@@ -56,6 +60,7 @@ contract BaseScenario is Test {
 
     coreProxy.createAccount(feeCollectorAccountId);
     coreProxy.addToFeatureFlagAllowlist(bytes32("registerProduct"), owner);
+
     coreProxy.setPeriphery(address(peripheryProxy));
 
     vm.stopPrank();
