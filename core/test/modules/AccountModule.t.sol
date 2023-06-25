@@ -10,12 +10,14 @@ pragma solidity >=0.8.19;
 import "forge-std/Test.sol";
 import "../../src/modules/AccountModule.sol";
 import "../../src/storage/AccountRBAC.sol";
+import "../../src/storage/AccessPassConfiguration.sol";
+import "../../src/interfaces/external/IAccessPassNFT.sol";
 import "../test-utils/MockCoreStorage.sol";
 
 contract EnhancedAccountModuleTest is AccountModule, CoreState {}
 
 contract AccountModuleTest is Test {
-    event AccountCreated(uint128 indexed accountId, address indexed owner, uint256 blockTimestamp);
+    event AccountCreated(uint128 indexed accountId, address indexed owner, address indexed trigger, uint256 blockTimestamp);
     event PermissionGranted(
         uint128 indexed accountId,
         bytes32 indexed permission,
@@ -68,9 +70,18 @@ contract AccountModuleTest is Test {
 
         // Expect AccountCreated event
         vm.expectEmit(true, true, true, true, address(accountModule));
-        emit AccountCreated(100, address(this), block.timestamp);
+        emit AccountCreated(100, address(this), address(this), block.timestamp);
 
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+
+        accountModule.createAccount(100, 1, address(this));
     }
 
     function test_RevertWhen_CreateAccount_Global_Deny_All() public {
@@ -83,21 +94,36 @@ contract AccountModuleTest is Test {
             )
         );
 
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+
+        accountModule.createAccount(100, 1, address(this));
     }
 
 //test_RevertWhen_RevokePermission_Global_Deny_All
 
     function test_RevertWhen_CreateAccount_UnmockedMint() public {
         vm.expectRevert();
-        accountModule.createAccount(100);
+        accountModule.createAccount(100, 1, address(this));
     }
 
     function test_GetAccountPermissions_AccountCreator() public {
         vm.mockCall(
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+        accountModule.createAccount(100, 1, address(this));
 
         AccountModule.AccountPermissions[] memory accountPerms = accountModule.getAccountPermissions(100);
 
@@ -111,7 +137,14 @@ contract AccountModuleTest is Test {
         vm.mockCall(
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+        accountModule.createAccount(100, 1, address(this));
 
         vm.expectEmit(true, true, true, true, address(accountModule));
         emit PermissionGranted(100, AccountRBAC._ADMIN_PERMISSION, authorizedAddress, address(this), block.timestamp);
@@ -145,7 +178,14 @@ contract AccountModuleTest is Test {
         vm.mockCall(
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+        accountModule.createAccount(100, 1, address(this));
 
         vm.prank(unauthorizedAddress);
         vm.expectRevert(abi.encodeWithSelector(Account.PermissionDenied.selector, 100, unauthorizedAddress));
@@ -158,7 +198,14 @@ contract AccountModuleTest is Test {
         vm.mockCall(
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+        accountModule.createAccount(100, 1, address(this));
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, adminAddress);
         assertEq(accountModule.hasPermission(100, AccountRBAC._ADMIN_PERMISSION, adminAddress), true);
 
@@ -174,7 +221,14 @@ contract AccountModuleTest is Test {
         vm.mockCall(
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+        accountModule.createAccount(100, 1, address(this));
 
         AccountModule.AccountPermissions[] memory accountPerms = accountModule.getAccountPermissions(100);
         assertEq(accountPerms.length, 0);
@@ -213,7 +267,14 @@ contract AccountModuleTest is Test {
         vm.mockCall(
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+        accountModule.createAccount(100, 1, address(this));
 
         AccountModule.AccountPermissions[] memory accountPerms = accountModule.getAccountPermissions(100);
         assertEq(accountPerms.length, 0);
@@ -238,7 +299,14 @@ contract AccountModuleTest is Test {
         vm.mockCall(
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+        accountModule.createAccount(100, 1, address(this));
 
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, revokedAddress);
 
@@ -254,7 +322,14 @@ contract AccountModuleTest is Test {
         vm.mockCall(
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+        accountModule.createAccount(100, 1, address(this));
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, adminAddress);
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, otherAdminAddress);
         assertEq(accountModule.hasPermission(100, AccountRBAC._ADMIN_PERMISSION, adminAddress), true);
@@ -271,7 +346,15 @@ contract AccountModuleTest is Test {
         vm.mockCall(
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
-        accountModule.createAccount(100);
+
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+        accountModule.createAccount(100, 1, address(this));
 
         AccountModule.AccountPermissions[] memory accountPerms = accountModule.getAccountPermissions(100);
         assertEq(accountPerms.length, 0);
@@ -308,7 +391,16 @@ contract AccountModuleTest is Test {
         vm.mockCall(
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
-        accountModule.createAccount(100);
+
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(address(this))
+        );
+
+        accountModule.createAccount(100, 1, address(this));
 
         AccountModule.AccountPermissions[] memory accountPerms = accountModule.getAccountPermissions(100);
         assertEq(accountPerms.length, 0);
@@ -348,7 +440,17 @@ contract AccountModuleTest is Test {
         );
 
         vm.prank(randomAddress);
-        accountModule.createAccount(100);
+
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(randomAddress)
+        );
+
+        accountModule.createAccount(100, 1, randomAddress);
 
         assertEq(accountModule.getAccountOwner(100), randomAddress);
     }
@@ -360,8 +462,16 @@ contract AccountModuleTest is Test {
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
 
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(randomAddress)
+        );
+
         vm.prank(randomAddress);
-        accountModule.createAccount(100);
+        accountModule.createAccount(100, 1, randomAddress);
 
         assertEq(accountModule.isAuthorized(100, AccountRBAC._ADMIN_PERMISSION, randomAddress), true);
     }
@@ -374,8 +484,16 @@ contract AccountModuleTest is Test {
             proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
         );
 
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(randomAddress)
+        );
+
         vm.prank(randomAddress);
-        accountModule.createAccount(100);
+        accountModule.createAccount(100, 1, randomAddress);
 
         assertEq(accountModule.isAuthorized(100, AccountRBAC._ADMIN_PERMISSION, otherAddress), false);
     }
@@ -389,7 +507,16 @@ contract AccountModuleTest is Test {
         );
 
         vm.prank(randomAddress);
-        accountModule.createAccount(100);
+
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(randomAddress)
+        );
+
+        accountModule.createAccount(100, 1, randomAddress);
         vm.prank(randomAddress);
         accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, otherAddress);
 
@@ -404,7 +531,14 @@ contract AccountModuleTest is Test {
         );
 
         vm.prank(randomAddress);
-        accountModule.createAccount(100);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(randomAddress)
+        );
+        accountModule.createAccount(100, 1, randomAddress);
 
         assertEq(accountModule.hasPermission(100, AccountRBAC._ADMIN_PERMISSION, randomAddress), false);
     }

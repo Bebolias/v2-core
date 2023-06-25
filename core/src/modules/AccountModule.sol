@@ -12,6 +12,8 @@ import "../interfaces/IAccountModule.sol";
 import "@voltz-protocol/util-modules/src/storage/AssociatedSystem.sol";
 import "../storage/Account.sol";
 import "../storage/AccountRBAC.sol";
+import "../storage/AccessPassConfiguration.sol";
+import "../interfaces/external/IAccessPassNFT.sol";
 import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 
 /**
@@ -26,6 +28,8 @@ contract AccountModule is IAccountModule {
 
     bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
     bytes32 private constant _ACCOUNT_SYSTEM = "accountNFT";
+    bytes32 private constant _CREATE_ACCOUNT_FEATURE_FLAG = "createAccount";
+    bytes32 private constant _NOTIFY_ACCOUNT_TRANSFER_FEATURE_FLAG = "notifyAccountTransfer";
 
     /**
      * @inheritdoc IAccountModule
@@ -58,19 +62,36 @@ contract AccountModule is IAccountModule {
     /**
      * @inheritdoc IAccountModule
      */
-    function createAccount(uint128 requestedAccountId) external override {
+    function createAccount(uint128 requestedAccountId, uint256 accessPassTokenId, address accountOwner) external override {
+        /*
+            Note, anyone can create an account for any accountOwner as long as the accountOwner owns the account pass nft.
+            During the alpha phase of the protocol, the create account feature will only be available to the Periphery
+            which will need to be separately set and the periphery will need to make sure accountOwner == msg.sender
+        */
         FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
+        FeatureFlag.ensureAccessToFeature(_CREATE_ACCOUNT_FEATURE_FLAG);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        address accessPassOwnerAddress = IAccessPassNFT(accessPassNFTAddress).ownerOf(accessPassTokenId);
+
+        if (accessPassOwnerAddress != accountOwner) {
+            revert OnlyAccessPassOwner(requestedAccountId, accessPassTokenId);
+        }
+
         IAccountTokenModule accountTokenModule = IAccountTokenModule(getAccountTokenAddress());
-        accountTokenModule.safeMint(msg.sender, requestedAccountId, "");
-        Account.create(requestedAccountId, msg.sender);
-        emit AccountCreated(requestedAccountId, msg.sender, block.timestamp);
+        accountTokenModule.safeMint(accountOwner, requestedAccountId, "");
+        Account.create(requestedAccountId, accountOwner);
+        emit AccountCreated(requestedAccountId, accountOwner, msg.sender, block.timestamp);
     }
 
     /**
      * @inheritdoc IAccountModule
      */
     function notifyAccountTransfer(address to, uint128 accountId) external override {
-        // todo: check if need a global feature flag check in here and its implications on account nft transfers
+        /*
+            Note, denying account transfers also blocks Margin Account token transfers.
+        */
+        FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
+        FeatureFlag.ensureAccessToFeature(_NOTIFY_ACCOUNT_TRANSFER_FEATURE_FLAG);
         _onlyAccountToken();
 
         Account.Data storage account = Account.load(accountId);

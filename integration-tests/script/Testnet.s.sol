@@ -93,8 +93,8 @@ contract Testnet is Script {
     address tokenAddress,
     uint128 productId,
     uint128 marketId,
-    uint128 feeCollectorAccountId
-
+    uint128 feeCollectorAccountId,
+    uint256 accessPassTokenId
   ) public {
     vm.startBroadcast(owner);
 
@@ -123,7 +123,7 @@ contract Testnet is Script {
       address(aaveRateOracle)
     );
 
-    coreProxy.createAccount(feeCollectorAccountId);
+    coreProxy.createAccount(feeCollectorAccountId, accessPassTokenId, msg.sender);
 
     coreProxy.configureMarketFee(
       MarketFeeConfiguration.Data({

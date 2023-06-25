@@ -8,9 +8,7 @@ import "../interfaces/external/IWETH9.sol";
  */
 library Config {
     struct Data {
-        /// @dev WETH9 address
         IWETH9 WETH9;
-        /// @dev Voltz V2 core proxy address
         address VOLTZ_V2_CORE_PROXY;
         address VOLTZ_V2_DATED_IRS_PROXY;
         address VOLTZ_V2_DATED_IRS_VAMM_PROXY;

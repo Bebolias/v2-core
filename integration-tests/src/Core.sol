@@ -13,6 +13,7 @@ import "@voltz-protocol/core/src/modules/OwnerUpgradeModule.sol";
 import "@voltz-protocol/core/src/modules/PeripheryModule.sol";
 import "@voltz-protocol/core/src/modules/ProductModule.sol";
 import "@voltz-protocol/core/src/modules/RiskConfigurationModule.sol";
+import "@voltz-protocol/core/src/modules/AccessPassConfigurationModule.sol";
 
 import "@voltz-protocol/core/src/modules/AccountTokenModule.sol";
 
@@ -27,7 +28,8 @@ contract CoreRouter is
   OwnerUpgradeModule,
   PeripheryModule,
   ProductModule,
-  RiskConfigurationModule 
+  RiskConfigurationModule,
+  AccessPassConfigurationModule
 { }
 
 contract CoreProxy is

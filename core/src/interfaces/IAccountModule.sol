@@ -19,6 +19,11 @@ interface IAccountModule {
     error OnlyAccountTokenProxy(address origin);
 
     /**
+    * @notice Thrown when attempting to create account without owning an access pass
+     */
+    error OnlyAccessPassOwner(uint128 requestedAccountId, uint256 accessPassTokenId);
+
+    /**
      * @notice Thrown when an account attempts to renounce a permission that it didn't have.
      */
     error PermissionNotGranted(uint128 accountId, bytes32 permission, address user);
@@ -27,9 +32,13 @@ interface IAccountModule {
      * @notice Emitted when an account token with id `accountId` is minted to `owner`.
      * @param accountId The id of the account.
      * @param owner The address that owns the created account.
+     * @param trigger The address that triggered account creation.
      * @param blockTimestamp The current block timestamp.
      */
-    event AccountCreated(uint128 indexed accountId, address indexed owner, uint256 blockTimestamp);
+    event AccountCreated(uint128 indexed accountId, address indexed owner, address indexed trigger, uint256 blockTimestamp);
+
+
+
 
     /**
      * @notice Emitted when an account token with id `accountId` is transferred to `newOwner`.
@@ -109,7 +118,7 @@ interface IAccountModule {
      *
      * Emits a {AccountCreated} event.
      */
-    function createAccount(uint128 requestedAccountId) external;
+    function createAccount(uint128 requestedAccountId, uint256 accessPassTokenId, address accountOwner) external;
 
     /**
      * @notice Called by AccountTokenModule to notify the system when the account token is transferred.

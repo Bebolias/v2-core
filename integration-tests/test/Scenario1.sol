@@ -135,6 +135,14 @@ contract Scenario1 is BaseScenario {
 
     token.approve(address(peripheryProxy), 1001e18);
 
+    vm.clearMockedCalls();
+
+    vm.mockCall(
+      accessPassAddress,
+      abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, accessPassTokenId),
+      abi.encode(user1)
+    );
+
     bytes memory commands = abi.encodePacked(
       bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
       bytes1(uint8(Commands.TRANSFER_FROM)),
@@ -142,7 +150,7 @@ contract Scenario1 is BaseScenario {
       bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
     );
     bytes[] memory inputs = new bytes[](4);
-    inputs[0] = abi.encode(1);
+    inputs[0] = abi.encode(1, accessPassTokenId);
     inputs[1] = abi.encode(address(token), 1001e18);
     inputs[2] = abi.encode(1, address(token), 1000e18);
     inputs[3] = abi.encode(
@@ -164,6 +172,14 @@ contract Scenario1 is BaseScenario {
 
     token.approve(address(peripheryProxy), 501e18);
 
+    vm.clearMockedCalls();
+
+    vm.mockCall(
+      accessPassAddress,
+      abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, accessPassTokenId),
+      abi.encode(user2)
+    );
+
     commands = abi.encodePacked(
       bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
       bytes1(uint8(Commands.TRANSFER_FROM)),
@@ -171,7 +187,7 @@ contract Scenario1 is BaseScenario {
       bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
     );
     inputs = new bytes[](4);
-    inputs[0] = abi.encode(2);
+    inputs[0] = abi.encode(2, accessPassTokenId);
     inputs[1] = abi.encode(address(token), 501e18);
     inputs[2] = abi.encode(2, address(token), 500e18);
     inputs[3] = abi.encode(

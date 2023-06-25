@@ -12,6 +12,7 @@ import "./Payments.sol";
  * @title Perform withdrawals and deposits to and from the v2 collateral module
  */
 library V2Core {
+
     function deposit(uint128 accountId, address collateralType, uint256 tokenAmount) internal {
         address coreProxyAddress = Config.load().VOLTZ_V2_CORE_PROXY;
         uint256 liquidationBooster = ICollateralConfigurationModule(
@@ -26,9 +27,9 @@ library V2Core {
         Payments.pay(collateralType, msg.sender, tokenAmount);
     }
 
-    function createAccount(uint128 requestedId) internal {
+    function createAccount(uint128 requestedId, uint256 accessPassTokenId) internal {
         Config.Data memory config = Config.load();
-        IAccountModule(config.VOLTZ_V2_CORE_PROXY).createAccount(requestedId);
-        IERC721(config.VOLTZ_V2_ACCOUNT_NFT_PROXY).safeTransferFrom(address(this), msg.sender, requestedId);
+        IAccountModule(config.VOLTZ_V2_CORE_PROXY).createAccount(requestedId, accessPassTokenId, msg.sender);
+        // todo: note, transfer is no longer necessary, consider removing VOLTZ_V2_ACCOUNT_NFT_PROXY from the config
     }
 }
