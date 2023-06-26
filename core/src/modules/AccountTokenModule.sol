@@ -28,7 +28,5 @@ contract AccountTokenModule is IAccountTokenModule, NFT {
         uint256 tokenId
     ) internal virtual override {
         IAccountModule(OwnableStorage.getOwner()).notifyAccountTransfer(to, tokenId.to128());
-
-        //todo: reset permissions
     }
 }

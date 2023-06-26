@@ -95,6 +95,12 @@ contract AccountModule is IAccountModule {
         _onlyAccountToken();
 
         Account.Data storage account = Account.load(accountId);
+
+        address[] memory permissionedAddresses = account.rbac.permissionAddresses.values();
+        for (uint256 i = 0; i < permissionedAddresses.length; i++) {
+            account.rbac.revokeAllPermissions(permissionedAddresses[i]);
+        }
+
         account.rbac.setOwner(to);
         emit AccountOwnerUpdate(accountId, to, block.timestamp);
     }

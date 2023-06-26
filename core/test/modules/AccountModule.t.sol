@@ -432,6 +432,35 @@ contract AccountModuleTest is Test {
         accountModule.notifyAccountTransfer(vm.addr(2), 100);
     }
 
+    function test_ResetPermissionsNotifyAccountTransfer() public {
+        // duplicate logic, consider simplifying
+        address to = vm.addr(2);
+        address randomAddress = address(1);
+        address accessPassNFTAddress = AccessPassConfiguration.load().accessPassNFTAddress;
+        vm.prank(randomAddress);
+        vm.mockCall(
+            proxyAddress, abi.encodeWithSelector(INftModule.safeMint.selector, address(this), 100, ""), abi.encode()
+        );
+        vm.mockCall(
+            accessPassNFTAddress,
+            0,
+            abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, 1),
+            abi.encode(randomAddress)
+        );
+        accountModule.createAccount(100, 1, randomAddress);
+        vm.prank(randomAddress);
+        accountModule.grantPermission(100, AccountRBAC._ADMIN_PERMISSION, vm.addr(3));
+
+        AccountModule.AccountPermissions[] memory accountPerms = accountModule.getAccountPermissions(100);
+        assertEq(accountPerms.length, 1);
+
+        vm.prank(proxyAddress);
+
+        accountModule.notifyAccountTransfer(to, 100);
+        accountPerms = accountModule.getAccountPermissions(100);
+        assertEq(accountPerms.length, 0);
+    }
+
     function test_GetAccountOwner() public {
         address randomAddress = address(1);
 
