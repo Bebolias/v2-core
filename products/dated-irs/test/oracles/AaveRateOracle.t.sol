@@ -9,9 +9,9 @@ pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
-import "./mocks/MockAaveLendingPool.sol";
-import "../src/oracles/AaveRateOracle.sol";
-import "../src/interfaces/IRateOracle.sol";
+import "../mocks/MockAaveLendingPool.sol";
+import "../../src/oracles/AaveRateOracle.sol";
+import "../../src/interfaces/IRateOracle.sol";
 import "oz/interfaces/IERC20.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
