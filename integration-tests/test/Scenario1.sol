@@ -28,7 +28,7 @@ contract Scenario1 is BaseScenario {
   function setUp() public {
     super._setUp();
     marketId = 1;
-    maturityTimestamp = uint32(block.timestamp) + 172800;
+    maturityTimestamp = uint32(block.timestamp) + 259200;
     extendedPoolModule = new ExtendedPoolModule();
   }
 
@@ -84,7 +84,7 @@ contract Scenario1 is BaseScenario {
         productId: productId, 
         marketId: marketId, 
         riskParameter: SD59x18.wrap(1e18), 
-        twapLookbackWindow: 86400
+        twapLookbackWindow: 120
       })
     );
 
@@ -104,11 +104,12 @@ contract Scenario1 is BaseScenario {
 
     vammProxy.setProductAddress(address(datedIrsProxy));
     vammProxy.createVamm(
-      1,
+      marketId,
       TickMath.getSqrtRatioAtTick(-13860), // price = 4%
       immutableConfig,
       mutableConfig
     );
+    vammProxy.increaseObservationCardinalityNext(marketId, maturityTimestamp, 16);
 
     peripheryProxy.configure(
       Config.Data({
@@ -130,6 +131,8 @@ contract Scenario1 is BaseScenario {
 
     address user1 = vm.addr(1);
     vm.startPrank(user1);
+
+    vm.warp(block.timestamp + 43200); // advance by 0.5 days
 
     token.mint(user1, 1001e18);
 
@@ -165,6 +168,8 @@ contract Scenario1 is BaseScenario {
 
     vm.stopPrank();
 
+    vm.warp(block.timestamp + 43200); // advance by 0.5 days
+
     address user2 = vm.addr(2);
     vm.startPrank(user2);
 
@@ -195,7 +200,7 @@ contract Scenario1 is BaseScenario {
       marketId,
       maturityTimestamp,
       500e18,
-      0 // todo: compute this properly
+      TickMath.getSqrtRatioAtTick(TickMath.MIN_TICK + 1)
     );
     peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 

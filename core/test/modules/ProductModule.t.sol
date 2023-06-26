@@ -220,11 +220,22 @@ contract ProductModuleTest is Test {
     function test_propagateTakerOrder_NewProduct() public {
         (uint128 productId, uint128 marketId) =
             productModule.configureNewProductAndMarket("Product3", UD60x18.wrap(2e16), UD60x18.wrap(25e15));
+        
+        MockProduct newProduct = productModule.getProducts()[productModule.getProducts().length - 1];
 
         //todo: check event emitted once implemented
         assertEq(productModule.getActiveProductsLength(100), 2);
 
-        vm.prank(address(productModule.getProducts()[productModule.getProducts().length - 1]));
+         vm.expectCall(
+            address(newProduct), 
+            abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100, Constants.TOKEN_0)
+        );
+
+        Account.Exposure[] memory emptyExposures;
+        newProduct.mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, emptyExposures);
+        newProduct.mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
+
+        vm.prank(address(newProduct));
         productModule.propagateTakerOrder(100, productId, marketId, Constants.TOKEN_0, 100e18);
 
         assertEq(productModule.getCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE - 25e17);
@@ -308,10 +319,21 @@ contract ProductModuleTest is Test {
         (uint128 productId, uint128 marketId) =
             productModule.configureNewProductAndMarket("Product3", UD60x18.wrap(2e16), UD60x18.wrap(25e15));
 
+        MockProduct newProduct = productModule.getProducts()[productModule.getProducts().length - 1];
+
         //todo: check event emitted once implemented
         assertEq(productModule.getActiveProductsLength(100), 2);
 
-        vm.prank(address(productModule.getProducts()[productModule.getProducts().length - 1]));
+         vm.expectCall(
+            address(newProduct), 
+            abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100, Constants.TOKEN_0)
+        );
+
+        Account.Exposure[] memory emptyExposures;
+        newProduct.mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, emptyExposures);
+        newProduct.mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
+
+        vm.prank(address(newProduct));
         productModule.propagateMakerOrder(100, productId, marketId, Constants.TOKEN_0, 100e18);
 
         assertEq(productModule.getCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE - 2e18);

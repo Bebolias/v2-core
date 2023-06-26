@@ -32,6 +32,7 @@ contract BaseScenario is Test {
   address owner;
 
   function _setUp() public {
+    vm.warp(1687525420);
 
     owner = vm.addr(55555);
 

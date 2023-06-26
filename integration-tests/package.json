@@ -12,7 +12,7 @@
     "@voltz-protocol/products-dated-irs": "workspace:^",
     "@voltz-protocol/util-contracts": "workspace:^",
     "@voltz-protocol/util-modules": "workspace:^",
-    "@voltz-protocol/v2-vamm": "1.9.0"
+    "@voltz-protocol/v2-vamm": "1.10.0"
   },
   "scripts": {
     "publish": "echo \"Cannot publish integration tests yet\"",

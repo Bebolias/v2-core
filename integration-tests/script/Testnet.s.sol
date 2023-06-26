@@ -40,6 +40,8 @@ contract Testnet is Script {
 
   address owner = coreProxy.owner();
 
+  bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+
   using SafeCastU256 for uint256;
   using SafeCastI256 for int256;
 
@@ -47,6 +49,8 @@ contract Testnet is Script {
     vm.startBroadcast(owner);
 
     console2.log(owner);
+  
+    coreProxy.setFeatureFlagAllowAll(_GLOBAL_FEATURE_FLAG, true);
 
     coreProxy.addToFeatureFlagAllowlist(bytes32("registerProduct"), owner);
 
@@ -174,9 +178,11 @@ contract Testnet is Script {
       immutableConfig,
       mutableConfig
     );
+
+    vammProxy.increaseObservationCardinalityNext(marketId, maturityTimestamp, 16);
   }
 
-  function mint(
+  function mintNewAccount(
     uint128 marketId,
     address tokenAddress,
     uint128 accountId,
@@ -217,7 +223,46 @@ contract Testnet is Script {
     peripheryProxy.execute(commands, inputs, block.timestamp + 100);  
   }
 
-  function swap(
+  function mintExistingAccount(
+    uint128 marketId,
+    address tokenAddress,
+    uint128 accountId,
+    uint32 maturityTimestamp,
+    uint256 depositAmount,
+    int256 leverage,  // positive means VT, negative means FT
+    address aaveRateOracleAddress
+  ) public {
+    vm.startBroadcast();
+
+    AaveRateOracle aaveRateOracle = AaveRateOracle(aaveRateOracleAddress);
+    uint256 liquidationBooster = coreProxy.getCollateralConfiguration(tokenAddress).liquidationBooster;
+    int256 baseAmount = sd59x18(int256(depositAmount) * leverage).div(aaveRateOracle.getCurrentIndex().intoSD59x18()).unwrap();
+
+    IERC20 token = IERC20(tokenAddress);
+    token.approve(address(peripheryProxy), depositAmount + liquidationBooster);
+
+    bytes memory commands = abi.encodePacked(
+      bytes1(uint8(Commands.TRANSFER_FROM)),
+      bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+      bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
+    );
+
+    bytes[] memory inputs = new bytes[](3);
+    inputs[0] = abi.encode(address(token), depositAmount + liquidationBooster);
+    inputs[1] = abi.encode(accountId, address(token), depositAmount);
+    inputs[2] = abi.encode(
+      accountId,  // accountId
+      marketId,
+      maturityTimestamp,
+      -14100, // 4.1%
+      -13620, // 3.9% 
+      getLiquidityForBase(-14100, -13620, baseAmount)    
+    );
+
+    peripheryProxy.execute(commands, inputs, block.timestamp + 100);  
+  }
+
+  function swapNewAccount(
     uint128 marketId,
     address tokenAddress,
     uint128 accountId,
@@ -250,7 +295,44 @@ contract Testnet is Script {
       marketId,
       maturityTimestamp,
       baseAmount,
-      (baseAmount > 0) ? TickMath.getSqrtRatioAtTick(TickMath.MAX_TICK - 1) : TickMath.getSqrtRatioAtTick(TickMath.MIN_TICK + 1)
+      (baseAmount > 0) ? TickMath.getSqrtRatioAtTick(TickMath.MIN_TICK + 1) : TickMath.getSqrtRatioAtTick(TickMath.MAX_TICK - 1)
+    );
+
+    peripheryProxy.execute(commands, inputs, block.timestamp + 100); 
+  }
+
+  function swapExistingAccount(
+    uint128 marketId,
+    address tokenAddress,
+    uint128 accountId,
+    uint32 maturityTimestamp,
+    uint256 depositAmount,
+    int256 leverage,  // positive means VT, negative means FT
+    address aaveRateOracleAddress
+  ) public {
+    vm.startBroadcast();
+
+    AaveRateOracle aaveRateOracle = AaveRateOracle(aaveRateOracleAddress);
+    uint256 liquidationBooster = coreProxy.getCollateralConfiguration(tokenAddress).liquidationBooster;
+    int256 baseAmount = sd59x18(int256(depositAmount) * leverage).div(aaveRateOracle.getCurrentIndex().intoSD59x18()).unwrap();
+
+    IERC20 token = IERC20(tokenAddress);
+    token.approve(address(peripheryProxy), depositAmount + liquidationBooster);
+
+    bytes memory commands = abi.encodePacked(
+      bytes1(uint8(Commands.TRANSFER_FROM)),
+      bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+      bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
+    );
+    bytes[] memory inputs = new bytes[](3);
+    inputs[0] = abi.encode(address(token), depositAmount + liquidationBooster);
+    inputs[1] = abi.encode(accountId, address(token), depositAmount);
+    inputs[2] = abi.encode(
+      accountId,
+      marketId,
+      maturityTimestamp,
+      baseAmount,
+      (baseAmount > 0) ? TickMath.getSqrtRatioAtTick(TickMath.MIN_TICK + 1) : TickMath.getSqrtRatioAtTick(TickMath.MAX_TICK - 1)
     );
 
     peripheryProxy.execute(commands, inputs, block.timestamp + 100); 

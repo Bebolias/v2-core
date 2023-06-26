@@ -132,10 +132,12 @@ contract ProductModule is IProductModule {
         );
 
         Account.Data storage account = Account.exists(accountId);
-        im = account.imCheck(collateralType);
+
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
         }
+
+        im = account.imCheck(collateralType);
     }
 
     function propagateMakerOrder(
@@ -154,10 +156,12 @@ contract ProductModule is IProductModule {
         );
 
         Account.Data storage account = Account.exists(accountId);
-        im = account.imCheck(collateralType);
+
         if (!account.activeProducts.contains(productId)) {
             account.activeProducts.add(productId);
         }
+
+        im = account.imCheck(collateralType);
     }
 
     function propagateSettlementCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount)

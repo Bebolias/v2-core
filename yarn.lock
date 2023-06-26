@@ -1621,7 +1621,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.9.0
+    "@voltz-protocol/v2-vamm": 1.10.0
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1659,7 +1659,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.9.0
+    "@voltz-protocol/v2-vamm": 1.10.0
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1680,7 +1680,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.9.0
+    "@voltz-protocol/v2-vamm": 1.10.0
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1723,9 +1723,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@voltz-protocol/v2-vamm@npm:1.9.0":
-  version: 1.9.0
-  resolution: "@voltz-protocol/v2-vamm@npm:1.9.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fv2-vamm%2F1.9.0%2F372a3b8e2115dc67a98ba164d5b9050fc27af4f1"
+"@voltz-protocol/v2-vamm@npm:1.10.0":
+  version: 1.10.0
+  resolution: "@voltz-protocol/v2-vamm@npm:1.10.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fv2-vamm%2F1.10.0%2F8626632860c6048fec686522cea2018200f4a477"
   dependencies:
     "@openzeppelin/contracts": ^4.8.3
     "@prb/math": 3.3.0
@@ -1733,7 +1733,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": 2.2.1
     "@voltz-protocol/util-contracts": 1.2.0
     "@voltz-protocol/util-modules": 1.1.0
-  checksum: 31935b6f2793b0e47d3bc84de2bdabaf2d31d637da4fbbce25041ce2cb0c170b4e5bdd2571378d3639b7ec5f254bd921ec4549e43c7ffc9cc0de2337b0b2ed74
+  checksum: c9208a4af0b3911a55eb22fba60c2ae1228477e44d29f5defcff565a4272026fd2568eed7a8fcb3780c8f0cb503b4a42ed4d8b5db2f73251558b2882f35cc12c
   languageName: node
   linkType: hard
 
