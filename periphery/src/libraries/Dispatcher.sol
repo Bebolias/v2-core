@@ -84,15 +84,13 @@ library Dispatcher {
             );
             output = abi.encode(fee, im);
         } else if (command == Commands.V2_CORE_CREATE_ACCOUNT) {
-            // equivalent: abi.decode(inputs, (address, address, uint160))
+            // equivalent: abi.decode(inputs, (uint128))
             uint128 requestedId;
-            uint256 accessPassTokenId;
             assembly {
                 requestedId := calldataload(inputs.offset)
-                accessPassTokenId := calldataload(add(inputs.offset, 0x20))
             }
             // todo: missing tests for this flow, no tests failed after changing the implementation
-            V2Core.createAccount(requestedId, accessPassTokenId);
+            V2Core.createAccount(requestedId);
         } else if (command == Commands.V2_CORE_DEPOSIT) {
             // equivalent: abi.decode(inputs, (uint128, address, uint256))
             uint128 accountId;

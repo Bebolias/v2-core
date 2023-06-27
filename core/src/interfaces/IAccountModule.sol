@@ -21,7 +21,7 @@ interface IAccountModule {
     /**
     * @notice Thrown when attempting to create account without owning an access pass
      */
-    error OnlyAccessPassOwner(uint128 requestedAccountId, uint256 accessPassTokenId);
+    error OnlyAccessPassOwner(uint128 requestedAccountId, address accountOwner);
 
     /**
      * @notice Thrown when an account attempts to renounce a permission that it didn't have.
@@ -118,7 +118,7 @@ interface IAccountModule {
      *
      * Emits a {AccountCreated} event.
      */
-    function createAccount(uint128 requestedAccountId, uint256 accessPassTokenId, address accountOwner) external;
+    function createAccount(uint128 requestedAccountId, address accountOwner) external;
 
     /**
      * @notice Called by AccountTokenModule to notify the system when the account token is transferred.

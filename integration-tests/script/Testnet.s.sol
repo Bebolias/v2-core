@@ -13,6 +13,7 @@ import {IERC20} from "@voltz-protocol/util-contracts/src/interfaces/IERC20.sol";
 import {ud60x18} from "@prb/math/UD60x18.sol";
 import {sd59x18} from "@prb/math/SD59x18.sol";
 
+import {AccessPassConfiguration} from "@voltz-protocol/core/src/storage/AccessPassConfiguration.sol";
 import {CollateralConfiguration} from "@voltz-protocol/core/src/storage/CollateralConfiguration.sol";
 import {ProtocolRiskConfiguration} from "@voltz-protocol/core/src/storage/ProtocolRiskConfiguration.sol";
 import {MarketFeeConfiguration} from "@voltz-protocol/core/src/storage/MarketFeeConfiguration.sol";
@@ -32,25 +33,38 @@ import {VammConfiguration, IRateOracle} from "@voltz-protocol/v2-vamm/utils/vamm
 
 import {SafeCastU256, SafeCastI256} from "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 
+import {AccessPassNFT} from "@voltz-protocol/access-pass-nft/src/AccessPassNFT.sol";
+import {Merkle} from "murky/Merkle.sol";
+import {SetUtil} from "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
+
 contract Testnet is Script {
   CoreProxy coreProxy = CoreProxy(payable(vm.envAddress("TESTNET_SCRIPT_CORE_PROXY")));
   DatedIrsProxy datedIrsProxy = DatedIrsProxy(payable(vm.envAddress("TESTNET_SCRIPT_DATED_IRS_PROXY")));
   PeripheryProxy peripheryProxy = PeripheryProxy(payable(vm.envAddress("TESTNET_SCRIPT_PERIPHERY_PROXY")));
   VammProxy vammProxy = VammProxy(payable(vm.envAddress("TESTNET_SCRIPT_VAMM_PROXY")));
+  AccessPassNFT accessPassNft = AccessPassNFT(payable(vm.envAddress("TESTNET_SCRIPT_ACCESS_PASS_NFT")));
 
   address owner = coreProxy.owner();
 
   bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+  bytes32 private constant _CREATE_ACCOUNT_FEATURE_FLAG = "createAccount";
+  bytes32 private constant _NOTIFY_ACCOUNT_TRANSFER_FEATURE_FLAG = "notifyAccountTransfer";
 
   using SafeCastU256 for uint256;
   using SafeCastI256 for int256;
 
-  function configureProtocol() public {
+  using SetUtil for SetUtil.Bytes32Set;
+  SetUtil.Bytes32Set addressPassNftInfo;
+  Merkle merkle = new Merkle();
+
+  function configureProtocol(bool deployAccessPassNft) public {
     vm.startBroadcast(owner);
 
     console2.log(owner);
   
     coreProxy.setFeatureFlagAllowAll(_GLOBAL_FEATURE_FLAG, true);
+    coreProxy.setFeatureFlagAllowAll(_CREATE_ACCOUNT_FEATURE_FLAG, true);
+    coreProxy.setFeatureFlagAllowAll(_NOTIFY_ACCOUNT_TRANSFER_FEATURE_FLAG, true);
 
     coreProxy.addToFeatureFlagAllowlist(bytes32("registerProduct"), owner);
 
@@ -73,6 +87,17 @@ contract Testnet is Script {
         VOLTZ_V2_ACCOUNT_NFT_PROXY: accountNftProxyAddress
       })
     );
+
+    if (deployAccessPassNft) {
+      accessPassNft = new AccessPassNFT("name", "symbol");
+      console2.log("Deployed Access Pass NFT:", address(accessPassNft));
+
+      coreProxy.configureAccessPass(
+        AccessPassConfiguration.Data({
+          accessPassNFTAddress: address(accessPassNft)
+        })
+      );
+    }
   }
 
   function configureProduct() public {
@@ -97,9 +122,10 @@ contract Testnet is Script {
     address tokenAddress,
     uint128 productId,
     uint128 marketId,
-    uint128 feeCollectorAccountId,
-    uint256 accessPassTokenId
+    uint128 feeCollectorAccountId
   ) public {
+    addNewRoot(owner);
+
     vm.startBroadcast(owner);
 
     coreProxy.configureCollateral(
@@ -127,7 +153,13 @@ contract Testnet is Script {
       address(aaveRateOracle)
     );
 
-    coreProxy.createAccount(feeCollectorAccountId, accessPassTokenId, msg.sender);
+    accessPassNft.redeem(
+      msg.sender,
+      1,
+      merkle.getProof(addressPassNftInfo.values(), 1),
+      merkle.getRoot(addressPassNftInfo.values())
+    );
+    coreProxy.createAccount(feeCollectorAccountId, owner);
 
     coreProxy.configureMarketFee(
       MarketFeeConfiguration.Data({
@@ -182,6 +214,34 @@ contract Testnet is Script {
     vammProxy.increaseObservationCardinalityNext(marketId, maturityTimestamp, 16);
   }
 
+  function addNewRoot(address[] memory accountOwners) public {
+    vm.startBroadcast(owner);
+
+    addressPassNftInfo.add(keccak256(abi.encodePacked(address(0), uint256(0))));
+    addressPassNftInfo.add(keccak256(abi.encodePacked(address(owner), uint256(1))));
+    for (uint256 i = 0; i < accountOwners.length; i += 1) {
+      bytes32 leaf = keccak256(abi.encodePacked(accountOwners[i], uint256(1)));
+      if (!addressPassNftInfo.contains(leaf)) {
+        addressPassNftInfo.add(leaf);
+      }
+    }
+    
+    accessPassNft.addNewRoot(
+      AccessPassNFT.RootInfo({
+        merkleRoot: merkle.getRoot(addressPassNftInfo.values()),
+        baseMetadataURI: "ipfs://"
+      })
+    );
+
+    vm.stopBroadcast();
+  }
+
+  function addNewRoot(address accountOwner) private {
+    address[] memory accountOwners = new address[](1);
+    accountOwners[0] = accountOwner;
+    addNewRoot(accountOwners);
+  }
+
   function mintNewAccount(
     uint128 marketId,
     address tokenAddress,
@@ -191,6 +251,8 @@ contract Testnet is Script {
     int256 leverage,  // positive means VT, negative means FT
     address aaveRateOracleAddress
   ) public {
+    addNewRoot(msg.sender);
+
     vm.startBroadcast();
 
     AaveRateOracle aaveRateOracle = AaveRateOracle(aaveRateOracleAddress);
@@ -199,6 +261,13 @@ contract Testnet is Script {
 
     IERC20 token = IERC20(tokenAddress);
     token.approve(address(peripheryProxy), depositAmount + liquidationBooster);
+
+    accessPassNft.redeem(
+      msg.sender,
+      1,
+      merkle.getProof(addressPassNftInfo.values(), 1),
+      merkle.getRoot(addressPassNftInfo.values())
+    );
 
     bytes memory commands = abi.encodePacked(
       bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
@@ -271,6 +340,8 @@ contract Testnet is Script {
     int256 leverage,  // positive means VT, negative means FT
     address aaveRateOracleAddress
   ) public {
+    addNewRoot(msg.sender);
+
     vm.startBroadcast();
 
     AaveRateOracle aaveRateOracle = AaveRateOracle(aaveRateOracleAddress);
@@ -279,6 +350,13 @@ contract Testnet is Script {
 
     IERC20 token = IERC20(tokenAddress);
     token.approve(address(peripheryProxy), depositAmount + liquidationBooster);
+
+    accessPassNft.redeem(
+      msg.sender,
+      1,
+      merkle.getProof(addressPassNftInfo.values(), 1),
+      merkle.getRoot(addressPassNftInfo.values())
+    );
 
     bytes memory commands = abi.encodePacked(
       bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),

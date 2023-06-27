@@ -9,10 +9,6 @@ import "@voltz-protocol/core/src/storage/MarketFeeConfiguration.sol";
 import "@voltz-protocol/products-dated-irs/src/storage/ProductConfiguration.sol";
 import "@voltz-protocol/products-dated-irs/src/storage/MarketConfiguration.sol";
 
-import {Config} from "@voltz-protocol/periphery/src/storage/Config.sol";
-import {Commands} from "@voltz-protocol/periphery/src/libraries/Commands.sol";
-import {IWETH9} from "@voltz-protocol/periphery/src/interfaces/external/IWETH9.sol";
-
 import "@voltz-protocol/v2-vamm/utils/vamm-math/TickMath.sol";
 import {ExtendedPoolModule} from "@voltz-protocol/v2-vamm/test/PoolModule.t.sol";
 import {VammConfiguration, IRateOracle} from "@voltz-protocol/v2-vamm/utils/vamm-math/VammConfiguration.sol";
@@ -24,6 +20,8 @@ contract Scenario1 is BaseScenario {
   uint128 marketId;
   uint32 maturityTimestamp;
   ExtendedPoolModule extendedPoolModule; // used to convert base to liquidity :)
+
+  using SetUtil for SetUtil.Bytes32Set;
 
   function setUp() public {
     super._setUp();
@@ -111,16 +109,6 @@ contract Scenario1 is BaseScenario {
     );
     vammProxy.increaseObservationCardinalityNext(marketId, maturityTimestamp, 16);
 
-    peripheryProxy.configure(
-      Config.Data({
-        WETH9: IWETH9(address(874392112)),  // todo: deploy weth9 mock
-        VOLTZ_V2_CORE_PROXY: address(coreProxy),
-        VOLTZ_V2_DATED_IRS_PROXY: address(datedIrsProxy),
-        VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(vammProxy),
-        VOLTZ_V2_ACCOUNT_NFT_PROXY: address(accountNftProxy)
-      })
-    );
-
     vm.stopPrank();
 
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(1e18));
@@ -130,6 +118,23 @@ contract Scenario1 is BaseScenario {
     setConfigs();
 
     address user1 = vm.addr(1);
+    address user2 = vm.addr(2);
+
+    addressPassNftInfo.add(keccak256(abi.encodePacked(user1, uint256(1))));
+    uint256 user1MerkleIndex = addressPassNftInfo.length() - 1;
+
+    addressPassNftInfo.add(keccak256(abi.encodePacked(user2, uint256(1))));
+    uint256 user2MerkleIndex = addressPassNftInfo.length() - 1;
+
+    vm.startPrank(owner);
+    accessPassNft.addNewRoot(
+      AccessPassNFT.RootInfo({
+        merkleRoot: merkle.getRoot(addressPassNftInfo.values()),
+        baseMetadataURI: "ipfs://"
+      })
+    );
+    vm.stopPrank();
+
     vm.startPrank(user1);
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days
@@ -138,12 +143,11 @@ contract Scenario1 is BaseScenario {
 
     token.approve(address(peripheryProxy), 1001e18);
 
-    vm.clearMockedCalls();
-
-    vm.mockCall(
-      accessPassAddress,
-      abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, accessPassTokenId),
-      abi.encode(user1)
+    accessPassNft.redeem(
+      user1,
+      1,
+      merkle.getProof(addressPassNftInfo.values(), user1MerkleIndex),
+      merkle.getRoot(addressPassNftInfo.values())
     );
 
     bytes memory commands = abi.encodePacked(
@@ -153,7 +157,7 @@ contract Scenario1 is BaseScenario {
       bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
     );
     bytes[] memory inputs = new bytes[](4);
-    inputs[0] = abi.encode(1, accessPassTokenId);
+    inputs[0] = abi.encode(1);
     inputs[1] = abi.encode(address(token), 1001e18);
     inputs[2] = abi.encode(1, address(token), 1000e18);
     inputs[3] = abi.encode(
@@ -170,19 +174,17 @@ contract Scenario1 is BaseScenario {
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days
 
-    address user2 = vm.addr(2);
     vm.startPrank(user2);
 
     token.mint(user2, 501e18);
 
     token.approve(address(peripheryProxy), 501e18);
 
-    vm.clearMockedCalls();
-
-    vm.mockCall(
-      accessPassAddress,
-      abi.encodeWithSelector(IAccessPassNFT.ownerOf.selector, accessPassTokenId),
-      abi.encode(user2)
+    accessPassNft.redeem(
+      user2,
+      1,
+      merkle.getProof(addressPassNftInfo.values(), user2MerkleIndex),
+      merkle.getRoot(addressPassNftInfo.values())
     );
 
     commands = abi.encodePacked(
@@ -192,7 +194,7 @@ contract Scenario1 is BaseScenario {
       bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
     );
     inputs = new bytes[](4);
-    inputs[0] = abi.encode(2, accessPassTokenId);
+    inputs[0] = abi.encode(2);
     inputs[1] = abi.encode(address(token), 501e18);
     inputs[2] = abi.encode(2, address(token), 500e18);
     inputs[3] = abi.encode(

@@ -16,3 +16,6 @@
 [submodule "access-pass-nft/lib/forge-std"]
 	path = access-pass-nft/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "integration-tests/lib/murky"]
+	path = integration-tests/lib/murky
+	url = https://github.com/dmfxyz/murky

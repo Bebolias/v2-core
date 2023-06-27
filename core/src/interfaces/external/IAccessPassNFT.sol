@@ -9,17 +9,10 @@ https://github.com/Voltz-Protocol/v2-core/blob/main/core/LICENSE
 pragma solidity >=0.8.19;
 
 interface IAccessPassNFT {
-
-
     /**
-     * @dev Returns the owner of the `tokenId` token.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must exist.
+     * @dev Returns the number of tokens in ``owner``'s account.
      */
-    function ownerOf(uint256 tokenId) external view returns (address owner);
-
+    function balanceOf(address owner) external view returns (uint256 balance);
 }
 
 

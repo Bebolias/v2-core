@@ -1,6 +1,8 @@
 #####################################
 # Deploy Core Router Modules
 #####################################
+[contract.AccessPassConfigurationModule]
+artifact = "AccessPassConfigurationModule"
 [contract.AccountModule]
 artifact = "AccountModule"
 [contract.AssociatedSystemsModule]
@@ -26,6 +28,7 @@ artifact = "RiskConfigurationModule"
 [router.CoreRouter]
 contracts = [
   "OwnerUpgradeModule",
+  "AccessPassConfigurationModule",
   "AccountModule",
   "AssociatedSystemsModule",
   "CollateralConfigurationModule",
@@ -39,6 +42,7 @@ contracts = [
 ]
 depends = [
   "contract.OwnerUpgradeModule",
+  "contract.AccessPassConfigurationModule",
   "contract.AccountModule",
   "contract.AssociatedSystemsModule",
   "contract.CollateralConfigurationModule",
