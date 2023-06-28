@@ -89,7 +89,8 @@ library Dispatcher {
             assembly {
                 requestedId := calldataload(inputs.offset)
             }
-            // todo: missing tests for this flow, no tests failed after changing the implementation
+
+            // todo: missing tests for this flow, no tests failed after changing the implementation (IR)
             V2Core.createAccount(requestedId);
         } else if (command == Commands.V2_CORE_DEPOSIT) {
             // equivalent: abi.decode(inputs, (uint128, address, uint256))

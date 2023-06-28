@@ -9,7 +9,6 @@ pragma solidity >=0.8.19;
 
 /**
  * @title Object for tracking a dated irs position
- * todo: annualization logic might fit nicely in here + any other irs position specific helpers
  */
 library Position {
     struct Data {

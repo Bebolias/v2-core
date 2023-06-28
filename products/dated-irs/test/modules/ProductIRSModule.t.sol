@@ -10,16 +10,16 @@ pragma solidity >=0.8.19;
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
-import "../src/oracles/AaveRateOracle.sol";
-import "../src/modules/ProductIRSModule.sol";
-import "../src/interfaces/IRateOracleModule.sol";
-import "../src/storage/MarketConfiguration.sol";
+import "../../src/oracles/AaveRateOracle.sol";
+import "../../src/modules/ProductIRSModule.sol";
+import "../../src/interfaces/IRateOracleModule.sol";
+import "../../src/storage/MarketConfiguration.sol";
 import "@voltz-protocol/core/src/interfaces/external/IProduct.sol";
 import "@voltz-protocol/core/src/modules/AccountModule.sol";
 import "@voltz-protocol/core/src/storage/AccountRBAC.sol";
 import "@voltz-protocol/core/src/modules/ProductModule.sol";
 import "oz/interfaces/IERC20.sol";
-import "./mocks/MockRateOracle.sol";
+import "../mocks/MockRateOracle.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
 import "@voltz-protocol/core/src/modules/RiskConfigurationModule.sol";
 import { UD60x18, unwrap } from "@prb/math/UD60x18.sol";
@@ -35,8 +35,10 @@ contract ProductIRSModuleExtended is ProductIRSModule {
         return ProductConfiguration.load();
     }
 
-    function createRateOracle(uint128 marketId, address oracleAddress) external returns (bytes32 s) {
-        RateOracleReader.Data storage oracle = RateOracleReader.set(marketId, oracleAddress);
+    function createRateOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds)
+    external returns (bytes32 s) {
+        RateOracleReader.Data storage oracle = RateOracleReader.set(marketId, oracleAddress,
+            maturityIndexCachingWindowInSeconds);
         assembly {
             s := oracle.slot
         }
@@ -80,7 +82,7 @@ contract ProductIRSModuleTest is Test {
         // create Rate Oracle
         mockRateOracle = new MockRateOracle();
         mockRateOracle.setLastUpdatedIndex(1e18 * 1e9);
-        productIrs.createRateOracle(MOCK_MARKET_ID, address(mockRateOracle));
+        productIrs.createRateOracle(MOCK_MARKET_ID, address(mockRateOracle), 3600);
 
         // create market
         productIrs.createMarket(MOCK_MARKET_ID, MOCK_QUOTE_TOKEN);
@@ -336,6 +338,7 @@ contract ProductIRSModuleTest is Test {
     }
 
     function test_RevertWhen_Settle_NotAllowed() public {
+        vm.warp(maturityTimestamp + 1);
         vm.expectRevert(abi.encodeWithSelector(
             IAccountModule.PermissionNotGranted.selector,
             MOCK_ACCOUNT_ID, AccountRBAC._ADMIN_PERMISSION, address(this)

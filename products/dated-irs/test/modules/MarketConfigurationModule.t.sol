@@ -9,8 +9,8 @@ pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
-import "../src/modules/MarketConfigurationModule.sol";
-import "../src/storage/MarketConfiguration.sol";
+import "../../src/modules/MarketConfigurationModule.sol";
+import "../../src/storage/MarketConfiguration.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
 
 contract MarketConfigurationModuleExtended is MarketConfigurationModule {

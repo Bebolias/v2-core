@@ -121,9 +121,9 @@ contract CollateralModule is ICollateralModule {
     function getAccountCollateralBalanceAvailable(uint128 accountId, address collateralType)
         external
         override
+        view
         returns (uint256 collateralBalanceAvailable)
     {
-        // todo: turn this into a view function
         return Account.load(accountId).getCollateralBalanceAvailable(collateralType);
     }
 

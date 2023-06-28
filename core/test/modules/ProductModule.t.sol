@@ -141,7 +141,7 @@ contract ProductModuleTest is Test {
         assertEq(exposuresBefore.length, 2);
 
         vm.prank(Constants.ALICE);
-        //todo: check event was emitted
+        //todo: check event was emitted (AN)
         productModule.closeAccount(1, 100, Constants.TOKEN_0);
 
         Account.Exposure[] memory exposuresAfter =
@@ -198,7 +198,7 @@ contract ProductModuleTest is Test {
     }
 
     function test_propagateTakerOrder_SameProduct() public {
-        //todo: check event emitted once implemented
+        //todo: check event emitted once implemented (AN)
         assertEq(productModule.getActiveProductsLength(100), 2);
         vm.prank(address(productModule.getProducts()[0]));
         productModule.propagateTakerOrder(100, 1, 10, Constants.TOKEN_0, 100e18);
@@ -208,7 +208,7 @@ contract ProductModuleTest is Test {
     }
 
     function test_propagateTakerOrder_SameProduct_NegativeNotional() public {
-        //todo: check event emitted once implemented
+        //todo: check event emitted once implemented (AN)
         assertEq(productModule.getActiveProductsLength(100), 2);
         vm.prank(address(productModule.getProducts()[0]));
         productModule.propagateTakerOrder(100, 1, 10, Constants.TOKEN_0, -100e18);
@@ -223,7 +223,7 @@ contract ProductModuleTest is Test {
         
         MockProduct newProduct = productModule.getProducts()[productModule.getProducts().length - 1];
 
-        //todo: check event emitted once implemented
+        //todo: check event emitted once implemented (AN)
         assertEq(productModule.getActiveProductsLength(100), 2);
 
          vm.expectCall(
@@ -296,7 +296,7 @@ contract ProductModuleTest is Test {
     }
 
     function test_propagateMakerOrder() public {
-        //todo: check event emitted once implemented
+        //todo: check event emitted once implemented (AN)
         assertEq(productModule.getActiveProductsLength(100), 2);
         vm.prank(address(productModule.getProducts()[0]));
         productModule.propagateMakerOrder(100, 1, 10, Constants.TOKEN_0, 100e18);
@@ -306,7 +306,7 @@ contract ProductModuleTest is Test {
     }
 
     function test_propagateMakerOrder_NegativeNotional() public {
-        //todo: check event emitted once implemented
+        //todo: check event emitted once implemented (AN)
         assertEq(productModule.getActiveProductsLength(100), 2);
         vm.prank(address(productModule.getProducts()[0]));
         productModule.propagateMakerOrder(100, 1, 10, Constants.TOKEN_0, -100e18);
@@ -321,7 +321,7 @@ contract ProductModuleTest is Test {
 
         MockProduct newProduct = productModule.getProducts()[productModule.getProducts().length - 1];
 
-        //todo: check event emitted once implemented
+        //todo: check event emitted once implemented (AN)
         assertEq(productModule.getActiveProductsLength(100), 2);
 
          vm.expectCall(
@@ -393,7 +393,7 @@ contract ProductModuleTest is Test {
     }
 
     function test_propagateSettlementCashflow() public {
-        //todo: event
+        //todo: event (AN)
         vm.prank(address(productModule.getProducts()[0]));
         productModule.propagateSettlementCashflow(100, 1, Constants.TOKEN_0, 123e18);
         assertEq(productModule.getCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE + 123e18);

@@ -17,7 +17,7 @@ contract AaveV3BorrowRateOracle is IRateOracle {
     address public immutable underlying;
 
     constructor(IAaveV3LendingPool _aaveLendingPool, address _underlying) {
-        // todo: introduce custom error
+        // todo: introduce custom error (AB)
         require(address(_aaveLendingPool) != address(0), "aave pool must exist");
 
         underlying = _underlying;
@@ -33,37 +33,7 @@ contract AaveV3BorrowRateOracle is IRateOracle {
     /// @inheritdoc IRateOracle
     function getCurrentIndex() external view override returns (UD60x18 liquidityIndex) {
         uint256 liquidityIndexInRay = aaveLendingPool.getReserveNormalizedVariableDebt(underlying);
-        // Convert index from Aave's "ray" (decimal scaled by 10^27) to UD60x18 (decimal scaled by 10^18)
         return ud(liquidityIndexInRay / 1e9);
-    }
-
-    /// @inheritdoc IRateOracle
-    function interpolateIndexValue(
-        UD60x18 beforeIndex,
-        uint256 beforeTimestampWad,
-        UD60x18 atOrAfterIndex,
-        uint256 atOrAfterTimestampWad,
-        uint256 queryTimestampWad
-    )
-    public
-    pure
-    returns (UD60x18 interpolatedIndex)
-    {
-        // todo: consider pushing this function into a shared stateless library
-        require(queryTimestampWad > beforeTimestampWad, "Unordered timestamps");
-
-        if (atOrAfterTimestampWad == queryTimestampWad) {
-            return atOrAfterIndex;
-        }
-
-        require(queryTimestampWad < atOrAfterTimestampWad, "Unordered timestamps");
-
-        // TODO: fix calculation to account for compounding (is there a better way than calculating an APY and applying it?)
-        UD60x18 totalDelta = atOrAfterIndex.sub(beforeIndex); // this does not allow negative rates
-
-        UD60x18 proportionOfPeriodElapsed =
-        ud(queryTimestampWad - beforeTimestampWad).div(ud(atOrAfterTimestampWad - beforeTimestampWad));
-        return proportionOfPeriodElapsed.mul(totalDelta).add(beforeIndex);
     }
 
     /**

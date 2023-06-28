@@ -37,8 +37,7 @@ contract ExecutionModuleTest is Test {
             WETH9: mockWeth,
             VOLTZ_V2_CORE_PROXY: core,
             VOLTZ_V2_DATED_IRS_PROXY: instrument,
-            VOLTZ_V2_DATED_IRS_VAMM_PROXY: exchange,
-            VOLTZ_V2_ACCOUNT_NFT_PROXY: accountNFT
+            VOLTZ_V2_DATED_IRS_VAMM_PROXY: exchange
         }));
     }
 

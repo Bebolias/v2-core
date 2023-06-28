@@ -20,7 +20,7 @@ interface IAaveV3LendingPool {
      */
     function getReserveNormalizedIncome(address asset) external view returns (uint256);
 
-    // todo: check the warning discussed below
+    // todo: check the warning discussed below (AB)
     /**
    * @notice Returns the normalized variable debt per unit of asset
    * @dev WARNING: This function is intended to be used primarily by the protocol itself to get a

@@ -86,8 +86,7 @@ contract BaseScenario is Test {
         WETH9: IWETH9(address(874392112)),  // todo: deploy weth9 mock
         VOLTZ_V2_CORE_PROXY: address(coreProxy),
         VOLTZ_V2_DATED_IRS_PROXY: address(datedIrsProxy),
-        VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(vammProxy),
-        VOLTZ_V2_ACCOUNT_NFT_PROXY: address(accountNftProxy)
+        VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(vammProxy)
       })
     );
 

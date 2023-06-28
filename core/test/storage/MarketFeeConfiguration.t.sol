@@ -144,5 +144,5 @@ contract MarketFeeConfigurationTest is Test {
         }
     }
 
-    // todo: test fee collector account does not exist
+    // todo: test fee collector account does not exist (AN)
 }

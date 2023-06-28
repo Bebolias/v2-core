@@ -9,7 +9,6 @@ import "../libraries/Dispatcher.sol";
  * @dev See IExecutionModule.
  */
 contract ExecutionModule is IExecutionModule {
-    // todo: add initialize method to set the immutables
 
     modifier checkDeadline(uint256 deadline) {
         if (block.timestamp > deadline) revert TransactionDeadlinePassed();

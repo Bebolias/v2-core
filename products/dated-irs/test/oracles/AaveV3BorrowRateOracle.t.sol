@@ -18,7 +18,7 @@ import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
 contract AaveV3RateOracleTest is Test {
 
-    // todo: consider abstracting duplicate tests once rate oracle functions are stateless libraries
+    // todo: consider abstracting duplicate tests once rate oracle functions are stateless libraries (AB)
 
     using { unwrap } for UD60x18;
 
@@ -54,49 +54,8 @@ contract AaveV3RateOracleTest is Test {
         assertEq(time, Time.blockTimestampTruncated());
     }
 
-    function test_InterpolateIndexValue() public {
-        UD60x18 index = rateOracle.interpolateIndexValue(
-            ud(1e18), // UD60x18 beforeIndex
-            0, // uint256 beforeTimestamp
-            ud(1.1e18), // UD60x18 atOrAfterIndex
-            100, // uint256 atOrAfterTimestamp
-            50 // uint256 queryTimestamp
-        );
-        assertEq(index.unwrap(), 1.05e18);
-    }
 
-    function test_RevertWhen_InterpolateUnorderedBeforeTime() public {
-        vm.expectRevert(bytes("Unordered timestamps"));
-        rateOracle.interpolateIndexValue(
-            ud(1e18), // UD60x18 beforeIndex
-            51, // uint256 beforeTimestamp
-            ud(1.1e18), // UD60x18 atOrAfterIndex
-            100, // uint256 atOrAfterTimestamp
-            50 // uint256 queryTimestamp
-        );
-    }
 
-    function test_RevertWhen_InterpolateUnorderedAfterTime() public {
-        vm.expectRevert(bytes("Unordered timestamps"));
-        rateOracle.interpolateIndexValue(
-            ud(1e18), // UD60x18 beforeIndex
-            0, // uint256 beforeTimestamp
-            ud(1.1e18), // UD60x18 atOrAfterIndex
-            49, // uint256 atOrAfterTimestamp
-            50 // uint256 queryTimestamp
-        );
-    }
-
-    function test_InterpolateIndexValueAtKnownTime() public {
-        UD60x18 index = rateOracle.interpolateIndexValue(
-            ud(1e18), // UD60x18 beforeIndex
-            0, // uint256 beforeTimestamp
-            ud(1.1e18), // UD60x18 atOrAfterIndex
-            50, // uint256 atOrAfterTimestamp
-            50 // uint256 queryTimestamp
-        );
-        assertEq(index.unwrap(), 1.1e18);
-    }
 
     function test_SetNonZeroIndexInMock() public {
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
@@ -138,31 +97,6 @@ contract AaveV3RateOracleTest is Test {
 
     // ------------------- FUZZING -------------------
 
-    /**
-     * @dev should fail in the following cases:
-     * - give a negative index if before & at values are inverted (time & index)
-     * -
-     */
-    function testFuzz_RevertWhen_InterpolateIndexValueWithUnorderedValues(
-        UD60x18 beforeIndex,
-        uint256 beforeTimestamp,
-        UD60x18 atOrAfterIndex,
-        uint256 atOrAfterTimestamp,
-        uint256 queryTimestamp
-    )
-    public
-    {
-        vm.expectRevert();
-        vm.assume(atOrAfterTimestamp != queryTimestamp);
-        vm.assume(
-            beforeIndex.gt(atOrAfterIndex) || beforeTimestamp >= atOrAfterTimestamp
-            || (queryTimestamp > atOrAfterTimestamp || queryTimestamp <= beforeTimestamp)
-        );
-
-        UD60x18 index =
-        rateOracle.interpolateIndexValue(beforeIndex, beforeTimestamp, atOrAfterIndex, atOrAfterTimestamp, queryTimestamp);
-    }
-
     function testFuzz_SetNonZeroIndexInMock(uint256 factorPerSecond, uint16 timePassed) public {
         mockLendingPool.setFactorPerSecond(TEST_UNDERLYING, ud(FACTOR_PER_SECOND));
         // not bigger than 72% apy per year
@@ -197,56 +131,4 @@ contract AaveV3RateOracleTest is Test {
         assertEq(time, Time.blockTimestampTruncated());
     }
 
-    // function testFuzz_success_interpolateIndexValue(
-    //     uint256 beforeIndex,
-    //     uint40 beforeTimestamp,
-    //     uint256 atOrAfterIndex,
-    //     uint40 atOrAfterTimestamp,
-    //     uint40 queryTimestamp
-    // ) public {
-    //     // bounding not to lose precision
-    //     // should we also enforce this in the function?
-    //     vm.assume(atOrAfterIndex < 1e38);
-    //     vm.assume(beforeIndex >= 1 && beforeTimestamp >= 1 && beforeIndex >= 1e18);
-
-    //     vm.assume(beforeIndex < atOrAfterIndex);
-    //     vm.assume(queryTimestamp <= atOrAfterTimestamp && queryTimestamp > beforeTimestamp);
-
-    //     UD60x18 beforeIndexWad = ud(beforeIndex);
-    //     UD60x18 atOrAfterIndexWad = ud(atOrAfterIndex);
-    //     uint256 beforeTimestampWad = beforeTimestamp * 1e18;
-    //     uint256 atOrAfterTimestampWad = atOrAfterTimestamp * 1e18;
-    //     uint256 queryTimestampWad = queryTimestamp * 1e18;
-
-    //     UD60x18 index = rateOracle.interpolateIndexValue(
-    //         beforeIndexWad,
-    //         beforeTimestampWad,
-    //         atOrAfterIndexWad,
-    //         atOrAfterTimestampWad,
-    //         queryTimestampWad
-    //     );
-
-    //     assertTrue(index.gte(beforeIndexWad)); // does it need library for comparison?
-    //     assertTrue(index.lte(atOrAfterIndexWad));
-
-    //     console2.log("index:", unwrap(index));
-
-    //     // slopes should be equal
-    //     if(unwrap(index.sub(beforeIndexWad).div(index)) < 1e9) {
-    //         console2.log("time:", unwrap(ud(beforeTimestampWad).div(ud(atOrAfterTimestampWad))));
-    //         console2.log("index dif:", unwrap(beforeIndexWad.div(atOrAfterIndexWad)));
-    //         assertTrue(
-    //             unwrap(ud(beforeTimestampWad).div(ud(atOrAfterTimestampWad))) < 1e9
-    //             || unwrap(beforeIndexWad.div(atOrAfterIndexWad)) < 1e9
-    //         );
-    //     } else {
-    //         console2.log("ok");
-    //         assertApproxEqRel(
-    //             unwrap(atOrAfterIndexWad.sub(beforeIndexWad).div(index.sub(beforeIndexWad))),
-    //             unwrap(ud(atOrAfterTimestampWad - beforeTimestampWad).div(ud(queryTimestampWad - beforeTimestampWad))),
-    //             5e16 // 5% error
-    //         );
-    //     }
-
-    // }
 }

@@ -80,11 +80,10 @@ contract Testnet is Script {
     (address accountNftProxyAddress, ) = coreProxy.getAssociatedSystem(bytes32("accountNFT"));
     peripheryProxy.configure(
       Config.Data({
-        WETH9: IWETH9(address(0)),  // todo: deploy weth9 mock
+        WETH9: IWETH9(address(0)),  // todo: deploy weth9 mock (AN)
         VOLTZ_V2_CORE_PROXY: address(coreProxy),
         VOLTZ_V2_DATED_IRS_PROXY: address(datedIrsProxy),
-        VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(vammProxy),
-        VOLTZ_V2_ACCOUNT_NFT_PROXY: accountNftProxyAddress
+        VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(vammProxy)
       })
     );
 
@@ -150,7 +149,8 @@ contract Testnet is Script {
 
     datedIrsProxy.setVariableOracle(
       marketId,
-      address(aaveRateOracle)
+      address(aaveRateOracle),
+      3600 // todo: push this into some config (AN)
     );
 
     accessPassNft.redeem(

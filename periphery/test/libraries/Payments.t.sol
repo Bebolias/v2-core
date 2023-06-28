@@ -36,8 +36,7 @@ contract PaymentsTest is Test {
                 WETH9: IWETH9(address(1)),
                 VOLTZ_V2_CORE_PROXY: address(0),
                 VOLTZ_V2_DATED_IRS_PROXY: address(0),
-                VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(0),
-                VOLTZ_V2_ACCOUNT_NFT_PROXY: address(0)
+                VOLTZ_V2_DATED_IRS_VAMM_PROXY: address(0)
             })
         );
     }

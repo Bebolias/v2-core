@@ -49,9 +49,6 @@ contract ProductIRSModule is IProductIRSModule {
         // check account access permissions
         IAccountModule(coreProxy).onlyAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
 
-        // update rate oracle cache if empty or hasn't been updated in a while
-        RateOracleReader.load(marketId).updateCache(maturityTimestamp);
-
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         (executedBaseAmount, executedQuoteAmount) =
             IPool(ProductConfiguration.getPoolAddress()).executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount, priceLimit);
@@ -98,6 +95,9 @@ contract ProductIRSModule is IProductIRSModule {
      */
     // note: return settlementCashflowInQuote?
     function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) external override {
+
+        RateOracleReader.load(marketId).updateRateIndexAtMaturityCache(maturityTimestamp);
+
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
         // check account access permissions

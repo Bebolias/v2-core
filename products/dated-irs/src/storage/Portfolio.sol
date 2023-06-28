@@ -115,7 +115,6 @@ library Portfolio {
      * @dev note: given that all the accounts are single-token, unrealizedPnL for a given account is in terms
      * of the settlement token of that account
      * consider avoiding pool if account is purely taker to save gas?
-     * todo: this function looks expesive and feels like there's room for optimisations
      */
     function getAccountUnrealizedPnL(
         Data storage self,
@@ -126,7 +125,6 @@ library Portfolio {
         view
         returns (int256 unrealizedPnL)
     {
-        // TODO: looks expensive - need to place limits on number of allowed markets and allowed maturities?
         for (uint256 i = 1; i <= self.activeMarketsAndMaturities[collateralType].length(); i++) {
             (uint128 marketId, uint32 maturityTimestamp) = self.getMarketAndMaturity(i, collateralType);
 

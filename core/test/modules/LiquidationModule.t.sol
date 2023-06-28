@@ -120,7 +120,7 @@ contract LiquidationModuleTest is Test {
             // Mock account (id: 100) unrealized PnL in product (id: 2)
             products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, -200e18);
 
-            // todo: test single account single-token mode
+            // todo: test single account single-token mode (AN)
             // Mock account (id:100) exposures to product (id:2) and markets (ids: 21)
             // {
             //     Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
@@ -130,7 +130,7 @@ contract LiquidationModuleTest is Test {
             //     products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_1, mockExposures);
             // }
 
-            // todo: test single account single-token mode
+            // todo: test single account single-token mode (AN)
             // products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_1, 1e17);
         }
     }
@@ -164,7 +164,7 @@ contract LiquidationModuleTest is Test {
             // Mock account (id: 100) unrealized PnL in product (id: 2)
             products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, -200e18);
 
-            // todo: test single account single-token mode
+            // todo: test single account single-token mode (AN)
             // Mock account (id:100) exposures to product (id:2) and markets (ids: 21)
             // {
             //     Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
@@ -174,7 +174,7 @@ contract LiquidationModuleTest is Test {
             //     products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_1, mockExposures);
             // }
 
-            // todo: test single account single-token mode
+            // todo: test single account single-token mode (AN)
             // products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_1, 1e17);
         }
     }

@@ -59,7 +59,7 @@ contract MockCoreStorage is MockAccountStorage, MockProductStorage {}
  *          - settlementToken: TOKEN_0
  *          - riskParameter: 1
  *
- *        // todo: test single account single-token mode
+ *        // todo: test single account single-token mode (AN)
  *        - - productId: 2
  *          - marketId: 21
  *          - settlementToken: TOKEN_1
@@ -283,13 +283,13 @@ contract CoreState is MockCoreStorage, Ownable {
             })
         );
 
-        // todo: test single account single-token mode
+        // todo: test single account single-token mode (AN)
         // Set market risk configuration
         // MarketRiskConfiguration.set(MarketRiskConfiguration.Data({productId: 2, marketId: 21, riskParameter: 1e18}));
     }
 
     function setFeatureFlagAllowAll(bytes32 feature, bool allowAll) public {
-        // todo: consider abstracting feature flag specific functions into a separate contract to inherit from
+        // todo: consider abstracting feature flag specific functions into a separate contract to inherit from (AB)
         OwnableStorage.onlyOwner();
         FeatureFlag.load(feature).allowAll = allowAll;
 
@@ -350,7 +350,7 @@ contract CoreState is MockCoreStorage, Ownable {
 
             products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
 
-            // todo: test single account single-token mode
+            // todo: test single account single-token mode (AN)
             Account.Exposure[] memory emptyExposures;
             products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_1, emptyExposures);
             products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_UNKNOWN, emptyExposures);
@@ -360,7 +360,7 @@ contract CoreState is MockCoreStorage, Ownable {
         // Mock account (id: 100) unrealized PnL in product (id: 2)
         products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, -200e18);
 
-        // todo: test single account single-token mode
+        // todo: test single account single-token mode (AN)
         // Mock account (id:100) exposures to product (id:2) and markets (ids: 21) (TOKEN_1)
         // {
         //     Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
@@ -371,7 +371,7 @@ contract CoreState is MockCoreStorage, Ownable {
 
         //     products[1].mockBaseToAnnualizedExposure(21, 155000, 3e18);
         // }
-        // todo: test single account single-token mode
+        // todo: test single account single-token mode (AN)
         // products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_1, 1e17);
         products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_1, 0);
         products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_UNKNOWN, 0);

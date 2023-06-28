@@ -47,7 +47,7 @@ library ProductConfiguration {
     function set(Data memory config) internal {
         Data storage storedConfig = load();
 
-        //todo: check interface id of pool address
+        //todo: check interface id of pool address (AB)
 
         storedConfig.productId = config.productId;
         storedConfig.coreProxy = config.coreProxy;

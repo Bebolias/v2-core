@@ -5,8 +5,8 @@
 artifact = "MarketConfigurationModule"
 [contract.ProductIRSModule]
 artifact = "ProductIRSModule"
-[contract.RateOracleManager]
-artifact = "RateOracleManager"
+[contract.RateOracleModule]
+artifact = "RateOracleModule"
 
 # Deploys Dated IRS Router
 [router.DatedIrsRouter]
@@ -14,11 +14,11 @@ contracts = [
   "OwnerUpgradeModule",
   "MarketConfigurationModule",
   "ProductIRSModule",
-  "RateOracleManager",
+  "RateOracleModule",
 ]
 depends = [
   "contract.OwnerUpgradeModule",
   "contract.MarketConfigurationModule",
   "contract.ProductIRSModule",
-  "contract.RateOracleManager",
+  "contract.RateOracleModule",
 ]

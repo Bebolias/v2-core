@@ -37,17 +37,4 @@ interface IRateOracle is IERC165 {
     /// @dev This function should revert if a valid rate cannot be discerned
     /// @return liquidityIndex the liquidity index value, as a decimal scaled up by 10^18 for storage in a uint256
     function getCurrentIndex() external view returns (UD60x18 liquidityIndex);
-
-    /// @notice Estimate an index for `queryTimestamp`, using known data points either side
-    /// Some implementations may assume that index growth is compounded, others that growth is simple (not compounded)
-    function interpolateIndexValue(
-        UD60x18 beforeIndex,
-        uint256 beforeTimestamp,
-        UD60x18 atOrAfterIndex,
-        uint256 atOrAfterTimestamp,
-        uint256 queryTimestamp
-    )
-        external
-        pure
-        returns (UD60x18 interpolatedIndex);
 }

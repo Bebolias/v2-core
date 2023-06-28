@@ -56,9 +56,9 @@ contract ProductModule is IProductModule {
     function getAccountAnnualizedExposures(uint128 productId, uint128 accountId, address collateralType)
         external
         override
+        view
         returns (Account.Exposure[] memory exposures)
     {
-        // todo: worth turning this into a view function?
         exposures = Product.load(productId).getAccountAnnualizedExposures(accountId, collateralType);
     }
 
@@ -84,10 +84,9 @@ contract ProductModule is IProductModule {
 
     function closeAccount(uint128 productId, uint128 accountId, address collateralType) external override {
         FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
-        // todo: consider returning data that might be useful in the future
-        // todo: double check permissions and validation
         Account.loadAccountAndValidatePermission(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
         Product.load(productId).closeAccount(accountId, collateralType);
+        emit AccountClosed(accountId, collateralType, msg.sender, block.timestamp);
     }
 
     /**

@@ -97,6 +97,7 @@ library Product {
      */
     function getAccountAnnualizedExposures(Data storage self, uint128 accountId, address collateralType)
         internal
+        view
         returns (Account.Exposure[] memory exposures)
     {
         return IProduct(self.productAddress).getAccountAnnualizedExposures(accountId, collateralType);

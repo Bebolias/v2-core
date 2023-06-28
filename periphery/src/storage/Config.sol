@@ -12,7 +12,6 @@ library Config {
         address VOLTZ_V2_CORE_PROXY;
         address VOLTZ_V2_DATED_IRS_PROXY;
         address VOLTZ_V2_DATED_IRS_VAMM_PROXY;
-        address VOLTZ_V2_ACCOUNT_NFT_PROXY;
     }
 
     /**
@@ -25,7 +24,6 @@ library Config {
         storedConfig.VOLTZ_V2_CORE_PROXY = config.VOLTZ_V2_CORE_PROXY;
         storedConfig.VOLTZ_V2_DATED_IRS_PROXY = config.VOLTZ_V2_DATED_IRS_PROXY;
         storedConfig.VOLTZ_V2_DATED_IRS_VAMM_PROXY = config.VOLTZ_V2_DATED_IRS_VAMM_PROXY;
-        storedConfig.VOLTZ_V2_ACCOUNT_NFT_PROXY = config.VOLTZ_V2_ACCOUNT_NFT_PROXY;
     }
 
     /**

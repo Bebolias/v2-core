@@ -117,5 +117,5 @@ contract FeeConfigurationModuleTest is Test {
         assertEq(UD60x18.unwrap(existingConfig.atomicTakerFee), 0);
     }
 
-    // todo: test fee collector account does not exist
+    // todo: test fee collector account does not exist (AN)
 }

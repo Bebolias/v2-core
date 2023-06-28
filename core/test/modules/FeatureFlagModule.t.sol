@@ -29,7 +29,7 @@ contract FeatureFlagModuleTest is Test {
 
         vm.store(
             address(featureFlagModule),
-            keccak256(abi.encode("xyz.voltz.OwnableStorage")), // todo: check if xyz.voltz.OwnableStorage applicable here
+            keccak256(abi.encode("xyz.voltz.OwnableStorage")),
             bytes32(abi.encode(owner))
         );
     }

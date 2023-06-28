@@ -149,6 +149,7 @@ library Account {
      */
     function getCollateralBalanceAvailable(Data storage self, address collateralType)
         internal
+        view
         returns (uint256 collateralBalanceAvailable)
     {
         (uint256 im,) = self.getMarginRequirements(collateralType);
@@ -214,6 +215,7 @@ library Account {
      */
     function getAnnualizedProductExposures(Data storage self, uint128 productId, address collateralType)
         internal
+        view
         returns (Exposure[] memory productExposures)
     {
         Product.Data storage _product = Product.load(productId);
@@ -293,6 +295,7 @@ library Account {
 
     function getMarginRequirements(Data storage self, address collateralType)
         internal
+        view
         returns (uint256 im, uint256 lm)
     {
         SetUtil.UintSet storage _activeProducts = self.activeProducts;

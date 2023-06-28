@@ -17,10 +17,8 @@ import { UD60x18 } from "@prb/math/UD60x18.sol";
 /**
  * @title Module for managing rate oracles connected to the Dated IRS Product
  * @dev See IRateOracleModule
- *  // todo: register a new rate oracle
- * // I'd call this RateOracleManagerModule to avoid confusion
  */
-contract RateOracleManager is IRateOracleModule {
+contract RateOracleModule is IRateOracleModule {
     using RateOracleReader for RateOracleReader.Data;
 
     /**
@@ -55,28 +53,55 @@ contract RateOracleManager is IRateOracleModule {
     }
 
     /**
-     * @inheritdoc IRateOracleModule
+    * @inheritdoc IRateOracleModule
      */
-    function setVariableOracle(uint128 marketId, address oracleAddress) external override {
-        OwnableStorage.onlyOwner();
-
-        validateAndConfigureOracleAddress(marketId, oracleAddress);
+    function getVariableOracleAddress(uint128 marketId) external view override returns (address variableOracleAddress) {
+        return RateOracleReader.load(marketId).oracleAddress;
     }
 
-    // todo: add getVariableOracle function
+    /**
+     * @inheritdoc IRateOracleModule
+     */
+    function setVariableOracle(uint128 marketId, address oracleAddress, uint256 maturityIndexCachingWindowInSeconds)
+    external override {
+        OwnableStorage.onlyOwner();
+
+        validateAndConfigureOracleAddress(marketId, oracleAddress, maturityIndexCachingWindowInSeconds);
+    }
+
+
+    /**
+     * @inheritdoc IRateOracleModule
+     */
+    function updateRateIndexAtMaturityCache(uint128 marketId, uint32 maturityTimestamp) external override {
+        RateOracleReader.load(marketId).updateRateIndexAtMaturityCache(maturityTimestamp);
+    }
+
+    /**
+     * @inheritdoc IRateOracleModule
+     */
+    function backfillRateIndexAtMaturityCache(uint128 marketId, uint32 maturityTimestamp,
+        UD60x18 rateIndexAtMaturity) external override {
+
+        OwnableStorage.onlyOwner();
+
+        RateOracleReader.load(marketId).backfillRateIndexAtMaturityCache(maturityTimestamp, rateIndexAtMaturity);
+
+    }
 
     /**
      * @dev Validates the address interface and creates or configures a rate oracle
      */
-    function validateAndConfigureOracleAddress(uint128 marketId, address oracleAddress) internal {
+    function validateAndConfigureOracleAddress(uint128 marketId, address oracleAddress,
+        uint256 maturityIndexCachingWindowInSeconds) internal {
         if (!_validateVariableOracleAddress(oracleAddress)) {
             revert InvalidVariableOracleAddress(oracleAddress);
         }
 
         // configure the variable rate oracle
-        RateOracleReader.set(marketId, oracleAddress);
+        RateOracleReader.set(marketId, oracleAddress, maturityIndexCachingWindowInSeconds);
 
-        emit RateOracleConfigured(marketId, oracleAddress, block.timestamp);
+        emit RateOracleConfigured(marketId, oracleAddress, maturityIndexCachingWindowInSeconds, block.timestamp);
     }
 
     function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {

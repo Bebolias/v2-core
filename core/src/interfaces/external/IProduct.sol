@@ -36,6 +36,7 @@ interface IProduct is IERC165 {
     /// annualized unfilled notional short for account and collateral
     function getAccountAnnualizedExposures(uint128 accountId, address collateralType)
         external
+        view
         returns (Account.Exposure[] memory exposures);
 
     // state-changing functions
