@@ -233,6 +233,13 @@ contract Testnet is Script {
       })
     );
 
+    accessPassNft.redeem(
+      owner,
+      1,
+      merkle.getProof(addressPassNftInfo.values(), 1),
+      merkle.getRoot(addressPassNftInfo.values())
+    );
+
     vm.stopBroadcast();
   }
 
