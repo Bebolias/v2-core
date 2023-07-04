@@ -43,7 +43,7 @@ contract BaseScenario is Test {
   address owner;
 
   function _setUp() public {
-    vm.warp(1687525420);
+    vm.warp(1687525420); // time has to be > lookbackwindow for twap to avoid underflow
     addressPassNftInfo.add(keccak256(abi.encodePacked(address(0), uint256(0))));
 
     owner = vm.addr(55555);
