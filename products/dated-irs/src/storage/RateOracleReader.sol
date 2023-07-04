@@ -114,7 +114,7 @@ library RateOracleReader {
     }
 
 
-    function getRateIndexCurrent(Data storage self, uint32 maturityTimestamp) internal view returns (UD60x18 rateIndexCurrent) {
+    function getRateIndexCurrent(Data storage self) internal view returns (UD60x18 rateIndexCurrent) {
         /*
             Note, need thoughts here for protocols where current index does not correspond to the current timestamp (block.timestamp)
             ref. Lido and Rocket

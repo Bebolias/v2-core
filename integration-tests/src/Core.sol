@@ -18,6 +18,7 @@ import "@voltz-protocol/core/src/modules/AccessPassConfigurationModule.sol";
 import "@voltz-protocol/core/src/modules/AccountTokenModule.sol";
 
 contract CoreRouter is
+  AccessPassConfigurationModule,
   AccountModule, 
   AssociatedSystemsModule,
   CollateralConfigurationModule,
@@ -28,8 +29,7 @@ contract CoreRouter is
   OwnerUpgradeModule,
   PeripheryModule,
   ProductModule,
-  RiskConfigurationModule,
-  AccessPassConfigurationModule
+  RiskConfigurationModule
 { }
 
 contract CoreProxy is

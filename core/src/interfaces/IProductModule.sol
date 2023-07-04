@@ -38,6 +38,9 @@ interface IProductModule {
      */
     event AccountClosed(uint128 indexed accountId, address collateralType, address sender, uint256 blockTimestamp);
 
+    /// @notice returns the id of the last created product
+    function getLastCreatedProductId() external returns (uint128);
+
     /// @notice returns the unrealized pnl in quote token terms for account
     function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType)
         external

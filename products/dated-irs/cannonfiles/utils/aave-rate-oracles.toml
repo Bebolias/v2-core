@@ -1,0 +1,22 @@
+[setting.aaveV2LendingPool]
+description = "Address of the Aave v2 Lending Pool"
+
+[setting.aaveV3LendingPool]
+description = "Address of the Aave v3 Lending Pool"
+
+[setting.usdc]
+description = "Address of the USDC ERC20 token"
+
+[contract.AaveRateOracle_USDC]
+artifact = "AaveRateOracle"
+args=[
+  "<%= settings.aaveLendingPool %>", # aaveLendingPool v2
+  "<%= settings.usdc %>", # underlying
+]
+
+[contract.AaveV3BorrowRateOracle_USDC]
+artifact = "AaveV3BorrowRateOracle"
+args=[
+  "<%= settings.aaveV3LendingPool %>", # aaveLendingPool v3
+  "<%= settings.usdc %>", # underlying
+]

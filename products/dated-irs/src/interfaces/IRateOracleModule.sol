@@ -43,7 +43,7 @@ interface IRateOracleModule {
      * @param marketId Id of the market (e.g. aUSDC lend) for which we're requesting the current rate index value
      * @return rateIndexCurrent Rate index at the current timestamp or at maturity time (whichever comes earlier)
      */
-    function getRateIndexCurrent(uint128 marketId, uint32 maturityTimestamp) external returns (UD60x18 rateIndexCurrent);
+    function getRateIndexCurrent(uint128 marketId) external returns (UD60x18 rateIndexCurrent);
 
     /**
      * @notice Get a variable rate oracle address for a given marketId

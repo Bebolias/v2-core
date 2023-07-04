@@ -92,19 +92,19 @@ contract RateOracleModuleTest is Test {
     }
 
     function test_InitGetRateIndexCurrent() public {
-        UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId, maturityTimestamp);
+        UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId);
         assertEq(rateIndexCurrent.unwrap(), 0);
     }
 
     function test_GetRateIndexCurrentBeforeMaturity() public {
         mockRateOracle.setLastUpdatedIndex(1.001e18 * 1e9);
-        UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId, maturityTimestamp);
+        UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId);
         assertEq(rateIndexCurrent.unwrap(), 1.001e18);
     }
 
 
     function test_NoCacheBeforeMaturity() public {
-        UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId, maturityTimestamp);
+        UD60x18 rateIndexCurrent = RateOracleModule.getRateIndexCurrent(marketId);
     }
 
     function test_GetRateIndexMaturity() public {

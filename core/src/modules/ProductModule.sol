@@ -9,13 +9,11 @@ pragma solidity >=0.8.19;
 
 import "../interfaces/external/IProduct.sol";
 import "../interfaces/IProductModule.sol";
-import "../interfaces/ICollateralModule.sol";
 import "../storage/Product.sol";
 import "../storage/ProductCreator.sol";
 import "../storage/MarketFeeConfiguration.sol";
 import "@voltz-protocol/util-modules/src/storage/AssociatedSystem.sol";
 import "@voltz-protocol/util-contracts/src/helpers/ERC165Helper.sol";
-import "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 import "@voltz-protocol/util-modules/src/storage/FeatureFlag.sol";
 import "oz/utils/math/SignedMath.sol";
 
@@ -37,6 +35,10 @@ contract ProductModule is IProductModule {
 
     bytes32 private constant _REGISTER_PRODUCT_FEATURE_FLAG = "registerProduct";
     bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
+
+    function getLastCreatedProductId() external view override returns (uint128) {
+        return ProductCreator.getProductStore().lastCreatedProductId;
+    }
 
     /**
      * @inheritdoc IProductModule

@@ -152,7 +152,7 @@ library Portfolio {
     {
         UD60x18 timeDeltaAnnualized = Time.timeDeltaAnnualized(maturityTimestamp);
 
-        UD60x18 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp);
+        UD60x18 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent();
 
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
         uint128 productId = ProductConfiguration.getProductId();
@@ -171,7 +171,7 @@ library Portfolio {
      * underlying rate oracle (e.g. aUSDC lend rate oracle)
      */
     function annualizedExposureFactor(uint128 marketId, uint32 maturityTimestamp) internal view returns (UD60x18 factor) {
-        UD60x18 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp);
+        UD60x18 currentLiquidityIndex = RateOracleReader.load(marketId).getRateIndexCurrent();
         UD60x18 timeDeltaAnnualized = Time.timeDeltaAnnualized(maturityTimestamp);
         factor = currentLiquidityIndex.mul(timeDeltaAnnualized);
     }

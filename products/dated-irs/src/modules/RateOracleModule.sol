@@ -26,15 +26,14 @@ contract RateOracleModule is IRateOracleModule {
      */
 
     function getRateIndexCurrent(
-        uint128 marketId,
-        uint32 maturityTimestamp
+        uint128 marketId
     )
         external
         view
         override
         returns (UD60x18 rateIndexCurrent)
     {
-        return RateOracleReader.load(marketId).getRateIndexCurrent(maturityTimestamp);
+        return RateOracleReader.load(marketId).getRateIndexCurrent();
     }
 
     /**

@@ -47,9 +47,9 @@ contract ExposeRateOracleReader {
         RateOracleReader.load(id).backfillRateIndexAtMaturityCache(maturityTimestamp, rateIndexAtMaturity);
     }
 
-    function getRateIndexCurrent(uint128 id, uint32 maturityTimestamp) external returns (UD60x18) {
+    function getRateIndexCurrent(uint128 id) external returns (UD60x18) {
         RateOracleReader.Data storage oracle = RateOracleReader.load(id);
-        return oracle.getRateIndexCurrent(maturityTimestamp);
+        return oracle.getRateIndexCurrent();
     }
 
     function getRateIndexMaturity(uint128 id, uint32 maturityTimestamp) external returns (UD60x18) {
@@ -106,7 +106,7 @@ contract RateOracleReaderTest is Test {
     function test_GetRateIndexCurrentBeforeMaturity() public {
         uint256 indexToSet = 1.001e18;
         mockRateOracle.setLastUpdatedIndex(indexToSet * 1e9);
-        UD60x18 index = rateOracleReader.getRateIndexCurrent(marketId, maturityTimestamp);
+        UD60x18 index = rateOracleReader.getRateIndexCurrent(marketId);
         assertEq(index.unwrap(), indexToSet);
     }
 
@@ -118,7 +118,7 @@ contract RateOracleReaderTest is Test {
         uint256 indexToSet = 1.001e18;
         mockRateOracle.setLastUpdatedIndex(indexToSet * 1e9);
 
-        UD60x18 index = rateOracleReader.getRateIndexCurrent(marketId, maturityTimestamp);
+        UD60x18 index = rateOracleReader.getRateIndexCurrent(marketId);
 
         assertEq(index.unwrap(), indexToSet);
     }

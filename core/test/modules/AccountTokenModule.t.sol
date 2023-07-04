@@ -43,6 +43,29 @@ contract AccountTokenModuleTest is Test, IERC721Receiver {
         accountTokenModule.safeMint(user, accountId, "");
     }
 
+    function test_MintBurnMint() public {
+        address user = vm.addr(2);
+        uint128 accountId = 100;
+
+        vm.mockCall(
+            address(owner),
+            abi.encodeWithSelector(IAccountModule.notifyAccountTransfer.selector, user, accountId),
+            abi.encode()
+        );
+
+        vm.startPrank(owner);
+
+        accountTokenModule.safeMint(user, accountId, "");
+        assertEq(accountTokenModule.ownerOf(accountId), user);
+
+        accountTokenModule.burn(accountId);
+        vm.expectRevert();
+        accountTokenModule.ownerOf(accountId);
+        
+        accountTokenModule.safeMint(user, accountId, "");
+        assertEq(accountTokenModule.ownerOf(accountId), user);
+    }
+
     function test_RevertWhen_Transfer_UnmockedAccountTransfer() public {
         address user = vm.addr(2);
         uint128 accountId = 100;

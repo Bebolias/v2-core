@@ -1,5 +1,6 @@
 include = [
   "utils/commons.toml",
   "utils/dated-irs-router.toml",
-  "utils/dated-irs-proxy.toml"
+  "utils/dated-irs-proxy.toml",
+  "utils/aave-rate-oracles.toml",
 ]
