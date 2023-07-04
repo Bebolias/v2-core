@@ -324,7 +324,7 @@ contract AccountTest is Test {
     function test_RevertWhen_ImCheck_False() public {
         setCollateralProfile("medium");
 
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, accountId));
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, accountId, Constants.TOKEN_0, 1800e18));
         accounts.imCheck(accountId, Constants.TOKEN_0);
     }
 

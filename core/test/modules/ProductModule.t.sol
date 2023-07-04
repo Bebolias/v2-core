@@ -289,7 +289,7 @@ contract ProductModuleTest is Test {
         uint256 im = 1800e18;
 
         vm.prank(address(productModule.getProducts()[0]));
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100));
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, im));
         productModule.propagateTakerOrder(
             100, 1, 10, Constants.TOKEN_0, int256(20 * (Constants.DEFAULT_TOKEN_0_BALANCE - im - uPnL) + 1e18)
         );
@@ -376,7 +376,7 @@ contract ProductModuleTest is Test {
         uint256 im = 1800e18;
 
         vm.prank(address(productModule.getProducts()[0]));
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100));
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, im));
         productModule.propagateMakerOrder(
             100, 1, 10, Constants.TOKEN_0, int256(100 * (Constants.DEFAULT_TOKEN_0_BALANCE - im - uPnL) + 1e18)
         );

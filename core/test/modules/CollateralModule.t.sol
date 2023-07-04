@@ -703,7 +703,7 @@ contract CollateralModuleTest is Test {
         vm.prank(Constants.ALICE);
 
         // Expect revert due to insufficient margin coverage
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100));
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, 1800e18));
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 

@@ -42,7 +42,7 @@ library Account {
     /**
      * @dev Thrown when a given account's total value is below the initial margin requirement
      */
-    error AccountBelowIM(uint128 accountId);
+    error AccountBelowIM(uint128 accountId, address collateralType, uint256 im);
 
     /**
      * @dev Thrown when an account cannot be found.
@@ -264,7 +264,7 @@ library Account {
     function imCheck(Data storage self, address collateralType) internal returns (uint256) {
         (bool isSatisfied, uint256 im) = self.isIMSatisfied(collateralType);
         if (!isSatisfied) {
-            revert AccountBelowIM(self.id);
+            revert AccountBelowIM(self.id, collateralType, im);
         }
         return im;
     }
