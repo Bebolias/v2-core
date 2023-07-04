@@ -6,14 +6,14 @@
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "4.9.0",
+    "@openzeppelin/contracts": "4.9.2",
     "@prb/math": "3.3.0",
     "@prb/test": "^0.6.0",
     "@voltz-protocol/core": "workspace:^",
     "@voltz-protocol/products-dated-irs": "workspace:^",
     "@voltz-protocol/util-contracts": "workspace:^",
     "@voltz-protocol/util-modules": "workspace:^",
-    "@voltz-protocol/v2-vamm": "1.10.0",
+    "@voltz-protocol/v2-vamm": "1.11.0",
     "solmate": "6.7.0"
   },
   "scripts": {

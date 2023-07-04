@@ -18,7 +18,7 @@
     "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "4.9.0"
+    "@openzeppelin/contracts": "4.9.2"
   },
   "devDependencies": {
     "@google-cloud/bigquery": "6.2.0",

@@ -3,7 +3,7 @@
   "version": "2.2.1",
   "license": "Voltz V2 License",
   "dependencies": {
-    "@openzeppelin/contracts": "4.9.0",
+    "@openzeppelin/contracts": "4.9.2",
     "@prb/math": "3.3.0",
     "@prb/test": "^0.6.0",
     "@voltz-protocol/core": "workspace:^",

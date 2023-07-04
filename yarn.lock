@@ -1114,10 +1114,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts@npm:4.9.0, @openzeppelin/contracts@npm:^4.8.3":
-  version: 4.9.0
-  resolution: "@openzeppelin/contracts@npm:4.9.0"
-  checksum: aa1499897f85821f9184497f5201152a4a272b05749c85c209e9e553d734467a78557bcd2efe35f07994d6e14f30c545b239a4f63622f27f808182efb3103658
+"@openzeppelin/contracts@npm:4.9.2":
+  version: 4.9.2
+  resolution: "@openzeppelin/contracts@npm:4.9.2"
+  checksum: 0538b18fe222e5414a5a539c240b155e0bef2a23c5182fb8e137d71a0c390fe899160f2d55701f75b127f54cc61aee4375370acc832475f19829368ac65c1fc6
   languageName: node
   linkType: hard
 
@@ -1595,7 +1595,7 @@ __metadata:
   resolution: "@voltz-protocol/access-pass-nft@workspace:access-pass-nft"
   dependencies:
     "@google-cloud/bigquery": 6.2.0
-    "@openzeppelin/contracts": 4.9.0
+    "@openzeppelin/contracts": 4.9.2
     "@pinata/sdk": ^2.1.0
     "@semantic-release/git": ^10.0.1
     "@semantic-release/github": ^8.0.7
@@ -1613,7 +1613,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/community@workspace:community"
   dependencies:
-    "@openzeppelin/contracts": 4.9.0
+    "@openzeppelin/contracts": 4.9.2
     "@semantic-release/git": ^10.0.1
     "@semantic-release/github": ^8.0.7
     "@voltz-protocol/core": "workspace:^"
@@ -1621,7 +1621,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.10.0
+    "@voltz-protocol/v2-vamm": 1.11.0
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1633,7 +1633,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/core@workspace:core"
   dependencies:
-    "@openzeppelin/contracts": 4.9.0
+    "@openzeppelin/contracts": 4.9.2
     "@prb/math": 3.3.0
     "@prb/test": ^0.6.0
     "@semantic-release/git": ^10.0.1
@@ -1651,7 +1651,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/integration-tests@workspace:integration-tests"
   dependencies:
-    "@openzeppelin/contracts": 4.9.0
+    "@openzeppelin/contracts": 4.9.2
     "@semantic-release/git": ^10.0.1
     "@semantic-release/github": ^8.0.7
     "@voltz-protocol/core": "workspace:^"
@@ -1659,7 +1659,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.10.0
+    "@voltz-protocol/v2-vamm": 1.11.0
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1671,7 +1671,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/periphery@workspace:periphery"
   dependencies:
-    "@openzeppelin/contracts": 4.9.0
+    "@openzeppelin/contracts": 4.9.2
     "@prb/math": 3.3.0
     "@prb/test": ^0.6.0
     "@semantic-release/git": ^10.0.1
@@ -1680,7 +1680,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.10.0
+    "@voltz-protocol/v2-vamm": 1.11.0
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1693,7 +1693,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@voltz-protocol/products-dated-irs@workspace:products/dated-irs"
   dependencies:
-    "@openzeppelin/contracts": 4.9.0
+    "@openzeppelin/contracts": 4.9.2
     "@prb/math": 3.3.0
     "@prb/test": ^0.6.0
     "@voltz-protocol/core": "workspace:^"
@@ -1723,17 +1723,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@voltz-protocol/v2-vamm@npm:1.10.0":
-  version: 1.10.0
-  resolution: "@voltz-protocol/v2-vamm@npm:1.10.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fv2-vamm%2F1.10.0%2F8626632860c6048fec686522cea2018200f4a477"
+"@voltz-protocol/v2-vamm@npm:1.11.0":
+  version: 1.11.0
+  resolution: "@voltz-protocol/v2-vamm@npm:1.11.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fv2-vamm%2F1.11.0%2F44b2e327d16737a167663747fa7a6d0f79cbaefe"
   dependencies:
-    "@openzeppelin/contracts": ^4.8.3
+    "@openzeppelin/contracts": 4.9.2
     "@prb/math": 3.3.0
     "@voltz-protocol/core": 2.1.1
     "@voltz-protocol/products-dated-irs": 2.2.1
     "@voltz-protocol/util-contracts": 1.2.0
     "@voltz-protocol/util-modules": 1.1.0
-  checksum: c9208a4af0b3911a55eb22fba60c2ae1228477e44d29f5defcff565a4272026fd2568eed7a8fcb3780c8f0cb503b4a42ed4d8b5db2f73251558b2882f35cc12c
+  checksum: c8bb6627105af7c32a8988e3d4319e10879bf8ea2398ad1433560ba4aba2ddc5f903786b7e8ad575d59144da0227cb709bff337362e05dba445aa1f3d692bb4e
   languageName: node
   linkType: hard
 

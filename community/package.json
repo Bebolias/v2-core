@@ -6,13 +6,13 @@
     "@voltz-protocol:registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "4.9.0",
+    "@openzeppelin/contracts": "4.9.2",
     "@voltz-protocol/core": "workspace:^",
     "@voltz-protocol/periphery": "workspace:^",
     "@voltz-protocol/products-dated-irs": "workspace:^",
     "@voltz-protocol/util-contracts": "workspace:^",
     "@voltz-protocol/util-modules": "workspace:^",
-    "@voltz-protocol/v2-vamm": "1.10.0"
+    "@voltz-protocol/v2-vamm": "1.11.0"
   },
   "scripts": {
     "publish": "echo \"Cannot publish community yet\"",
