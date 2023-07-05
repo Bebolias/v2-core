@@ -24,6 +24,10 @@ contract ProtocolConfig is ProtocolBase {
   Merkle private merkle = new Merkle();
 
   function run() public {
+    // Populate with transactions
+  }
+
+  function configure_protocol() public {
     acceptOwnerships();
     enableFeatures();
     configureProtocol({

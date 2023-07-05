@@ -34,3 +34,17 @@ This is a monorepo with the following folder structure and packages:
   ```
 - Run `yarn` to install dependencies
 - Run `forge install` to install other dependencies
+
+# Cannon deployment
+
+- Install cannon cli v2.4.14: `npm install -g @usecannon/cli@2.4.14`
+- Install cannon router plugin: `cannon plugin add cannon-plugin-router`
+- Run `cannon setup` and populate as following:
+  - publishing ipfs endpoint: use the api keys from the `v2-cannon-publish` project on Infura. 
+  - bulding ipfs endpoint: use the api keys from the `v2-cannon-build` project on Infura. 
+  - RPC endpoint: use a mainnet HTTPS endpoint
+  - registry address: use default (`0x8E5C7EFC9636A6A0408A46BB7F617094B81e5dba`)
+- Change directory to package: e.g., `cd core`
+- To deploy/upgrade protocol on arbitrum goerli: 
+  - Make sure latest code was compiled: `yarn build`
+  - `cannon build cannonfiles/arbitrum_one_goerli.toml --chain-id 421613 --provider-url <PROVIDER_URL> --private-key <PRIVATE_KEY>`
