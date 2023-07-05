@@ -5,7 +5,6 @@ import "./utils/TestUtils.sol";
 
 import {CollateralConfiguration} from "@voltz-protocol/core/src/storage/CollateralConfiguration.sol";
 import {ProtocolRiskConfiguration} from "@voltz-protocol/core/src/storage/ProtocolRiskConfiguration.sol";
-import {Account} from "@voltz-protocol/core/src/storage/Account.sol";
 import {MarketFeeConfiguration} from "@voltz-protocol/core/src/storage/MarketFeeConfiguration.sol";
 import {MarketRiskConfiguration} from "@voltz-protocol/core/src/storage/MarketRiskConfiguration.sol";
 
@@ -966,8 +965,8 @@ contract Scenario1 is BaseScenario, TestUtils {
       uint256 user2BalanceBeforeSettle = token.balanceOf(user2);
       // settlement CF = base * liqIndex + quote 
       int256 settlementCashflow = executedBaseAmount * maturityIndex / WAD.toInt() + executedQuoteAmount;
-      // fee = annualizedNotional * atomic fee
-      int256 existingCollateral = 501e18 - (executedBaseAmount * 5 * 5e16) / (WAD.toInt() * 2 * 365);
+      // 1 below represents the maturity index at the time of the trade
+      int256 existingCollateral = 501e18 - executedBaseAmount * 1 * 25e17 / WAD.toInt() / 365 * 5e16 / WAD.toInt();
 
       bytes memory commands = abi.encodePacked(
         bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)),
@@ -998,8 +997,8 @@ contract Scenario1 is BaseScenario, TestUtils {
 
       int256 settlementCashflow = -executedBaseAmount * maturityIndex / WAD.toInt() - executedQuoteAmount;
       // collateral = deposited margin + liqBooster - fees 
-      // TODO: LP fees are not calculated correctly - need annualizedNotional not base
-      int256 existingCollateral = 1001e18 - (10000e18 * 1e16) / WAD.toInt();
+      // 1 below represents the maturity index at the time of the trade
+      int256 existingCollateral = 1001e18 - 10000e18 * 1 * 25e17 / WAD.toInt() / 365 * 1e16 / WAD.toInt();
 
       bytes memory commands = abi.encodePacked(
         bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)),
@@ -1101,7 +1100,8 @@ contract Scenario1 is BaseScenario, TestUtils {
       // settlement CF = base * liqIndex + quote 
       int256 settlementCashflow = executedBaseAmount * maturityIndex / WAD.toInt() + executedQuoteAmount;
       // fee = annualizedNotional * atomic fee , note: executedBaseAmount is negative
-      int256 existingCollateral = 501e18 + (executedBaseAmount * 5 * 5e16) / (WAD.toInt() * 2 * 365);
+      // 1 below represents the maturity index at the time of the trade
+      int256 existingCollateral = 501e18 + executedBaseAmount * 1 * 25e17 / WAD.toInt() / 365 * 5e16 / WAD.toInt();
 
       bytes memory commands = abi.encodePacked(
         bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)),
@@ -1134,7 +1134,8 @@ contract Scenario1 is BaseScenario, TestUtils {
         maturityIndex
         / WAD.toInt() 
         - executedQuoteAmount;
-      int256 existingCollateral = 1001e18 - (10000e18 * 1e16) / WAD.toInt();
+      // 1 below represents the maturity index at the time of the trade
+      int256 existingCollateral = 1001e18 - 10000e18 * 1 * 25e17 / WAD.toInt() / 365 * 1e16 / WAD.toInt();
 
       bytes memory commands = abi.encodePacked(
         bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)),

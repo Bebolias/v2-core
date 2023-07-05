@@ -77,7 +77,7 @@ contract ProductIRSModule is IProductIRSModule {
             executedQuoteAmount,
             annualizedNotionalAmount,
             block.timestamp
-            );
+        );
     }
 
     function getSingleAnnualizedExposure(
@@ -214,7 +214,7 @@ contract ProductIRSModule is IProductIRSModule {
         uint128 accountId,
         uint128 marketId,
         uint32 maturityTimestamp,
-        int256 annualizedBaseAmount
+        int256 baseAmount
     ) external returns (uint256 fee, uint256 im) {
         if (msg.sender != ProductConfiguration.getPoolAddress()) {
             revert NotAuthorized(msg.sender, "propagateMakerOrder");
@@ -222,13 +222,15 @@ contract ProductIRSModule is IProductIRSModule {
 
         Portfolio.loadOrCreate(accountId).updatePosition(marketId, maturityTimestamp, 0, 0);
 
+        int256 annualizedNotionalAmount = getSingleAnnualizedExposure(baseAmount, marketId, maturityTimestamp);
+
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
         (fee, im) = IProductModule(coreProxy).propagateMakerOrder(
             accountId,
             ProductConfiguration.getProductId(),
             marketId,
             MarketConfiguration.load(marketId).quoteToken,
-            annualizedBaseAmount
+            annualizedNotionalAmount
         );
     }
 
