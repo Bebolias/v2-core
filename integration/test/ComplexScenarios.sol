@@ -85,7 +85,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     );
     datedIrsProxy.setVariableOracle(
       1,
-      address(aaveRateOracle),
+      address(aaveV3RateOracle),
       3600
     );
     datedIrsProxy.configureProduct(
@@ -125,7 +125,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         priceImpactPhi: ud60x18(1e17), // 0.1
         priceImpactBeta: ud60x18(125e15), // 0.125
         spread: ud60x18(3e15), // 0.3%
-        rateOracle: IRateOracle(address(aaveRateOracle))
+        rateOracle: IRateOracle(address(aaveV3RateOracle))
     });
 
     vammProxy.setProductAddress(address(datedIrsProxy));

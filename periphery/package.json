@@ -13,7 +13,7 @@
     "@voltz-protocol/products-dated-irs": "workspace:^",
     "@voltz-protocol/util-contracts": "workspace:^",
     "@voltz-protocol/util-modules": "workspace:^",
-    "@voltz-protocol/v2-vamm": "1.11.0",
+    "@voltz-protocol/v2-vamm": "1.12.0",
     "solmate": "6.7.0"
   },
   "scripts": {

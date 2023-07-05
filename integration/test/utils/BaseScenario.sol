@@ -3,7 +3,7 @@ pragma solidity >=0.8.19;
 import "forge-std/Test.sol";
 
 import {CoreRouter, CoreProxy, AccountNftRouter, AccountNftProxy, AccessPassConfiguration} from "../../src/Core.sol";
-import {DatedIrsRouter, DatedIrsProxy, AaveRateOracle, MockAaveLendingPool} from "../../src/DatedIrs.sol";
+import {DatedIrsRouter, DatedIrsProxy, AaveV3RateOracle, MockAaveLendingPool} from "../../src/DatedIrs.sol";
 import {PeripheryRouter, PeripheryProxy} from "../../src/Periphery.sol";
 import {VammRouter, VammProxy} from "../../src/Vamm.sol";
 
@@ -32,7 +32,7 @@ contract BaseScenario is Test {
   ERC20Mock token;
 
   MockAaveLendingPool aaveLendingPool;
-  AaveRateOracle aaveRateOracle;
+  AaveV3RateOracle aaveV3RateOracle;
 
   uint128 constant feeCollectorAccountId = 999;
 
@@ -75,7 +75,7 @@ contract BaseScenario is Test {
     token = new ERC20Mock();
 
     aaveLendingPool = new MockAaveLendingPool();
-    aaveRateOracle = new AaveRateOracle(aaveLendingPool, address(token));
+    aaveV3RateOracle = new AaveV3RateOracle(aaveLendingPool, address(token));
 
     coreProxy.addToFeatureFlagAllowlist(bytes32("registerProduct"), owner);
 

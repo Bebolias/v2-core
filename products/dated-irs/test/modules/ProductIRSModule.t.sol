@@ -10,7 +10,7 @@ pragma solidity >=0.8.19;
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
-import "../../src/oracles/AaveRateOracle.sol";
+import "../../src/oracles/AaveV3RateOracle.sol";
 import "../../src/modules/ProductIRSModule.sol";
 import "../../src/interfaces/IRateOracleModule.sol";
 import "../../src/storage/MarketConfiguration.sol";

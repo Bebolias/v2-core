@@ -14,7 +14,7 @@ import {CollateralConfiguration} from "@voltz-protocol/core/src/storage/Collater
 import {ProtocolRiskConfiguration} from "@voltz-protocol/core/src/storage/ProtocolRiskConfiguration.sol";
 import {MarketFeeConfiguration} from "@voltz-protocol/core/src/storage/MarketFeeConfiguration.sol";
 import {MarketRiskConfiguration} from "@voltz-protocol/core/src/storage/MarketRiskConfiguration.sol";
-import {AaveRateOracle} from "@voltz-protocol/products-dated-irs/src/oracles/AaveRateOracle.sol";
+import {AaveV3RateOracle} from "@voltz-protocol/products-dated-irs/src/oracles/AaveV3RateOracle.sol";
 import {AaveV3BorrowRateOracle} from "@voltz-protocol/products-dated-irs/src/oracles/AaveV3BorrowRateOracle.sol";
 
 import {ProductConfiguration} from "@voltz-protocol/products-dated-irs/src/storage/ProductConfiguration.sol";
@@ -35,7 +35,7 @@ contract ProtocolBase is BatchScript {
   PeripheryProxy internal peripheryProxy = PeripheryProxy(payable(vm.envAddress("PERIPHERY_PROXY")));
   VammProxy internal vammProxy = VammProxy(payable(vm.envAddress("VAMM_PROXY")));
 
-  AaveRateOracle internal aaveRateOracle = AaveRateOracle(vm.envAddress("AAVE_V2_RATE_ORACLE"));
+  AaveV3RateOracle internal aaveV3RateOracle = AaveV3RateOracle(vm.envAddress("AAVE_V3_RATE_ORACLE"));
   AaveV3BorrowRateOracle internal aaveV3BorrowRateOracle = AaveV3BorrowRateOracle(vm.envAddress("AAVE_V3_BORROW_RATE_ORACLE"));
 
   AccessPassNFT internal accessPassNft = AccessPassNFT(vm.envAddress("ACCESS_PASS_NFT"));

@@ -4,3 +4,6 @@ include = [
   "utils/account-nft-router.toml",
   "utils/core-proxy.toml"
 ]
+
+[setting.owner]
+defaultValue = "0xF8F6B70a36f4398f0853a311dC6699Aba8333Cc1"

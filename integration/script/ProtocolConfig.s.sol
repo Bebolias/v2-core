@@ -33,7 +33,7 @@ contract ProtocolConfig is ProtocolBase {
     });
     registerDatedIrsProduct();
     configureMarket({
-      rateOracleAddress: address(aaveRateOracle),
+      rateOracleAddress: address(aaveV3RateOracle),
       tokenAddress: Utils.getUSDCAddress(chainId),
       productId: 1,
       marketId: 1,
@@ -49,7 +49,7 @@ contract ProtocolConfig is ProtocolBase {
     deployPool({
       marketId: 1,
       maturityTimestamp: 1688990400,
-      rateOracleAddress: address(aaveRateOracle),
+      rateOracleAddress: address(aaveV3RateOracle),
       priceImpactPhi: ud60x18(1e17), // 0.1
       priceImpactBeta: ud60x18(125e15), // 0.125
       spread: ud60x18(3e15), // 0.3%
@@ -65,7 +65,7 @@ contract ProtocolConfig is ProtocolBase {
       notionalAmount: 100e6,
       tickLower: -14100, // 4.1%
       tickUpper: -13620, // 3.9%
-      rateOracleAddress: address(aaveRateOracle)
+      rateOracleAddress: address(aaveV3RateOracle)
     });
   }
 

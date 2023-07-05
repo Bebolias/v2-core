@@ -1,0 +1,15 @@
+include = [
+  "utils/commons.toml",
+  "utils/dated-irs-router.toml",
+  "utils/dated-irs-proxy.toml",
+  "utils/aave-rate-oracles.toml",
+]
+
+[setting.owner]
+defaultValue = "0xF8F6B70a36f4398f0853a311dC6699Aba8333Cc1"
+
+[setting.aaveV3LendingPool]
+defaultValue = "0xeAA2F46aeFd7BDe8fB91Df1B277193079b727655"
+
+[setting.usdc]
+defaultValue = "0x72A9c57cD5E2Ff20450e409cF6A542f1E6c710fc"

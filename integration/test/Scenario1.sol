@@ -76,7 +76,7 @@ contract Scenario1 is BaseScenario, TestUtils {
     );
     datedIrsProxy.setVariableOracle(
       1,
-      address(aaveRateOracle),
+      address(aaveV3RateOracle),
       3600
     );
     datedIrsProxy.configureProduct(
@@ -116,7 +116,7 @@ contract Scenario1 is BaseScenario, TestUtils {
         priceImpactPhi: ud60x18(1e17), // 0.1
         priceImpactBeta: ud60x18(125e15), // 0.125
         spread: ud60x18(3e15), // 0.3%
-        rateOracle: IRateOracle(address(aaveRateOracle))
+        rateOracle: IRateOracle(address(aaveV3RateOracle))
     });
 
     vammProxy.setProductAddress(address(datedIrsProxy));
@@ -243,6 +243,8 @@ contract Scenario1 is BaseScenario, TestUtils {
 
     assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure - eps));
     assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure + eps));
+
+    vm.stopPrank();
   }
 
   function test_MINT_FT() public {
@@ -310,6 +312,8 @@ contract Scenario1 is BaseScenario, TestUtils {
         0 // todo: compute this properly
       );
       peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+
+      vm.stopPrank();
     }
 
     int24 currentTick = vammProxy.getVammTick(marketId, maturityTimestamp); // -13837 = 3.98%
@@ -670,6 +674,8 @@ contract Scenario1 is BaseScenario, TestUtils {
     assertEq(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, 0, "f l");
     // TRADER
     assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, 0, "f t");
+
+    vm.stopPrank();
   }
 
   function test_Recovery_From_Min_Tick() public {
@@ -818,6 +824,8 @@ contract Scenario1 is BaseScenario, TestUtils {
     assertEq(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, 0, "f l");
     // TRADER
     assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, 0, "f t");
+
+    vm.stopPrank();
   }
 
   function test_Recovery_From_Max_Tick() public {
@@ -980,6 +988,7 @@ contract Scenario1 is BaseScenario, TestUtils {
       assertEq(collateralBalance, 0);
       assertEq(user2BalanceAfterSettle.toInt(), user2BalanceBeforeSettle.toInt() + settlementCashflow + existingCollateral);
     }
+    vm.stopPrank();
 
     /// SETTLE LP
     {
@@ -1113,6 +1122,7 @@ contract Scenario1 is BaseScenario, TestUtils {
       assertEq(collateralBalance, 0);
       assertEq(user2BalanceAfterSettle.toInt(), user2BalanceBeforeSettle.toInt() + settlementCashflow + existingCollateral);
     }
+     vm.stopPrank();
 
     /// SETTLE LP
     {
@@ -1214,6 +1224,7 @@ contract Scenario1 is BaseScenario, TestUtils {
     assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledShort, 0);
     assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledLong, 0);
 
+    vm.stopPrank();
   }
 
   function test_MINT_FT_UNWIND() public {
@@ -1288,5 +1299,7 @@ contract Scenario1 is BaseScenario, TestUtils {
 
     assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledShort, 0);
     assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledLong, 0);
+
+    vm.stopPrank();
   }
 }

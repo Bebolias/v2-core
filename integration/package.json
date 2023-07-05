@@ -1,5 +1,5 @@
 {
-  "name": "@voltz-protocol/integration-tests",
+  "name": "@voltz-protocol/integration",
   "version": "2.0.0",
   "publishConfig": {
     "access": "restricted",
@@ -12,10 +12,10 @@
     "@voltz-protocol/products-dated-irs": "workspace:^",
     "@voltz-protocol/util-contracts": "workspace:^",
     "@voltz-protocol/util-modules": "workspace:^",
-    "@voltz-protocol/v2-vamm": "1.11.0"
+    "@voltz-protocol/v2-vamm": "1.12.0"
   },
   "scripts": {
-    "publish": "echo \"Cannot publish integration tests yet\"",
+    "publish": "echo \"Cannot publish integration yet\"",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",
     "lint:sol:check": "yarn solhint \"{src,test}/**/*.sol\"",

@@ -10,13 +10,13 @@ pragma solidity >=0.8.19;
 import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "../mocks/MockAaveLendingPool.sol";
-import "../../src/oracles/AaveRateOracle.sol";
+import "../../src/oracles/AaveV3RateOracle.sol";
 import "../../src/interfaces/IRateOracle.sol";
 import "oz/interfaces/IERC20.sol";
 import "@voltz-protocol/util-contracts/src/interfaces/IERC165.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
-contract AaveRateOracleTest is Test {
+contract AaveV3RateOracleTest is Test {
     using { unwrap } for UD60x18;
 
     address constant TEST_UNDERLYING_ADDRESS = 0x1122334455667788990011223344556677889900;
@@ -26,12 +26,12 @@ contract AaveRateOracleTest is Test {
     UD60x18 initValue = ud(1e18);
 
     MockAaveLendingPool mockLendingPool;
-    AaveRateOracle rateOracle;
+    AaveV3RateOracle rateOracle;
 
     function setUp() public virtual {
         mockLendingPool = new MockAaveLendingPool();
         mockLendingPool.setReserveNormalizedIncome(TEST_UNDERLYING, initValue);
-        rateOracle = new AaveRateOracle(
+        rateOracle = new AaveV3RateOracle(
             mockLendingPool,
             TEST_UNDERLYING_ADDRESS
         );

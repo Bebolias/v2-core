@@ -11,7 +11,7 @@ import "forge-std/Test.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
 import "../mocks/MockRateOracle.sol";
-import "../../src/oracles/AaveRateOracle.sol";
+import "../../src/oracles/AaveV3RateOracle.sol";
 import "../../src/modules/RateOracleModule.sol";
 import "../../src/storage/RateOracleReader.sol";
 import "../../src/interfaces/IRateOracleModule.sol";

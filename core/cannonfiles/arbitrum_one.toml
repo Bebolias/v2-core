@@ -3,3 +3,6 @@ include = [
   "utils/core-router.toml",
   "utils/account-nft-router.toml"
 ]
+
+[setting.owner]
+defaultValue = "0x8DC15493a8041f059f18ddBA98ee7dcf93b838Ad"

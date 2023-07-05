@@ -12,7 +12,7 @@ import "../interfaces/external/IAaveV3LendingPool.sol";
 import "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import { UD60x18, ud, unwrap } from "@prb/math/UD60x18.sol";
 
-contract AaveRateOracle is IRateOracle {
+contract AaveV3RateOracle is IRateOracle {
     IAaveV3LendingPool public aaveLendingPool;
     address public immutable underlying;
 

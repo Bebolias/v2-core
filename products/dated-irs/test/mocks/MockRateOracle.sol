@@ -7,7 +7,7 @@ https://github.com/Voltz-Protocol/v2-core/blob/main/products/dated-irs/LICENSE
 */
 pragma solidity >=0.8.19;
 
-import "../../src/oracles/AaveRateOracle.sol";
+import "../../src/oracles/AaveV3RateOracle.sol";
 import "../../src/interfaces/IRateOracle.sol";
 import "./MockAaveLendingPool.sol";
 import "../../src/interfaces/external/IAaveV3LendingPool.sol";

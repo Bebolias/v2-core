@@ -58,7 +58,7 @@
         "utils/modules",
         "products/dated-irs",
         "community",
-        "integration-tests",
+        "integration",
         "access-pass-nft"
     ],
     "engines": {
