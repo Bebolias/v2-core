@@ -642,6 +642,32 @@ contract CollateralModuleTest is Test {
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 
+    function test_RevertWhen_Withdraw_InsufficientCollateralAndLiquidationBooster_LargeUPnL() public {
+        changeIMRequirementToZero();
+        MockProduct[] memory products = collateralModule.getProducts();
+        // Mock account (id: 100) unrealized PnL in product (id: 1)
+        products[0].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 100000e18);
+        products[0].skipGetAccountUnrealizedPnLMock(100, Constants.TOKEN_0); // skip old mock
+        // Mock account (id: 100) unrealized PnL in product (id: 2)
+        products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 100000e18);
+        products[1].skipGetAccountUnrealizedPnLMock(100, Constants.TOKEN_0); // skip old mock
+
+        // Amount to withdraw
+        uint256 amount = 10000e18 + 11e18;
+        address user = Constants.ALICE;
+
+        // Mock ERC20 external calls
+        vm.mockCall(Constants.TOKEN_0, abi.encodeWithSelector(IERC20.transfer.selector, user, amount), abi.encode());
+
+        vm.prank(user);
+
+        // Expect Withdrawn event
+        vm.expectRevert(abi.encodeWithSelector(Collateral.InsufficientLiquidationBoosterBalance.selector, 11e18));
+
+        // Withdraw
+        collateralModule.withdraw(100, Constants.TOKEN_0, amount);
+    }
+
     function test_RevertWhen_Withdraw_UnautohorizedAccount(address otherAddress) public {
         vm.assume(otherAddress != Constants.ALICE);
         vm.assume(otherAddress != Constants.PERIPHERY);
