@@ -1,0 +1,18 @@
+# To be used on testnets only. Proxies on mainnet networks
+# should be deployed by the community deployer.
+
+include = [
+  "utils/commons.toml",
+]
+
+# Deploys an initial Dated IRS Proxy seperately so that a new Dated IRS 
+# Proxy is not re-deployed every time the OwnerUpgradeModule bytecode is
+# changing. Implementation is then upgraded to the correct Router 
+# implementation in the invoke.upgrade_dated_irs_proxy action in 
+[contract.InitialDatedIrsProxy]
+artifact = "ProductProxy"
+args = ["<%= contracts.OwnerUpgradeModule.address %>", "<%= settings.owner %>"]
+abiOf = ["OwnerUpgradeModule"]
+salt = "<%= settings.salt %>"
+create2 = true
+depends = ["contract.OwnerUpgradeModule"]

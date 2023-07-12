@@ -1,8 +1,11 @@
 include = [
   "utils/commons.toml",
   "utils/periphery-router.toml",
-  "utils/periphery-proxy.toml",
+  "utils/periphery-proxy-upgrade.toml",
 ]
 
 [setting.owner]
 defaultValue = "0xF8F6B70a36f4398f0853a311dC6699Aba8333Cc1"
+
+[setting.peripheryProxy]
+defaultValue = "0x7917ADcd534c78f6901fc8A07d3834b9b47EAf26"

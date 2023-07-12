@@ -268,7 +268,7 @@ abstract contract BatchScript is Script, DelegatePrank {
         placeholder.serialize("refundReceiver", address(0));
         placeholder.serialize("contractTransactionHash", batch_.txHash);
         placeholder.serialize("signature", batch_.signature);
-        string memory payload = placeholder.serialize("sender", msg.sender);
+        string memory payload = placeholder.serialize("sender", msg.sender); //todo: AN fix this
 
         // Send batch
         (uint256 status, bytes memory data) = endpoint.post(

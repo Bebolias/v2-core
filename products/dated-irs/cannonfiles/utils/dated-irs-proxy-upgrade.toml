@@ -1,0 +1,18 @@
+# datedIrsProxy is required and must be overridden
+[setting.datedIrsProxy]
+description = "Address of the deployed Dated IRS Proxy"
+
+# Upgrades implementation of Dated IRS Proxy to point to the new 
+# router implementation.
+[invoke.upgrade_dated_irs_proxy]
+target = ["<%= settings.datedIrsProxy %>"]
+abi = "OwnerUpgradeModule"
+from = "<%= settings.owner %>"
+func = "upgradeTo"
+args = ["<%= contracts.DatedIrsRouter.address %>"]
+factory.DatedIrsProxy.abiOf = ["DatedIrsRouter"]
+factory.DatedIrsProxy.event = "Upgraded"
+factory.DatedIrsProxy.arg = 0
+depends = [
+  "router.DatedIrsRouter"
+]

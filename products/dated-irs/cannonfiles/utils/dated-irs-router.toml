@@ -8,7 +8,9 @@ artifact = "ProductIRSModule"
 [contract.RateOracleModule]
 artifact = "RateOracleModule"
 
-# Deploys Dated IRS Router
+#####################################
+# Deploy Dated IRS Router
+#####################################
 [router.DatedIrsRouter]
 contracts = [
   "OwnerUpgradeModule",

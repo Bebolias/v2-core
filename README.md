@@ -37,7 +37,7 @@ This is a monorepo with the following folder structure and packages:
 
 # Cannon deployment
 
-- Install cannon cli v2.4.14: `npm install -g @usecannon/cli@2.4.14`
+- Install latest cannon cli: `npm install -g @usecannon/cli`
 - Install cannon router plugin: `cannon plugin add cannon-plugin-router`
 - Run `cannon setup` and populate as following:
   - publishing ipfs endpoint: use the api keys from the `v2-cannon-publish` project on Infura. 

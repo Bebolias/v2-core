@@ -8,7 +8,9 @@ artifact = "ERC721ReceiverModule"
 [contract.ExecutionModule]
 artifact = "ExecutionModule"
 
-# Deploys Periphery Router
+#####################################
+# Deploy Periphery Router
+#####################################
 [router.PeripheryRouter]
 contracts = [
   "OwnerUpgradeModule",

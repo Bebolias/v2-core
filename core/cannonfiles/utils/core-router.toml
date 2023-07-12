@@ -24,7 +24,9 @@ artifact = "ProductModule"
 [contract.RiskConfigurationModule]
 artifact = "RiskConfigurationModule"
 
-# Deploys Core Router
+#####################################
+# Deploy Core Router
+#####################################
 [router.CoreRouter]
 contracts = [
   "OwnerUpgradeModule",

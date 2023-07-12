@@ -1,8 +1,12 @@
 include = [
   "utils/commons.toml",
   "utils/core-router.toml",
-  "utils/account-nft-router.toml"
+  "utils/account-nft-router.toml",
+  "utils/core-proxy-upgrade.toml",
 ]
 
 [setting.owner]
 defaultValue = "0x8DC15493a8041f059f18ddBA98ee7dcf93b838Ad"
+
+[setting.coreProxy]
+defaultValue = "0x9fa00f089655de61c3758d7e3635b552c273b970"

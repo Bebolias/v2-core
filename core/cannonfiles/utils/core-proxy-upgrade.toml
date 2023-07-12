@@ -1,24 +1,12 @@
-# owner is required and must be overridden
-[setting.owner]
-description = "Admin user for the protocol"
-
-# Deploys an initial Core Proxy so that a new Core Proxy is not 
-# re-deployed every time we deploy a new router. Implementation is
-# then upgraded to the correct Router implementation in the
-# invoke.upgrade_core_proxy command below.
-[contract.InitialCoreProxy]
-artifact = "CoreProxy"
-args = ["<%= contracts.OwnerUpgradeModule.address %>", "<%= settings.owner %>"]
-abiOf = ["OwnerUpgradeModule"]
-salt = "<%= settings.salt %>"
-create2 = true
-depends = ["contract.OwnerUpgradeModule"]
+# coreProxy is required and must be overridden
+[setting.coreProxy]
+description = "Address of the deployed Core Proxy"
 
 # Upgrades implementation of Core Proxy to point to the new 
 # router implementation.
 [invoke.upgrade_core_proxy]
-target = ["InitialCoreProxy"]
-abi = "UpgradeModule"
+target = ["<%= settings.coreProxy %>"]
+abi = "OwnerUpgradeModule"
 from = "<%= settings.owner %>"
 func = "upgradeTo"
 args = ["<%= contracts.CoreRouter.address %>"]
@@ -26,7 +14,6 @@ factory.CoreProxy.abiOf = ["CoreRouter"]
 factory.CoreProxy.event = "Upgraded"
 factory.CoreProxy.arg = 0
 depends = [
-  "contract.InitialCoreProxy",
   "router.CoreRouter"
 ]
 
