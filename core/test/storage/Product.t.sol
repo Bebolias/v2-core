@@ -31,15 +31,6 @@ contract ExposedProduct is CoreState {
         Product.onlyProductAddress(productId, caller);
     }
 
-    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType)
-        external
-        view
-        returns (int256 accountUnrealizedPnL)
-    {
-        Product.Data storage product = Product.load(productId);
-        return product.getAccountUnrealizedPnL(accountId, collateralType);
-    }
-
     function baseToAnnualizedExposure(
         uint128 productId,
         int256[] memory baseAmounts,
@@ -50,12 +41,12 @@ contract ExposedProduct is CoreState {
         return product.baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp);
     }
 
-    function getAccountAnnualizedExposures(uint128 productId, uint128 accountId, address collateralType)
+    function getAccountTakerAndMakerExposures(uint128 productId, uint128 accountId, address collateralType)
         external
-        returns (Account.Exposure[] memory exposures)
+    returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
     {
         Product.Data storage product = Product.load(productId);
-        return product.getAccountAnnualizedExposures(accountId, collateralType);
+        return product.getAccountTakerAndMakerExposures(accountId, collateralType);
     }
 
     function closeAccount(uint128 productId, uint128 accountId, address collateralType) external {
@@ -91,10 +82,6 @@ contract ProductTest is Test {
         product.onlyProductAddress(productId, otherAddress);
     }
 
-    function test_GetAccountUnrealizedPnL() public {
-        assertEq(product.getAccountUnrealizedPnL(productId, accountId, Constants.TOKEN_0), 100e18);
-    }
-
     function test_BaseToAnnualizedExposure() public {
         int256[] memory baseAmounts = new int256[](1);
         baseAmounts[0] = 100;
@@ -109,21 +96,8 @@ contract ProductTest is Test {
         assertEq(exposures[0], 250);
     }
 
-    function test_GetAnnualizedProductExposures() public {
-        Account.Exposure[] memory exposures =
-            product.getAccountAnnualizedExposures(productId, accountId, Constants.TOKEN_0);
-
-        assertEq(exposures.length, 2);
-
-        assertEq(exposures[0].marketId, 10);
-        assertEq(exposures[0].filled, 100e18);
-        assertEq(exposures[0].unfilledLong, 200e18);
-        assertEq(exposures[0].unfilledShort, 200e18);
-
-        assertEq(exposures[1].marketId, 11);
-        assertEq(exposures[1].filled, 200e18);
-        assertEq(exposures[1].unfilledLong, 300e18);
-        assertEq(exposures[1].unfilledShort, 400e18);
+    function test_GetAccountTakerAndMakerExposures() public {
+        // todo: implementation
     }
 
     function test_CloseAccount() public {

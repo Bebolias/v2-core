@@ -7,7 +7,7 @@ https://github.com/Voltz-Protocol/v2-core/blob/main/core/LICENSE
 */
 pragma solidity >=0.8.19;
 
-import { SD59x18 } from "@prb/math/SD59x18.sol";
+import { UD60x18 } from "@prb/math/SD59x18.sol";
 
 /**
  * @title Tracks market-level risk settings
@@ -25,7 +25,7 @@ library MarketRiskConfiguration {
         /**
          * @dev Risk Parameters are multiplied by notional exposures to derived shocked cashflow calculations
          */
-        SD59x18 riskParameter;
+        UD60x18 riskParameter;
         /**
          * @dev Number of seconds in the past from which to calculate the time-weighted average fixed rate (average = geometric mean)
          */

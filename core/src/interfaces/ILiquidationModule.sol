@@ -19,7 +19,7 @@ interface ILiquidationModule {
     /**
      * @dev Thrown when an account exposure is not reduced when liquidated.
      */
-    error AccountExposureNotReduced(uint128 accountId, uint256 imPreClose, uint256 imPostClose);
+    error AccountExposureNotReduced(uint128 accountId, uint256 imPreClose, uint256 imPostClose, uint256 highestUnrealizedLossPreClose, uint256 highestUnrealizedLossPostClose);
 
     /**
      * @dev Thrown when a liquidation uses the liquidation booster but the account
@@ -46,6 +46,8 @@ interface ILiquidationModule {
         uint256 liquidatorRewardAmount,
         uint256 imPreClose,
         uint256 imPostClose,
+        uint256 highestUnrealizedLossPreClose,
+        uint256 highestUnrealizedLossPostClose,
         uint256 blockTimestamp
     );
 

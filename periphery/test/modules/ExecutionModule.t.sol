@@ -53,7 +53,7 @@ contract ExecutionModuleTest is Test {
                 IProductIRSModule.initiateTakerOrder.selector,
                 1, 101, 1678786786, 100, 0
             ),
-            abi.encode(100, -100, 25, 55)
+            abi.encode(100, -100, 25, 55, 0)
         );
 
         vm.mockCall(
@@ -133,7 +133,7 @@ contract ExecutionModuleTest is Test {
                 IProductIRSModule.initiateTakerOrder.selector,
                 1, 101, 1678786786, 100, 0
             ),
-            abi.encode(100, -100, 25, 55)
+            abi.encode(100, -100, 25, 55, 0)
         );
 
         vm.mockCall(
@@ -147,14 +147,16 @@ contract ExecutionModuleTest is Test {
 
         bytes[] memory output = exec.execute(commands, inputs, deadline);
 
+        // todo: add unrealziedLoss to decoding
         (uint256 fee, uint256 im) = abi.decode(output[0], (uint256, uint256));
         (
             int256 executedBaseAmount,
             int256 executedQuoteAmount,
             uint256 fee1,
             uint256 im1,
+            uint256 highestUnrealizedLoss,
             int24 currentTick
-        ) = abi.decode(output[1], (int256, int256, uint256, uint256, int24));
+        ) = abi.decode(output[1], (int256, int256, uint256, uint256, uint256, int24));
         assertEq(output.length, 2);
         assertEq(fee, 163656);
         assertEq(im, 187267678);
@@ -163,6 +165,7 @@ contract ExecutionModuleTest is Test {
         assertEq(fee1, 25);
         assertEq(im1, 55);
         assertEq(currentTick, 660);
+        // todo: assert unrealized loss
     }
 
     function testExecCommand_Withdraw() public {

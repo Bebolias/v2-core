@@ -41,17 +41,13 @@ interface IProductModule {
     /// @notice returns the id of the last created product
     function getLastCreatedProductId() external returns (uint128);
 
-    /// @notice returns the unrealized pnl in quote token terms for account
-    function getAccountUnrealizedPnL(uint128 productId, uint128 accountId, address collateralType)
-        external
-        returns (int256);
 
-    /// @notice returns annualized filled notional, annualized unfilled notional long, annualized unfilled notional short
-    function getAccountAnnualizedExposures(uint128 productId, uint128 accountId, address collateralType)
+    /// @notice returns account taker and maker exposures for a given product, account and collateral type
+    function getAccountTakerAndMakerExposures(uint128 productId, uint128 accountId, address collateralType)
         external
-        returns (Account.Exposure[] memory exposures);
+        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper);
 
-    // state changing functions
+    //// STATE CHANGING FUNCTIONS ////
 
     /**
      * @notice Connects a product to the system.
@@ -70,7 +66,7 @@ interface IProductModule {
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external returns (uint256 fee, uint256 im);
+    ) external returns (uint256 fee, uint256 im, uint256 highestUnrealizedLoss);
 
     function propagateMakerOrder(
         uint128 accountId,
@@ -78,7 +74,9 @@ interface IProductModule {
         uint128 marketId,
         address collateralType,
         int256 annualizedNotional
-    ) external returns (uint256 fee, uint256 im);
+    ) external returns (uint256 fee, uint256 im, uint256 highestUnrealizedLoss);
 
+
+    // todo: consider naming propagateCashflow to be more generic to work with e.g. perps that may have funding cashflows
     function propagateSettlementCashflow(uint128 accountId, uint128 productId, address collateralType, int256 amount) external;
 }

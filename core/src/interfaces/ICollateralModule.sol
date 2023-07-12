@@ -97,18 +97,6 @@ interface ICollateralModule {
         returns (uint256 liquidationBoosterBalance);
 
     /**
-     * @notice Returns the total account value pertaining to account `accountId` in terms of the quote token of the (single token)
-     * account
-     * @param accountId The id of the account whose total account value is being queried.
-     * @return totalAccountValue The total account value in terms of the quote token of the account, denominated in
-     * the token's native decimal representation.
-     */
-    function getTotalAccountValue(uint128 accountId, address collateralType)
-        external
-        view
-        returns (int256 totalAccountValue);
-
-    /**
      * @notice Deposits `tokenAmount` of collateral of type `collateralType` into account `accountId`.
      * @dev Anyone can deposit into anyone's active account without restriction.
      * @param accountId The id of the account that is making the deposit.

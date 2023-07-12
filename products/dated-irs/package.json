@@ -18,7 +18,7 @@
     "lint:sol:write": "yarn solhint --fix \"{src,test}/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
     "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",
-    "build": "forge build",
+    "build": "forge build --via-ir",
     "coverage": "forge coverage --report lcov; npx lcov-badge-generator ./lcov.info --output coverage.svg",
     "release": "semantic-release",
     "bump": "yarn version minor",

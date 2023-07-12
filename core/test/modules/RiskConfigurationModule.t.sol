@@ -11,7 +11,6 @@ import "forge-std/Test.sol";
 import "../../src/modules/RiskConfigurationModule.sol";
 import "../test-utils/Constants.sol";
 
-import {SD59x18} from "@prb/math/SD59x18.sol";
 import {UD60x18} from "@prb/math/UD60x18.sol";
 
 contract RiskConfigurationModuleTest is Test {
@@ -33,7 +32,7 @@ contract RiskConfigurationModuleTest is Test {
 
     function test_ConfigureMarketRisk() public {
         MarketRiskConfiguration.Data memory config =
-            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e16), twapLookbackWindow: 86400});
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: UD60x18.wrap(1e16), twapLookbackWindow: 86400});
 
         // Expect MarketRiskConfigured event
         vm.expectEmit(true, true, true, true, address(riskConfigurationModule));
@@ -46,14 +45,14 @@ contract RiskConfigurationModuleTest is Test {
 
         assertEq(existingConfig.productId, config.productId);
         assertEq(existingConfig.marketId, config.marketId);
-        assertEq(SD59x18.unwrap(existingConfig.riskParameter), SD59x18.unwrap(config.riskParameter));
+        assertEq(UD60x18.unwrap(existingConfig.riskParameter), UD60x18.unwrap(config.riskParameter));
     }
 
     function testFuzz_RevertWhen_ConfigureMarketRisk_NoOwner(address otherAddress) public {
         vm.assume(otherAddress != owner);
 
         MarketRiskConfiguration.Data memory config =
-            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e16), twapLookbackWindow: 86400});
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: UD60x18.wrap(1e16), twapLookbackWindow: 86400});
 
         vm.expectRevert(abi.encodeWithSelector(AccessError.Unauthorized.selector, otherAddress));
         vm.prank(otherAddress);
@@ -63,19 +62,19 @@ contract RiskConfigurationModuleTest is Test {
     function test_GetMarketRiskConfiguration() public {
         vm.prank(owner);
         riskConfigurationModule.configureMarketRisk(
-            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e16), twapLookbackWindow: 86400})
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: UD60x18.wrap(1e16), twapLookbackWindow: 86400})
         );
 
         vm.prank(owner);
         riskConfigurationModule.configureMarketRisk(
-            MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: SD59x18.wrap(2e16), twapLookbackWindow: 86400})
+            MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: UD60x18.wrap(2e16), twapLookbackWindow: 86400})
         );
 
         MarketRiskConfiguration.Data memory existingConfig = riskConfigurationModule.getMarketRiskConfiguration(2, 20);
 
         assertEq(existingConfig.productId, 2);
         assertEq(existingConfig.marketId, 20);
-        assertEq(SD59x18.unwrap(existingConfig.riskParameter), 2e16);
+        assertEq(UD60x18.unwrap(existingConfig.riskParameter), 2e16);
     }
 
     function test_GetMarketRiskConfiguration_Empty() public {
@@ -83,7 +82,7 @@ contract RiskConfigurationModuleTest is Test {
 
         assertEq(existingConfig.productId, 0);
         assertEq(existingConfig.marketId, 0);
-        assertEq(SD59x18.unwrap(existingConfig.riskParameter), 0);
+        assertEq(UD60x18.unwrap(existingConfig.riskParameter), 0);
     }
 
     function test_ConfigureProtocolRisk() public {

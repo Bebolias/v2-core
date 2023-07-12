@@ -90,7 +90,7 @@ interface IProductIRSModule is IProduct {
         uint160 priceLimit
     )
         external
-        returns (int256 executedBaseAmount, int256 executedQuoteAmount, uint256 fee, uint256 im);
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount, uint256 fee, uint256 im, uint256 highestUnrealizedLoss);
 
     /**
      * @notice Creates or updates the configuration for the given product.
@@ -117,7 +117,7 @@ interface IProductIRSModule is IProduct {
         uint128 marketId,
         uint32 maturityTimestamp,
         int256 baseAmount
-    ) external returns (uint256 fee, uint256 im);
+    ) external returns (uint256 fee, uint256 im, uint256 highestUnrealizedLoss);
 
     /**
      * @notice Returns core proxy address from ProductConfigruation

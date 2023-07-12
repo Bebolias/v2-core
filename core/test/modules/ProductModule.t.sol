@@ -68,24 +68,8 @@ contract ProductModuleTest is Test {
 
     }
 
-    function test_GetAccountUnrealizedPnL() public {
-        assertEq(productModule.getAccountUnrealizedPnL(1, 100, Constants.TOKEN_0), 100e18);
-    }
-
-    function test_GetAccountAnnualizedExposures() public {
-        Account.Exposure[] memory exposures = productModule.getAccountAnnualizedExposures(1, 100, Constants.TOKEN_0);
-
-        assertEq(exposures.length, 2);
-
-        assertEq(exposures[0].marketId, 10);
-        assertEq(exposures[0].filled, 100e18);
-        assertEq(exposures[0].unfilledLong, 200e18);
-        assertEq(exposures[0].unfilledShort, 200e18);
-
-        assertEq(exposures[1].marketId, 11);
-        assertEq(exposures[1].filled, 200e18);
-        assertEq(exposures[1].unfilledLong, 300e18);
-        assertEq(exposures[1].unfilledShort, 400e18);
+    function test_GetAccountTakerAndMakerExposures() public {
+        // todo: implement
     }
 
     function test_RegisterProduct() public {
@@ -134,19 +118,19 @@ contract ProductModuleTest is Test {
 
     function test_CloseAccount() public {
         Account.Exposure[] memory emptyExposures;
-        productModule.getProducts()[0].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, emptyExposures);
+        productModule.getProducts()[0].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, emptyExposures, emptyExposures, emptyExposures);
 
-        Account.Exposure[] memory exposuresBefore =
-            productModule.getProducts()[0].getAccountAnnualizedExposures(100, Constants.TOKEN_0);
-        assertEq(exposuresBefore.length, 2);
+        (Account.Exposure[] memory takerExposuresBefore, Account.Exposure[] memory makerLowerExposuresBefore, Account.Exposure[] memory makerUpperExposuresBefore) =
+            productModule.getProducts()[0].getAccountTakerAndMakerExposures(100, Constants.TOKEN_0);
+        assertEq(makerLowerExposuresBefore.length, 2);
 
         vm.prank(Constants.ALICE);
         //todo: check event was emitted (AN)
         productModule.closeAccount(1, 100, Constants.TOKEN_0);
 
-        Account.Exposure[] memory exposuresAfter =
-            productModule.getProducts()[0].getAccountAnnualizedExposures(100, Constants.TOKEN_0);
-        assertEq(exposuresAfter.length, 0);
+        (Account.Exposure[] memory takerExposuresAfter, Account.Exposure[] memory makerLowerExposuresAfter, Account.Exposure[] memory makerUpperExposuresAfter) =
+            productModule.getProducts()[0].getAccountTakerAndMakerExposures(100, Constants.TOKEN_0);
+        assertEq(makerLowerExposuresAfter.length, 0);
     }
 
     function test_RevertWhen_CloseAccount_Global_Deny_All() public {
@@ -226,14 +210,8 @@ contract ProductModuleTest is Test {
         //todo: check event emitted once implemented (AN)
         assertEq(productModule.getActiveProductsLength(100), 2);
 
-         vm.expectCall(
-            address(newProduct), 
-            abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100, Constants.TOKEN_0)
-        );
-
         Account.Exposure[] memory emptyExposures;
-        newProduct.mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, emptyExposures);
-        newProduct.mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
+        newProduct.mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, emptyExposures, emptyExposures, emptyExposures);
 
         vm.prank(address(newProduct));
         productModule.propagateTakerOrder(100, productId, marketId, Constants.TOKEN_0, 100e18);
@@ -285,13 +263,13 @@ contract ProductModuleTest is Test {
     }
 
     function test_RevertWhen_propagateTakerOrder_ImCheck() public {
-        uint256 uPnL = 100e18;
-        uint256 im = 1800e18;
+        uint256 unrealizedLoss = 0;
+        uint256 im = 2000e18;
 
         vm.prank(address(productModule.getProducts()[0]));
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, im));
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, im, unrealizedLoss));
         productModule.propagateTakerOrder(
-            100, 1, 10, Constants.TOKEN_0, int256(20 * (Constants.DEFAULT_TOKEN_0_BALANCE - im - uPnL) + 1e18)
+            100, 1, 10, Constants.TOKEN_0, int256(20 * (Constants.DEFAULT_TOKEN_0_BALANCE - im - unrealizedLoss) + 1e18)
         );
     }
 
@@ -324,14 +302,8 @@ contract ProductModuleTest is Test {
         //todo: check event emitted once implemented (AN)
         assertEq(productModule.getActiveProductsLength(100), 2);
 
-         vm.expectCall(
-            address(newProduct), 
-            abi.encodeWithSelector(IProduct.getAccountUnrealizedPnL.selector, 100, Constants.TOKEN_0)
-        );
-
         Account.Exposure[] memory emptyExposures;
-        newProduct.mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, emptyExposures);
-        newProduct.mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
+        newProduct.mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, emptyExposures, emptyExposures, emptyExposures);
 
         vm.prank(address(newProduct));
         productModule.propagateMakerOrder(100, productId, marketId, Constants.TOKEN_0, 100e18);
@@ -372,13 +344,13 @@ contract ProductModuleTest is Test {
     }
 
     function test_RevertWhen_propagateMakerOrder_ImCheck() public {
-        uint256 uPnL = 100e18;
-        uint256 im = 1800e18;
+        uint256 unrealizedLoss = 0;
+        uint256 im = 2000e18;
 
         vm.prank(address(productModule.getProducts()[0]));
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, im));
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, im, unrealizedLoss));
         productModule.propagateMakerOrder(
-            100, 1, 10, Constants.TOKEN_0, int256(100 * (Constants.DEFAULT_TOKEN_0_BALANCE - im - uPnL) + 1e18)
+            100, 1, 10, Constants.TOKEN_0, int256(100 * (Constants.DEFAULT_TOKEN_0_BALANCE - im - unrealizedLoss) + 1e18)
         );
     }
 

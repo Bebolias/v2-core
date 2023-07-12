@@ -12,14 +12,12 @@ import "../../storage/Account.sol";
 
 /// @title Interface a Product needs to adhere.
 interface IProduct is IERC165 {
+
+
+    //// VIEW FUNCTIONS ////
+
     /// @notice returns a human-readable name for a given product
     function name() external view returns (string memory);
-
-    /// @notice returns the unrealized pnl in quote token terms for account and collateral
-    function getAccountUnrealizedPnL(uint128 accountId, address collateralType)
-        external
-        view
-        returns (int256 unrealizedPnL);
 
     /**
      * @dev in context of interest rate swaps, base refers to scaled variable tokens (e.g. scaled virtual aUSDC)
@@ -32,14 +30,13 @@ interface IProduct is IERC165 {
         view
         returns (int256[] memory exposures);
 
-    /// @notice returns annualized filled notional, annualized unfilled notional long,
-    /// annualized unfilled notional short for account and collateral
-    function getAccountAnnualizedExposures(uint128 accountId, address collateralType)
+    /// @notice returns account taker and maker exposures for a given account and collateral type
+    function getAccountTakerAndMakerExposures(uint128 accountId, address collateralType)
         external
         view
-        returns (Account.Exposure[] memory exposures);
+        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper);
 
-    // state-changing functions
+    //// STATE CHANGING FUNCTIONS ////
 
     /// @notice attempts to close all the unfilled and filled positions of a given account in the product
     // if there are multiple maturities in which the account has active positions, the product is expected to close

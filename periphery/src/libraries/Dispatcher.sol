@@ -44,9 +44,10 @@ library Dispatcher {
                 int256 executedQuoteAmount,
                 uint256 fee,
                 uint256 im,
+                uint256 highestUnrealizedLoss,
                 int24 currentTick
             ) = V2DatedIRS.swap(accountId, marketId, maturityTimestamp, baseAmount, priceLimit);
-            output = abi.encode(executedBaseAmount, executedQuoteAmount, fee, im, currentTick);
+            output = abi.encode(executedBaseAmount, executedQuoteAmount, fee, im, highestUnrealizedLoss, currentTick);
         } else if (command == Commands.V2_DATED_IRS_INSTRUMENT_SETTLE) {
             // equivalent: abi.decode(inputs, (uint128, uint128, uint32))
             uint128 accountId;

@@ -66,42 +66,26 @@ contract CollateralModuleTest is Test {
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](2);
 
-                mockExposures[0] = Account.Exposure({marketId: 10, filled: 0, unfilledLong: 0, unfilledShort: -0});
-                mockExposures[1] = Account.Exposure({marketId: 11, filled: 0, unfilledLong: 0, unfilledShort: 0});
+                mockExposures[0] = Account.Exposure({productId: 1, marketId: 10, annualizedNotional: 0, lockedPrice: 1e18, marketTwap: 1e18});
+                mockExposures[1] = Account.Exposure({productId: 1, marketId: 11, annualizedNotional: 0, lockedPrice: 1e18, marketTwap: 1e18});
 
-                products[0].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
-                products[0].skipGetAccountAnnualizedExposures(100, Constants.TOKEN_0); // skip old mock
+                // todo: currently using mockExposures for mockTakerExposures, mockMakerExposuresLower and mockMakerExposuresUpper
+                products[0].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, mockExposures, mockExposures, mockExposures);
+                products[0].skipGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0); // skip old mock
             }
 
-            // Mock account (id: 100) unrealized PnL in product (id: 1)
-            products[0].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
-            products[0].skipGetAccountUnrealizedPnLMock(100, Constants.TOKEN_0); // skip old mock
 
             // Mock account (id:100) exposures to product (id:2) and markets (ids: 20)
             {
                 Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
 
-                mockExposures[0] = Account.Exposure({marketId: 20, filled: 0, unfilledLong: 0, unfilledShort: 0});
+                mockExposures[0] = Account.Exposure({productId: 2, marketId: 20, annualizedNotional: 0, lockedPrice: 1e18, marketTwap: 1e18});
 
-                products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_0, mockExposures);
-                products[1].skipGetAccountAnnualizedExposures(100, Constants.TOKEN_0); // skip old mock
+                products[1].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, mockExposures, mockExposures, mockExposures);
+                products[1].skipGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0); // skip old mock
             }
-            // Mock account (id: 100) unrealized PnL in product (id: 2)
-            products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 0);
-            products[1].skipGetAccountUnrealizedPnLMock(100, Constants.TOKEN_0); // skip old mock
 
             // todo: test single account single-token mode (AN)
-            // Mock account (id:100) exposures to product (id:2) and markets (ids: 21)
-            // {
-            //     Account.Exposure[] memory mockExposures = new Account.Exposure[](1);
-
-            //     mockExposures[0] = Account.Exposure({marketId: 21, filled: 0, unfilledLong: 0, unfilledShort: 0});
-
-            //     products[1].mockGetAccountAnnualizedExposures(100, Constants.TOKEN_1, mockExposures);
-            // }
-
-            // todo: test single account single-token mode (AN)
-            // products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_1, 1e17);
         }
     }
 
@@ -117,21 +101,33 @@ contract CollateralModuleTest is Test {
         );
     }
 
-    function test_GetTotalAccountValue() public {
-        int256 uPnL = 100e18;
-        assertEq(
-            collateralModule.getTotalAccountValue(100, Constants.TOKEN_0),
-            Constants.DEFAULT_TOKEN_0_BALANCE.toInt() - uPnL
-        );
-    }
 
     function test_GetAccountCollateralBalanceAvailable() public {
-        uint256 uPnL = 100e18;
-        uint256 im = 1800e18;
+        uint256 unrealizedLoss = 0;
+        uint256 im = 2000e18;
+
+        // first market (marketId 10, productId 1
+        // risk parameter = 1
+        //  liquidationMarginRequirementExposureLower: 100e18 (annualized notional = -100e18)
+        //  liquidationMarginRequirementExposureUpper: 300e18 (annualized notional = 300e18)
+
+        // second market
+        // risk parameter = 1
+        //  liquidationMarginRequirementExposureLower: 500e18 (annualized notional = 500e18)
+        //  liquidationMarginRequirementExposureUpper: 0
+
+        // third market
+        // risk parameter = 1
+        //  liquidationMarginRequirementExposureLower: 200e18 (annualized notional = -200e18)
+        //  liquidationMarginRequirementExposureUpper: 100e18 (annualized notional = 100e18)
+
+        // total lm = 300e18 + 500e18 + 200e18= 1000e18
+        // im mutliplier = 2
+        // im = 1000e18 * 2 = 2000e18
 
         assertEq(
             collateralModule.getAccountCollateralBalanceAvailable(100, Constants.TOKEN_0),
-            Constants.DEFAULT_TOKEN_0_BALANCE - uPnL - im
+            Constants.DEFAULT_TOKEN_0_BALANCE - unrealizedLoss - im
         );
     }
 
@@ -645,12 +641,6 @@ contract CollateralModuleTest is Test {
     function test_RevertWhen_Withdraw_InsufficientCollateralAndLiquidationBooster_LargeUPnL() public {
         changeIMRequirementToZero();
         MockProduct[] memory products = collateralModule.getProducts();
-        // Mock account (id: 100) unrealized PnL in product (id: 1)
-        products[0].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 100000e18);
-        products[0].skipGetAccountUnrealizedPnLMock(100, Constants.TOKEN_0); // skip old mock
-        // Mock account (id: 100) unrealized PnL in product (id: 2)
-        products[1].mockGetAccountUnrealizedPnL(100, Constants.TOKEN_0, 100000e18);
-        products[1].skipGetAccountUnrealizedPnLMock(100, Constants.TOKEN_0); // skip old mock
 
         // Amount to withdraw
         uint256 amount = 10000e18 + 11e18;
@@ -729,7 +719,7 @@ contract CollateralModuleTest is Test {
         vm.prank(Constants.ALICE);
 
         // Expect revert due to insufficient margin coverage
-        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, 1800e18));
+        vm.expectRevert(abi.encodeWithSelector(Account.AccountBelowIM.selector, 100, Constants.TOKEN_0, 2000e18, 0));
         collateralModule.withdraw(100, Constants.TOKEN_0, amount);
     }
 

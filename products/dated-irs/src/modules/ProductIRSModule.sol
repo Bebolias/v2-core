@@ -42,7 +42,7 @@ contract ProductIRSModule is IProductIRSModule {
     )
         external
         override
-        returns (int256 executedBaseAmount, int256 executedQuoteAmount, uint256 fee, uint256 im)
+        returns (int256 executedBaseAmount, int256 executedQuoteAmount, uint256 fee, uint256 im, uint256 highestUnrealizedLoss)
     {
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
@@ -59,7 +59,7 @@ contract ProductIRSModule is IProductIRSModule {
         int256 annualizedNotionalAmount = getSingleAnnualizedExposure(executedBaseAmount, marketId, maturityTimestamp);
         
         uint128 productId = ProductConfiguration.getProductId();
-        (fee, im) = IProductModule(coreProxy).propagateTakerOrder(
+        (fee, im, highestUnrealizedLoss) = IProductModule(coreProxy).propagateTakerOrder(
             accountId,
             productId,
             marketId,
@@ -77,7 +77,8 @@ contract ProductIRSModule is IProductIRSModule {
             executedQuoteAmount,
             annualizedNotionalAmount,
             block.timestamp
-        );
+            );
+
     }
 
     function getSingleAnnualizedExposure(
@@ -125,22 +126,6 @@ contract ProductIRSModule is IProductIRSModule {
         return "Dated IRS Product";
     }
 
-    /**
-     * @inheritdoc IProduct
-     */
-    function getAccountUnrealizedPnL(
-        uint128 accountId,
-        address collateralType
-    )
-        external
-        view
-        override
-        returns (int256 unrealizedPnL)
-    {
-        Portfolio.Data storage portfolio = Portfolio.exists(accountId);
-        address poolAddress = ProductConfiguration.getPoolAddress();
-        return portfolio.getAccountUnrealizedPnL(poolAddress, collateralType);
-    }
 
     /**
      * @inheritdoc IProduct
@@ -161,18 +146,18 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProduct
      */
-    function getAccountAnnualizedExposures(
+    function getAccountTakerAndMakerExposures(
         uint128 accountId,
         address collateralType
     )
         external
         view
         override
-        returns (Account.Exposure[] memory exposures)
+        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
     {
         Portfolio.Data storage portfolio = Portfolio.exists(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();
-        return portfolio.getAccountAnnualizedExposures(poolAddress, collateralType);
+        return portfolio.getAccountTakerAndMakerExposures(poolAddress, collateralType);
     }
 
     /**
@@ -215,7 +200,8 @@ contract ProductIRSModule is IProductIRSModule {
         uint128 marketId,
         uint32 maturityTimestamp,
         int256 baseAmount
-    ) external returns (uint256 fee, uint256 im) {
+    ) external returns (uint256 fee, uint256 im, uint256 highestUnrealizedLoss) {
+
         if (msg.sender != ProductConfiguration.getPoolAddress()) {
             revert NotAuthorized(msg.sender, "propagateMakerOrder");
         }
@@ -225,13 +211,14 @@ contract ProductIRSModule is IProductIRSModule {
         int256 annualizedNotionalAmount = getSingleAnnualizedExposure(baseAmount, marketId, maturityTimestamp);
 
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
-        (fee, im) = IProductModule(coreProxy).propagateMakerOrder(
+        (fee, im, highestUnrealizedLoss) = IProductModule(coreProxy).propagateMakerOrder(
             accountId,
             ProductConfiguration.getProductId(),
             marketId,
             MarketConfiguration.load(marketId).quoteToken,
             annualizedNotionalAmount
         );
+
     }
 
     /**

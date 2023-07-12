@@ -49,39 +49,39 @@ contract MarketRiskConfigurationTest is Test {
 
     function test_Set() public {
         marketRiskConfiguration.set(
-            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18), twapLookbackWindow: 86400})
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: UD60x18.wrap(1e18), twapLookbackWindow: 86400})
         );
 
         MarketRiskConfiguration.Data memory data = marketRiskConfiguration.getMarketRiskConfiguration(1, 10);
 
         assertEq(data.productId, 1);
         assertEq(data.marketId, 10);
-        assertEq(SD59x18.unwrap(data.riskParameter), 1e18);
+        assertEq(UD60x18.unwrap(data.riskParameter), 1e18);
     }
 
     function test_Set_Twice() public {
         marketRiskConfiguration.set(
-            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18), twapLookbackWindow: 86400})
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: UD60x18.wrap(1e18), twapLookbackWindow: 86400})
         );
 
         marketRiskConfiguration.set(
-            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(2e18), twapLookbackWindow: 86400})
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: UD60x18.wrap(2e18), twapLookbackWindow: 86400})
         );
 
         MarketRiskConfiguration.Data memory data = marketRiskConfiguration.getMarketRiskConfiguration(1, 10);
 
         assertEq(data.productId, 1);
         assertEq(data.marketId, 10);
-        assertEq(SD59x18.unwrap(data.riskParameter), 2e18);
+        assertEq(UD60x18.unwrap(data.riskParameter), 2e18);
     }
 
     function test_Set_MoreConfigurations() public {
         marketRiskConfiguration.set(
-            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: SD59x18.wrap(1e18), twapLookbackWindow: 86400})
+            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: UD60x18.wrap(1e18), twapLookbackWindow: 86400})
         );
 
         marketRiskConfiguration.set(
-            MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: SD59x18.wrap(2e18), twapLookbackWindow: 86400})
+            MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: UD60x18.wrap(2e18), twapLookbackWindow: 86400})
         );
 
         {
@@ -89,7 +89,7 @@ contract MarketRiskConfigurationTest is Test {
 
             assertEq(data.productId, 1);
             assertEq(data.marketId, 10);
-            assertEq(SD59x18.unwrap(data.riskParameter), 1e18);
+            assertEq(UD60x18.unwrap(data.riskParameter), 1e18);
         }
 
         {
@@ -97,7 +97,7 @@ contract MarketRiskConfigurationTest is Test {
 
             assertEq(data.productId, 2);
             assertEq(data.marketId, 20);
-            assertEq(SD59x18.unwrap(data.riskParameter), 2e18);
+            assertEq(UD60x18.unwrap(data.riskParameter), 2e18);
         }
     }
 }

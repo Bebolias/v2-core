@@ -61,20 +61,6 @@ library Product {
     }
 
     /**
-     * @dev The product at self.productAddress is expected to aggregate the pnl for a given account in all maturities and pools
-     * @dev note, given that the account only supports single-token mode, the unrealised pnl is expected to be in terms of the
-     * settlement token of the account, i.e. all the positions used in the unrealised pnl calculation should settle/quote in a token
-     * that matches the settlement token of the account.
-     */
-    function getAccountUnrealizedPnL(Data storage self, uint128 accountId, address collateralType)
-        internal
-        view
-        returns (int256 accountUnrealizedPnL)
-    {
-        return IProduct(self.productAddress).getAccountUnrealizedPnL(accountId, collateralType);
-    }
-
-    /**
      * @dev in context of interest rate swaps, base refers to scaled variable tokens (e.g. scaled virtual aUSDC)
      * @dev in order to derive the annualized exposure of base tokens in quote terms (i.e. USDC), we need to
      * first calculate the (non-annualized) exposure by multiplying the baseAmount by the current liquidity index of the
@@ -90,17 +76,14 @@ library Product {
     }
 
     /**
-     * @dev The product at self.productAddress is expected to aggregate filled and
-     * @dev unfilled notionals for all maturities and pools
-     * note: needs to be in terms of the collateralType token of the account given currently
-     * note only supporting single-token mode
+     * @dev Returns taker exposures alongside maker exposures for the lower and upper bounds of the maker's range
      */
-    function getAccountAnnualizedExposures(Data storage self, uint128 accountId, address collateralType)
+    function getAccountTakerAndMakerExposures(Data storage self, uint128 accountId, address collateralType)
         internal
         view
-        returns (Account.Exposure[] memory exposures)
+        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
     {
-        return IProduct(self.productAddress).getAccountAnnualizedExposures(accountId, collateralType);
+        return IProduct(self.productAddress).getAccountTakerAndMakerExposures(accountId, collateralType);
     }
 
     /**
