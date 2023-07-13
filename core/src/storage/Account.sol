@@ -20,7 +20,8 @@ import "oz/utils/math/SignedMath.sol";
 
 // todo: consider moving into ProbMathHelper.sol
 import {UD60x18, sub as subSD59x18} from "@prb/math/SD59x18.sol";
-import {mulUDxUint, mulUDxInt, mulSDxInt, sd59x18, SD59x18, UD60x18} from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
+import {mulUDxUint, mulUDxInt, mulSDxInt, sd59x18, SD59x18, UD60x18} 
+    from "@voltz-protocol/util-contracts/src/helpers/PrbMathHelper.sol";
 
 /**
  * @title Object for tracking accounts with access control and collateral tracking.
@@ -154,7 +155,8 @@ library Account {
         view
         returns (uint256 collateralBalanceAvailable)
     {
-        (uint256 initialMarginRequirement,,uint256 highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
+        (uint256 initialMarginRequirement,,uint256 highestUnrealizedLoss) = 
+            self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
 
         uint256 collateralBalance = self.getCollateralBalance(collateralType);
 
@@ -219,10 +221,15 @@ library Account {
     function getProductTakerAndMakerExposures(Data storage self, uint128 productId, address collateralType)
         internal
         view
-        returns (Exposure[] memory productTakerExposures, Exposure[] memory productMakerExposuresLower, Exposure[] memory productMakerExposuresUpper)
+        returns (
+            Exposure[] memory productTakerExposures,
+            Exposure[] memory productMakerExposuresLower,
+            Exposure[] memory productMakerExposuresUpper
+        )
     {
         Product.Data storage _product = Product.load(productId);
-        (productTakerExposures, productMakerExposuresLower, productMakerExposuresUpper) = _product.getAccountTakerAndMakerExposures(self.id, collateralType);
+        (productTakerExposures, productMakerExposuresLower, productMakerExposuresUpper) = 
+            _product.getAccountTakerAndMakerExposures(self.id, collateralType);
     }
 
 
@@ -252,21 +259,31 @@ library Account {
     /**
      * @dev Returns a boolean imSatisfied (true if the account is above initial margin requirement) and the initial margin requirement
      */
-    function isIMSatisfied(Data storage self, address collateralType) internal view returns (bool imSatisfied, uint256 initialMarginRequirement, uint256 highestUnrealizedLoss) {
+    function isIMSatisfied(Data storage self, address collateralType)
+        internal
+        view
+    returns (bool imSatisfied, uint256 initialMarginRequirement, uint256 highestUnrealizedLoss) {
         (initialMarginRequirement,,highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
         uint256 collateralBalance = self.getCollateralBalance(collateralType);
         imSatisfied = collateralBalance >= initialMarginRequirement + highestUnrealizedLoss;
     }
 
     /**
-     * @dev Returns a booleans liquidatable (true if the account is below liquidation margin requirement) and the initial and liquidation margin requirements
+     * @dev Returns a booleans liquidatable (true if the account is below liquidation margin requirement) 
+     * and the initial and liquidation margin requirements
      */
     function isLiquidatable(Data storage self, address collateralType)
         internal
         view
-        returns (bool liquidatable, uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
+        returns (
+            bool liquidatable,
+            uint256 initialMarginRequirement,
+            uint256 liquidationMarginRequirement,
+            uint256 highestUnrealizedLoss
+        )
     {
-        (initialMarginRequirement, liquidationMarginRequirement, highestUnrealizedLoss) = self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
+        (initialMarginRequirement, liquidationMarginRequirement, highestUnrealizedLoss) = 
+            self.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
         uint256 collateralBalance = self.getCollateralBalance(collateralType);
         liquidatable = collateralBalance < liquidationMarginRequirement + highestUnrealizedLoss;
     }
@@ -286,12 +303,17 @@ library Account {
         for (uint256 i = 1; i <= _activeProducts.length(); i++) {
             uint128 productId = _activeProducts.valueAt(i).to128();
 
-            (Exposure[] memory productTakerExposures, Exposure[] memory productMakerExposuresLower, Exposure[] memory productMakerExposuresUpper) = self.getProductTakerAndMakerExposures(productId, collateralType);
+            (
+                Exposure[] memory productTakerExposures,
+                Exposure[] memory productMakerExposuresLower,
+                Exposure[] memory productMakerExposuresUpper
+            ) = self.getProductTakerAndMakerExposures(productId, collateralType);
 
             (uint256 lmTakerPositions, uint256 unrealizedLossTakerPositions) = computeLMAndUnrealizedLossFromExposures(
                 productTakerExposures
             );
-            (uint256 lmMakerPositions, uint256 highestUnrealizedLossMakerPositions) = computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(productMakerExposuresLower, productMakerExposuresUpper);
+            (uint256 lmMakerPositions, uint256 highestUnrealizedLossMakerPositions) =
+                computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(productMakerExposuresLower, productMakerExposuresUpper);
             liquidationMarginRequirement += (lmTakerPositions + lmMakerPositions);
             highestUnrealizedLoss += (unrealizedLossTakerPositions + highestUnrealizedLossMakerPositions);
         }
@@ -325,8 +347,13 @@ library Account {
         for (uint256 i=0; i < exposures.length; i++) {
             Exposure memory exposure = exposures[i];
             UD60x18 riskParameter = getRiskParameter(exposure.productId, exposure.marketId);
-            uint256 liquidationMarginRequirementExposure = computeLiquidationMarginRequirement(exposure.annualizedNotional, riskParameter);
-            uint256 unrealizedLossExposure = computeUnrealizedLoss(exposure.annualizedNotional, UD60x18.wrap(exposure.lockedPrice), UD60x18.wrap(exposure.marketTwap));
+            uint256 liquidationMarginRequirementExposure = 
+                computeLiquidationMarginRequirement(exposure.annualizedNotional, riskParameter);
+            uint256 unrealizedLossExposure = computeUnrealizedLoss(
+                exposure.annualizedNotional,
+                UD60x18.wrap(exposure.lockedPrice),
+                UD60x18.wrap(exposure.marketTwap)
+            );
             liquidationMarginRequirement += liquidationMarginRequirementExposure;
             unrealizedLoss += unrealizedLossExposure;
         }
@@ -373,8 +400,11 @@ library Account {
         }
     }
 
-    function computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(Exposure[] memory exposuresLower, Exposure[] memory exposuresUpper) internal view
-    returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
+    function computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(
+        Exposure[] memory exposuresLower,
+        Exposure[] memory exposuresUpper
+        ) internal view
+        returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
     {
 
         // todo: assert or revert if exposuresLower.length != exposuresUpper.length
@@ -384,12 +414,25 @@ library Account {
             Exposure memory exposureLower = exposuresLower[i];
             Exposure memory exposureUpper = exposuresUpper[i];
             UD60x18 riskParameter = getRiskParameter(exposureLower.productId, exposureLower.marketId);
-            uint256 liquidationMarginRequirementExposureLower = computeLiquidationMarginRequirement(exposureLower.annualizedNotional, riskParameter);
-            uint256 liquidationMarginRequirementExposureUpper = computeLiquidationMarginRequirement(exposureUpper.annualizedNotional, riskParameter);
-            uint256 unrealizedLossExposureLower = computeUnrealizedLoss(exposureLower.annualizedNotional, UD60x18.wrap(exposureLower.lockedPrice), UD60x18.wrap(exposureLower.marketTwap));
-            uint256 unrealizedLossExposureUpper = computeUnrealizedLoss(exposureUpper.annualizedNotional, UD60x18.wrap(exposureUpper.lockedPrice), UD60x18.wrap(exposureUpper.marketTwap));
+            uint256 liquidationMarginRequirementExposureLower = 
+                computeLiquidationMarginRequirement(exposureLower.annualizedNotional, riskParameter);
+            uint256 liquidationMarginRequirementExposureUpper =
+                computeLiquidationMarginRequirement(exposureUpper.annualizedNotional, riskParameter);
+            uint256 unrealizedLossExposureLower = computeUnrealizedLoss(
+                exposureLower.annualizedNotional,
+                UD60x18.wrap(exposureLower.lockedPrice),
+                UD60x18.wrap(exposureLower.marketTwap)
+            );
+            uint256 unrealizedLossExposureUpper = computeUnrealizedLoss(
+                exposureUpper.annualizedNotional,
+                UD60x18.wrap(exposureUpper.lockedPrice),
+                UD60x18.wrap(exposureUpper.marketTwap)
+            );
 
-            if (liquidationMarginRequirementExposureLower + unrealizedLossExposureLower > liquidationMarginRequirementExposureUpper + unrealizedLossExposureUpper) {
+            if (
+                liquidationMarginRequirementExposureLower + unrealizedLossExposureLower >
+                liquidationMarginRequirementExposureUpper + unrealizedLossExposureUpper
+            ) {
                 liquidationMarginRequirement += liquidationMarginRequirementExposureLower;
                 highestUnrealizedLoss += unrealizedLossExposureLower;
             } else {

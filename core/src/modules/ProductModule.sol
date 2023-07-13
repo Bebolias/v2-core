@@ -48,9 +48,14 @@ contract ProductModule is IProductModule {
         external
         override
         view
-        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
+        returns (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        )
     {
-        (takerExposures, makerExposuresLower, makerExposuresUpper) = Product.load(productId).getAccountTakerAndMakerExposures(accountId, collateralType);
+        (takerExposures, makerExposuresLower, makerExposuresUpper) = 
+            Product.load(productId).getAccountTakerAndMakerExposures(accountId, collateralType);
     }
 
     /**

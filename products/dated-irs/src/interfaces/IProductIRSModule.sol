@@ -14,6 +14,14 @@ import "../storage/ProductConfiguration.sol";
 interface IProductIRSModule is IProduct {
     event ProductConfigured(ProductConfiguration.Data config, uint256 blockTimestamp);
 
+    struct TakerOrderParams {
+        uint128 accountId;
+        uint128 marketId;
+        uint32 maturityTimestamp;
+        int256 baseAmount;
+        uint160 priceLimit;
+    }
+
     /**
      * @notice Emitted when a taker order of the account token with id `accountId` is initiated.
      * @param accountId The id of the account.
@@ -75,20 +83,14 @@ interface IProductIRSModule is IProduct {
     /**
      * @notice Initiates a taker order for a given account by consuming liquidity provided by the pool connected to this product
      * @dev Initially a single pool is connected to a single product, however, that doesn't need to be the case in the future
-     * @param accountId Id of the account that wants to initiate a taker order
-     * @param marketId Id of the market in which the account wants to initiate a taker order (e.g. 1 for aUSDC lend)
-     * @param maturityTimestamp Maturity timestamp of the market in which the account wants to initiate a taker order
-     * @param priceLimit The Q64.96 sqrt price limit. If !isFT, the price cannot be less than this
-     * @param baseAmount Amount of notional that the account wants to trade in either long (+) or short (-) direction depending on
+     * params accountId Id of the account that wants to initiate a taker order
+     * params marketId Id of the market in which the account wants to initiate a taker order (e.g. 1 for aUSDC lend)
+     * params maturityTimestamp Maturity timestamp of the market in which the account wants to initiate a taker order
+     * params priceLimit The Q64.96 sqrt price limit. If !isFT, the price cannot be less than this
+     * params baseAmount Amount of notional that the account wants to trade in either long (+) or short (-) direction depending on
      * sign
      */
-    function initiateTakerOrder(
-        uint128 accountId,
-        uint128 marketId,
-        uint32 maturityTimestamp,
-        int256 baseAmount,
-        uint160 priceLimit
-    )
+    function initiateTakerOrder(TakerOrderParams memory params)
         external
         returns (int256 executedBaseAmount, int256 executedQuoteAmount, uint256 fee, uint256 im, uint256 highestUnrealizedLoss);
 

@@ -81,7 +81,11 @@ library Product {
     function getAccountTakerAndMakerExposures(Data storage self, uint128 accountId, address collateralType)
         internal
         view
-        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
+        returns (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        )
     {
         return IProduct(self.productAddress).getAccountTakerAndMakerExposures(accountId, collateralType);
     }

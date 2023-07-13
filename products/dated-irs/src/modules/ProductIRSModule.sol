@@ -33,13 +33,7 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProductIRSModule
      */
-    function initiateTakerOrder(
-        uint128 accountId,
-        uint128 marketId,
-        uint32 maturityTimestamp,
-        int256 baseAmount,
-        uint160 priceLimit
-    )
+    function initiateTakerOrder(TakerOrderParams memory params)
         external
         override
         returns (int256 executedBaseAmount, int256 executedQuoteAmount, uint256 fee, uint256 im, uint256 highestUnrealizedLoss)
@@ -47,31 +41,37 @@ contract ProductIRSModule is IProductIRSModule {
         address coreProxy = ProductConfiguration.getCoreProxyAddress();
 
         // check account access permissions
-        IAccountModule(coreProxy).onlyAuthorized(accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
+        IAccountModule(coreProxy).onlyAuthorized(params.accountId, AccountRBAC._ADMIN_PERMISSION, msg.sender);
 
         // check if market id is valid + check there is an active pool with maturityTimestamp requested
         (executedBaseAmount, executedQuoteAmount) =
-            IPool(ProductConfiguration.getPoolAddress()).executeDatedTakerOrder(marketId, maturityTimestamp, baseAmount, priceLimit);
-        Portfolio.loadOrCreate(accountId).updatePosition(marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount);
+            IPool(ProductConfiguration.getPoolAddress()).executeDatedTakerOrder(
+                params.marketId, params.maturityTimestamp, params.baseAmount, params.priceLimit
+            );
+        Portfolio.loadOrCreate(params.accountId).updatePosition(
+            params.marketId, params.maturityTimestamp, executedBaseAmount, executedQuoteAmount
+        );
 
         // propagate order
-        address quoteToken = MarketConfiguration.load(marketId).quoteToken;
-        int256 annualizedNotionalAmount = getSingleAnnualizedExposure(executedBaseAmount, marketId, maturityTimestamp);
+        address quoteToken = MarketConfiguration.load(params.marketId).quoteToken;
+        int256 annualizedNotionalAmount = getSingleAnnualizedExposure(
+            executedBaseAmount, params.marketId, params.maturityTimestamp
+        );
         
         uint128 productId = ProductConfiguration.getProductId();
         (fee, im, highestUnrealizedLoss) = IProductModule(coreProxy).propagateTakerOrder(
-            accountId,
+            params.accountId,
             productId,
-            marketId,
+            params.marketId,
             quoteToken,
             annualizedNotionalAmount
         );
 
         emit TakerOrder(
-            accountId,
+            params.accountId,
             productId,
-            marketId,
-            maturityTimestamp,
+            params.marketId,
+            params.maturityTimestamp,
             quoteToken,
             executedBaseAmount,
             executedQuoteAmount,
@@ -153,7 +153,11 @@ contract ProductIRSModule is IProductIRSModule {
         external
         view
         override
-        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
+        returns (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        )
     {
         Portfolio.Data storage portfolio = Portfolio.exists(accountId);
         address poolAddress = ProductConfiguration.getPoolAddress();

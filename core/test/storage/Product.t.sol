@@ -43,7 +43,11 @@ contract ExposedProduct is CoreState {
 
     function getAccountTakerAndMakerExposures(uint128 productId, uint128 accountId, address collateralType)
         external
-    returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper)
+    returns (
+        Account.Exposure[] memory takerExposures,
+        Account.Exposure[] memory makerExposuresLower,
+        Account.Exposure[] memory makerExposuresUpper
+    )
     {
         Product.Data storage product = Product.load(productId);
         return product.getAccountTakerAndMakerExposures(accountId, collateralType);

@@ -82,7 +82,11 @@ contract MockProduct is IProduct {
     function getAccountTakerAndMakerExposures(uint128 accountId, address collateralType)
         public
         view
-        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerLowerExposures, Account.Exposure[] memory makerUpperExposures)
+        returns (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerLowerExposures,
+            Account.Exposure[] memory makerUpperExposures
+        )
     {
         MockAccountMakerAndTakerExposures storage tmp = mockAccountTakerAndMakerExposures[accountId][collateralType];
 
@@ -90,7 +94,11 @@ contract MockProduct is IProduct {
             revert("Unmocked call");
         }
 
-        return (tmp.takerExposuresReturnValues[tmp.start], tmp.makerLowerExposuresReturnValues[tmp.start], tmp.makerUpperExposuresReturnValues[tmp.start]);
+        return (
+            tmp.takerExposuresReturnValues[tmp.start],
+            tmp.makerLowerExposuresReturnValues[tmp.start],
+            tmp.makerUpperExposuresReturnValues[tmp.start]
+        );
     }
 
     // supportsInterface mock support

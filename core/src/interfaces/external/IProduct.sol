@@ -34,7 +34,11 @@ interface IProduct is IERC165 {
     function getAccountTakerAndMakerExposures(uint128 accountId, address collateralType)
         external
         view
-        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper);
+        returns (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        );
 
     //// STATE CHANGING FUNCTIONS ////
 

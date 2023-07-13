@@ -80,13 +80,25 @@ contract LiquidationModule is ILiquidationModule {
         }
 
         account.closeAccount(collateralType);
-        (uint256 imPostClose,,uint256 highestUnrealizedLossPostClose) = account.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
+        (uint256 imPostClose,,uint256 highestUnrealizedLossPostClose) = 
+            account.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
 
         if (imPreClose + highestUnrealizedLossPreClose <= imPostClose + highestUnrealizedLossPostClose) {
-            revert AccountExposureNotReduced(liquidatedAccountId, imPreClose, imPostClose, highestUnrealizedLossPreClose, highestUnrealizedLossPostClose);
+            revert AccountExposureNotReduced(
+                liquidatedAccountId,
+                imPreClose,
+                imPostClose,
+                highestUnrealizedLossPreClose,
+                highestUnrealizedLossPostClose
+            );
         }
 
-        liquidatorRewardAmount = extractLiquidatorReward(liquidatedAccountId, collateralType, imPreClose+highestUnrealizedLossPreClose, imPostClose+highestUnrealizedLossPostClose);
+        liquidatorRewardAmount = extractLiquidatorReward(
+            liquidatedAccountId,
+            collateralType,
+            imPreClose + highestUnrealizedLossPreClose,
+            imPostClose+highestUnrealizedLossPostClose
+        );
 
         Account.Data storage liquidatorAccount = Account.exists(liquidatorAccountId);
         liquidatorAccount.collaterals[collateralType].increaseCollateralBalance(liquidatorRewardAmount);

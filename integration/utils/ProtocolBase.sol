@@ -364,6 +364,21 @@ contract ProtocolBase is BatchScript {
     }
   }
 
+  function setMakerPositionsPerAccountLimit(uint256 makerPositionsPerAccountLimit) public {
+    if (!multisig) {
+      vm.broadcast(owner);
+      vammProxy.setMakerPositionsPerAccountLimit(makerPositionsPerAccountLimit);
+    } else {
+      addToBatch(
+        address(vammProxy),
+        abi.encodeCall(
+          vammProxy.setMakerPositionsPerAccountLimit,
+          (makerPositionsPerAccountLimit)
+        )
+      );
+    }
+  }
+
   ////////////////////////////////////////////////////////////////////
   /////////////////             PERIPHERY            /////////////////
   ////////////////////////////////////////////////////////////////////

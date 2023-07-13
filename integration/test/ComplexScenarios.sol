@@ -92,7 +92,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
       ProductConfiguration.Data({
         productId: productId,
         coreProxy: address(coreProxy),
-        poolAddress: address(vammProxy)
+        poolAddress: address(vammProxy),
+        takerPositionsPerAccountLimit: 1
       })
     );
 
@@ -109,7 +110,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
       MarketRiskConfiguration.Data({
         productId: productId, 
         marketId: marketId, 
-        riskParameter: SD59x18.wrap(1e18), 
+        riskParameter: UD60x18.wrap(1e18), 
         twapLookbackWindow: 120
       })
     );
@@ -125,7 +126,9 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         priceImpactPhi: ud60x18(1e17), // 0.1
         priceImpactBeta: ud60x18(125e15), // 0.125
         spread: ud60x18(3e15), // 0.3%
-        rateOracle: IRateOracle(address(aaveV3RateOracle))
+        rateOracle: IRateOracle(address(aaveV3RateOracle)),
+        minTick: TickMath.DEFAULT_MIN_TICK,
+        maxTick: TickMath.DEFAULT_MAX_TICK
     });
 
     vammProxy.setProductAddress(address(datedIrsProxy));
@@ -136,6 +139,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
       mutableConfig
     );
     vammProxy.increaseObservationCardinalityNext(marketId, maturityTimestamp, 16);
+    vammProxy.setMakerPositionsPerAccountLimit(1);
 
     vm.stopPrank();
 
@@ -203,9 +207,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         marketId,
         maturityTimestamp,
         baseAmount,
-        baseAmount > 0 ? 
-            TickMath.MIN_SQRT_RATIO + 1 :
-            TickMath.MAX_SQRT_RATIO - 1 // MIN_SQRT_LIMIT, VT
+        0
     );
     bytes[] memory output = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 
@@ -245,8 +247,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         marketId,
         maturityTimestamp,
         baseAmount,
-        baseAmount > 0 ? TickMath.getSqrtRatioAtTick(TickMath.MIN_TICK + 1) :
-            TickMath.getSqrtRatioAtTick(TickMath.MAX_TICK - 1)
+        0
     );
     bytes[] memory output = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 

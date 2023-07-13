@@ -67,7 +67,11 @@ contract ExposedAccounts is CoreState {
 
     function getProductTakerAndMakerExposures(uint128 id, uint128 productId, address collateralType)
         external
-        returns (Account.Exposure[] memory productTakerExposures, Account.Exposure[] memory productMakerExposuresLower, Account.Exposure[] memory productMakerExposuresUpper)
+        returns (
+            Account.Exposure[] memory productTakerExposures,
+            Account.Exposure[] memory productMakerExposuresLower,
+            Account.Exposure[] memory productMakerExposuresUpper
+        )
     {
         Account.Data storage account = Account.load(id);
         return account.getProductTakerAndMakerExposures(productId, collateralType);
@@ -97,7 +101,9 @@ contract ExposedAccounts is CoreState {
         return account.isLiquidatable(collateralType);
     }
 
-    function getMarginRequirementsAndHighestUnrealizedLoss(uint128 id, address collateralType) external returns (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) {
+    function getMarginRequirementsAndHighestUnrealizedLoss(uint128 id, address collateralType) 
+        external 
+        returns (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) {
         Account.Data storage account = Account.load(id);
         return account.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
     }
@@ -250,7 +256,8 @@ contract AccountTest is Test {
     function test_IsLiquidatable_True() public {
         setCollateralProfile("low");
 
-        (bool liquidatable, uint256 im, uint256 lm, uint256 highestUnrealizedLoss) = accounts.isLiquidatable(accountId, Constants.TOKEN_0);
+        (bool liquidatable, uint256 im, uint256 lm, uint256 highestUnrealizedLoss) =
+             accounts.isLiquidatable(accountId, Constants.TOKEN_0);
 
         assertEq(liquidatable, true);
         assertEq(lm, 1000e18);
@@ -260,7 +267,8 @@ contract AccountTest is Test {
     function test_IsLiquidatable_False() public {
         setCollateralProfile("medium");
 
-        (bool liquidatable, uint256 im, uint256 lm, uint256 highestUnrealizedLoss) = accounts.isLiquidatable(accountId, Constants.TOKEN_0);
+        (bool liquidatable, uint256 im, uint256 lm, uint256 highestUnrealizedLoss) = 
+            accounts.isLiquidatable(accountId, Constants.TOKEN_0);
 
         assertEq(liquidatable, false);
         assertEq(lm, 1000e18);
@@ -270,7 +278,8 @@ contract AccountTest is Test {
     function test_IsIMSatisfied_False() public {
         setCollateralProfile("medium");
 
-        (bool imSatisfied, uint256 im, uint256 highestUnrealizedLoss) = accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
+        (bool imSatisfied, uint256 im, uint256 highestUnrealizedLoss) = 
+            accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
 
         assertEq(imSatisfied, false);
         assertEq(im, 2000e18);
@@ -280,7 +289,8 @@ contract AccountTest is Test {
     function test_IsIMSatisfied_True() public {
         setCollateralProfile("high");
 
-        (bool imSatisfied, uint256 im, uint256 highestUnrealizedLoss) = accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
+        (bool imSatisfied, uint256 im, uint256 highestUnrealizedLoss) =
+            accounts.isIMSatisfied(accountId, Constants.TOKEN_0);
 
         assertEq(imSatisfied, true);
         assertEq(im, 2000e18);

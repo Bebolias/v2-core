@@ -33,6 +33,10 @@ contract ExposeProductConfiguration {
         return ProductConfiguration.getProductId();
     }
 
+    function getTakerPositionsPerAccountLimit() external view returns (uint256) {
+        return ProductConfiguration.getTakerPositionsPerAccountLimit();
+    }
+
     function set(ProductConfiguration.Data memory data) external {
         ProductConfiguration.set(data);
     }
@@ -50,7 +54,12 @@ contract ProductConfigurationTest is Test {
     function setUp() public virtual {
         productConfiguration = new ExposeProductConfiguration();
         productConfiguration.set(
-            ProductConfiguration.Data({ productId: MOCK_PRODUCT_ID, coreProxy: MOCK_PROXY_ADDRESS, poolAddress: MOCK_POOL_ADDRESS })
+            ProductConfiguration.Data({ 
+                productId: MOCK_PRODUCT_ID,
+                coreProxy: MOCK_PROXY_ADDRESS,
+                poolAddress: MOCK_POOL_ADDRESS,
+                takerPositionsPerAccountLimit: 2 
+            })
         );
     }
 
@@ -63,13 +72,20 @@ contract ProductConfigurationTest is Test {
         assertEq(productConfiguration.getProductId(), MOCK_PRODUCT_ID);
         assertEq(productConfiguration.getCoreProxyAddress(), MOCK_PROXY_ADDRESS);
         assertEq(productConfiguration.getPoolAddress(), MOCK_POOL_ADDRESS);
+        assertEq(productConfiguration.getTakerPositionsPerAccountLimit(), 2);
     }
 
     function test_SetNewConfigForOldProduct() public {
-        productConfiguration.set(ProductConfiguration.Data({ productId: 677, coreProxy: address(3), poolAddress: address(4) }));
+        productConfiguration.set(ProductConfiguration.Data({
+            productId: 677,
+            coreProxy: address(3),
+            poolAddress: address(4),
+            takerPositionsPerAccountLimit: 3 
+        }));
 
         assertEq(productConfiguration.getProductId(), 677);
         assertEq(productConfiguration.getCoreProxyAddress(), address(3));
         assertEq(productConfiguration.getPoolAddress(), address(4));
+        assertEq(productConfiguration.getTakerPositionsPerAccountLimit(), 3);
     }
 }

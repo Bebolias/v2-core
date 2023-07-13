@@ -118,17 +118,26 @@ contract ProductModuleTest is Test {
 
     function test_CloseAccount() public {
         Account.Exposure[] memory emptyExposures;
-        productModule.getProducts()[0].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, emptyExposures, emptyExposures, emptyExposures);
+        productModule.getProducts()[0].mockGetAccountTakerAndMakerExposures(
+            100, Constants.TOKEN_0, emptyExposures, emptyExposures, emptyExposures
+        );
 
-        (Account.Exposure[] memory takerExposuresBefore, Account.Exposure[] memory makerLowerExposuresBefore, Account.Exposure[] memory makerUpperExposuresBefore) =
-            productModule.getProducts()[0].getAccountTakerAndMakerExposures(100, Constants.TOKEN_0);
+        (
+            Account.Exposure[] memory takerExposuresBefore,
+            Account.Exposure[] memory makerLowerExposuresBefore,
+            Account.Exposure[] memory makerUpperExposuresBefore
+        ) = productModule.getProducts()[0].getAccountTakerAndMakerExposures(100, Constants.TOKEN_0);
         assertEq(makerLowerExposuresBefore.length, 2);
 
         vm.prank(Constants.ALICE);
         //todo: check event was emitted (AN)
         productModule.closeAccount(1, 100, Constants.TOKEN_0);
 
-        (Account.Exposure[] memory takerExposuresAfter, Account.Exposure[] memory makerLowerExposuresAfter, Account.Exposure[] memory makerUpperExposuresAfter) =
+        (
+            Account.Exposure[] memory takerExposuresAfter,
+            Account.Exposure[] memory makerLowerExposuresAfter,
+            Account.Exposure[] memory makerUpperExposuresAfter
+        ) =
             productModule.getProducts()[0].getAccountTakerAndMakerExposures(100, Constants.TOKEN_0);
         assertEq(makerLowerExposuresAfter.length, 0);
     }

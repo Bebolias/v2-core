@@ -245,13 +245,19 @@ contract CoreState is MockCoreStorage, Ownable {
 
         // Set market risk configuration
         MarketRiskConfiguration.set(
-            MarketRiskConfiguration.Data({productId: 1, marketId: 10, riskParameter: UD60x18.wrap(1e18), twapLookbackWindow: 86400})
+            MarketRiskConfiguration.Data(
+                {productId: 1, marketId: 10, riskParameter: UD60x18.wrap(1e18), twapLookbackWindow: 86400}
+            )
         );
         MarketRiskConfiguration.set(
-            MarketRiskConfiguration.Data({productId: 1, marketId: 11, riskParameter: UD60x18.wrap(1e18), twapLookbackWindow: 86400})
+            MarketRiskConfiguration.Data(
+                {productId: 1, marketId: 11, riskParameter: UD60x18.wrap(1e18), twapLookbackWindow: 86400}
+            )
         );
         MarketRiskConfiguration.set(
-            MarketRiskConfiguration.Data({productId: 2, marketId: 20, riskParameter: UD60x18.wrap(1e18), twapLookbackWindow: 86400})
+            MarketRiskConfiguration.Data(
+                {productId: 2, marketId: 20, riskParameter: UD60x18.wrap(1e18), twapLookbackWindow: 86400}
+            )
         );
 
         // Set market fee configuration
@@ -334,11 +340,15 @@ contract CoreState is MockCoreStorage, Ownable {
             mockExposuresMakerLower[1] =
             Account.Exposure({productId: 1, marketId: 11, annualizedNotional: 500e18, lockedPrice: 1e18, marketTwap: 1e18});
 
-            products[0].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, mockExposuresTaker, mockExposuresMakerLower, mockExposuresMakerUpper);
+            products[0].mockGetAccountTakerAndMakerExposures(
+                100, Constants.TOKEN_0, mockExposuresTaker, mockExposuresMakerLower, mockExposuresMakerUpper
+            );
 
             Account.Exposure[] memory emptyExposures;
             products[0].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_1, emptyExposures, emptyExposures, emptyExposures);
-            products[0].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_UNKNOWN, emptyExposures, emptyExposures, emptyExposures);
+            products[0].mockGetAccountTakerAndMakerExposures(
+                100, Constants.TOKEN_UNKNOWN, emptyExposures, emptyExposures, emptyExposures
+            );
 
             products[0].mockBaseToAnnualizedExposure(10, 123000, 5e17);
             products[0].mockBaseToAnnualizedExposure(11, 120000, 25e16);
@@ -356,12 +366,16 @@ contract CoreState is MockCoreStorage, Ownable {
             mockExposuresMakerUpper[0] =
             Account.Exposure({productId: 2, marketId: 20, annualizedNotional: 100e18, lockedPrice: 1e18, marketTwap: 1e18});
 
-            products[1].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_0, mockExposuresTaker, mockExposuresMakerLower, mockExposuresMakerUpper);
+            products[1].mockGetAccountTakerAndMakerExposures(
+                100, Constants.TOKEN_0, mockExposuresTaker, mockExposuresMakerLower, mockExposuresMakerUpper
+            );
 
             // todo: test single account single-token mode (AN)
             Account.Exposure[] memory emptyExposures;
             products[1].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_1, emptyExposures, emptyExposures, emptyExposures);
-            products[1].mockGetAccountTakerAndMakerExposures(100, Constants.TOKEN_UNKNOWN, emptyExposures, emptyExposures, emptyExposures);
+            products[1].mockGetAccountTakerAndMakerExposures(
+                100, Constants.TOKEN_UNKNOWN, emptyExposures, emptyExposures, emptyExposures
+            );
 
             products[1].mockBaseToAnnualizedExposure(20, 145000, 2e18);
         }

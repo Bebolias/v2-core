@@ -89,14 +89,24 @@ contract ProductIRSModuleTest is Test {
 
         // create product
         productIrs.configureProduct(
-            ProductConfiguration.Data({ productId: MOCK_PRODUCT_ID, coreProxy: address(mockCoreStorage), poolAddress: address(2) })
+            ProductConfiguration.Data({
+                productId: MOCK_PRODUCT_ID,
+                coreProxy: address(mockCoreStorage),
+                poolAddress: address(2),
+                takerPositionsPerAccountLimit: 2 
+            })
         );
     }
 
     function test_ProductConfiguredCorrectly() public {
         // expect ProductConfigured event
         ProductConfiguration.Data memory config =
-            ProductConfiguration.Data({ productId: 124, coreProxy: address(3), poolAddress: address(4) });
+            ProductConfiguration.Data({
+                productId: 124,
+                coreProxy: address(3),
+                poolAddress: address(4),
+                takerPositionsPerAccountLimit: 3 
+            });
 
         vm.expectEmit(true, true, false, true);
         emit ProductConfigured(config, block.timestamp);
@@ -107,6 +117,7 @@ contract ProductIRSModuleTest is Test {
         assertEq(configRecived.productId, 124);
         assertEq(configRecived.coreProxy, address(3));
         assertEq(configRecived.poolAddress, address(4));
+        assertEq(configRecived.takerPositionsPerAccountLimit, 3);
     }
 
     function test_SupportsInterfaceIERC165() public {
@@ -200,7 +211,15 @@ contract ProductIRSModuleTest is Test {
         );
         vm.startPrank(MOCK_USER);
 
-        productIrs.initiateTakerOrder(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp, 100, 0);
+        productIrs.initiateTakerOrder(
+            IProductIRSModule.TakerOrderParams({
+                accountId: MOCK_ACCOUNT_ID,
+                marketId: MOCK_MARKET_ID,
+                maturityTimestamp: maturityTimestamp,
+                baseAmount: 100,
+                priceLimit: 0
+            })
+        );
         vm.stopPrank();
     }
 
@@ -211,7 +230,15 @@ contract ProductIRSModuleTest is Test {
             IAccountModule.PermissionNotGranted.selector,
             MOCK_ACCOUNT_ID, AccountRBAC._ADMIN_PERMISSION, address(this)
         ));
-        productIrs.initiateTakerOrder(MOCK_ACCOUNT_ID, MOCK_MARKET_ID, maturityTimestamp, 100, 0);
+        productIrs.initiateTakerOrder(
+            IProductIRSModule.TakerOrderParams({
+                accountId: MOCK_ACCOUNT_ID,
+                marketId: MOCK_MARKET_ID,
+                maturityTimestamp: maturityTimestamp,
+                baseAmount: 100,
+                priceLimit: 0
+            })
+        );
     }
 
     function test_CloseExistingAccount() public {
@@ -254,7 +281,11 @@ contract ProductIRSModuleTest is Test {
             abi.encode(10, 12)
         );
 
-        (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper) = productIrs.getAccountTakerAndMakerExposures(MOCK_ACCOUNT_ID, MOCK_QUOTE_TOKEN);
+        (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        ) = productIrs.getAccountTakerAndMakerExposures(MOCK_ACCOUNT_ID, MOCK_QUOTE_TOKEN);
 
         // todo: layer in asserts
 //        assertEq(exposures.length, 1);

@@ -45,7 +45,11 @@ interface IProductModule {
     /// @notice returns account taker and maker exposures for a given product, account and collateral type
     function getAccountTakerAndMakerExposures(uint128 productId, uint128 accountId, address collateralType)
         external
-        returns (Account.Exposure[] memory takerExposures, Account.Exposure[] memory makerExposuresLower, Account.Exposure[] memory makerExposuresUpper);
+        returns (
+            Account.Exposure[] memory takerExposures,
+            Account.Exposure[] memory makerExposuresLower,
+            Account.Exposure[] memory makerExposuresUpper
+        );
 
     //// STATE CHANGING FUNCTIONS ////
 

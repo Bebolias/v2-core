@@ -11,10 +11,25 @@ import "../storage/Config.sol";
 library V2DatedIRS {
     function swap(uint128 accountId, uint128 marketId, uint32 maturityTimestamp, int256 baseAmount, uint160 priceLimit)
         internal
-        returns (int256 executedBaseAmount, int256 executedQuoteAmount, uint256 fee, uint256 im, uint256 highestUnrealizedLoss, int24 currentTick)
+        returns (
+            int256 executedBaseAmount,
+            int256 executedQuoteAmount,
+            uint256 fee,
+            uint256 im,
+            uint256 highestUnrealizedLoss,
+            int24 currentTick
+        )
     {
-        (executedBaseAmount, executedQuoteAmount, fee, im, highestUnrealizedLoss) = IProductIRSModule(Config.load().VOLTZ_V2_DATED_IRS_PROXY)
-            .initiateTakerOrder(accountId, marketId, maturityTimestamp, baseAmount, priceLimit);
+        IProductIRSModule.TakerOrderParams memory params  = IProductIRSModule.TakerOrderParams({
+            accountId: accountId,
+            marketId: marketId,
+            maturityTimestamp: maturityTimestamp,
+            baseAmount: baseAmount,
+            priceLimit: priceLimit
+        }); 
+        (executedBaseAmount, executedQuoteAmount, fee, im, highestUnrealizedLoss) =
+            IProductIRSModule(Config.load().VOLTZ_V2_DATED_IRS_PROXY)
+                .initiateTakerOrder(params);
         // get current tick
         currentTick = IVammModule(Config.load().VOLTZ_V2_DATED_IRS_VAMM_PROXY).getVammTick(marketId, maturityTimestamp);
     }
