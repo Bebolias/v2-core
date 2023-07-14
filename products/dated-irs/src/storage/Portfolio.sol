@@ -116,6 +116,22 @@ library Portfolio {
         }
     }
 
+    // todo: consider breaking below functions into pure functions
+    function computeUnrealizedLoss(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        address poolAddress,
+        int256 baseBalance,
+        int256 quoteBalance
+    ) internal view returns (uint256 unrealizedLoss) {
+        int256 unwindQuote = computeUnwindQuote(marketId, maturityTimestamp, poolAddress, baseBalance);
+        int256 unrealizedPnL = quoteBalance + unwindQuote;
+
+        if (unrealizedPnL < 0) {
+            // todo: check if safecasting with .Uint() is necessary
+            unrealizedLoss = uint256(-unrealizedPnL);
+        }
+    }
 
     function computeUnwindQuote(
         uint128 marketId,
@@ -197,8 +213,12 @@ library Portfolio {
         uint32 maturityTimestamp;
         int256 baseBalance;
         int256 baseBalancePool;
+        int256 quoteBalance;
+        int256 quoteBalancePool;
         uint256 unfilledBaseLong;
+        uint256 unfilledQuoteLong;
         uint256 unfilledBaseShort;
+        uint256 unfilledQuoteShort;
         UD60x18 _annualizedExposureFactor;
     }
 
@@ -218,6 +238,7 @@ library Portfolio {
             makerExposuresUpperWithEmptySlots: new Account.Exposure[](self.activeMarketsAndMaturities[collateralType].length())
         });
 
+
         for (uint256 i = 0; i < ces.poolsCount; i++) {
             PoolExposureState memory pes = self.getPoolExposureState(
                 i + 1,
@@ -225,22 +246,31 @@ library Portfolio {
                 poolAddress
             );
 
-            // todo: pull market twap
             if (pes.unfilledBaseLong == 0 && pes.unfilledBaseShort == 0) {
                 // no unfilled exposures => only consider taker exposures
-                // todo: pull annualized locked fixed rate to populate the lockedPrice field
+                uint256 unrealizedLoss = computeUnrealizedLoss(
+                    pes.marketId,
+                    pes.maturityTimestamp,
+                    poolAddress,
+                    pes.baseBalance + pes.baseBalancePool,
+                    pes.quoteBalance + pes.quoteBalancePool
+                );
                 ces.takerExposuresWithEmptySlots[ces.takerExposuresLength] = Account.Exposure({
                     productId: ces.productId,
                     marketId: pes.marketId,
                     annualizedNotional: mulUDxInt(pes._annualizedExposureFactor, pes.baseBalance + pes.baseBalancePool),
-                    lockedPrice: 0,
-                    marketTwap: 0
+                    unrealizedLoss: unrealizedLoss
                 });
                 ces.takerExposuresLength = ces.takerExposuresLength + 1;
             } else {
-                // unfilled exposures => consider maker lower 
-                // (unfilled short gets filled) and upper exposures (unfilled long gets filled)
-                // todo: compute locked price for lower and upper exposures
+                // unfilled exposures => consider maker lower
+                uint256 unrealizedLossLower = computeUnrealizedLoss(
+                    pes.marketId,
+                    pes.maturityTimestamp,
+                    poolAddress,
+                    pes.baseBalance + pes.baseBalancePool - pes.unfilledBaseShort.toInt(),
+                    pes.quoteBalance + pes.quoteBalancePool + pes.unfilledQuoteShort.toInt()
+                );
                 ces.makerExposuresLowerWithEmptySlots[ces.makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: ces.productId,
                     marketId: pes.marketId,
@@ -248,9 +278,15 @@ library Portfolio {
                         pes._annualizedExposureFactor, 
                         pes.baseBalance + pes.baseBalancePool + pes.unfilledBaseShort.toInt()
                     ),
-                    lockedPrice: 0,
-                    marketTwap: 0
+                    unrealizedLoss: unrealizedLossLower
                 });
+                uint256 unrealizedLossUpper = computeUnrealizedLoss(
+                    pes.marketId,
+                    pes.maturityTimestamp,
+                    poolAddress,
+                    pes.baseBalance + pes.baseBalancePool + pes.unfilledBaseLong.toInt(),
+                    pes.quoteBalance + pes.quoteBalancePool - pes.unfilledQuoteLong.toInt()
+                );
                 ces.makerExposuresUpperWithEmptySlots[ces.makerExposuresLowerAndUpperLength] = Account.Exposure({
                     productId: ces.productId,
                     marketId: pes.marketId,
@@ -258,8 +294,7 @@ library Portfolio {
                         pes._annualizedExposureFactor,
                         pes.baseBalance + pes.baseBalancePool + pes.unfilledBaseLong.toInt()
                     ),
-                    lockedPrice: 0,
-                    marketTwap: 0
+                    unrealizedLoss: unrealizedLossUpper
                 });
                 ces.makerExposuresLowerAndUpperLength = ces.makerExposuresLowerAndUpperLength + 1;
             }
@@ -284,9 +319,11 @@ library Portfolio {
         (pes.marketId, pes.maturityTimestamp) = self.getMarketAndMaturity(index, collateralType);
 
         pes.baseBalance = self.positions[pes.marketId][pes.maturityTimestamp].baseBalance;
-        (pes.baseBalancePool,) = IPool(poolAddress).getAccountFilledBalances(pes.marketId, pes.maturityTimestamp, self.accountId);
-        (pes.unfilledBaseLong, pes.unfilledBaseShort) =
-            IPool(poolAddress).getAccountUnfilledBases(pes.marketId, pes.maturityTimestamp, self.accountId);
+        pes.quoteBalance = self.positions[pes.marketId][pes.maturityTimestamp].quoteBalance;
+        (pes.baseBalancePool,pes.quoteBalancePool) = IPool(poolAddress).getAccountFilledBalances(
+            pes.marketId, pes.maturityTimestamp, self.accountId);
+        (pes.unfilledBaseLong, pes.unfilledQuoteLong, pes.unfilledBaseShort, pes.unfilledQuoteShort) =
+            IPool(poolAddress).getAccountUnfilledBaseAndQuote(pes.marketId, pes.maturityTimestamp, self.accountId);
         pes._annualizedExposureFactor = annualizedExposureFactor(pes.marketId, pes.maturityTimestamp);
     }
 

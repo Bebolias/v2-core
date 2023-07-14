@@ -87,8 +87,8 @@ library Account {
         uint128 productId;
         uint128 marketId;
         int256 annualizedNotional;
-        uint256 lockedPrice;
-        uint256 marketTwap;
+        // note, in context of dated irs with the current accounting logic it also includes accruedInterest
+        uint256 unrealizedLoss;
     }
 
     //// STATE CHANGING FUNCTIONS ////
@@ -349,13 +349,8 @@ library Account {
             UD60x18 riskParameter = getRiskParameter(exposure.productId, exposure.marketId);
             uint256 liquidationMarginRequirementExposure = 
                 computeLiquidationMarginRequirement(exposure.annualizedNotional, riskParameter);
-            uint256 unrealizedLossExposure = computeUnrealizedLoss(
-                exposure.annualizedNotional,
-                UD60x18.wrap(exposure.lockedPrice),
-                UD60x18.wrap(exposure.marketTwap)
-            );
             liquidationMarginRequirement += liquidationMarginRequirementExposure;
-            unrealizedLoss += unrealizedLossExposure;
+            unrealizedLoss += exposure.unrealizedLoss;
         }
 
     }
@@ -385,20 +380,6 @@ library Account {
         initialMarginRequirement = mulUDxUint(imMultiplier, liquidationMarginRequirement);
     }
 
-    /**
-     * @dev Returns the unrealized loss given the annualized exposure, the market twap and the locked price
-     */
-    function computeUnrealizedLoss(int256 annualizedNotional, UD60x18 lockedPrice, UD60x18 marketTwap)
-    internal
-    pure
-    returns (uint256 unrealizedLoss)
-    {
-        SD59x18 priceDelta = subSD59x18(sd59x18(marketTwap), sd59x18(lockedPrice));
-        int256 unrealizedPnL = mulSDxInt(priceDelta, annualizedNotional);
-        if (unrealizedPnL < 0) {
-            unrealizedLoss = (-unrealizedPnL).toUint();
-        }
-    }
 
     function computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(
         Exposure[] memory exposuresLower,
@@ -407,10 +388,11 @@ library Account {
         returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
     {
 
-        // todo: assert or revert if exposuresLower.length != exposuresUpper.length
+        require(exposuresLower.length == exposuresUpper.length);
+
         for (uint256 i=0; i < exposuresLower.length; i++) {
-            // todo: assert or revert if exposuresLower[i].productId != exposuresUpper[i].productId
-            // todo: assert or revert if exposuresLower[i].marketId != exposuresUpper[i].marketId
+            require(exposuresLower[i].productId == exposuresUpper[i].productId);
+            require(exposuresLower[i].marketId == exposuresUpper[i].marketId);
             Exposure memory exposureLower = exposuresLower[i];
             Exposure memory exposureUpper = exposuresUpper[i];
             UD60x18 riskParameter = getRiskParameter(exposureLower.productId, exposureLower.marketId);
@@ -418,26 +400,16 @@ library Account {
                 computeLiquidationMarginRequirement(exposureLower.annualizedNotional, riskParameter);
             uint256 liquidationMarginRequirementExposureUpper =
                 computeLiquidationMarginRequirement(exposureUpper.annualizedNotional, riskParameter);
-            uint256 unrealizedLossExposureLower = computeUnrealizedLoss(
-                exposureLower.annualizedNotional,
-                UD60x18.wrap(exposureLower.lockedPrice),
-                UD60x18.wrap(exposureLower.marketTwap)
-            );
-            uint256 unrealizedLossExposureUpper = computeUnrealizedLoss(
-                exposureUpper.annualizedNotional,
-                UD60x18.wrap(exposureUpper.lockedPrice),
-                UD60x18.wrap(exposureUpper.marketTwap)
-            );
 
             if (
-                liquidationMarginRequirementExposureLower + unrealizedLossExposureLower >
-                liquidationMarginRequirementExposureUpper + unrealizedLossExposureUpper
+                liquidationMarginRequirementExposureLower + exposureLower.unrealizedLoss >
+                liquidationMarginRequirementExposureUpper + exposureUpper.unrealizedLoss
             ) {
                 liquidationMarginRequirement += liquidationMarginRequirementExposureLower;
-                highestUnrealizedLoss += unrealizedLossExposureLower;
+                highestUnrealizedLoss += exposureLower.unrealizedLoss;
             } else {
                 liquidationMarginRequirement += liquidationMarginRequirementExposureUpper;
-                highestUnrealizedLoss += unrealizedLossExposureUpper;
+                highestUnrealizedLoss += exposureUpper.unrealizedLoss;
             }
         }
     }

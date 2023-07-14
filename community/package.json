@@ -12,7 +12,7 @@
     "@voltz-protocol/products-dated-irs": "workspace:^",
     "@voltz-protocol/util-contracts": "workspace:^",
     "@voltz-protocol/util-modules": "workspace:^",
-    "@voltz-protocol/v2-vamm": "1.16.0"
+    "@voltz-protocol/v2-vamm": "1.16.2"
   },
   "scripts": {
     "publish": "echo \"Cannot publish community yet\"",
