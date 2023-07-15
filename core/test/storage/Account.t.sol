@@ -12,6 +12,7 @@ import "../../src/storage/Account.sol";
 import "../test-utils/MockCoreStorage.sol";
 
 import {SD59x18} from "@prb/math/SD59x18.sol";
+import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
 
 contract ExposedAccounts is CoreState {
     using Account for Account.Data;
@@ -106,6 +107,40 @@ contract ExposedAccounts is CoreState {
         returns (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) {
         Account.Data storage account = Account.load(id);
         return account.getMarginRequirementsAndHighestUnrealizedLoss(collateralType);
+    }
+
+    function computeLMAndUnrealizedLossFromExposures(Account.Exposure[] memory exposures)
+    external
+    view
+    returns (uint256 liquidationMarginRequirement, uint256 unrealizedLoss)
+    {
+        return Account.computeLMAndUnrealizedLossFromExposures(exposures);
+    }
+
+    function computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(
+        Account.Exposure[] memory exposuresLower,
+        Account.Exposure[] memory exposuresUpper
+    ) external view
+    returns (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss)
+    {
+        return Account.computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(exposuresLower, exposuresUpper);
+    }
+
+    function computeLiquidationMarginRequirement(int256 annualizedNotional, UD60x18 riskParameter)
+    external
+    pure
+    returns (uint256 liquidationMarginRequirement)
+    {
+       
+        return Account.computeLiquidationMarginRequirement(annualizedNotional, riskParameter);
+    }
+
+    function computeInitialMarginRequirement(uint256 liquidationMarginRequirement, UD60x18 imMultiplier)
+    external
+    pure
+    returns (uint256 initialMarginRequirement)
+    {
+        return Account.computeInitialMarginRequirement(liquidationMarginRequirement, imMultiplier);
     }
 }
 
@@ -234,7 +269,15 @@ contract AccountTest is Test {
     }
 
     function test_GetProductTakerAndMakerExposures() public {
-        // todo: implementation
+        (
+        Account.Exposure[] memory productTakerExposures,
+        Account.Exposure[] memory productMakerExposuresLower,
+        Account.Exposure[] memory productMakerExposuresUpper
+        ) = accounts.getProductTakerAndMakerExposures(accountId, 1, Constants.TOKEN_0);
+
+        assertEq(productTakerExposures.length, 0);
+        assertEq(productMakerExposuresLower.length, 2);
+        assertEq(productMakerExposuresUpper.length, 2);
     }
 
     function test_GetRiskParameter() public {
@@ -250,7 +293,12 @@ contract AccountTest is Test {
     }
 
     function test_GetMarginRequirementsAndHighestUnrealizedLoss() public {
-        // todo: implementation
+        (uint256 initialMarginRequirement, uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) =
+            accounts.getMarginRequirementsAndHighestUnrealizedLoss(accountId, Constants.TOKEN_0);
+
+        assertEq(initialMarginRequirement, 2000e18);
+        assertEq(liquidationMarginRequirement, 1000e18);
+        assertEq(highestUnrealizedLoss, 0);
     }
 
     function test_IsLiquidatable_True() public {
@@ -362,4 +410,77 @@ contract AccountTest is Test {
 
         assertEq(collateralBalanceAvailable, 1e18);
     }
+
+    function test_ComputeLMAndUnrealizedLossFromExposures() public {
+        uint256 length = 3;
+        Account.Exposure[] memory exposures = new Account.Exposure[](length);
+        
+        uint256 expectedUnrealizedLoss;
+        for (uint256 i = 0; i < 3; i += 1) {
+            exposures[i] = Account.Exposure({
+                productId: 1,
+                marketId: (i % 2 == 0) ? 10 : 11,
+                annualizedNotional: int256(i * 100),
+                unrealizedLoss: i * 50
+            });
+
+            expectedUnrealizedLoss += exposures[i].unrealizedLoss;
+        } 
+
+        (uint256 liquidationMarginRequirement, uint256 unrealizedLoss) = accounts.computeLMAndUnrealizedLossFromExposures(exposures);
+        assertEq(liquidationMarginRequirement, 300);
+        assertEq(unrealizedLoss, expectedUnrealizedLoss);
+    }
+
+
+    function test_ComputeLMAndHighestUnrealizedLossFromLowerAndUpperExposures() public {
+        uint256 length = 3;
+        Account.Exposure[] memory lowerExposures = new Account.Exposure[](length);
+        Account.Exposure[] memory upperExposures = new Account.Exposure[](length);
+
+        uint256 expectedUnrealizedLoss;
+        uint256 expectedLiquidationMarginRequirement;
+        for (uint256 i = 0; i < length; i += 1) {
+            lowerExposures[i] = Account.Exposure({
+                productId: 1,
+                marketId: (i % 2 == 0) ? 10 : 11,
+                annualizedNotional: int256(i * 1000),
+                unrealizedLoss: i * 500
+            });
+
+            upperExposures[i] = Account.Exposure({
+                productId: 1,
+                marketId: (i % 2 == 0) ? 10 : 11,
+                annualizedNotional: int256(i * 100),
+                unrealizedLoss: i * 50
+            });
+
+            // note, in here we're only taking into account lower exposures because they pose the highest risk
+            expectedUnrealizedLoss += lowerExposures[i].unrealizedLoss;
+            // in here we're assuming the risk parameter is 1, hence lm = annualized notional * 1 = annualized notional
+            expectedLiquidationMarginRequirement += lowerExposures[i].annualizedNotional.toUint();
+        }
+
+        (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) = accounts.computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(lowerExposures, upperExposures);
+        assertEq(liquidationMarginRequirement, expectedLiquidationMarginRequirement);
+        assertEq(highestUnrealizedLoss, expectedUnrealizedLoss);
+    }
+
+    function test_ComputeLiquidationMarginRequirement() public {
+        int256 annualizedNotional = 1000;
+        UD60x18 riskParameter = UD60x18.wrap(2e18);
+        uint256 expectedLiquidationMarginRequirement = 2000;
+        uint256 liquidationMarginRequirement = accounts.computeLiquidationMarginRequirement(annualizedNotional, riskParameter);
+        assertEq(liquidationMarginRequirement, expectedLiquidationMarginRequirement);
+    }
+
+    function test_ComputeInitialMarginRequirement() public {
+        uint256 liquidaionMarginRequirement = 2000;
+        UD60x18 imMultiplier = UD60x18.wrap(2e18);
+        uint256 expectedInitialMarginRequirement = 4000;
+        uint256 initialMarginRequirement = accounts.computeInitialMarginRequirement(liquidaionMarginRequirement, imMultiplier);
+        assertEq(initialMarginRequirement, expectedInitialMarginRequirement);
+    }
+
+
 }

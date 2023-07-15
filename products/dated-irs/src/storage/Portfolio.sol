@@ -116,7 +116,6 @@ library Portfolio {
         }
     }
 
-    // todo: consider breaking below functions into pure functions
     function computeUnrealizedLoss(
         uint128 marketId,
         uint32 maturityTimestamp,
@@ -189,7 +188,7 @@ library Portfolio {
     function removeEmptySlotsFromExposuresArray(
         Account.Exposure[] memory exposures,
         uint256 length
-    ) internal view returns (Account.Exposure[] memory exposuresWithoutEmptySlots) {
+    ) internal pure returns (Account.Exposure[] memory exposuresWithoutEmptySlots) {
         // todo: consider into a utility library
         require(exposures.length >= length);
         exposuresWithoutEmptySlots = new Account.Exposure[](length);
@@ -230,6 +229,7 @@ library Portfolio {
 
         CollateralExposureState memory ces = CollateralExposureState({
             productId: ProductConfiguration.getProductId(),
+            // todo: consider renaming poolsCoint to activeMarketsAndMaturitiesCount
             poolsCount: self.activeMarketsAndMaturities[collateralType].length(),
             takerExposuresLength: 0,
             makerExposuresLowerAndUpperLength: 0,
@@ -276,10 +276,11 @@ library Portfolio {
                     marketId: pes.marketId,
                     annualizedNotional: mulUDxInt(
                         pes._annualizedExposureFactor, 
-                        pes.baseBalance + pes.baseBalancePool + pes.unfilledBaseShort.toInt()
+                        pes.baseBalance + pes.baseBalancePool - pes.unfilledBaseShort.toInt()
                     ),
                     unrealizedLoss: unrealizedLossLower
                 });
+
                 uint256 unrealizedLossUpper = computeUnrealizedLoss(
                     pes.marketId,
                     pes.maturityTimestamp,

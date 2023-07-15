@@ -18,6 +18,7 @@ import "@voltz-protocol/core/src/storage/Account.sol";
 import "@voltz-protocol/core/src/storage/MarketRiskConfiguration.sol";
 import "@voltz-protocol/core/src/interfaces/IRiskConfigurationModule.sol";
 import "@voltz-protocol/core/src/interfaces/IProductModule.sol";
+import "../../src/interfaces/IPool.sol";
 import { UD60x18, ud, unwrap as uUnwrap } from "@prb/math/UD60x18.sol";
 
 contract ExposePortfolio {
@@ -150,6 +151,37 @@ contract ExposePortfolio {
 
     function setMarket(uint128 marketId, address quoteToken) external {
         MarketConfiguration.set(MarketConfiguration.Data({ marketId: marketId, quoteToken: quoteToken }));
+    }
+
+    function computeUnrealizedLoss(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        address poolAddress,
+        int256 baseBalance,
+        int256 quoteBalance
+    ) external view returns (uint256 unrealizedLoss) {
+        unrealizedLoss = Portfolio.computeUnrealizedLoss(
+            marketId,
+            maturityTimestamp,
+            poolAddress,
+            baseBalance,
+            quoteBalance
+        );
+    }
+
+    function removeEmptySlotsFromExposuresArray(
+        Account.Exposure[] memory exposures,
+        uint256 length
+    ) external pure returns (Account.Exposure[] memory exposuresWithoutEmptySlots) {
+        exposuresWithoutEmptySlots = Portfolio.removeEmptySlotsFromExposuresArray(exposures, length);
+    }
+
+    function getAccountTakerAndMakerExposuresWithEmptySlots(
+        uint128 id,
+        address poolAddress,
+        address collateralType
+    ) external view returns (Account.Exposure[] memory, Account.Exposure[] memory, Account.Exposure[] memory, uint256, uint256)  {
+        return Portfolio.load(id).getAccountTakerAndMakerExposuresWithEmptySlots(poolAddress, collateralType);
     }
 
     // EXTRA GETTERS
@@ -558,6 +590,12 @@ contract PortfolioTest is Test {
         vm.mockCall(coreProxy, abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1,
             marketId), abi.encode(1,marketId,1,3600));
 
+        vm.mockCall(address(mockPool), abi.encodeWithSelector(IPool.getAccountUnfilledBaseAndQuote.selector, marketId, maturityTimestamp,
+            accountId), abi.encode(1e18, 2e18, 2e18, 1e18));
+
+        vm.mockCall(address(mockPool), abi.encodeWithSelector(IPool.getAccountFilledBalances.selector, marketId, maturityTimestamp,
+            accountId), abi.encode(1e18, -1e18));
+
         (
             Account.Exposure[] memory takerExposures,
             Account.Exposure[] memory makerExposuresLower,
@@ -565,12 +603,24 @@ contract PortfolioTest is Test {
         ) =
             portfolio.getAccountTakerAndMakerExposures(accountId, address(mockPool), MOCK_COLLATERAL_TYPE);
 
-        // todo: asserts
-//        assertEq(exposures.length, 1);
-//        assertEq(exposures[0].marketId, marketId);
-//        assertEq(exposures[0].filled, 1e7);
-//        assertEq(exposures[0].unfilledLong, 0);
-//        assertEq(exposures[0].unfilledShort, 0);
+        // annualized exposure factor = 1e18
+        // base balance = 10000000
+        // quote balance = 20000000
+
+        assertEq(takerExposures.length, 0);
+        assertEq(makerExposuresLower.length, 1);
+        assertEq(makerExposuresUpper.length, 1);
+
+        assertEq(makerExposuresLower[0].productId, 1);
+        assertEq(makerExposuresUpper[0].productId, 1);
+        assertEq(makerExposuresLower[0].marketId, marketId);
+        assertEq(makerExposuresUpper[0].marketId, marketId);
+        assertEq(makerExposuresLower[0].annualizedNotional, 10000000 + 1e18 - 2e18);
+        assertEq(makerExposuresUpper[0].annualizedNotional, 10000000 + 1e18 + 1e18);
+        // todo: double check unrealized losses are correctly calculated (interesting why they are the same)
+        assertEq(makerExposuresLower[0].unrealizedLoss, 999999999970000000);
+        assertEq(makerExposuresUpper[0].unrealizedLoss, 999999999970000000);
+
     }
 
     function test_AccountAnnualizedWithPosition() public {
@@ -597,5 +647,80 @@ contract PortfolioTest is Test {
 //        assertEq(exposures[0].filled, 25);
 //        assertEq(exposures[0].unfilledLong, 2);
 //        assertEq(exposures[0].unfilledShort, 3);
+    }
+
+    function test_ComputeUnrealizedLoss_Zero() public {
+        uint32 maturityTimestamp = currentTimestamp + ONE_YEAR;
+        uint256 liqudityIndex = 1e27;
+        UD60x18 twap = ud(0.3e18);
+
+        mockPool.setDatedIRSTwap(marketId, maturityTimestamp, twap);
+
+        mockRateOracle.setLastUpdatedIndex(liqudityIndex);
+
+        vm.mockCall(
+            coreProxy,
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1, marketId),
+            abi.encode(mockCoreMarketConfig)
+        );
+
+        uint256 unrealizedLoss = portfolio.computeUnrealizedLoss(marketId, maturityTimestamp, address(mockPool), 1e18, -1e18);
+
+        // unwind quote = 1.3E18
+        // unrealized pnl = 1.3E18 - 1E18 = 0.3E18
+        // unrealized loss = 0
+
+        assertEq(unrealizedLoss, 0);
+    }
+
+    function test_ComputeUnrealizedLoss_Positive() public {
+        uint32 maturityTimestamp = currentTimestamp + ONE_YEAR;
+        uint256 liqudityIndex = 1e27;
+        UD60x18 twap = ud(0.1e18);
+
+        mockPool.setDatedIRSTwap(marketId, maturityTimestamp, twap);
+
+        mockRateOracle.setLastUpdatedIndex(liqudityIndex);
+
+        vm.mockCall(
+            coreProxy,
+            abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1, marketId),
+            abi.encode(mockCoreMarketConfig)
+        );
+
+        uint256 unrealizedLoss = portfolio.computeUnrealizedLoss(marketId, maturityTimestamp, address(mockPool), 1e18, -100e18);
+
+        // unwind quote = 1.1E18
+        // unrealized pnl = 1.1E18 - 100E18 = -9.89E19
+        // unrealized loss = 9.89E19
+
+        assertEq(unrealizedLoss, 9.89e19);
+    }
+
+    function test_RemoveEmptySlotsFromExposuresArray() public {
+        Account.Exposure[] memory exposures = new Account.Exposure[](3);
+        exposures[0] = Account.Exposure(
+            {productId: 1, marketId: 11, annualizedNotional: 2e18, unrealizedLoss: 0}
+        );
+        exposures[1] = Account.Exposure(
+            {productId: 1, marketId: 12, annualizedNotional: 2e18, unrealizedLoss: 0}
+        );
+
+        Account.Exposure[] memory exposuresWithoutEmotySlots = portfolio.removeEmptySlotsFromExposuresArray(exposures, 2);
+
+        assertEq(exposuresWithoutEmotySlots.length, 2);
+        assertEq(exposuresWithoutEmotySlots[0].productId, 1);
+        assertEq(exposuresWithoutEmotySlots[1].productId, 1);
+        assertEq(exposuresWithoutEmotySlots[0].marketId, 11);
+        assertEq(exposuresWithoutEmotySlots[1].marketId, 12);
+        assertEq(exposuresWithoutEmotySlots[0].annualizedNotional, 2e18);
+        assertEq(exposuresWithoutEmotySlots[1].annualizedNotional, 2e18);
+        assertEq(exposuresWithoutEmotySlots[0].unrealizedLoss, 0);
+        assertEq(exposuresWithoutEmotySlots[1].unrealizedLoss, 0);
+
+    }
+
+    function test_GetAccountTakerAndMakerExposuresWithEmptySlots() public {
+        // todo: implement
     }
 }
