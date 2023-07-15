@@ -24,3 +24,7 @@ yarn-error.log
 
 
 .vscode/
+
+crytic-export/
+
+test/fuzzing/corpora

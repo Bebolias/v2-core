@@ -2,10 +2,13 @@ pragma solidity >=0.8.19;
 
 import "forge-std/Test.sol";
 
-import {CoreRouter, CoreProxy, AccountNftRouter, AccountNftProxy, AccessPassConfiguration} from "../../src/Core.sol";
-import {DatedIrsRouter, DatedIrsProxy, AaveV3RateOracle, MockAaveLendingPool} from "../../src/DatedIrs.sol";
-import {PeripheryRouter, PeripheryProxy} from "../../src/Periphery.sol";
-import {VammRouter, VammProxy} from "../../src/Vamm.sol";
+import {CoreRouter, CoreProxy, AccountNftRouter, AccountNftProxy, AccessPassConfiguration} from "../../src/proxies/Core.sol";
+import {DatedIrsRouter, DatedIrsProxy} from "../../src/proxies/DatedIrs.sol";
+import {PeripheryRouter, PeripheryProxy} from "../../src/proxies/Periphery.sol";
+import {VammRouter, VammProxy} from "../../src/proxies/Vamm.sol";
+
+import {AaveV3RateOracle} from "@voltz-protocol/products-dated-irs/src/oracles/AaveV3RateOracle.sol";
+import {MockAaveLendingPool} from "@voltz-protocol/products-dated-irs/test/mocks/MockAaveLendingPool.sol";
 
 import {AccessPassNFT} from "@voltz-protocol/access-pass-nft/src/AccessPassNFT.sol";
 import {Merkle} from "murky/Merkle.sol";

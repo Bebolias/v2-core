@@ -137,8 +137,7 @@ abstract contract BatchScript is Script, DelegatePrank {
     // Internal functions
     function _initialize() private {
         // Set the chain ID
-        Chain memory chain = getChain(vm.envString("CHAIN"));
-        chainId = chain.chainId;
+        chainId = vm.envUint("CHAIN_ID");
 
         // Set the Safe API base URL and multisend address based on chain
         SAFE_MULTISEND_ADDRESS = 0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526; // v1.4.1

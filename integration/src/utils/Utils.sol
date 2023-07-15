@@ -12,7 +12,7 @@ library Utils {
   using SafeCastU256 for uint256;
   using SafeCastI256 for int256;
   
-  function getWETH9Address(uint256 chainId) public pure returns (address) {
+  function getWETH9Address(uint256 chainId) internal pure returns (address) {
     if (chainId == 1) {
       return 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     } else if (chainId == 5) {
@@ -23,12 +23,15 @@ library Utils {
       return 0xb83C277172198E8Ec6b841Ff9bEF2d7fa524f797;
     } else if (chainId == 43114) {
       return 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7;
-    } else {
+    } else if (chainId == 0) { // used for echidna
+      return 0x0000000000000000000000000000000000000000;
+    }
+    else {
       revert("getWETH9Address: Unsupported chain");
     }
   }
 
-  function getUSDCAddress(uint256 chainId) public pure returns (address) {
+  function getUSDCAddress(uint256 chainId) internal pure returns (address) {
     if (chainId == 1) {
       return 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     } else if (chainId == 5) {
@@ -44,7 +47,7 @@ library Utils {
     }
   }
 
-  function existsAccountNft(IERC721 accountNftProxy, uint256 tokenId) public view returns (bool) {
+  function existsAccountNft(IERC721 accountNftProxy, uint256 tokenId) internal view returns (bool) {
     try accountNftProxy.ownerOf(tokenId) {
       return true;
     } catch {
@@ -56,7 +59,7 @@ library Utils {
     int24 tickLower,
     int24 tickUpper,
     int256 baseAmount
-  ) public pure returns (int128 liquidity) {
+  ) internal pure returns (int128 liquidity) {
     // get sqrt ratios
     uint160 sqrtRatioAX96 = TickMath.getSqrtRatioAtTick(tickLower);
     uint160 sqrtRatioBX96 = TickMath.getSqrtRatioAtTick(tickUpper);

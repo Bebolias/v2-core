@@ -18,7 +18,7 @@ library AssociatedSystem {
         }
     }
 
-    bytes32 public constant KIND_ERC721 = "erc721";
+    bytes32 internal constant KIND_ERC721 = "erc721";
 
     function getAddress(Data storage self) internal view returns (address) {
         return self.proxy;

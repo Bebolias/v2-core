@@ -1,0 +1,13 @@
+#select the mode to test, which can be property, assertion, overflow, exploration, optimization
+testMode: "assertion"
+#testLimit is the number of test sequences to run
+testLimit: 100000000000
+#seqLen defines how many transactions are in a test sequence
+seqLen: 1
+#coverage controls coverage guided testing
+coverage: true
+#directory to save the corpus; by default is disabled
+corpusDir: corpora/harness_corpus
+# whether or not to generate a coverage report
+coverageReport: true
+codeSize: 0x10000
