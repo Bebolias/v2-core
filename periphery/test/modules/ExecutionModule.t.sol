@@ -98,14 +98,15 @@ contract ExecutionModuleTest is Test {
                 IPoolModule.initiateDatedMakerOrder.selector,
                 1, 101, 1678786786, -6600, -6000, 10389000
             ),
-            abi.encode(163656, 187267678)
+            abi.encode(163656, 187267678, 0)
         );
 
         bytes[] memory output = exec.execute(commands, inputs, deadline);
-        (uint256 fee, uint256 im) = abi.decode(output[0], (uint256, uint256));
+        (uint256 fee, uint256 im, uint256 highestUnrealizedLoss) = abi.decode(output[0], (uint256, uint256, uint256));
         assertEq(output.length, 1);
         assertEq(fee, 163656);
         assertEq(im, 187267678);
+        assertEq(highestUnrealizedLoss, 0);
     }
 
     function testExecCommand_TwoOutputs() public {
@@ -124,7 +125,7 @@ contract ExecutionModuleTest is Test {
                 IPoolModule.initiateDatedMakerOrder.selector,
                 1, 101, 1678786786, -6600, -6000, 10389000
             ),
-            abi.encode(163656, 187267678)
+            abi.encode(163656, 187267678, 0)
         );
 
         vm.mockCall(
@@ -147,8 +148,7 @@ contract ExecutionModuleTest is Test {
 
         bytes[] memory output = exec.execute(commands, inputs, deadline);
 
-        // todo: add unrealziedLoss to decoding
-        (uint256 fee, uint256 im) = abi.decode(output[0], (uint256, uint256));
+        (uint256 fee, uint256 im, uint256 highestUnrealizedLossMaker) = abi.decode(output[0], (uint256, uint256, uint256));
         (
             int256 executedBaseAmount,
             int256 executedQuoteAmount,
@@ -165,7 +165,8 @@ contract ExecutionModuleTest is Test {
         assertEq(fee1, 25);
         assertEq(im1, 55);
         assertEq(currentTick, 660);
-        // todo: assert unrealized loss
+        assertEq(highestUnrealizedLoss, 0);
+        assertEq(highestUnrealizedLossMaker, 0);
     }
 
     function testExecCommand_Withdraw() public {

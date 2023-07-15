@@ -464,15 +464,16 @@ contract ComplexScenarios is BaseScenario, TestUtils {
   /// @dev gets average fixed rate in wad
   function getAvgRate(
     int256 base,
-    int256 quote, 
+    int256 quote,
     int256 liquidityIndex,
     int256 yearsUntilMaturityWad
   ) public returns (int256) {
-    // quote = base * li * (1 + avgprice * yearsTillMat)
+    // quote = -base * li * (1 + avgprice * yearsTillMat)
+    // todo: consider returning a uint256 given the fact that the rate cannon be negative
     SD59x18 one = sd59x18(WAD.toInt());
-    return 
+    return
         SD59x18.unwrap(
-            abs(sd59x18(quote).div(sd59x18(base).mul(sd59x18(liquidityIndex))))
+            abs(sd59x18(quote).div(sd59x18(-base).mul(sd59x18(liquidityIndex))))
             .sub(one)
             .div(sd59x18(yearsUntilMaturityWad))
         );

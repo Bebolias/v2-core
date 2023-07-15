@@ -297,8 +297,8 @@ contract ProductModuleTest is Test {
         assertEq(productModule.getActiveProductsLength(100), 2);
         vm.prank(address(productModule.getProducts()[0]));
         productModule.propagateMakerOrder(100, 1, 10, Constants.TOKEN_0, -100e18);
-        assertEq(productModule.getCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE - 1e18);
-        assertEq(productModule.getCollateralBalance(999, Constants.TOKEN_0), 1e18);
+        assertEq(productModule.getCollateralBalance(100, Constants.TOKEN_0), Constants.DEFAULT_TOKEN_0_BALANCE);
+        assertEq(productModule.getCollateralBalance(999, Constants.TOKEN_0), 0);
         assertEq(productModule.getActiveProductsLength(100), 2);
     }
 

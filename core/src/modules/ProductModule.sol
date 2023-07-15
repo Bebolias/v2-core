@@ -145,10 +145,12 @@ contract ProductModule is IProductModule {
         FeatureFlag.ensureAccessToFeature(_GLOBAL_FEATURE_FLAG);
         Product.onlyProductAddress(productId, msg.sender);
 
-        MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
-        fee = distributeFees(
-            accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicMakerFee, collateralType, annualizedNotional
-        );
+        if (annualizedNotional > 0) {
+            MarketFeeConfiguration.Data memory feeConfig = MarketFeeConfiguration.load(productId, marketId);
+            fee = distributeFees(
+                accountId, feeConfig.feeCollectorAccountId, feeConfig.atomicMakerFee, collateralType, annualizedNotional
+            );
+        }
 
         Account.Data storage account = Account.exists(accountId);
 

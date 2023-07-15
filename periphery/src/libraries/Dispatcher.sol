@@ -75,7 +75,7 @@ library Dispatcher {
                 tickUpper := calldataload(add(inputs.offset, 0x80))
                 liquidityDelta := calldataload(add(inputs.offset, 0xA0))
             }
-            (uint256 fee, uint256 im) = V2DatedIRSVamm.initiateDatedMakerOrder(
+            (uint256 fee, uint256 im, uint256 highestUnrealizedLoss) = V2DatedIRSVamm.initiateDatedMakerOrder(
                 accountId,
                 marketId,
                 maturityTimestamp,
@@ -83,7 +83,7 @@ library Dispatcher {
                 tickUpper,
                 liquidityDelta
             );
-            output = abi.encode(fee, im);
+            output = abi.encode(fee, im, highestUnrealizedLoss);
         } else if (command == Commands.V2_CORE_CREATE_ACCOUNT) {
             // equivalent: abi.decode(inputs, (uint128))
             uint128 requestedId;
