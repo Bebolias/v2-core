@@ -1621,7 +1621,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.17.2
+    "@voltz-protocol/v2-vamm": 1.17.3
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1672,7 +1672,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.17.2
+    "@voltz-protocol/v2-vamm": 1.17.3
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1693,7 +1693,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": "workspace:^"
     "@voltz-protocol/util-contracts": "workspace:^"
     "@voltz-protocol/util-modules": "workspace:^"
-    "@voltz-protocol/v2-vamm": 1.17.2
+    "@voltz-protocol/v2-vamm": 1.17.3
     lcov-badge-generator: 1.0.5
     prettier: 2.8.4
     semantic-release: ^20.1.1
@@ -1766,9 +1766,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@voltz-protocol/v2-vamm@npm:1.17.2":
-  version: 1.17.2
-  resolution: "@voltz-protocol/v2-vamm@npm:1.17.2::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fv2-vamm%2F1.17.2%2Fe98d4fd13ea30e92ef58cb17bacbf03ca1d8cbc7"
+"@voltz-protocol/v2-vamm@npm:1.17.3":
+  version: 1.17.3
+  resolution: "@voltz-protocol/v2-vamm@npm:1.17.3::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40voltz-protocol%2Fv2-vamm%2F1.17.3%2F5237e91f401fd8401901f8561fa499f5ee8f8e30"
   dependencies:
     "@openzeppelin/contracts": 4.9.2
     "@prb/math": 3.3.0
@@ -1776,7 +1776,7 @@ __metadata:
     "@voltz-protocol/products-dated-irs": 2.4.0
     "@voltz-protocol/util-contracts": 1.3.0
     "@voltz-protocol/util-modules": 1.2.0
-  checksum: 3b4d050b9ee61c56493d97b0902598a18343fc8c1b1bb0406aade34ba7f6e2726b76f519658c8103a5737819770a7bcf421c4728c35e2c5bfc67512b8a8a5d3b
+  checksum: daa693721350d8ae3ee81ad1f80b6281b4a6dea66a613fb6075140aba353d48bc7b8509b98e8c4943991c8d76d7fb1823a2e7bd346d1e69ee71f988cf29f04ba
   languageName: node
   linkType: hard
 

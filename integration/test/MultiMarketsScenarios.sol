@@ -1,159 +1,170 @@
 pragma solidity >=0.8.19;
 
-// import "./utils/BaseScenario.sol";
-// import "./utils/TestUtils.sol";
+import "./utils/BaseScenario.sol";
+import "./utils/TestUtils.sol";
 
-// import {CollateralConfiguration} from "@voltz-protocol/core/src/storage/CollateralConfiguration.sol";
-// import {ProtocolRiskConfiguration} from "@voltz-protocol/core/src/storage/ProtocolRiskConfiguration.sol";
-// import {Account} from "@voltz-protocol/core/src/storage/Account.sol";
-// import {MarketFeeConfiguration} from "@voltz-protocol/core/src/storage/MarketFeeConfiguration.sol";
-// import {MarketRiskConfiguration} from "@voltz-protocol/core/src/storage/MarketRiskConfiguration.sol";
+import {CollateralConfiguration} from "@voltz-protocol/core/src/storage/CollateralConfiguration.sol";
+import {ProtocolRiskConfiguration} from "@voltz-protocol/core/src/storage/ProtocolRiskConfiguration.sol";
+import {Account} from "@voltz-protocol/core/src/storage/Account.sol";
+import {MarketFeeConfiguration} from "@voltz-protocol/core/src/storage/MarketFeeConfiguration.sol";
+import {MarketRiskConfiguration} from "@voltz-protocol/core/src/storage/MarketRiskConfiguration.sol";
 
-// import {ProductConfiguration} from "@voltz-protocol/products-dated-irs/src/storage/ProductConfiguration.sol";
-// import {MarketConfiguration} from "@voltz-protocol/products-dated-irs/src/storage/MarketConfiguration.sol";
+import {ProductConfiguration} from "@voltz-protocol/products-dated-irs/src/storage/ProductConfiguration.sol";
+import {MarketConfiguration} from "@voltz-protocol/products-dated-irs/src/storage/MarketConfiguration.sol";
 
-// import "@voltz-protocol/v2-vamm/utils/vamm-math/TickMath.sol";
-// import {ExtendedPoolModule} from "@voltz-protocol/v2-vamm/test/PoolModule.t.sol";
-// import {VammConfiguration, IRateOracle} from "@voltz-protocol/v2-vamm/utils/vamm-math/VammConfiguration.sol";
+import "@voltz-protocol/v2-vamm/utils/vamm-math/TickMath.sol";
+import {ExtendedPoolModule} from "@voltz-protocol/v2-vamm/test/PoolModule.t.sol";
+import {VammConfiguration, IRateOracle} from "@voltz-protocol/v2-vamm/utils/vamm-math/VammConfiguration.sol";
 
-// import {SafeCastI256, SafeCastU256, SafeCastU128} from "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
-// import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
+import {SafeCastI256, SafeCastU256, SafeCastU128} from "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
+import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 
-// import { ud60x18, div, SD59x18, UD60x18 } from "@prb/math/UD60x18.sol";
-// import { sd59x18, abs } from "@prb/math/SD59x18.sol";
+import { ud60x18, div, SD59x18, UD60x18 } from "@prb/math/UD60x18.sol";
+import { sd59x18, abs } from "@prb/math/SD59x18.sol";
 
-// // import "forge-std/console2.sol";
+// import "forge-std/console2.sol";
 
-// contract MultiMarketsScenarios is TestUtils, BaseScenario {
-//  using SafeCastI256 for int256;
-//   using SafeCastU256 for uint256;
-//   using SafeCastU128 for uint128;
+contract MultiMarketsScenarios is TestUtils, BaseScenario {
+ using SafeCastI256 for int256;
+  using SafeCastU256 for uint256;
+  using SafeCastU128 for uint128;
 
-//   uint256 internal constant Q96 = 0x1000000000000000000000000;
-//   uint256 internal constant WAD = 1_000_000_000_000_000_000;
+  uint256 internal constant Q96 = 0x1000000000000000000000000;
+  uint256 internal constant WAD = 1_000_000_000_000_000_000;
 
-//   address internal user1;
-//   address internal user2;
+  address internal user1;
+  address internal user2;
 
-//   uint128 productId;
-//   uint128 marketId;
-//   uint32 maturityTimestamp;
-//   uint32 maturityTimestamp2;
-//   ExtendedPoolModule extendedPoolModule; // used to convert base to liquidity :)
+  uint128 productId;
+  uint128 marketId;
+  uint32 maturityTimestamp;
+  uint32 maturityTimestamp2;
+  ExtendedPoolModule extendedPoolModule; // used to convert base to liquidity :)
 
-//   using SetUtil for SetUtil.Bytes32Set;
+  using SetUtil for SetUtil.Bytes32Set;
 
-//   struct ExecutedAmounts {
-//     int256 executedBaseAmount;
-//     int256 executedQuoteAmount;
-//     uint256 fee;
-//     uint256 im;
-//   }
+  struct ExecutedAmounts {
+    int256 executedBaseAmount;
+    int256 executedQuoteAmount;
+    uint256 fee;
+    uint256 im;
+  }
 
-//   function setUp() public {
-//     super._setUp();
-//     user1 = vm.addr(1);
-//     user2 = vm.addr(2);
-//     marketId = 1;
-//     maturityTimestamp = uint32(block.timestamp) + 259200; // in 3 days
-//     maturityTimestamp2 = uint32(block.timestamp) + 259201; // in 3 days
-//     extendedPoolModule = new ExtendedPoolModule();
-//   }
+  function setUp() public {
+    super._setUp();
+    user1 = vm.addr(1);
+    user2 = vm.addr(2);
+    marketId = 1;
+    maturityTimestamp = uint32(block.timestamp) + 345600; // in 3 days
+    maturityTimestamp2 = uint32(block.timestamp) + 345600; // in 3 days
+    extendedPoolModule = new ExtendedPoolModule();
+  }
 
-//   function setMarket(uint32 _maturityTimestamp) public {
-//     vm.startPrank(owner);
+  function setMarket(uint32 _maturityTimestamp) public {
+    vm.startPrank(owner);
 
-//     VammConfiguration.Immutable memory immutableConfig = VammConfiguration.Immutable({
-//         maturityTimestamp: _maturityTimestamp,
-//         _maxLiquidityPerTick: type(uint128).max,
-//         _tickSpacing: 60,
-//         marketId: marketId
-//     });
+    VammConfiguration.Immutable memory immutableConfig = VammConfiguration.Immutable({
+        maturityTimestamp: _maturityTimestamp,
+        _maxLiquidityPerTick: type(uint128).max,
+        _tickSpacing: 60,
+        marketId: marketId
+    });
 
-//     VammConfiguration.Mutable memory mutableConfig = VammConfiguration.Mutable({
-//         priceImpactPhi: ud60x18(1e17), // 0.1
-//         priceImpactBeta: ud60x18(125e15), // 0.125
-//         spread: ud60x18(3e15), // 0.3%
-//         rateOracle: IRateOracle(address(aaveV3RateOracle)),
-//         minTick: TickMath.DEFAULT_MIN_TICK,
-//         maxTick: TickMath.DEFAULT_MAX_TICK
-//     });
+    VammConfiguration.Mutable memory mutableConfig = VammConfiguration.Mutable({
+        priceImpactPhi: ud60x18(0), // 0.1
+        priceImpactBeta: ud60x18(0), // 0.125
+        spread: ud60x18(3e15), // 0.3%
+        rateOracle: IRateOracle(address(aaveV3RateOracle)),
+        minTick: TickMath.DEFAULT_MIN_TICK,
+        maxTick: TickMath.DEFAULT_MAX_TICK
+    });
 
-//     vammProxy.setProductAddress(address(datedIrsProxy));
-//     vammProxy.createVamm(
-//       marketId,
-//       TickMath.getSqrtRatioAtTick(-13860), // price = 4%
-//       immutableConfig,
-//       mutableConfig
-//     );
-//     vammProxy.increaseObservationCardinalityNext(marketId, _maturityTimestamp, 16);
+    vammProxy.setProductAddress(address(datedIrsProxy));
+    vm.warp(block.timestamp + 86400); // advance by 1 days
+    uint32[] memory times = new uint32[](2);
+    times[0] = uint32(block.timestamp - 86400);
+    times[1] = uint32(block.timestamp - 43200);
+    int24[] memory observedTicks = new int24[](2);
+    observedTicks[0] = -13860;
+    observedTicks[1] = -13860;
+    vammProxy.createVamm(
+      marketId,
+      TickMath.getSqrtRatioAtTick(-13860), // price = 4%
+      times,
+      observedTicks,
+      immutableConfig,
+      mutableConfig
+    );
+    vammProxy.increaseObservationCardinalityNext(marketId, _maturityTimestamp, 16);
 
-//     vm.stopPrank();
-//   }
+    vm.stopPrank();
+  }
 
-//   function setConfigs() public {
+  function setConfigs() public {
 
-//     // COLLATERAL & PROTOCOL RISK & MARKET
-//     {
-//         vm.startPrank(owner);
+    // COLLATERAL & PROTOCOL RISK & MARKET
+    {
+        vm.startPrank(owner);
 
-//         coreProxy.configureCollateral(
-//         CollateralConfiguration.Data({
-//                 depositingEnabled: true,
-//                 liquidationBooster: 1e18,
-//                 tokenAddress: address(token),
-//                 cap: 1000000e18
-//             })
-//         );
-//         coreProxy.configureProtocolRisk(
-//         ProtocolRiskConfiguration.Data({
-//                 imMultiplier: UD60x18.wrap(2e18),
-//                 liquidatorRewardParameter: UD60x18.wrap(5e16)
-//             })
-//         );
+        coreProxy.configureCollateral(
+        CollateralConfiguration.Data({
+                depositingEnabled: true,
+                liquidationBooster: 1e18,
+                tokenAddress: address(token),
+                cap: 1000000e18
+            })
+        );
+        coreProxy.configureProtocolRisk(
+        ProtocolRiskConfiguration.Data({
+                imMultiplier: UD60x18.wrap(2e18),
+                liquidatorRewardParameter: UD60x18.wrap(5e16)
+            })
+        );
 
-//         productId = coreProxy.registerProduct(address(datedIrsProxy), "Dated IRS Product");
+        productId = coreProxy.registerProduct(address(datedIrsProxy), "Dated IRS Product");
 
-//         datedIrsProxy.configureMarket(
-//             MarketConfiguration.Data({
-//                 marketId: marketId,
-//                 quoteToken: address(token)
-//             })
-//         );
-//         datedIrsProxy.setVariableOracle(
-//             1,
-//             address(aaveV3RateOracle),
-//             3600
-//         );
-//         datedIrsProxy.configureProduct(
-//         ProductConfiguration.Data({
-//                 productId: productId,
-//                 coreProxy: address(coreProxy),
-//                 poolAddress: address(vammProxy),
-//                 takerPositionsPerAccountLimit: 3
-//             })
-//         );
+        datedIrsProxy.configureMarket(
+            MarketConfiguration.Data({
+                marketId: marketId,
+                quoteToken: address(token)
+            })
+        );
+        datedIrsProxy.setVariableOracle(
+            1,
+            address(aaveV3RateOracle),
+            3600
+        );
+        datedIrsProxy.configureProduct(
+        ProductConfiguration.Data({
+                productId: productId,
+                coreProxy: address(coreProxy),
+                poolAddress: address(vammProxy),
+                takerPositionsPerAccountLimit: 3
+            })
+        );
 
-//         coreProxy.configureMarketFee(
-//         MarketFeeConfiguration.Data({
-//                 productId: productId,
-//                 marketId: marketId,
-//                 feeCollectorAccountId: feeCollectorAccountId,
-//                 atomicMakerFee: UD60x18.wrap(1e16),
-//                 atomicTakerFee: UD60x18.wrap(5e16)
-//             })
-//         );
-//         coreProxy.configureMarketRisk(
-//         MarketRiskConfiguration.Data({
-//                 productId: productId, 
-//                 marketId: marketId, 
-//                 riskParameter: SD59x18.wrap(1e18), 
-//                 twapLookbackWindow: 120
-//             })
-//         );
+        coreProxy.configureMarketFee(
+        MarketFeeConfiguration.Data({
+                productId: productId,
+                marketId: marketId,
+                feeCollectorAccountId: feeCollectorAccountId,
+                atomicMakerFee: UD60x18.wrap(1e16),
+                atomicTakerFee: UD60x18.wrap(5e16)
+            })
+        );
+        coreProxy.configureMarketRisk(
+        MarketRiskConfiguration.Data({
+                productId: productId, 
+                marketId: marketId, 
+                riskParameter: UD60x18.wrap(1e18), 
+                twapLookbackWindow: 120
+            })
+        );
 
-//         vm.stopPrank();
-//     }
+        vm.stopPrank();
+    }
+  }
+}
     
 //     setMarket(maturityTimestamp);
 //     setMarket(maturityTimestamp2);

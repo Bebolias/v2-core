@@ -113,8 +113,8 @@ contract Scenario1 is BaseScenario, TestUtils {
     });
 
     VammConfiguration.Mutable memory mutableConfig = VammConfiguration.Mutable({
-        priceImpactPhi: ud60x18(1e17), // 0.1
-        priceImpactBeta: ud60x18(125e15), // 0.125
+        priceImpactPhi: ud60x18(0), // 0
+        priceImpactBeta: ud60x18(0), // 0
         spread: ud60x18(3e15), // 0.3%
         rateOracle: IRateOracle(address(aaveV3RateOracle)),
         minTick: TickMath.DEFAULT_MIN_TICK,
@@ -122,9 +122,18 @@ contract Scenario1 is BaseScenario, TestUtils {
     });
 
     vammProxy.setProductAddress(address(datedIrsProxy));
+    vm.warp(block.timestamp + 86400); // advance by 1 days
+    uint32[] memory times = new uint32[](2);
+    times[0] = uint32(block.timestamp - 86400);
+    times[1] = uint32(block.timestamp - 43200);
+    int24[] memory observedTicks = new int24[](2);
+    observedTicks[0] = -13860;
+    observedTicks[1] = -13860;
     vammProxy.createVamm(
       marketId,
       TickMath.getSqrtRatioAtTick(-13860), // price = 4%
+      times,
+      observedTicks,
       immutableConfig,
       mutableConfig
     );

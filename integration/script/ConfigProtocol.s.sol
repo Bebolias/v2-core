@@ -61,6 +61,12 @@ contract ConfigProtocol is SetupProtocol {
       twapLookbackWindow: 120,
       maturityIndexCachingWindowInSeconds: 3600
     });
+    uint32[] memory times = new uint32[](2);
+    times[0] = uint32(block.timestamp - 86400);
+    times[1] = uint32(block.timestamp - 43200);
+    int24[] memory observedTicks = new int24[](2);
+    observedTicks[0] = -13860;
+    observedTicks[1] = -13860;
     deployPool({
       marketId: 1,
       maturityTimestamp: 1688990400,
@@ -70,7 +76,9 @@ contract ConfigProtocol is SetupProtocol {
       spread: ud60x18(3e15), // 0.3%
       initTick: -13860, // price = 4%
       observationCardinalityNext: 16,
-      makerPositionsPerAccountLimit: 1
+      makerPositionsPerAccountLimit: 1,
+      times: times,
+      observedTicks: observedTicks
     });
     mintOrBurn({
       marketId: 1,
