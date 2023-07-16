@@ -680,6 +680,25 @@ contract SetupProtocol is BatchScript {
     }
   }
 
+  function configureVamm(
+    uint128 marketId,
+    uint32 maturityTimestamp,
+    VammConfiguration.Mutable memory mutableConfig
+  ) public {
+    if (!settings.multisig) {
+      broadcastOrPrank();
+      contracts.vammProxy.configureVamm(marketId, maturityTimestamp, mutableConfig);
+    } else {
+      addToBatch(
+        address(contracts.vammProxy),
+        abi.encodeCall(
+          contracts.vammProxy.configureVamm,
+          (marketId, maturityTimestamp, mutableConfig)
+        )
+      );
+    }
+  }
+
   function increaseObservationCardinalityNext(
     uint128 marketId, 
     uint32 maturityTimestamp, 
