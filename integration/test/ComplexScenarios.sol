@@ -38,6 +38,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
   uint128 productId;
   uint128 marketId;
   uint32 maturityTimestamp;
+  uint32 maturityTimestampOneYearLater;
   ExtendedPoolModule extendedPoolModule; // used to convert base to liquidity :)
 
   using SetUtil for SetUtil.Bytes32Set;
@@ -54,6 +55,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     user2 = vm.addr(2);
     marketId = 1;
     maturityTimestamp = uint32(block.timestamp) + 345600; // in 4 days
+    maturityTimestampOneYearLater = maturityTimestamp + 31536000; // in 1 year after original maturity timestamp
     extendedPoolModule = new ExtendedPoolModule();
   }
 
@@ -115,6 +117,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
       })
     );
 
+    // vamm (maturityTimestamp)
+
     VammConfiguration.Immutable memory immutableConfig = VammConfiguration.Immutable({
         maturityTimestamp: maturityTimestamp,
         _maxLiquidityPerTick: type(uint128).max,
@@ -148,7 +152,37 @@ contract ComplexScenarios is BaseScenario, TestUtils {
       mutableConfig
     );
     vammProxy.increaseObservationCardinalityNext(marketId, maturityTimestamp, 16);
-    vammProxy.setMakerPositionsPerAccountLimit(1);
+    vammProxy.setMakerPositionsPerAccountLimit(2);
+
+    // vamm (maturityTimestampOneYearLater)
+
+      VammConfiguration.Immutable memory immutableConfigOneYearLaterMaturity = VammConfiguration.Immutable({
+          maturityTimestamp: maturityTimestampOneYearLater,
+          _maxLiquidityPerTick: type(uint128).max,
+          _tickSpacing: 60,
+          marketId: marketId
+      });
+
+      VammConfiguration.Mutable memory mutableConfigOneYearLaterMaturity = VammConfiguration.Mutable({
+          priceImpactPhi: ud60x18(0), // 0
+          priceImpactBeta: ud60x18(0), // 0
+          spread: ud60x18(3e15), // 0.3%
+          rateOracle: IRateOracle(address(aaveV3RateOracle)),
+          minTick: TickMath.DEFAULT_MIN_TICK,
+          maxTick: TickMath.DEFAULT_MAX_TICK
+      });
+
+      vammProxy.setProductAddress(address(datedIrsProxy));
+      // note uses the same observed ticks as the previous vamm
+      vammProxy.createVamm(
+          marketId,
+          TickMath.getSqrtRatioAtTick(-13860), // price = 4%
+          times,
+          observedTicks,
+          immutableConfigOneYearLaterMaturity,
+          mutableConfigOneYearLaterMaturity
+      );
+      vammProxy.increaseObservationCardinalityNext(marketId, maturityTimestampOneYearLater, 16);
 
     vm.stopPrank();
 
@@ -1689,5 +1723,9 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     assertAlmostEq(cashflows[3], int(693015000000000000), 5e16);
 
     assertAlmostEq(-(cashflows[0] + cashflows[2]), cashflows[1] + cashflows[3], 1000);
+  }
+
+  function test_rollover() public {
+
   }
 }
