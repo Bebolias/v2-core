@@ -1893,17 +1893,6 @@ contract ComplexScenarios is BaseScenario, TestUtils {
 
       assertGe(liquidationMarginRequirementAfterSecondLp, liquidationMarginRequirementAfterFirstLp);
 
-//      newTaker(
-//          4, // accountId
-//          vm.addr(4), // user
-//          1, // count,
-//          5, // merkleIndex
-//          101e18, // toDeposit
-//          500e18, // baseAmount
-//          maturityTimestamp
-//      );
-
-
       vm.warp(maturityTimestamp + 1);
 
       // todo: pass meaningful existing collateral and settlemnet cashflow
@@ -1917,6 +1906,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
 
       (,,uint256 liquidationMarginRequirementAfterSettle,) = coreProxy.isLiquidatable(1, address(token));
       assertGe(liquidationMarginRequirementAfterSecondLp, liquidationMarginRequirementAfterSettle);
+      assertGt(liquidationMarginRequirementAfterSettle, 0);
 
       // another account opens lp position in maturityTimestampOneYearLater
       uint256 fee3 = newMaker(
