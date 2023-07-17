@@ -315,7 +315,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     int256 baseAmount,
     int24 tickLower,
     int24 tickUpper,
-    uint256 maturityTimestamp
+    uint256 maturityTimestamp,
+    bool createAccount
     ) public returns (uint256 fee){
     vm.startPrank(user);
 
@@ -325,33 +326,62 @@ contract ComplexScenarios is BaseScenario, TestUtils {
 
     token.approve(address(peripheryProxy), toDeposit);
 
-    redeemAccessPass(user, count, merkleIndex);
-
     // PERIPHERY LP COMMAND
-    int128 liquidity = extendedPoolModule.getLiquidityForBase(tickLower, tickUpper, baseAmount);
-    bytes memory commands = abi.encodePacked(
-        bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
-        bytes1(uint8(Commands.TRANSFER_FROM)),
-        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
-        bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
-    );
-    bytes[] memory inputs = new bytes[](4);
-    inputs[0] = abi.encode(accountId);
-    inputs[1] = abi.encode(address(token), toDeposit);
-    inputs[2] = abi.encode(accountId, address(token), margin);
-    inputs[3] = abi.encode(
-        accountId,
-        marketId,
-        maturityTimestamp,
-        tickLower,
-        tickUpper,
-        liquidity
-    );
-    bytes[] memory output = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+    // todo: tidy up duplicate code
+    if (createAccount) {
+        redeemAccessPass(user, count, merkleIndex);
+        int128 liquidity = extendedPoolModule.getLiquidityForBase(tickLower, tickUpper, baseAmount);
+        bytes memory commands = abi.encodePacked(
+            bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
+            bytes1(uint8(Commands.TRANSFER_FROM)),
+            bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+            bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
+        );
+        bytes[] memory inputs = new bytes[](4);
+        inputs[0] = abi.encode(accountId);
+        inputs[1] = abi.encode(address(token), toDeposit);
+        inputs[2] = abi.encode(accountId, address(token), margin);
+        inputs[3] = abi.encode(
+            accountId,
+            marketId,
+            maturityTimestamp,
+            tickLower,
+            tickUpper,
+            liquidity
+        );
+        bytes[] memory output = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 
-    (
-      fee,
-    ) = abi.decode(output[3], (uint256, uint256));
+        (
+            fee,
+        ) = abi.decode(output[3], (uint256, uint256));
+
+    } else {
+
+        int128 liquidity = extendedPoolModule.getLiquidityForBase(tickLower, tickUpper, baseAmount);
+        bytes memory commands = abi.encodePacked(
+            bytes1(uint8(Commands.TRANSFER_FROM)),
+            bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+            bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
+        );
+        bytes[] memory inputs = new bytes[](3);
+        inputs[0] = abi.encode(address(token), toDeposit);
+        inputs[1] = abi.encode(accountId, address(token), margin);
+        inputs[2] = abi.encode(
+            accountId,
+            marketId,
+            maturityTimestamp,
+            tickLower,
+            tickUpper,
+            liquidity
+        );
+        bytes[] memory output = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+
+        (
+            fee,
+        ) = abi.decode(output[2], (uint256, uint256));
+
+    }
+
 
     vm.stopPrank();
   }
@@ -545,7 +575,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
    amounts[0] = newTaker(
@@ -569,7 +600,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     amounts[1] = 
@@ -594,7 +626,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     amounts[2] = newTaker(
@@ -696,7 +729,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -725,7 +759,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -754,7 +789,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // TRADER
@@ -894,7 +930,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -925,7 +962,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -956,7 +994,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // TRADER
@@ -1103,7 +1142,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -20820, // 8%
         69060,// 0.00102%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -1141,7 +1181,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10e18, // baseAmount
         -14580, // 4.3%
         -14100, // 4.1%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // FT
@@ -1177,7 +1218,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -13620, // 3.9% 
         -13380, // 3.8%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -1334,7 +1376,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -1363,7 +1406,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -1498,7 +1542,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -1527,7 +1572,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -1662,7 +1708,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -1691,7 +1738,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         10000e18, // baseAmount
         -14100, // 4.1%
         -13620, // 3.9%
-        maturityTimestamp
+        maturityTimestamp,
+        true
     );
 
     // VT
@@ -1810,5 +1858,34 @@ contract ComplexScenarios is BaseScenario, TestUtils {
 
   function test_rollover() public {
       setConfigs();
+
+      // lp position in maturityTimestamp
+      uint256 fee1 = newMaker(
+          1, // accountId
+          vm.addr(1), // user
+          1, // count,
+          2, // merkleIndex
+          1001e18, // toDeposit
+          10000e18, // baseAmount
+          -14100, // 4.1%
+          -13620, // 3.9%
+          maturityTimestamp,
+          true
+      );
+
+      // lp position in matuirityTimestampOneYearLayer
+      uint256 fee2 = newMaker(
+          1, // accountId
+          vm.addr(1), // user
+          1, // count,
+          2, // merkleIndex
+          1001e18, // toDeposit
+          10000e18, // baseAmount
+          -14100, // 4.1%
+          -13620, // 3.9%
+          maturityTimestamp,
+          false
+      );
+
   }
 }
