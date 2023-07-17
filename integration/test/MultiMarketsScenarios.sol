@@ -49,6 +49,8 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     int256 executedQuoteAmount;
     uint256 fee;
     uint256 im;
+    // todo: add highestUnrealizedLoss
+      // todo: can we pull more information to play with in tests?
   }
 
   struct MakerExecutedAmounts {
@@ -58,6 +60,8 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     int24 tickUpper;
     uint256 fee;
     uint256 im;
+    // todo: add highestUnrealizedLoss
+    // todo: can we pull more information to play with in tests?
   }
 
   function setUp() public {
@@ -334,6 +338,10 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
       console2.log("liquidationMarginRequirement", liquidationMarginRequirement); // 392.9103807
       console2.log("highestUnrealizedLoss", highestUnrealizedLoss);
 
+      // todo: manually calculate liquidation margin requirement for lower and upper scenarios and compare to the above
+      // 5,029 * * 1 * 1/12
+      // 5,046.3547167274 * 1 * 1/12 = 420.5295597273
+
       // get unfilled base and quote balances of maker
       (uint256 unfilledBaseLong, uint256 unfilledQuoteLong, uint256 unfilledBaseShort, uint256 unfilledQuoteShort) =
       vammProxy.getAccountUnfilledBaseAndQuote(_marketId, _maturityTimestamp, accountId);
@@ -343,8 +351,15 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
       console2.log("unfilledBaseShort", unfilledBaseShort);
       console2.log("unfilledQuoteShort", unfilledQuoteShort);
 
+      // todo: another scenario, two lps with identical base but different tick ranges should end up having different
+      // unrealized loss
+      // todo: need a scenario where highestUnrealizedLoss is positive, can artifically create this by having a
+      // very out of range tickLower and tickUpper
+      // todo: we want to make sure that highest unrealized loss does not change as takers trade against lp's liquidity
+
+      // todo: manually calculate unfilled balances using the current tick
       // todo: investigate why this fails, in theory these should be equal
-//      assertEq(uint256(executedAmounts.baseAmount), unfilledBaseLong+unfilledBaseShort);
+      assertEq(uint256(executedAmounts.baseAmount), unfilledBaseLong+unfilledBaseShort);
       assertEq(liquidatable, false);
       assertGe(initialMarginRequirement, liquidationMarginRequirement);
 
@@ -357,93 +372,6 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
       // through withdraw
   }
 
-  // function editTaker(
-  //   uint128 _marketId,
-  //   uint32 _maturityTimestamp,
-  //   uint128 accountId,
-  //   address user,
-  //   uint256 toDeposit,
-  //   int256 baseAmount
-  //   ) public returns (ExecutedAmounts memory executedAmounts) {
-  //   uint256 margin = toDeposit;
-
-  //   vm.startPrank(user);
-
-  //   token.mint(user, toDeposit);
-
-  //   token.approve(address(peripheryProxy), toDeposit);
-
-  //   bytes memory commands = abi.encodePacked(
-  //       bytes1(uint8(Commands.TRANSFER_FROM)),
-  //       bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
-  //       bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
-  //   );
-  //   bytes[] memory inputs = new bytes[](3);
-  //   inputs[0] = abi.encode(address(token), toDeposit);
-  //   inputs[1] = abi.encode(accountId, address(token), margin);
-  //   inputs[2] = abi.encode(
-  //       accountId,  // accountId
-  //       _marketId,
-  //       _maturityTimestamp,
-  //       baseAmount,
-  //       0
-  //   );
-  //   bytes[] memory output = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
-
-
-  //   (
-  //     executedAmounts.executedBaseAmount,
-  //     executedAmounts.executedQuoteAmount,
-  //     executedAmounts.fee,,
-  //   ) = abi.decode(output[2], (int256, int256, uint256, uint256, int24));
-
-  //   vm.stopPrank();
-  // }
-
-  // function editMaker(
-  //   uint128 _marketId,
-  //   uint32 _maturityTimestamp,
-  //   uint128 accountId,
-  //   address user,
-  //   uint256 toDeposit,
-  //   int256 baseAmount,
-  //   int24 tickLower,
-  //   int24 tickUpper
-  //   ) public returns (uint256 fee) {
-  //   vm.startPrank(user);
-
-  //   uint256 margin = toDeposit; // minus liquidation booster
-
-  //   token.mint(user, toDeposit);
-
-  //   token.approve(address(peripheryProxy), toDeposit);
-
-  //   // PERIPHERY LP COMMAND
-  //   int128 liquidity = extendedPoolModule.getLiquidityForBase(tickLower, tickUpper, baseAmount);
-  //   bytes memory commands = abi.encodePacked(
-  //       bytes1(uint8(Commands.TRANSFER_FROM)),
-  //       bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
-  //       bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
-  //   );
-  //   bytes[] memory inputs = new bytes[](3);
-  //   inputs[0] = abi.encode(address(token), toDeposit);
-  //   inputs[1] = abi.encode(accountId, address(token), margin);
-  //   inputs[2] = abi.encode(
-  //       accountId,
-  //       _marketId,
-  //       _maturityTimestamp,
-  //       tickLower,
-  //       tickUpper,
-  //       liquidity
-  //   );
-  //   bytes[] memory output = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
-
-  //   (
-  //     fee,
-  //   ) = abi.decode(output[2], (uint256, uint256));
-
-  //   vm.stopPrank();
-  // }
 
   function redeemAccessPass(address user, uint256 count, uint256 merkleIndex) public {
     accessPassNft.redeem(
