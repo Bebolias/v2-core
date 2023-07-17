@@ -1925,9 +1925,5 @@ contract ComplexScenarios is BaseScenario, TestUtils {
 
       assertEq(liquidationMarginRequirementSecondLp, liquidationMarginRequirementAfterSettle);
 
-    // todo: note, when i try creating two lp positions it fails unless both maker and taker limits are 2
-      // is this expected
-
-
   }
 }
