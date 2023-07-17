@@ -223,8 +223,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     (
       executedAmounts.executedBaseAmount,
       executedAmounts.executedQuoteAmount,
-      executedAmounts.fee,,
-    ) = abi.decode(output[3], (int256, int256, uint256, uint256, int24));
+      executedAmounts.fee,,,
+    ) = abi.decode(output[3], (int256, int256, uint256, uint256, uint256, int24));
 
     vm.stopPrank();
   }
