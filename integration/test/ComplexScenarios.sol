@@ -1893,15 +1893,15 @@ contract ComplexScenarios is BaseScenario, TestUtils {
 
       assertGe(liquidationMarginRequirementAfterSecondLp, liquidationMarginRequirementAfterFirstLp);
 
-      newTaker(
-          4, // accountId
-          vm.addr(4), // user
-          1, // count,
-          5, // merkleIndex
-          101e18, // toDeposit
-          500e18, // baseAmount
-          maturityTimestamp
-      );
+//      newTaker(
+//          4, // accountId
+//          vm.addr(4), // user
+//          1, // count,
+//          5, // merkleIndex
+//          101e18, // toDeposit
+//          500e18, // baseAmount
+//          maturityTimestamp
+//      );
 
 
       vm.warp(maturityTimestamp + 1);
@@ -1914,6 +1914,9 @@ contract ComplexScenarios is BaseScenario, TestUtils {
           100,
           maturityTimestamp
       );
+
+      (,,uint256 liquidationMarginRequirementAfterSettle,) = coreProxy.isLiquidatable(1, address(token));
+      assertGe(liquidationMarginRequirementAfterSecondLp, liquidationMarginRequirementAfterSettle);
 
       // another account opens lp position in maturityTimestampOneYearLater
       uint256 fee3 = newMaker(
@@ -1928,6 +1931,9 @@ contract ComplexScenarios is BaseScenario, TestUtils {
           maturityTimestampOneYearLater,
           true
       );
+      (,,uint256 liquidationMarginRequirementSecondLp,) = coreProxy.isLiquidatable(3, address(token));
+
+      assertEq(liquidationMarginRequirementSecondLp, liquidationMarginRequirementAfterSettle);
 
     // todo: note, when i try creating two lp positions it fails unless both maker and taker limits are 2
       // is this expected
