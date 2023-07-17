@@ -29,6 +29,8 @@ import {Config} from "@voltz-protocol/periphery/src/storage/Config.sol";
 import {Ownable} from "@voltz-protocol/util-contracts/src/ownership/Ownable.sol";
 import {IERC20} from "@voltz-protocol/util-contracts/src/interfaces/IERC20.sol";
 
+import {UUPSImplementation} from "@voltz-protocol/util-contracts/src/proxy/UUPSImplementation.sol";
+
 import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
 import {SD59x18, sd59x18} from "@prb/math/SD59x18.sol";
 
@@ -100,6 +102,12 @@ contract SetupProtocol is BatchScript {
      vm.broadcast(metadata.owner);
     } else if (settings.echidna) {
       hevm.prank(metadata.owner);
+    }
+  }
+
+  function execute_multisig_batch() internal {
+    if (settings.multisig) {
+      executeBatch(settings.multisigAddress, settings.multisigSend, metadata.owner);
     }
   }
 
@@ -254,6 +262,7 @@ contract SetupProtocol is BatchScript {
     UD60x18 priceImpactBeta,
     UD60x18 spread,
     int24 initTick,
+    int24 tickSpacing,
     uint16 observationCardinalityNext,
     uint256 makerPositionsPerAccountLimit,
     uint32[] memory times,
@@ -262,7 +271,7 @@ contract SetupProtocol is BatchScript {
     VammConfiguration.Immutable memory immutableConfig = VammConfiguration.Immutable({
         maturityTimestamp: maturityTimestamp,
         _maxLiquidityPerTick: type(uint128).max,
-        _tickSpacing: 60,
+        _tickSpacing: tickSpacing,
         marketId: marketId
     });
 
@@ -426,8 +435,23 @@ contract SetupProtocol is BatchScript {
   }
 
   ////////////////////////////////////////////////////////////////////
-  /////////////////             CORE PROXY           /////////////////
+  /////////////////          GENERAL PROXY OPS         ///////////////
   ////////////////////////////////////////////////////////////////////
+
+  function upgradeProxy(address proxyAddress, address routerAddress) public {
+    if (!settings.multisig) {
+      broadcastOrPrank();
+      UUPSImplementation(proxyAddress).upgradeTo(routerAddress);
+    } else {
+      addToBatch(
+        proxyAddress,
+        abi.encodeCall(
+          UUPSImplementation(proxyAddress).upgradeTo,
+          (routerAddress)
+        )
+      );
+    }
+  } 
 
   function acceptOwnership(address ownableProxyAddress) public {
     if (!settings.multisig) {
@@ -443,6 +467,10 @@ contract SetupProtocol is BatchScript {
       );
     }
   }
+
+  ////////////////////////////////////////////////////////////////////
+  /////////////////             CORE PROXY           /////////////////
+  ////////////////////////////////////////////////////////////////////
 
   function setFeatureFlagAllowAll(bytes32 feature, bool allowAll) public {
     if (!settings.multisig) {

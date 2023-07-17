@@ -48,3 +48,11 @@ This is a monorepo with the following folder structure and packages:
 - To deploy/upgrade protocol on arbitrum goerli: 
   - Make sure latest code was compiled: `yarn build`
   - `cannon build cannonfiles/arbitrum_one_goerli.toml --chain-id 421613 --provider-url <PROVIDER_URL> --private-key <PRIVATE_KEY>`
+
+
+# MULTISIG CONFIGS
+- Connect ledger to local app on machine
+- `cd integration`
+- `MULTISIG=true`, `MULTISIG_ADDRESS=`, `MULTISIG_SEND=true/false`, `WALLET_TYPE=ledger` and `MNEMONIC_INDEX=0` into `.env`
+- Populate rest of env variables required for the script (proxies etc)
+- forge script script/ConfigProtocol.s.sol --rpc-url <RPC_URL>

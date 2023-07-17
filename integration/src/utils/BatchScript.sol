@@ -129,13 +129,13 @@ abstract contract BatchScript is Script, DelegatePrank {
 
     // Simulate then send the batch to the Safe API. If `send_` is `false`, the
     // batch will only be simulated.
-    function executeBatch(address safe_, bool send_) public {
+    function executeBatch(address safe_, bool send_, address owner) public {
         _initialize();
         Batch memory batch = _createBatch(safe_);
         _simulateBatch(safe_, batch);
         if (send_) {
             batch = _signBatch(safe_, batch);
-            _sendBatch(safe_, batch);
+            _sendBatch(safe_, batch, owner);
         }
     }
 
@@ -254,7 +254,7 @@ abstract contract BatchScript is Script, DelegatePrank {
         }
     }
 
-    function _sendBatch(address safe_, Batch memory batch_) internal {
+    function _sendBatch(address safe_, Batch memory batch_, address owner) internal {
         string memory endpoint = _getSafeAPIEndpoint(safe_);
 
         // Create json payload for API call to Gnosis transaction service
@@ -272,7 +272,7 @@ abstract contract BatchScript is Script, DelegatePrank {
         placeholder.serialize("refundReceiver", address(0));
         placeholder.serialize("contractTransactionHash", batch_.txHash);
         placeholder.serialize("signature", batch_.signature);
-        string memory payload = placeholder.serialize("sender", msg.sender); //todo: AN fix this
+        string memory payload = placeholder.serialize("sender", owner); //todo: AN still fix this
 
         // Send batch
         (uint256 status, bytes memory data) = endpoint.post(
