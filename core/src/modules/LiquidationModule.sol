@@ -33,6 +33,21 @@ contract LiquidationModule is ILiquidationModule {
 
     bytes32 private constant _GLOBAL_FEATURE_FLAG = "global";
 
+
+    /**
+     * @inheritdoc ILiquidationModule
+     */
+    function isLiquidatable(uint128 accountId, address collateralType) external view override returns (
+        bool liquidatable,
+        uint256 initialMarginRequirement,
+        uint256 liquidationMarginRequirement,
+        uint256 highestUnrealizedLoss
+    ) {
+        Account.Data storage account = Account.load(accountId);
+        return account.isLiquidatable(collateralType);
+    }
+
+
     function extractLiquidatorReward(
         uint128 liquidatedAccountId,
         address collateralType,

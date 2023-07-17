@@ -58,6 +58,22 @@ interface ILiquidationModule {
     );
 
     /**
+     * @notice Checks if an account is liquidatable
+     * @param accountId The id of the account that is being checked
+     * @param collateralType The collateral type of the account that is being checked
+     * @return liquidatable True if the account is liquidatable
+     * @return initialMarginRequirement The initial margin requirement of the account
+     * @return liquidationMarginRequirement The liquidation margin requirement of the account
+     * @return highestUnrealizedLoss The highest unrealized loss of the account
+     */
+    function isLiquidatable(uint128 accountId, address collateralType) external view returns (
+        bool liquidatable,
+        uint256 initialMarginRequirement,
+        uint256 liquidationMarginRequirement,
+        uint256 highestUnrealizedLoss
+    );
+
+    /**
      * @notice Liquidates an account
      * @param liquidatedAccountId The id of the account that is being liquidated
      * @param liquidatorAccountId Account id that will receive the rewards from the liquidation.

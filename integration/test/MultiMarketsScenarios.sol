@@ -67,7 +67,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     marketId = 1;
     // in 30 days pools (time will be advanced by 1 day before creating the pools)
     maturityTimestamp = uint32(block.timestamp) + 86400 + 86400 * 30; 
-    maturityTimestamp2 = uint32(block.timestamp) + 86400 + 86400 * 30;
+    maturityTimestamp2 = uint32(block.timestamp) + 86400 + 86400 * 365; // one year pool
     extendedPoolModule = new ExtendedPoolModule();
   }
 
@@ -82,8 +82,8 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     });
 
     VammConfiguration.Mutable memory mutableConfig = VammConfiguration.Mutable({
-        priceImpactPhi: ud60x18(1e17), // 0.1
-        priceImpactBeta: ud60x18(125e15), // 0.125
+        priceImpactPhi: ud60x18(0), // 0
+        priceImpactBeta: ud60x18(0), // 0
         spread: ud60x18(3e15), // 0.3%
         rateOracle: IRateOracle(address(aaveV3RateOracle)),
         minTick: TickMath.DEFAULT_MIN_TICK,
@@ -107,6 +107,8 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
       mutableConfig
     );
     vammProxy.increaseObservationCardinalityNext(marketId, _maturityTimestamp, 16);
+    vammProxy.setMakerPositionsPerAccountLimit(1);
+
 
     vm.stopPrank();
   }
@@ -298,6 +300,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     );
     bytes[] memory output = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 
+    // todo: fix decoding
     (
       executedAmounts.executedBaseAmount,
       executedAmounts.executedQuoteAmount,
@@ -319,11 +322,13 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     MakerExecutedAmounts memory executedAmounts
   ) public returns (bool){
 
-    // check against IM 
+
+
+    // check against IM
     // margin > im + unrealizedLoss
     // compute unrealized loss
 
-    // check it fails if position exposure is increased 
+    // check it fails if position exposure is increased
       // through unrealized
       // through withdraw
   }
@@ -449,7 +454,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620 // 3.9%
     );
 
     // check im
@@ -460,20 +465,20 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
         vm.addr(1), // user
         makerAmounts[0]
     );
-
-    vm.warp(block.timestamp + 86400); // advance by 1 day
-
-    // VT - 1st pool
-    takerAmounts[0] = newTaker(
-        marketId,
-        maturityTimestamp,
-        2, // accountId
-        vm.addr(2), // user
-        1, // count,
-        3, // merkleIndex
-        101e18, // toDeposit
-        500e18 // baseAmount
-    );
+//
+//    vm.warp(block.timestamp + 86400); // advance by 1 day
+//
+//    // VT - 1st pool
+//    takerAmounts[0] = newTaker(
+//        marketId,
+//        maturityTimestamp,
+//        2, // accountId
+//        vm.addr(2), // user
+//        1, // count,
+//        3, // merkleIndex
+//        101e18, // toDeposit
+//        500e18 // baseAmount
+//    );
 
     
   }
