@@ -223,7 +223,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     uint256 count,
     uint256 merkleIndex,
     uint256 toDeposit,
-    int256 baseAmount
+    int256 baseAmount,
+    uint256 maturityTimestamp
     ) public returns (ExecutedAmounts memory executedAmounts) {
     uint256 margin = toDeposit - 1e18; // minus liquidation booster
 
@@ -267,7 +268,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     uint128 accountId,
     address user,
     uint256 toDeposit,
-    int256 baseAmount
+    int256 baseAmount,
+    uint256 maturityTimestamp
     ) public returns (ExecutedAmounts memory executedAmounts) {
     uint256 margin = toDeposit;
 
@@ -312,7 +314,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     uint256 toDeposit,
     int256 baseAmount,
     int24 tickLower,
-    int24 tickUpper
+    int24 tickUpper,
+    uint256 maturityTimestamp
     ) public returns (uint256 fee){
     vm.startPrank(user);
 
@@ -359,7 +362,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     uint256 toDeposit,
     int256 baseAmount,
     int24 tickLower,
-    int24 tickUpper
+    int24 tickUpper,
+    uint256 maturityTimestamp
     ) public returns (uint256 fee) {
     vm.startPrank(user);
 
@@ -400,7 +404,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     uint128 accountId,
     address user,
     int256 settlementCashflow,
-    int256 existingCollateral
+    int256 existingCollateral,
+    uint256 maturityTimestamp
   ) public {
     vm.startPrank(user);
     bytes memory commands = abi.encodePacked(
@@ -456,7 +461,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     int256 executedBaseAmount,
     int256 executedQuoteAmount,
     uint256 fee,
-    int256 maturityIndex // int to fit the calculations
+    int256 maturityIndex, // int to fit the calculations
+    uint256 maturityTimestamp
   ) public  returns (int256 settlementCashflow){
     uint256 userBalanceBeforeSettle = token.balanceOf(user);
     // settlement CF = base * liqIndex + quote 
@@ -468,7 +474,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         accountId, // accountId
         user, // user
         settlementCashflow,
-        existingCollateral
+        existingCollateral,
+        maturityTimestamp
     );
 
     uint256 collateralBalance = coreProxy.getAccountCollateralBalance(accountId, address(token));
@@ -537,7 +544,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
    amounts[0] = newTaker(
@@ -546,7 +554,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         3, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days
@@ -559,7 +568,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     amounts[1] = 
@@ -569,7 +579,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         5, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days
@@ -582,7 +593,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     amounts[2] = newTaker(
@@ -591,7 +603,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         7, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(maturityTimestamp + 1);
@@ -603,7 +616,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[0].executedBaseAmount + amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount / 3),
         -(amounts[0].executedQuoteAmount + amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount / 3),
         fee1,
-        1e18
+        1e18,
+        maturityTimestamp
     );
 
     checkSettle(
@@ -613,7 +627,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[0].executedBaseAmount,
         amounts[0].executedQuoteAmount,
         amounts[0].fee,
-        1e18
+        1e18,
+        maturityTimestamp
     );
 
     checkSettle(
@@ -623,7 +638,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount / 3),
         -(amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount / 3),
         fee3,
-        1e18
+        1e18,
+        maturityTimestamp
     );
 
     checkSettle(
@@ -633,7 +649,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[1].executedBaseAmount,
         amounts[1].executedQuoteAmount,
         amounts[1].fee,
-        1e18
+        1e18,
+        maturityTimestamp
     );
 
     checkSettle(
@@ -643,7 +660,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[2].executedBaseAmount / 3),
         -(amounts[2].executedQuoteAmount / 3),
         fee5,
-        1e18
+        1e18,
+        maturityTimestamp
     );
 
     checkSettle(
@@ -653,7 +671,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[2].executedBaseAmount,
         amounts[2].executedQuoteAmount,
         amounts[2].fee,
-        1e18
+        1e18,
+        maturityTimestamp
     );
 
   }
@@ -676,7 +695,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // VT
@@ -686,7 +706,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         3, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days 
@@ -703,7 +724,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // VT
@@ -714,7 +736,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         5, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
@@ -730,7 +753,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // TRADER
@@ -740,7 +764,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         7, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(maturityTimestamp + 1);
@@ -762,7 +787,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[0].executedBaseAmount + amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount / 3),
         -(amounts[0].executedQuoteAmount + amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount / 3),
         fee1,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
     
     cashflows[1] = checkSettle(
@@ -772,7 +798,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[0].executedBaseAmount,
         amounts[0].executedQuoteAmount,
         amounts[0].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[2] = checkSettle(
@@ -782,7 +809,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount / 3),
         -(amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount / 3),
         fee3,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[3] = checkSettle(
@@ -792,7 +820,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[1].executedBaseAmount,
         amounts[1].executedQuoteAmount,
         amounts[1].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[4] = checkSettle(
@@ -802,7 +831,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[2].executedBaseAmount / 3),
         -(amounts[2].executedQuoteAmount / 3),
         fee5,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[5] = checkSettle(
@@ -812,7 +842,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[2].executedBaseAmount,
         amounts[2].executedQuoteAmount,
         amounts[2].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp); // 4.0165% -13905
@@ -862,7 +893,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // VT
@@ -872,7 +904,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         3, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days 
@@ -891,7 +924,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // VT
@@ -902,7 +936,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         5, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days 
@@ -920,7 +955,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // TRADER
@@ -930,7 +966,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         7, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(maturityTimestamp + 1);
@@ -951,7 +988,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[0].executedBaseAmount + amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount / 3),
         -(amounts[0].executedQuoteAmount + amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount / 3),
         fee1,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
     
     cashflows[1] = checkSettle(
@@ -961,7 +999,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[0].executedBaseAmount,
         amounts[0].executedQuoteAmount,
         amounts[0].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[2] = checkSettle(
@@ -971,7 +1010,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount / 3),
         -(amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount / 3),
         fee3,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[3] = checkSettle(
@@ -981,7 +1021,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[1].executedBaseAmount,
         amounts[1].executedQuoteAmount,
         amounts[1].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[4] = checkSettle(
@@ -991,7 +1032,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[2].executedBaseAmount / 3),
         -(amounts[2].executedQuoteAmount / 3),
         fee5,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[5] = checkSettle(
@@ -1001,7 +1043,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[2].executedBaseAmount,
         amounts[2].executedQuoteAmount,
         amounts[2].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp); // 4.0165% -13905
@@ -1059,7 +1102,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -20820, // 8%
-        69060// 0.00102% 
+        69060,// 0.00102%
+        maturityTimestamp
     );
 
     // VT
@@ -1069,7 +1113,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         3, // merkleIndex
         101e18, // toDeposit
-        45e18 // baseAmount
+        45e18, // baseAmount
+        maturityTimestamp
     );
     avgRates[0] = getAvgRate(
         amounts[0].executedBaseAmount, 
@@ -1095,7 +1140,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10e18, // baseAmount
         -14580, // 4.3%
-        -14100 // 4.1% 
+        -14100, // 4.1%
+        maturityTimestamp
     );
 
     // FT
@@ -1106,7 +1152,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         5, // merkleIndex
         101e18, // toDeposit
-        -2000e18 // baseAmount
+        -2000e18, // baseAmount
+        maturityTimestamp
     );
     avgRates[1] = getAvgRate(
         amounts[1].executedBaseAmount, 
@@ -1129,7 +1176,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -13620, // 3.9% 
-        -13380 // 3.8%
+        -13380, // 3.8%
+        maturityTimestamp
     );
 
     // VT
@@ -1139,7 +1187,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         7, // merkleIndex
         101e18, // toDeposit
-        2010e18 // baseAmount
+        2010e18, // baseAmount
+        maturityTimestamp
     );
     avgRates[2] = getAvgRate(
         amounts[2].executedBaseAmount, 
@@ -1179,7 +1228,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[0].executedBaseAmount,
         amounts[0].executedQuoteAmount,
         amounts[0].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[2] = checkWithUnknownCashflow(
@@ -1197,7 +1247,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[1].executedBaseAmount,
         amounts[1].executedQuoteAmount,
         amounts[1].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[4] = checkWithUnknownCashflow(
@@ -1215,7 +1266,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[2].executedBaseAmount,
         amounts[2].executedQuoteAmount,
         amounts[2].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     // LPs
@@ -1281,7 +1333,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // VT
@@ -1291,7 +1344,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         3, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days 
@@ -1308,7 +1362,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // VT
@@ -1319,7 +1374,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         5, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
@@ -1333,7 +1389,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         0, // toDeposit
         -5000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // UNWIND
@@ -1341,7 +1398,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         2, // accountId
         vm.addr(2), // user
         0, // toDeposit
-        -200e18 // baseAmount
+        -200e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(maturityTimestamp + 1);
@@ -1363,7 +1421,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[0].executedBaseAmount + amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount / 3),
         -(amounts[0].executedQuoteAmount + amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount / 3),
         fee1 + fee5,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
     
     cashflows[1] = checkSettle(
@@ -1373,7 +1432,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[0].executedBaseAmount + amounts[2].executedBaseAmount,
         amounts[0].executedQuoteAmount + amounts[2].executedQuoteAmount,
         amounts[0].fee + amounts[2].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[2] = checkSettle(
@@ -1383,7 +1443,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount * 2 / 3),
         -(amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount * 2 / 3),
         fee3,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[3] = checkSettle(
@@ -1393,7 +1454,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[1].executedBaseAmount,
         amounts[1].executedQuoteAmount,
         amounts[1].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
@@ -1435,7 +1497,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // VT
@@ -1445,7 +1508,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         3, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days 
@@ -1462,7 +1526,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // VT
@@ -1473,7 +1538,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         5, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
@@ -1487,7 +1553,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         0, // toDeposit
         -5000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // UNWIND -> switch to FT
@@ -1495,7 +1562,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         2, // accountId
         vm.addr(2), // user
         0, // toDeposit
-        -600e18 // baseAmount
+        -600e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(maturityTimestamp + 1);
@@ -1517,7 +1585,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[0].executedBaseAmount + amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount / 3),
         -(amounts[0].executedQuoteAmount + amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount / 3),
         fee1 + fee5,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
     
     cashflows[1] = checkSettle(
@@ -1527,7 +1596,9 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[0].executedBaseAmount + amounts[2].executedBaseAmount,
         amounts[0].executedQuoteAmount + amounts[2].executedQuoteAmount,
         amounts[0].fee + amounts[2].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
+
     );
 
     cashflows[2] = checkSettle(
@@ -1537,7 +1608,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount * 2 / 3),
         -(amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount * 2 / 3),
         fee3,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[3] = checkSettle(
@@ -1547,7 +1619,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[1].executedBaseAmount,
         amounts[1].executedQuoteAmount,
         amounts[1].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
@@ -1588,7 +1661,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // VT
@@ -1598,7 +1672,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         3, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(block.timestamp + 43200); // advance by 0.5 days 
@@ -1615,7 +1690,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1001e18, // toDeposit
         10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // VT
@@ -1626,7 +1702,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         1, // count,
         5, // merkleIndex
         101e18, // toDeposit
-        500e18 // baseAmount
+        500e18, // baseAmount
+        maturityTimestamp
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
@@ -1640,7 +1717,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         0, // toDeposit
         -10000e18, // baseAmount
         -14100, // 4.1%
-        -13620 // 3.9% 
+        -13620, // 3.9%
+        maturityTimestamp
     );
 
     // UNWIND -> switch to FT
@@ -1648,7 +1726,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         2, // accountId
         vm.addr(2), // user
         0, // toDeposit
-        -600e18 // baseAmount
+        -600e18, // baseAmount
+        maturityTimestamp
     );
 
     vm.warp(maturityTimestamp + 1);
@@ -1670,7 +1749,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[0].executedBaseAmount + amounts[1].executedBaseAmount / 2),
         -(amounts[0].executedQuoteAmount + amounts[1].executedQuoteAmount / 2),
         fee1 + fee5,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
     
     cashflows[1] = checkSettle(
@@ -1680,7 +1760,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[0].executedBaseAmount + amounts[2].executedBaseAmount,
         amounts[0].executedQuoteAmount + amounts[2].executedQuoteAmount,
         amounts[0].fee + amounts[2].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[2] = checkSettle(
@@ -1690,7 +1771,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         -(amounts[1].executedBaseAmount / 2 + amounts[2].executedBaseAmount),
         -(amounts[1].executedQuoteAmount / 2 + amounts[2].executedQuoteAmount),
         fee3 + 1,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     cashflows[3] = checkSettle(
@@ -1700,7 +1782,8 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         amounts[1].executedBaseAmount,
         amounts[1].executedQuoteAmount,
         amounts[1].fee,
-        maturityIndex
+        maturityIndex,
+        maturityTimestamp
     );
 
     currentTick = vammProxy.getVammTick(marketId, maturityTimestamp);
@@ -1726,6 +1809,6 @@ contract ComplexScenarios is BaseScenario, TestUtils {
   }
 
   function test_rollover() public {
-
+      setConfigs();
   }
 }
