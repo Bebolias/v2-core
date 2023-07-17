@@ -300,13 +300,13 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     );
     bytes[] memory output = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 
-    // todo: fix decoding
+    // todo: add unrealized loss to exposures
     (
       executedAmounts.executedBaseAmount,
       executedAmounts.executedQuoteAmount,
       executedAmounts.fee, 
-      executedAmounts.im,
-    ) = abi.decode(output[3], (int256, int256, uint256, uint256, int24));
+      executedAmounts.im,,
+    ) = abi.decode(output[3], (int256, int256, uint256, uint256, uint256, int24));
 
     executedAmounts.depositedAmount = toDeposit;
 
@@ -489,20 +489,20 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
         vm.addr(1), // user
         makerAmounts[0]
     );
-//
-//    vm.warp(block.timestamp + 86400); // advance by 1 day
-//
-//    // VT - 1st pool
-//    takerAmounts[0] = newTaker(
-//        marketId,
-//        maturityTimestamp,
-//        2, // accountId
-//        vm.addr(2), // user
-//        1, // count,
-//        3, // merkleIndex
-//        101e18, // toDeposit
-//        500e18 // baseAmount
-//    );
+
+    vm.warp(block.timestamp + 86400); // advance by 1 day
+
+    // VT - 1st pool
+    takerAmounts[0] = newTaker(
+        marketId,
+        maturityTimestamp,
+        2, // accountId
+        vm.addr(2), // user
+        1, // count,
+        3, // merkleIndex
+        101e18, // toDeposit
+        500e18 // baseAmount
+    );
 
     
   }
