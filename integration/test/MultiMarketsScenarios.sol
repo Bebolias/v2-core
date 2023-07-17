@@ -22,7 +22,7 @@ import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import { ud60x18, div, SD59x18, UD60x18 } from "@prb/math/UD60x18.sol";
 import { sd59x18, abs } from "@prb/math/SD59x18.sol";
 
-// import "forge-std/console2.sol";
+ import "forge-std/console2.sol";
 
 contract MultiMarketsScenarios is TestUtils, BaseScenario {
  using SafeCastI256 for int256;
@@ -320,9 +320,33 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     uint128 accountId,
     address user,
     MakerExecutedAmounts memory executedAmounts
-  ) public returns (bool){
+  ) public {
 
+      (
+      bool liquidatable,
+      uint256 initialMarginRequirement,
+      uint256 liquidationMarginRequirement,
+      uint256 highestUnrealizedLoss
+      ) = coreProxy.isLiquidatable(accountId, address(token));
 
+      console2.log("liquidatable", liquidatable);
+      console2.log("initialMarginRequirement", initialMarginRequirement); // 785.8207615
+      console2.log("liquidationMarginRequirement", liquidationMarginRequirement); // 392.9103807
+      console2.log("highestUnrealizedLoss", highestUnrealizedLoss);
+
+      // get unfilled base and quote balances of maker
+      (uint256 unfilledBaseLong, uint256 unfilledQuoteLong, uint256 unfilledBaseShort, uint256 unfilledQuoteShort) =
+      vammProxy.getAccountUnfilledBaseAndQuote(_marketId, _maturityTimestamp, accountId);
+
+      console2.log("unfilledBaseLong", unfilledBaseLong);
+      console2.log("unfilledQuoteLong", unfilledQuoteLong);
+      console2.log("unfilledBaseShort", unfilledBaseShort);
+      console2.log("unfilledQuoteShort", unfilledQuoteShort);
+
+      // todo: investigate why this fails, in theory these should be equal
+//      assertEq(uint256(executedAmounts.baseAmount), unfilledBaseLong+unfilledBaseShort);
+      assertEq(liquidatable, false);
+      assertGe(initialMarginRequirement, liquidationMarginRequirement);
 
     // check against IM
     // margin > im + unrealizedLoss
