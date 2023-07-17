@@ -994,7 +994,7 @@ contract Scenario1 is BaseScenario, TestUtils {
       int256 settlementCashflow = executedBaseAmount * maturityIndex / WAD.toInt() + executedQuoteAmount;
       // 1 below represents the maturity index at the time of the trade
       // todo: fee calc is likely not correct
-//      int256 existingCollateral = 500e18 - executedBaseAmount * 1 * 25e17 / WAD.toInt() / 365 * 5e16 / WAD.toInt();
+      //int256 existingCollateral = 500e18 - executedBaseAmount * 1 * 25e17 / WAD.toInt() / 365 * 5e16 / WAD.toInt();
       int256 existingCollateral = 499760273972602739750;
 
       bytes memory commands = abi.encodePacked(
@@ -1029,150 +1029,150 @@ contract Scenario1 is BaseScenario, TestUtils {
       // collateral = deposited margin + liqBooster - fees 
       // 1 below represents the maturity index at the time of the trade
       // todo: fee calc
-//      int256 existingCollateral = 1001e18 - 10000e18 * 1 * 25e17 / WAD.toInt() / 365 * 1e16 / WAD.toInt();
-      int256 existingCollateral = 999041095890410959001;
+      // int256 existingCollateral = 1001e18 - 10000e18 * 1 * 25e17 / WAD.toInt() / 365 * 1e16 / WAD.toInt();
+            int256 existingCollateral = 999041095890410959001;
 
-      bytes memory commands = abi.encodePacked(
-        bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)),
-        bytes1(uint8(Commands.V2_CORE_WITHDRAW))
-      );
-      bytes[] memory inputs = new bytes[](2);
-      inputs[0] = abi.encode(
-        1,  // accountId
-        marketId,
-        maturityTimestamp
-      );
-      inputs[1] = abi.encode(1, address(token), settlementCashflow + existingCollateral);
-      peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+            bytes memory commands = abi.encodePacked(
+              bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)),
+              bytes1(uint8(Commands.V2_CORE_WITHDRAW))
+            );
+            bytes[] memory inputs = new bytes[](2);
+            inputs[0] = abi.encode(
+              1,  // accountId
+              marketId,
+              maturityTimestamp
+            );
+            inputs[1] = abi.encode(1, address(token), settlementCashflow + existingCollateral);
+            peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 
-      uint256 collateralBalance = coreProxy.getAccountCollateralBalance(1, address(token));
+            uint256 collateralBalance = coreProxy.getAccountCollateralBalance(1, address(token));
 
-      uint256 user1BalanceAfterSettle = token.balanceOf(user1);
-      assertEq(collateralBalance, 0);
-      assertEq(user1BalanceAfterSettle.toInt(), user1BalanceBeforeSettle.toInt() + settlementCashflow + existingCollateral);
-    }
-  }
+            uint256 user1BalanceAfterSettle = token.balanceOf(user1);
+            assertEq(collateralBalance, 0);
+            assertEq(user1BalanceAfterSettle.toInt(), user1BalanceBeforeSettle.toInt() + settlementCashflow + existingCollateral);
+          }
+        }
 
-  function test_MINT_FT_Settlement() public {
-    setConfigs();
+        function test_MINT_FT_Settlement() public {
+          setConfigs();
 
-    vm.startPrank(user1);
-    token.mint(user1, 1001e18);
-    token.approve(address(peripheryProxy), 1001e18);
+          vm.startPrank(user1);
+          token.mint(user1, 1001e18);
+          token.approve(address(peripheryProxy), 1001e18);
 
-    // PERIPHERY LP COMMAND
-    redeemAccessPass(user1, 1, 2);
-    int128 lpLiquidity = extendedPoolModule.getLiquidityForBase(-14100, -13620, 10000e18); // 833_203_486_935_127_427_677_715
-    {
-      bytes memory commands = abi.encodePacked(
-        bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
-        bytes1(uint8(Commands.TRANSFER_FROM)),
-        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
-        bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
-      );
-      bytes[] memory inputs = new bytes[](4);
-      inputs[0] = abi.encode(1);
-      inputs[1] = abi.encode(address(token), 1001e18);
-      inputs[2] = abi.encode(1, address(token), 1000e18);
-      inputs[3] = abi.encode(
-        1,  // accountId
-        marketId,
-        maturityTimestamp,
-        -14100, // 4.1%
-        -13620, // 3.9% 
-        extendedPoolModule.getLiquidityForBase(-14100, -13620, 10000e18)    
-      );
-      peripheryProxy.execute(commands, inputs, block.timestamp + 1);
-    }
+          // PERIPHERY LP COMMAND
+          redeemAccessPass(user1, 1, 2);
+          int128 lpLiquidity = extendedPoolModule.getLiquidityForBase(-14100, -13620, 10000e18); // 833_203_486_935_127_427_677_715
+          {
+            bytes memory commands = abi.encodePacked(
+              bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
+              bytes1(uint8(Commands.TRANSFER_FROM)),
+              bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+              bytes1(uint8(Commands.V2_VAMM_EXCHANGE_LP))
+            );
+            bytes[] memory inputs = new bytes[](4);
+            inputs[0] = abi.encode(1);
+            inputs[1] = abi.encode(address(token), 1001e18);
+            inputs[2] = abi.encode(1, address(token), 1000e18);
+            inputs[3] = abi.encode(
+              1,  // accountId
+              marketId,
+              maturityTimestamp,
+              -14100, // 4.1%
+              -13620, // 3.9% 
+              extendedPoolModule.getLiquidityForBase(-14100, -13620, 10000e18)    
+            );
+            peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+          }
 
-    vm.stopPrank();
-    //uint256 lpUnfilledShortBeforeTrade = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort;
+          vm.stopPrank();
+          //uint256 lpUnfilledShortBeforeTrade = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort;
 
-    vm.startPrank(user2);
-    token.mint(user2, 10001e18);
-    token.approve(address(peripheryProxy), 501e18);
+          vm.startPrank(user2);
+          token.mint(user2, 10001e18);
+          token.approve(address(peripheryProxy), 501e18);
 
-    /// PERIPHERY VT SWAP COMMAND -> tick grows
-    bytes[] memory swapOutput;
-    redeemAccessPass(user2, 1, 3);
-    {
-      bytes memory commands = abi.encodePacked(
-        bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
-        bytes1(uint8(Commands.TRANSFER_FROM)),
-        bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
-        bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
-      );
-      bytes[] memory inputs = new bytes[](4);
-      inputs[0] = abi.encode(2);
-      inputs[1] = abi.encode(address(token), 501e18);
-      inputs[2] = abi.encode(2, address(token), 500e18);
-      inputs[3] = abi.encode(
-        2,  // accountId
-        marketId,
-        maturityTimestamp,
-        -500e18,
-        0 // todo: compute this properly
-      );
-      swapOutput = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
-    }
+          /// PERIPHERY VT SWAP COMMAND -> tick grows
+          bytes[] memory swapOutput;
+          redeemAccessPass(user2, 1, 3);
+          {
+            bytes memory commands = abi.encodePacked(
+              bytes1(uint8(Commands.V2_CORE_CREATE_ACCOUNT)),
+              bytes1(uint8(Commands.TRANSFER_FROM)),
+              bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
+              bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SWAP))
+            );
+            bytes[] memory inputs = new bytes[](4);
+            inputs[0] = abi.encode(2);
+            inputs[1] = abi.encode(address(token), 501e18);
+            inputs[2] = abi.encode(2, address(token), 500e18);
+            inputs[3] = abi.encode(
+              2,  // accountId
+              marketId,
+              maturityTimestamp,
+              -500e18,
+              0 // todo: compute this properly
+            );
+            swapOutput = peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+          }
 
-    (
-      int256 executedBaseAmount,
-      int256 executedQuoteAmount,,,,
-    ) = abi.decode(swapOutput[3], (int256, int256, uint256, uint256, uint256, int24));
+          (
+            int256 executedBaseAmount,
+            int256 executedQuoteAmount,,,,
+          ) = abi.decode(swapOutput[3], (int256, int256, uint256, uint256, uint256, int24));
 
-    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(101e16));
-    vm.warp(maturityTimestamp + 1);
-    datedIrsProxy.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
-    int256 maturityIndex = int256(UD60x18.unwrap(datedIrsProxy.getRateIndexMaturity(marketId, maturityTimestamp)));
+          aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(101e16));
+          vm.warp(maturityTimestamp + 1);
+          datedIrsProxy.updateRateIndexAtMaturityCache(marketId, maturityTimestamp);
+          int256 maturityIndex = int256(UD60x18.unwrap(datedIrsProxy.getRateIndexMaturity(marketId, maturityTimestamp)));
 
-    /// SETTLE TRADER
-    {
-      uint256 user2BalanceBeforeSettle = token.balanceOf(user2);
-      // settlement CF = base * liqIndex + quote 
-      int256 settlementCashflow = executedBaseAmount * maturityIndex / WAD.toInt() + executedQuoteAmount;
+          /// SETTLE TRADER
+          {
+            uint256 user2BalanceBeforeSettle = token.balanceOf(user2);
+            // settlement CF = base * liqIndex + quote 
+            int256 settlementCashflow = executedBaseAmount * maturityIndex / WAD.toInt() + executedQuoteAmount;
 
-      // fee = annualizedNotional * atomic fee , note: executedBaseAmount is negative
-      // 1 below represents the maturity index at the time of the trade
-      // todo: double check the calculation of fees (for now using raw existing collateral from contracts)
-//      int256 existingCollateral = 500e18 + executedBaseAmount * 1 * 25e17 / WAD.toInt() / 365 * 5e16 / WAD.toInt();
-      int256 existingCollateral = 499760273972602739750;
+            // fee = annualizedNotional * atomic fee , note: executedBaseAmount is negative
+            // 1 below represents the maturity index at the time of the trade
+            // todo: double check the calculation of fees (for now using raw existing collateral from contracts)
+      // int256 existingCollateral = 500e18 + executedBaseAmount * 1 * 25e17 / WAD.toInt() / 365 * 5e16 / WAD.toInt();
+            int256 existingCollateral = 499760273972602739750;
 
-    bytes memory commands = abi.encodePacked(
-        bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)),
-        bytes1(uint8(Commands.V2_CORE_WITHDRAW))
-      );
-      bytes[] memory inputs = new bytes[](2);
-      inputs[0] = abi.encode(
-        2,  // accountId
-        marketId,
-        maturityTimestamp
-      );
-        inputs[1] = abi.encode(2, address(token), settlementCashflow + existingCollateral);
-      peripheryProxy.execute(commands, inputs, block.timestamp + 1);
+          bytes memory commands = abi.encodePacked(
+              bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)),
+              bytes1(uint8(Commands.V2_CORE_WITHDRAW))
+            );
+            bytes[] memory inputs = new bytes[](2);
+            inputs[0] = abi.encode(
+              2,  // accountId
+              marketId,
+              maturityTimestamp
+            );
+              inputs[1] = abi.encode(2, address(token), settlementCashflow + existingCollateral);
+            peripheryProxy.execute(commands, inputs, block.timestamp + 1);
 
-      uint256 collateralBalance = coreProxy.getAccountCollateralBalance(2, address(token));
+            uint256 collateralBalance = coreProxy.getAccountCollateralBalance(2, address(token));
 
-      uint256 user2BalanceAfterSettle = token.balanceOf(user2);
-      assertEq(collateralBalance, 0);
-      assertEq(user2BalanceAfterSettle.toInt(), user2BalanceBeforeSettle.toInt() + settlementCashflow + existingCollateral);
-    }
-     vm.stopPrank();
+            uint256 user2BalanceAfterSettle = token.balanceOf(user2);
+            assertEq(collateralBalance, 0);
+            assertEq(user2BalanceAfterSettle.toInt(), user2BalanceBeforeSettle.toInt() + settlementCashflow + existingCollateral);
+          }
+          vm.stopPrank();
 
-    /// SETTLE LP
-    {
-      vm.startPrank(user1);
-      uint256 user1BalanceBeforeSettle = token.balanceOf(user1);
-      // settlement CF = base * liqIndex + quote  (opposite of trader's)
-      // todo: note, subtracting 1 from the settlement cashflow since there's a small discrepancy (need to check)
-      int256 settlementCashflow = 
-        -executedBaseAmount * 
-        maturityIndex
-        / WAD.toInt() 
-        - executedQuoteAmount - 1;
-      // 1 below represents the maturity index at the time of the trade
-      // todo: uncomment below line once fee calc in the test is sorted
-//      int256 existingCollateral = 1000e18 - 10000e18 * 1 * 25e17 / WAD.toInt() / 365 * 1e16 / WAD.toInt();
+          /// SETTLE LP
+          {
+            vm.startPrank(user1);
+            uint256 user1BalanceBeforeSettle = token.balanceOf(user1);
+            // settlement CF = base * liqIndex + quote  (opposite of trader's)
+            // todo: note, subtracting 1 from the settlement cashflow since there's a small discrepancy (need to check)
+            int256 settlementCashflow = 
+              -executedBaseAmount * 
+              maturityIndex
+              / WAD.toInt() 
+              - executedQuoteAmount - 1;
+            // 1 below represents the maturity index at the time of the trade
+            // todo: uncomment below line once fee calc in the test is sorted
+      // int256 existingCollateral = 1000e18 - 10000e18 * 1 * 25e17 / WAD.toInt() / 365 * 1e16 / WAD.toInt();
         int256 existingCollateral = 999041095890410959001;
 
       bytes memory commands = abi.encodePacked(
