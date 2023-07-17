@@ -461,7 +461,8 @@ contract AccountTest is Test {
             expectedLiquidationMarginRequirement += lowerExposures[i].annualizedNotional.toUint();
         }
 
-        (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) = accounts.computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(lowerExposures, upperExposures);
+        (uint256 liquidationMarginRequirement, uint256 highestUnrealizedLoss) = 
+            accounts.computeLMAndHighestUnrealizedLossFromLowerAndUpperExposures(lowerExposures, upperExposures);
         assertEq(liquidationMarginRequirement, expectedLiquidationMarginRequirement);
         assertEq(highestUnrealizedLoss, expectedUnrealizedLoss);
     }

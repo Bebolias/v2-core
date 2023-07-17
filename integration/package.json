@@ -18,7 +18,7 @@
     "publish": "echo \"Cannot publish integration yet\"",
     "lint:check": "yarn lint:sol:check && yarn prettier:check",
     "lint:write": "yarn lint:sol:write && yarn prettier:write",
-    "lint:sol:check": "yarn solhint \"{src,test}/**/*.sol\"",
+    "lint:sol:check": "yarn solhint \"{src,test}/**/*.sol\" --ignore-path .solhintignore",
     "lint:sol:write": "yarn solhint --fix \"{src,test}/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
     "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",

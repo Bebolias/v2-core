@@ -103,7 +103,7 @@ contract RateOracleModule is IRateOracleModule {
         emit RateOracleConfigured(marketId, oracleAddress, maturityIndexCachingWindowInSeconds, block.timestamp);
     }
 
-    function _validateVariableOracleAddress(address oracleAddress) internal returns (bool isValid) {
+    function _validateVariableOracleAddress(address oracleAddress) internal view returns (bool isValid) {
         return IERC165(oracleAddress).supportsInterface(type(IRateOracle).interfaceId);
     }
 }

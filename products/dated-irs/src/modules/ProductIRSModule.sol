@@ -85,7 +85,7 @@ contract ProductIRSModule is IProductIRSModule {
         int256 executedBaseAmount,
         uint128 marketId,
         uint32 maturityTimestamp
-    ) internal returns (int256 annualizedNotionalAmount) {
+    ) internal view returns (int256 annualizedNotionalAmount) {
         int256[] memory baseAmounts = new int256[](1);
         baseAmounts[0] = executedBaseAmount;
         annualizedNotionalAmount = baseToAnnualizedExposure(baseAmounts, marketId, maturityTimestamp)[0];
@@ -192,7 +192,7 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IProductIRSModule
      */
-    function getCoreProxyAddress() external returns (address) {
+    function getCoreProxyAddress() external view returns (address) {
         return ProductConfiguration.getCoreProxyAddress();
     }
 
@@ -228,7 +228,7 @@ contract ProductIRSModule is IProductIRSModule {
     /**
      * @inheritdoc IERC165
      */
-    function supportsInterface(bytes4 interfaceId) external view override(IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure override(IERC165) returns (bool) {
         return interfaceId == type(IProduct).interfaceId || interfaceId == this.supportsInterface.selector;
     }
 }

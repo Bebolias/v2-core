@@ -53,7 +53,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     user1 = vm.addr(1);
     user2 = vm.addr(2);
     marketId = 1;
-    maturityTimestamp = uint32(block.timestamp) + 259200; // in 3 days
+    maturityTimestamp = uint32(block.timestamp) + 345600; // in 4 days
     extendedPoolModule = new ExtendedPoolModule();
   }
 
@@ -130,7 +130,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         minTick: TickMath.DEFAULT_MIN_TICK,
         maxTick: TickMath.DEFAULT_MAX_TICK
     });
-
+    
     vammProxy.setProductAddress(address(datedIrsProxy));
     vm.warp(block.timestamp + 86400); // advance by 1 days
     uint32[] memory times = new uint32[](2);

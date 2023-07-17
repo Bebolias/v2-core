@@ -16,9 +16,9 @@ library Time {
         require((timestamp = uint32(_timestamp)) == _timestamp, "TSOFLOW");
     }
 
-    function timeDeltaAnnualized(uint32 timestamp) internal view returns (UD60x18 timeDeltaAnnualized) {
+    function timeDeltaAnnualized(uint32 timestamp) internal view returns (UD60x18 _timeDeltaAnnualized) {
         if (timestamp > blockTimestampTruncated()) {
-            timeDeltaAnnualized = (uint256(timestamp) - block.timestamp).toUD60x18().div(SECONDS_IN_YEAR.toUD60x18());
+            _timeDeltaAnnualized = (uint256(timestamp) - block.timestamp).toUD60x18().div(SECONDS_IN_YEAR.toUD60x18());
         }
     }
 }

@@ -22,15 +22,19 @@ abstract contract BatchScript is Script, DelegatePrank {
     //     "safeTxGas": 0,  // Max gas to use in the transaction
 
     // Used by refund mechanism, not needed here
-    //     "gasToken": "<checksummed address>", // Token address (hold by the Safe) to be used as a refund to the sender, if `null` is Ether
+    //     "gasToken": "<checksummed address>", 
+        // Token address (hold by the Safe) to be used as a refund to the sender, if `null` is Ether
     //     "baseGas": 0,  // Gast costs not related to the transaction execution (signature check, refund payment...)
     //     "gasPrice": 0,  // Gas price used for the refund calculation
-    //     "refundReceiver": "<checksummed address>", //Address of receiver of gas payment (or `null` if tx.origin)
+    //     "refundReceiver": "<checksummed address>", 
+        //Address of receiver of gas payment (or `null` if tx.origin)
 
     //     "nonce": 0,  // Nonce of the Safe, transaction cannot be executed until Safe's nonce is not equal to this nonce
     //     "contractTransactionHash": "string",  // Contract transaction hash calculated from all the field
-    //     "sender": "<checksummed address>",  // Owner of the Safe proposing the transaction. Must match one of the signatures
-    //     "signature": "<0x prefixed hex string>",  // One or more ethereum ECDSA signatures of the `contractTransactionHash` as an hex string
+    //     "sender": "<checksummed address>",  
+        // Owner of the Safe proposing the transaction. Must match one of the signatures
+    //     "signature": "<0x prefixed hex string>",  
+        // One or more ethereum ECDSA signatures of the `contractTransactionHash` as an hex string
 
     // Not required
     //     "origin": "string"  // Give more information about the transaction, e.g. "My Custom Safe app"
@@ -44,7 +48,8 @@ abstract contract BatchScript is Script, DelegatePrank {
         0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218;
 
     // keccak256(
-    //     "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
+    //     "SafeTx(address to,uint256 value,bytes data,uint8 operation,
+    //          uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
     // );
     bytes32 private constant SAFE_TX_TYPEHASH =
         0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8;

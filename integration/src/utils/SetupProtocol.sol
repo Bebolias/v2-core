@@ -705,6 +705,40 @@ contract SetupProtocol is BatchScript {
     }
   }
 
+  function setPoolPauseState(
+    bool paused
+  ) public {
+    if (!settings.multisig) {
+      broadcastOrPrank();
+      contracts.vammProxy.setPauseState(paused);
+    } else {
+      addToBatch(
+        address(contracts.vammProxy),
+        abi.encodeCall(
+          contracts.vammProxy.setPauseState,
+          (paused)
+        )
+      );
+    }
+  }
+
+  function setVammFeatureFlagAllowOne(bytes32 feature, address account) public {
+    if (!settings.multisig) {
+      broadcastOrPrank();
+      contracts.vammProxy.addToFeatureFlagAllowlist(
+        feature, account
+      );
+    } else {
+      addToBatch(
+        address(contracts.vammProxy),
+        abi.encodeCall(
+          contracts.vammProxy.addToFeatureFlagAllowlist, 
+          (feature, account)
+        )
+      );
+    }
+  }
+
   function increaseObservationCardinalityNext(
     uint128 marketId, 
     uint32 maturityTimestamp, 

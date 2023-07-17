@@ -590,8 +590,12 @@ contract PortfolioTest is Test {
         vm.mockCall(coreProxy, abi.encodeWithSelector(IRiskConfigurationModule.getMarketRiskConfiguration.selector, 1,
             marketId), abi.encode(1,marketId,1,3600));
 
-        vm.mockCall(address(mockPool), abi.encodeWithSelector(IPool.getAccountUnfilledBaseAndQuote.selector, marketId, maturityTimestamp,
-            accountId), abi.encode(1e18, 2e18, 2e18, 1e18));
+        vm.mockCall(address(mockPool), abi.encodeWithSelector(
+                IPool.getAccountUnfilledBaseAndQuote.selector,
+                marketId,
+                maturityTimestamp,
+                accountId
+            ), abi.encode(1e18, 2e18, 2e18, 1e18));
 
         vm.mockCall(address(mockPool), abi.encodeWithSelector(IPool.getAccountFilledBalances.selector, marketId, maturityTimestamp,
             accountId), abi.encode(1e18, -1e18));
