@@ -95,7 +95,7 @@ contract ComplexScenarios is BaseScenario, TestUtils {
         productId: productId,
         coreProxy: address(coreProxy),
         poolAddress: address(vammProxy),
-        takerPositionsPerAccountLimit: 1
+        takerPositionsPerAccountLimit: 2
       })
     );
 
@@ -1873,19 +1873,65 @@ contract ComplexScenarios is BaseScenario, TestUtils {
           true
       );
 
+      (,,uint256 liquidationMarginRequirementAfterFirstLp,) = coreProxy.isLiquidatable(1, address(token));
+
       // lp position in matuirityTimestampOneYearLayer
       uint256 fee2 = newMaker(
           1, // accountId
           vm.addr(1), // user
           1, // count,
           2, // merkleIndex
-          1001e18, // toDeposit
+          20001e18, // toDeposit
           10000e18, // baseAmount
           -14100, // 4.1%
           -13620, // 3.9%
-          maturityTimestamp,
+          maturityTimestampOneYearLater,
           false
       );
+
+      (,,uint256 liquidationMarginRequirementAfterSecondLp,) = coreProxy.isLiquidatable(1, address(token));
+
+      assertGe(liquidationMarginRequirementAfterSecondLp, liquidationMarginRequirementAfterFirstLp);
+
+      newTaker(
+          4, // accountId
+          vm.addr(4), // user
+          1, // count,
+          5, // merkleIndex
+          101e18, // toDeposit
+          500e18, // baseAmount
+          maturityTimestamp
+      );
+
+
+      vm.warp(maturityTimestamp + 1);
+
+      // todo: pass meaningful existing collateral and settlemnet cashflow
+      settle(
+          1,
+          vm.addr(1),
+          0,
+          100,
+          maturityTimestamp
+      );
+
+      // another account opens lp position in maturityTimestampOneYearLater
+      uint256 fee3 = newMaker(
+          3, // accountId
+          vm.addr(3), // user
+          1, // count,
+          4, // merkleIndex
+          20001e18, // toDeposit
+          10000e18, // baseAmount
+          -14100, // 4.1%
+          -13620, // 3.9%
+          maturityTimestampOneYearLater,
+          true
+      );
+
+    // todo: note, when i try creating two lp positions it fails unless both maker and taker limits are 2
+      // is this expected
+
 
   }
 }
