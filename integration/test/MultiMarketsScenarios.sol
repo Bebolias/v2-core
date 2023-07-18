@@ -25,7 +25,7 @@ import { sd59x18, abs } from "@prb/math/SD59x18.sol";
 import "forge-std/console2.sol";
 
 contract MultiMarketsScenarios is TestUtils, BaseScenario {
- using SafeCastI256 for int256;
+  using SafeCastI256 for int256;
   using SafeCastU256 for uint256;
   using SafeCastU128 for uint128;
 
@@ -827,13 +827,13 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
         vm.addr(2), // user
         1, // count,
         3, // merkleIndex
-        70e18, // toDeposit
-        -500e18 // baseAmount
+        7e18, // toDeposit
+        -50e18 // baseAmount
     );
 
     uint256 twap3 = UD60x18.unwrap(vammProxy.getAdjustedDatedIRSTwap(
       marketId, maturityTimestamp, 
-      500e18, 120
+      50e18, 120
     ));
     console2.log("CHECK TAKER ---------"); 
     (MarginData memory mBefore, )= checkImTaker(
@@ -869,6 +869,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     assertGt(mAfterVolatility.highestUnrealizedLoss, mBefore.highestUnrealizedLoss);
     // tick before was in the middle => modes towards 1 side => LMR is higher
     assertGt(mAfterVolatility.liquidationMarginRequirement, mBefore.liquidationMarginRequirement);
+    uint256 marginBefore = coreProxy.getAccountCollateralBalance(2, address(token));
 
     console2.log("-------- LIQUIDATION -------");
     vm.startPrank(vm.addr(4));
@@ -880,16 +881,19 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     MarginData memory mAfterLiq;
     (
         ,
-        mAfterLiq.initialMarginRequirement,
-        mAfterLiq.highestUnrealizedLoss,
-    ) = coreProxy.isLiquidatable(1, address(token));
+        mAfterLiq.initialMarginRequirement,,
+        mAfterLiq.highestUnrealizedLoss
+    ) = coreProxy.isLiquidatable(2, address(token));
     assertLt(mAfterLiq.initialMarginRequirement + mAfterLiq.highestUnrealizedLoss,
       mAfterVolatility.initialMarginRequirement + mAfterVolatility.highestUnrealizedLoss);
     
     // liq reward sent
+    console2.log(coreProxy.getAccountCollateralBalance(4, address(token)));
+    console2.log((-takerAmounts[0].executedBaseAmount).toUint() * 1.135e18 / 1e18 * timeFactor(maturityTimestamp) / 1e18 * 0.0002e18 / 1e18 );
+
     assertEq(coreProxy.getAccountCollateralBalance(2, address(token)), 
-      takerAmounts[0].depositedAmount -
-      takerAmounts[0].executedBaseAmount.toUint() * 2.8e18 / 1e18 * timeFactor(maturityTimestamp) / 1e18 * 0.0002e18 / 1e18 -
+      marginBefore -
+      (-takerAmounts[0].executedBaseAmount).toUint() * 1.135e18 / 1e18 * timeFactor(maturityTimestamp) / 1e18 * 0.0002e18 / 1e18 -
       coreProxy.getAccountCollateralBalance(4, address(token)), "qt");
   }
 

@@ -906,10 +906,6 @@ contract ComplexScenarios is BaseScenario, TestUtils {
     assertAlmostEq(-(cashflows[0] + cashflows[2] + cashflows[4]), cashflows[1] + cashflows[3] + cashflows[5], 1000);
   }
 
-  // todo, needs new setup
-  function test_3months_pool() public {
-  }
-
   function test_high_variable_rate_volatility() public {
     /// note same positions taken by different users at 0.5 days interval
     /// change in the liquidity index

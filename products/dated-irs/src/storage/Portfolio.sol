@@ -378,6 +378,8 @@ library Portfolio {
             (int256 executedBaseAmount, int256 executedQuoteAmount) =
                 pool.executeDatedTakerOrder(marketId, maturityTimestamp, unwindBase, 0);
 
+            position.update(executedBaseAmount, executedQuoteAmount);
+
             UD60x18 _annualizedExposureFactor = annualizedExposureFactor(marketId, maturityTimestamp);
             IProductModule(ProductConfiguration.getCoreProxyAddress()).propagateTakerOrder(
                 self.accountId,
@@ -386,8 +388,6 @@ library Portfolio {
                 collateralType,
                 mulUDxInt(_annualizedExposureFactor, executedBaseAmount)
             );
-
-            position.update(executedBaseAmount, executedQuoteAmount);
 
             emit ProductPositionUpdated(
                 self.accountId, marketId, maturityTimestamp, executedBaseAmount, executedQuoteAmount, block.timestamp

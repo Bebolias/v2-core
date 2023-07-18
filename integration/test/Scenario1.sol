@@ -757,7 +757,7 @@ contract Scenario1 is BaseScenario, TestUtils {
     assertEq(executedBaseAmount, -600e18);
     assertNotEq(executedQuoteAmount, 0);
     // todo: fix expected fee calculation in the test
-//    assertAlmostEq(fee, uint256(-expectedFee), 100);
+    //assertAlmostEq(fee, uint256(-expectedFee), 100);
     assertEq(currentTick, currentTickVamm);
     // todo: another assertion that'd be helpful is to check that sum of settlement casfhlows is approx 0
   }
@@ -910,7 +910,7 @@ contract Scenario1 is BaseScenario, TestUtils {
     assertEq(executedBaseAmount, 600e18);
     assertNotEq(executedQuoteAmount, 0);
     // todo: note, expectedFee calculation is not correct, need to fix the test
-//    assertAlmostEq(fee, uint256(expectedFee), 100);
+    //assertAlmostEq(fee, uint256(expectedFee), 100);
     assertEq(currentTick, currentTickVamm);
   }
 
