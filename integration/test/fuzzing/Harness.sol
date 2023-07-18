@@ -36,7 +36,8 @@ contract Harness {
         multisigAddress: address(0),
         multisigSend: false,
         echidna: true,
-        broadcast: false
+        broadcast: false,
+        prank: false
       }),
       owner
     );

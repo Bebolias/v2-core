@@ -61,12 +61,14 @@ contract SetupProtocol is BatchScript {
     
     bool echidna;
     bool broadcast;
+    bool prank;
   }
   Settings public settings;
 
   struct Metadata {
     uint256 chainId;
     address owner;
+    address sender;
 
     AccessPassNFT accessPassNft;
     AccountNftProxy accountNftProxy;
@@ -86,22 +88,32 @@ contract SetupProtocol is BatchScript {
     contracts = _contracts;
     settings = _settings;
 
-    AccessPassConfiguration.Data memory accessPassConfig = contracts.coreProxy.getAccessPassConfiguration();
-    metadata.accessPassNft = AccessPassNFT(accessPassConfig.accessPassNFTAddress);
+    // todo: Alex
+    try contracts.coreProxy.getAccessPassConfiguration() returns (AccessPassConfiguration.Data memory accessPassConfig) {
+      metadata.accessPassNft = AccessPassNFT(accessPassConfig.accessPassNFTAddress);
+    } catch {
+      metadata.accessPassNft = AccessPassNFT(vm.envAddress("ACCESS_PASS_NFT"));
+    }
 
     (address accountNftProxyAddress, ) = contracts.coreProxy.getAssociatedSystem(bytes32("accountNFT"));
     metadata.accountNftProxy = AccountNftProxy(payable(accountNftProxyAddress));
 
     metadata.chainId = (!settings.echidna) ? vm.envUint("CHAIN_ID") : 0;
-
     metadata.owner = owner;
+    metadata.sender = owner;
+  }
+
+  function changeSender(address sender) internal {
+    metadata.sender = sender;
   }
 
   function broadcastOrPrank() internal {
     if (settings.broadcast) {
-     vm.broadcast(metadata.owner);
+     vm.broadcast(metadata.sender);
     } else if (settings.echidna) {
-      hevm.prank(metadata.owner);
+      hevm.prank(metadata.sender);
+    } else if (settings.prank) {
+      vm.prank(metadata.sender);
     }
   }
 
@@ -181,7 +193,8 @@ contract SetupProtocol is BatchScript {
 
   function registerDatedIrsProduct(uint256 _takerPositionsPerAccountLimit) public {
     // predict product id
-    uint128 productId = contracts.coreProxy.getLastCreatedProductId() + 1;
+    // uint128 productId = contracts.coreProxy.getLastCreatedProductId() + 1; // todo: Alex
+    uint128 productId = 1;
     registerProduct(address(contracts.datedIrsProxy), "Dated IRS Product");
 
     configureProduct(
@@ -255,37 +268,16 @@ contract SetupProtocol is BatchScript {
   }
 
   function deployPool(
-    uint128 marketId,
-    uint32 maturityTimestamp,
-    address rateOracleAddress,
-    UD60x18 priceImpactPhi,
-    UD60x18 priceImpactBeta,
-    UD60x18 spread,
+    VammConfiguration.Immutable memory immutableConfig,
+    VammConfiguration.Mutable memory mutableConfig,
     int24 initTick,
-    int24 tickSpacing,
     uint16 observationCardinalityNext,
     uint256 makerPositionsPerAccountLimit,
     uint32[] memory times,
     int24[] memory observedTicks
   ) public {
-    VammConfiguration.Immutable memory immutableConfig = VammConfiguration.Immutable({
-        maturityTimestamp: maturityTimestamp,
-        _maxLiquidityPerTick: type(uint128).max,
-        _tickSpacing: tickSpacing,
-        marketId: marketId
-    });
-
-    VammConfiguration.Mutable memory mutableConfig = VammConfiguration.Mutable({
-        priceImpactPhi: priceImpactPhi,
-        priceImpactBeta: priceImpactBeta,
-        spread: spread,
-        rateOracle: IRateOracle(address(rateOracleAddress)),
-        minTick: TickMath.DEFAULT_MIN_TICK,
-        maxTick: TickMath.DEFAULT_MAX_TICK
-    });
-
     createVamm({
-      marketId: marketId,
+      marketId: immutableConfig.marketId,
       sqrtPriceX96: TickMath.getSqrtRatioAtTick(initTick),
       times: times,
       observedTicks: observedTicks,
@@ -294,8 +286,8 @@ contract SetupProtocol is BatchScript {
     });
 
     increaseObservationCardinalityNext({
-      marketId: marketId,
-      maturityTimestamp: maturityTimestamp,
+      marketId: immutableConfig.marketId,
+      maturityTimestamp: immutableConfig.maturityTimestamp,
       observationCardinalityNext: observationCardinalityNext
     });
 
@@ -471,6 +463,21 @@ contract SetupProtocol is BatchScript {
   ////////////////////////////////////////////////////////////////////
   /////////////////             CORE PROXY           /////////////////
   ////////////////////////////////////////////////////////////////////
+
+  function initOrUpgradeNft(bytes32 id, string memory name, string memory symbol, string memory uri, address impl) public {
+    if (!settings.multisig) {
+      broadcastOrPrank();
+      contracts.coreProxy.initOrUpgradeNft(id, name, symbol, uri, impl);
+    } else {
+      addToBatch(
+        address(contracts.coreProxy),
+        abi.encodeCall(
+          contracts.coreProxy.initOrUpgradeNft,
+          (id, name, symbol, uri, impl)
+        )
+      );
+    }
+  }
 
   function setFeatureFlagAllowAll(bytes32 feature, bool allowAll) public {
     if (!settings.multisig) {

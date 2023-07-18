@@ -55,4 +55,4 @@ This is a monorepo with the following folder structure and packages:
 - `cd integration`
 - `MULTISIG=true`, `MULTISIG_ADDRESS=`, `MULTISIG_SEND=true/false`, `WALLET_TYPE=ledger` and `MNEMONIC_INDEX=0` into `.env`
 - Populate rest of env variables required for the script (proxies etc)
-- forge script script/ConfigProtocol.s.sol --rpc-url <RPC_URL>
+- `forge script script/ConfigProtocol.s.sol --rpc-url <RPC_URL> --ffi`

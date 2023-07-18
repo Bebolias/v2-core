@@ -30,7 +30,8 @@ contract ConfigProtocol is SetupProtocol {
         multisigAddress: (_multisig) ? vm.envAddress("MULTISIG_ADDRESS") : address(0),
         multisigSend: (_multisig) ? vm.envBool("MULTISIG_SEND") : false,
         echidna: false,
-        broadcast: !_multisig
+        broadcast: !_multisig,
+        prank: false
       }),
       vm.envAddress("OWNER")
     )
@@ -39,15 +40,18 @@ contract ConfigProtocol is SetupProtocol {
   function run() public {
     // Populate with transactions
 
-    // todo: double check if we also configure
-    // ACCESS_PASS_NFT=0xf28E795B214230ba192f7f9167d6CbEc2558B00c
-    // AAVE_V3_RATE_ORACLE=0x4072356632230f14385c28e9143fb1c34096bddb
-    // AAVE_V3_BORROW_RATE_ORACLE=0xb792a53a24F313CcF3eBF9A51C7eF4aF216b6D4E
+    upgradeProxy(address(contracts.coreProxy), 0x44E1D5aEcb7B4d191F37f1933A30343046bD9ADB);
+    upgradeProxy(address(contracts.datedIrsProxy), 0x2463Db784786e04d266d9D91E77E1Fd650204fDD);
+    upgradeProxy(address(contracts.peripheryProxy), 0x2457D958DBEBaCc9daA41B47592faCA5845f8Fc3);
+    upgradeProxy(address(contracts.vammProxy), 0x8b6663217C62D5510F191de84d1c3a403D304016);
 
-    upgradeProxy(address(contracts.coreProxy), address(0x6BB334e672729b63AA7d7c4867D4EbD3f9444Ca3));
-    upgradeProxy(address(contracts.datedIrsProxy), address(0xcc22e3862D13f40142C1Ccd9294e8AD66f845bE2));
-    upgradeProxy(address(contracts.peripheryProxy), address(0x7917ADcd534c78f6901fc8A07d3834b9b47EAf26));
-    upgradeProxy(address(contracts.vammProxy), address(0x1d45dDD16ba18fEE069Adcd85827E71FcD54fc38));
+    initOrUpgradeNft({
+      id: 0x6163636f756e744e465400000000000000000000000000000000000000000000,
+      name: "Voltz V2 Account NFT", 
+      symbol: "VOLTZ", 
+      uri: "https://www.voltz.xyz/", 
+      impl: 0x935b397d9888C70027eCF8F7Dc6a68AbdCceBEd4
+    });
 
     enableFeatures();
 
@@ -62,7 +66,7 @@ contract ConfigProtocol is SetupProtocol {
     configureMarket({
       rateOracleAddress: address(contracts.aaveV3RateOracle),
       // note, let's keep as bridged usdc for now
-      tokenAddress: Utils.getUSDCAddress(metadata.chainId),  // todo: update helper function if we want native USDC
+      tokenAddress: Utils.getUSDCAddress(metadata.chainId),
       productId: 1,
       marketId: 1,
       feeCollectorAccountId: 999,
@@ -78,33 +82,39 @@ contract ConfigProtocol is SetupProtocol {
      times[0] = uint32(block.timestamp - 86400*4); // note goes back 4 days, while lookback is 3 days, so should be fine?
      times[1] = uint32(block.timestamp - 86400*3);
     int24[] memory observedTicks = new int24[](2);
-     observedTicks[0] = -12500; // 3.4% note worth double checking
-     observedTicks[1] = -12500; // 3.4%
+     observedTicks[0] = -12240; // 3.4% note worth double checking
+     observedTicks[1] = -12240; // 3.4%
     deployPool({
-      marketId: 1,
-      maturityTimestamp: 1692356400,                                // Fri Aug 18 2023 11:00:00 GMT+0000
-      rateOracleAddress: address(contracts.aaveV3RateOracle),
-      priceImpactPhi: ud60x18(0),
-      priceImpactBeta: ud60x18(0),
-      spread: ud60x18(0.001e18),
-      initTick: -12500, // 3.4%
-      tickSpacing: 60,
+      immutableConfig: VammConfiguration.Immutable({
+        maturityTimestamp: 1692356400,                                // Fri Aug 18 2023 11:00:00 GMT+0000
+        _maxLiquidityPerTick: type(uint128).max,
+        _tickSpacing: 60,
+        marketId: 1
+      }),
+      mutableConfig: VammConfiguration.Mutable({
+        priceImpactPhi: ud60x18(0),
+        priceImpactBeta: ud60x18(0),
+        spread: ud60x18(0.001e18),
+        rateOracle: IRateOracle(address(contracts.aaveV3RateOracle)),
+        minTick: -15780,  // 4.85%
+        maxTick: 15780    // 0.2%
+      }),
+      initTick: -12240, // 3.4%
       // todo: note, is this sufficient, or should we increase? what's the min gap between consecutive observations?
       observationCardinalityNext: 20,
       makerPositionsPerAccountLimit: 1,
       times: times,
       observedTicks: observedTicks
     });
-    // todo: note, is this pcv?
     mintOrBurn({
       marketId: 1,
       tokenAddress: Utils.getUSDCAddress(metadata.chainId),
-      accountId: 0,
+      accountId: 444,
       maturityTimestamp: 1692356400,
       marginAmount: 25000e6,
       notionalAmount: 25000e6 * 500,
-      tickLower: -15400, // 4.66% note worth double checking
-      tickUpper: -8600, // 2.36% note worth double checking
+      tickLower: -15420, // 4.67%
+      tickUpper: -8580, // 2.35%
       rateOracleAddress: address(contracts.aaveV3RateOracle)
     });
 
@@ -146,14 +156,21 @@ contract ConfigProtocol is SetupProtocol {
     observedTicks[0] = -13860;
     observedTicks[1] = -13860;
     deployPool({
-      marketId: 1,
-      maturityTimestamp: 1688990400,
-      rateOracleAddress: address(contracts.aaveV3RateOracle),
-      priceImpactPhi: ud60x18(1e17), // 0.1
-      priceImpactBeta: ud60x18(125e15), // 0.125
-      spread: ud60x18(3e15), // 0.3%
+      immutableConfig: VammConfiguration.Immutable({
+        maturityTimestamp: 1688990400,
+        _maxLiquidityPerTick: type(uint128).max,
+        _tickSpacing: 60,
+        marketId: 1
+      }),
+      mutableConfig: VammConfiguration.Mutable({
+        priceImpactPhi: ud60x18(1e17), // 0.1
+        priceImpactBeta: ud60x18(125e15), // 0.125
+        spread: ud60x18(3e15), // 0.3%
+        rateOracle: IRateOracle(address(contracts.aaveV3RateOracle)),
+        minTick: TickMath.DEFAULT_MIN_TICK,
+        maxTick: TickMath.DEFAULT_MAX_TICK
+      }),
       initTick: -13860, // price = 4%
-      tickSpacing: 60,
       observationCardinalityNext: 16,
       makerPositionsPerAccountLimit: 1,
       times: times,
