@@ -239,7 +239,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     bytes[] memory inputs = new bytes[](4);
     inputs[0] = abi.encode(accountId);
     inputs[1] = abi.encode(address(token), toDeposit);
-    inputs[2] = abi.encode(accountId, address(token), toDeposit - 1e18);
+    inputs[2] = abi.encode(accountId, address(token), toDeposit);
     inputs[3] = abi.encode(
         accountId,
         _marketId,
@@ -278,7 +278,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     uint256 toDeposit,
     int256 baseAmount
     ) public returns (TakerExecutedAmounts memory executedAmounts) {
-    uint256 margin = toDeposit - 1e18; // minus liquidation booster
+    uint256 margin = toDeposit - 0; // minus liquidation booster
 
     vm.startPrank(user);
 
@@ -445,8 +445,8 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
       ) = coreProxy.isLiquidatable(accountId, address(token));
 
       console2.log("liquidatable", m.liquidatable);
-      console2.log("initialMarginRequirement", m.initialMarginRequirement); // 785.8207615
-      console2.log("liquidationMarginRequirement", m.liquidationMarginRequirement); // 392.9103807
+      console2.log("initialMarginRequirement", m.initialMarginRequirement);
+      console2.log("liquidationMarginRequirement", m.liquidationMarginRequirement);
       console2.log("highestUnrealizedLoss",m.highestUnrealizedLoss);
 
       (u.unfilledBaseLong, u.unfilledBaseShort, u.unfilledQuoteLong, u.unfilledQuoteShort) =
@@ -466,13 +466,18 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
 
       // calculate unrealized loss low
       uint256 expectedUnrealizedLoss = absOrZero(executedAmounts.executedQuoteAmount + 
-        (executedAmounts.executedQuoteAmount * currentLiquidityIndex.toInt() * (twap * timeFactor(maturityTimestamp) / 1e18 + 1e18).toInt() / 1e36));
+        (executedAmounts.executedBaseAmount * currentLiquidityIndex.toInt() * (twap * timeFactor(maturityTimestamp) / 1e18 + 1e18).toInt() / 1e36));
 
       console2.log("expectedUnrealizedLoss", expectedUnrealizedLoss);
-      assertAlmostEq(expectedUnrealizedLoss.toInt(), m.highestUnrealizedLoss.toInt(), 2e15);
+      assertAlmostEq(expectedUnrealizedLoss.toInt(), m.highestUnrealizedLoss.toInt(), 1e5);
       assertAlmostEq(expectedLmr, m.liquidationMarginRequirement, 1e5);
       assertAlmostEq(expectedLmr * imMultiplier, m.initialMarginRequirement, 1e5);
       assertGt(executedAmounts.depositedAmount, expectedLmr * imMultiplier + expectedUnrealizedLoss, "IMR taker");
+
+      // assertEq(expectedUnrealizedLoss.toInt(), m.highestUnrealizedLoss.toInt(), "loss 1");
+      // assertEq(expectedLmr, m.liquidationMarginRequirement, "LMR");
+      // assertEq(expectedLmr * imMultiplier, m.initialMarginRequirement, "IMR");
+      // assertGt(executedAmounts.depositedAmount, expectedLmr * imMultiplier + expectedUnrealizedLoss, "IMR taker");
 
       // get unfilled base and quote balances of maker
       
@@ -599,7 +604,10 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     );
 
     int24 tick2 = vammProxy.getVammTick(marketId, maturityTimestamp);
-    uint256 twap2 = priceFromTick(tick2) / 100;
+    uint256 twap2 = UD60x18.unwrap(vammProxy.getAdjustedDatedIRSTwap(
+      marketId, maturityTimestamp, 
+      500e18, 120
+    ));
     console2.log("CHECK TAKER ---------");
     checkImTaker(
       marketId,
@@ -607,7 +615,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
         2, // accountId
         vm.addr(2), // user
         takerAmounts[0],
-        twap 
+        twap2 
     );
 
     // CHECK LP's margin data after some liquidity was consumed
@@ -625,85 +633,264 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
     assertGt(mAfter.liquidationMarginRequirement, mBefore.liquidationMarginRequirement);
   }
 
-  // function test_liquidation_two_markets() public {
-  //   /// note same positions taken by different users at 0.5 days interval
-  //   /// no change in the liquidity index
-  //   setConfigs();
+  // reason: unrealized loss
+  function test_liquidation_lp() public {
+    /// note same positions taken by different users at 0.5 days interval
+    /// no change in the liquidity index
+    setConfigs();
 
-  //   ExecutedAmounts[] memory amounts = new ExecutedAmounts[](3);
+    TakerExecutedAmounts[] memory takerAmounts = new TakerExecutedAmounts[](3);
+    MakerExecutedAmounts[] memory makerAmounts = new MakerExecutedAmounts[](3);
 
-  //   // console2.log("-------- LP -------");
-  //   newMaker(
-  //       marketId,
-  //       maturityTimestamp,
-  //       1, // accountId
-  //       vm.addr(1), // user
-  //       1, // count,
-  //       2, // merkleIndex
-  //       1001e18, // toDeposit
-  //       10000e18, // baseAmount
-  //       -14100, // 4.1%
-  //       -13620 // 3.9% 
-  //   );
-  //   editMaker(
-  //       marketId,
-  //       maturityTimestamp2,
-  //       1, // accountId
-  //       vm.addr(1), // user
-  //       1001e18, // toDeposit
-  //       10000e18, // baseAmount
-  //       -14100, // 4.1%
-  //       -13620 // 3.9% 
-  //   );
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(1e18));
 
-  //   // FT
-  //   // console2.log("-------- FT -------");
-  //   amounts[0] = newTaker(
-  //       marketId,
-  //       maturityTimestamp,
-  //       2, // accountId
-  //       vm.addr(2), // user
-  //       1, // count,
-  //       3, // merkleIndex
-  //       8e18, // toDeposit - margin = 7e18
-  //       -500e18 // baseAmount
-  //   ); // MR = 500e18 * 2.5/265 * 2 = 6.849315068493150000
-  //   // console2.log("IM", amounts[0].im);
-  //   // console2.log("BASE", amounts[0].executedBaseAmount);
+    // LP - 1st pool
+    makerAmounts[0] = newMaker(
+        marketId,
+        maturityTimestamp,
+        1, // accountId
+        vm.addr(1), // user
+        1, // count,
+        2, // merkleIndex
+        500e18, // toDeposit
+        10000e18, // baseAmount
+        -14100, // 4.1%
+        -13620 // 3.9%
+    );
 
-  //   // console2.log("-------- FT -------");
-  //   amounts[1] = editTaker(
-  //       marketId,
-  //       maturityTimestamp2,
-  //       2, // accountId
-  //       vm.addr(2), // user
-  //       0, // toDeposit - margin = 7e18
-  //       -1e18 // baseAmount
-  //   ); // MR = 500e18 * 2.5/265 * 2 = 6.849315068493150000
+    // coverup for future liquidation
+    // without extra liquidity, LP can't unwind (tries to take VT)
+    makerAmounts[1] = newMaker(
+        marketId,
+        maturityTimestamp,
+        3, // accountId
+        vm.addr(3), // user
+        1, // count,
+        4, // merkleIndex
+        500e18, // toDeposit
+        10000e18, // baseAmount
+        -14100, // 4.1%
+        -13620 // 3.9%
+    );
 
-  //   vm.warp(block.timestamp + 43200); // advance by 0.5 days
-  //   aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(1.01e18)); // 2 days left
-  //   // LMR = 500e18 * 2/365 * li2 = 7.5471
-  //   // unrealized pnl = base * li2 * (twap * 2/365 + 1) - 500.136  = 500 * li * 1.000219 - 500.136 =
+    // check im
+    console2.log("CHECK LP ---------");
+    (MarginData memory mBefore,) = checkImMaker(
+      marketId,
+        maturityTimestamp,
+        1, // accountId
+        vm.addr(1), // user
+        0,
+        makerAmounts[0],
+        priceFromTick(-13860) / 100 
+    );
 
-  //   //console2.log("-------- LIQUIDATION -------");
-  //   // LIQUIDQATE
-  //   vm.startPrank(vm.addr(3));
-  //   redeemAccessPass(vm.addr(3), 1, 4);
-  //   coreProxy.createAccount(3, vm.addr(3));
-  //   coreProxy.liquidate(2, 3, address(token));
-  //   vm.stopPrank();
-  // }
+    vm.warp(block.timestamp + 86400 * 5); // 5 days past
+    // 15.7% apy
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(1.002e18));
 
-  function test_settlement_cashflow_after_maturity() public {
+    // VT
+    takerAmounts[0] = newTaker(
+        marketId,
+        maturityTimestamp,
+        2, // accountId
+        vm.addr(2), // user
+        1, // count,
+        3, // merkleIndex
+        100e18, // toDeposit
+        500e18 // baseAmount
+    );
+
+    uint256 twap3 = UD60x18.unwrap(vammProxy.getAdjustedDatedIRSTwap(
+      marketId, maturityTimestamp, 
+      -500e18, 120
+    ));
+    console2.log("CHECK TAKER ---------"); 
+    checkImTaker(
+        marketId,
+        maturityTimestamp,
+        2, // accountId
+        vm.addr(2), // user
+        takerAmounts[0],
+        twap3
+    );
+
+    vm.warp(block.timestamp + 86400 * 5); // 5 days past
+    // bump the index to make LP liquidatable - LMR
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(2.8e18));
+
+    // CHECK LP's margin data after some liquidity was consumed
+    console2.log("CHECK LP ---------"); 
+    MarginData memory mAfterSwap;
+    (
+        mAfterSwap.liquidatable,
+        mAfterSwap.initialMarginRequirement,
+        mAfterSwap.liquidationMarginRequirement,
+        mAfterSwap.highestUnrealizedLoss
+    ) = coreProxy.isLiquidatable(1, address(token));
+
+    // lmr 71.678952195079287421 hloss 449.845037907720900220
+    // note lmr grows with liquidityIndex
+    // if lmr grows such that the position becomes
+    console2.log("mAfterSwap.liquidatable", mAfterSwap.liquidatable);
+    console2.log("mAfterSwap.highestUnrealizedLoss", mAfterSwap.highestUnrealizedLoss);
+    console2.log("mAfterSwap.liquidationMarginRequirement", mAfterSwap.liquidationMarginRequirement);
+
+    assertEq(mAfterSwap.liquidatable, true);
+    assertGt(mAfterSwap.highestUnrealizedLoss, mBefore.highestUnrealizedLoss);
+    // tick before was in the middle => modes towards 1 side => LMR is higher
+    assertGt(mAfterSwap.liquidationMarginRequirement, mBefore.liquidationMarginRequirement);
+
+    console2.log("-------- LIQUIDATION -------");
+    vm.startPrank(vm.addr(4));
+    redeemAccessPass(vm.addr(4), 1, 5);
+    coreProxy.createAccount(4, vm.addr(4));
+    coreProxy.liquidate(1, 4, address(token));
+    vm.stopPrank();
+
+    MarginData memory mAfterLiq;
+    (
+        ,
+        mAfterLiq.initialMarginRequirement,
+        mAfterLiq.highestUnrealizedLoss,
+    ) = coreProxy.isLiquidatable(1, address(token));
+    assertLt(mAfterLiq.initialMarginRequirement + mAfterLiq.highestUnrealizedLoss,
+      mAfterSwap.initialMarginRequirement + mAfterSwap.highestUnrealizedLoss);
+    
+    // liq reward sent
+    assertEq(coreProxy.getAccountCollateralBalance(1, address(token)), 
+      makerAmounts[0].depositedAmount -
+      takerAmounts[0].executedBaseAmount.toUint() / 2 * 2.8e18 / 1e18 * timeFactor(maturityTimestamp) / 1e18 * 0.0002e18 / 1e18 -
+      coreProxy.getAccountCollateralBalance(4, address(token)), "qt");
   }
 
-  function test_settlement_after_liquidation() public {
+  function test_liquidation_trader() public {
+    /// note same positions taken by different users at 0.5 days interval
+    /// no change in the liquidity index
+    setConfigs();
+
+    TakerExecutedAmounts[] memory takerAmounts = new TakerExecutedAmounts[](3);
+    MakerExecutedAmounts[] memory makerAmounts = new MakerExecutedAmounts[](3);
+
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(1e18));
+
+    // LP - 1st pool
+    makerAmounts[0] = newMaker(
+        marketId,
+        maturityTimestamp,
+        1, // accountId
+        vm.addr(1), // user
+        1, // count,
+        2, // merkleIndex
+        500e18, // toDeposit
+        10000e18, // baseAmount
+        -14100, // 4.1%
+        -13620 // 3.9%
+    );
+
+    // coverup for future liquidation
+    // without extra liquidity, LP can't unwind (tries to take VT)
+    makerAmounts[1] = newMaker(
+        marketId,
+        maturityTimestamp,
+        3, // accountId
+        vm.addr(3), // user
+        1, // count,
+        4, // merkleIndex
+        500e18, // toDeposit
+        10000e18, // baseAmount
+        -14100, // 4.1%
+        -13620 // 3.9%
+    );
+
+    // check im
+    console2.log("CHECK LP ---------");
+    checkImMaker(
+      marketId,
+        maturityTimestamp,
+        1, // accountId
+        vm.addr(1), // user
+        0,
+        makerAmounts[0],
+        priceFromTick(-13860) / 100 
+    );
+
+    vm.warp(block.timestamp + 86400 * 5); // 5 days past
+    // 15.7% apy
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(1.002e18));
+
+    // FT
+    takerAmounts[0] = newTaker(
+        marketId,
+        maturityTimestamp,
+        2, // accountId
+        vm.addr(2), // user
+        1, // count,
+        3, // merkleIndex
+        70e18, // toDeposit
+        -500e18 // baseAmount
+    );
+
+    uint256 twap3 = UD60x18.unwrap(vammProxy.getAdjustedDatedIRSTwap(
+      marketId, maturityTimestamp, 
+      500e18, 120
+    ));
+    console2.log("CHECK TAKER ---------"); 
+    (MarginData memory mBefore, )= checkImTaker(
+        marketId,
+        maturityTimestamp,
+        2, // accountId
+        vm.addr(2), // user
+        takerAmounts[0],
+        twap3
+    );
+
+    vm.warp(block.timestamp + 86400); // 1 day passes
+    // bump the index to make LP liquidatable - LMR
+    aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(1.135e18));
+
+    // CHECK LP's margin data after some liquidity was consumed
+    console2.log("CHECK TRADER ---------"); 
+    MarginData memory mAfterVolatility;
+    (
+        mAfterVolatility.liquidatable,
+        mAfterVolatility.initialMarginRequirement,
+        mAfterVolatility.liquidationMarginRequirement,
+        mAfterVolatility.highestUnrealizedLoss
+    ) = coreProxy.isLiquidatable(2, address(token));
+
+    // note lmr grows with liquidityIndex
+    // if lmr grows such that the position becomes
+    console2.log("mAfterVolatility.liquidatable", mAfterVolatility.liquidatable);
+    console2.log("mAfterVolatility.highestUnrealizedLoss", mAfterVolatility.highestUnrealizedLoss);
+    console2.log("mAfterVolatility.liquidationMarginRequirement", mAfterVolatility.liquidationMarginRequirement);
+
+    assertEq(mAfterVolatility.liquidatable, true);
+    assertGt(mAfterVolatility.highestUnrealizedLoss, mBefore.highestUnrealizedLoss);
+    // tick before was in the middle => modes towards 1 side => LMR is higher
+    assertGt(mAfterVolatility.liquidationMarginRequirement, mBefore.liquidationMarginRequirement);
+
+    console2.log("-------- LIQUIDATION -------");
+    vm.startPrank(vm.addr(4));
+    redeemAccessPass(vm.addr(4), 1, 5);
+    coreProxy.createAccount(4, vm.addr(4));
+    coreProxy.liquidate(2, 4, address(token));
+    vm.stopPrank();
+
+    MarginData memory mAfterLiq;
+    (
+        ,
+        mAfterLiq.initialMarginRequirement,
+        mAfterLiq.highestUnrealizedLoss,
+    ) = coreProxy.isLiquidatable(1, address(token));
+    assertLt(mAfterLiq.initialMarginRequirement + mAfterLiq.highestUnrealizedLoss,
+      mAfterVolatility.initialMarginRequirement + mAfterVolatility.highestUnrealizedLoss);
+    
+    // liq reward sent
+    assertEq(coreProxy.getAccountCollateralBalance(2, address(token)), 
+      takerAmounts[0].depositedAmount -
+      takerAmounts[0].executedBaseAmount.toUint() * 2.8e18 / 1e18 * timeFactor(maturityTimestamp) / 1e18 * 0.0002e18 / 1e18 -
+      coreProxy.getAccountCollateralBalance(4, address(token)), "qt");
   }
 
-  function test_settlement_on_long_pool() public {
-  }
-
-  function test_margin_requirements() public {
-  }
 }
