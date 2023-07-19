@@ -22,6 +22,18 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
     using SafeCastU256 for uint256;
     using SafeCastU128 for uint128;
 
+    struct TraderActor {
+        address walletAddress;
+        uint128 accountId;
+    }
+
+    struct LpActor {
+        address walletAddress;
+        uint128 accountId;
+        int24 tickLower;
+        int24 tickUpper;
+    }
+
     address owner = address(999999);
     ERC20Mock token = new ERC20Mock(6);
     DeployProtocol deployProtocol = new DeployProtocol(owner, address(token));
