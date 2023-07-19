@@ -2,7 +2,9 @@ pragma solidity >=0.8.19;
 
 import {DeployProtocol} from "../../src/utils/DeployProtocol.sol";
 import {ScenarioHelper, IRateOracle, VammConfiguration, Utils} from "../utils/ScenarioHelper.sol";
+
 import {IERC20} from "@voltz-protocol/util-contracts/src/interfaces/IERC20.sol";
+import {Time} from "@voltz-protocol/util-contracts/src/helpers/Time.sol";
 import {MockAaveLendingPool} from "@voltz-protocol/products-dated-irs/test/mocks/MockAaveLendingPool.sol";
 
 import {ERC20Mock} from "../utils/ERC20Mock.sol";
@@ -13,7 +15,7 @@ import {SD59x18, sd59x18} from "@prb/math/SD59x18.sol";
 import "forge-std/console2.sol";
 
 contract Scenario1 is ScenarioHelper {
-    uint32 maturityTimestamp = 1719788400; // 1 year pool
+    uint32 maturityTimestamp; // 1 year pool
     uint128 marketId = 1;
 
     function setUp() public {
@@ -59,6 +61,7 @@ contract Scenario1 is ScenarioHelper {
         int24[] memory observedTicks = new int24[](2);
         observedTicks[0] = -12240; // 3.4% note worth double checking
         observedTicks[1] = -12240; // 3.4%
+        maturityTimestamp = uint32(block.timestamp + Time.SECONDS_IN_YEAR);
         deployPool({
             immutableConfig: VammConfiguration.Immutable({
                 maturityTimestamp: maturityTimestamp, // Fri Aug 18 2023 11:00:00 GMT+0000
@@ -121,7 +124,7 @@ contract Scenario1 is ScenarioHelper {
                 baseAmount: 600e6
             });
 
-            margin[1] = getMarginData(1);
+            margin[1] = getMarginData(2);
 
             // FT
             takers[1] = executeTakerOrder({
@@ -131,40 +134,260 @@ contract Scenario1 is ScenarioHelper {
                 user: address(3),
                 count: 1,
                 merkleIndex: 3, // NEW taker
-                margin: 230e6,
+                margin: 60e6,
                 baseAmount: -100e6
             });
 
-            margin[2] = getMarginData(1);
+            margin[2] = getMarginData(3);
         }
 
-        // CHECK EFFECTS OF OF TRADING
-        margin[0] = compareCurrentMarginData(1, margin[0], true); // hul grows due to twap
-        margin[1] = compareCurrentMarginData(2, margin[1], false); // hul reduces due to twap
-        // margin[2] = compareCurrentMarginData(3, margin[2], false);
-
-        // VERIFY MARGIN DATA
+        // VERIFY MARGIN DATA AFTER SWAPS
         {
             //LP 
-            // lmr = riskParam * (filledB + unfilledBLong) * li * timeFact
-            // = riskParam * (filledB + unfilledBLong)
-            // = rP * (500 + )
+            // currentTick = -12426 // console2.log(contracts.vammProxy.getVammTick(marketId, maturityTimestamp));
+
+            /* LMR Long= riskParam * (filledB + unfilledBLong) * li * timeFact
+             = riskParam * (filledB + liq * (sqrtHigh - sqrtCurrent))
+             = 0.013 * (-500e6 + 10000e6 * (sqrt(1.0001^-10260) - sqrt(1.0001^-12426)) /  (sqrt(1.0001^-10260) - sqrt(1.0001^-13920 )))
+             LMR Long = 73_289_773
+             LMR Short = riskParam * (filledB - liq * (sqrtCurrent - sqrtLow)) = 56_710_226
+            */
+
+            // unfilledBaseShort 3862325112
+            // unfilledBaseLong 6137674887
+            // console2.log(takers[0].executedQuoteAmount); // -621231883
+            // console2.log(takers[1].executedQuoteAmount); // 103370686
+            /* 
+            unfilledQuoteLong = ((1/sqrtCurr/sqrtHigh/100 + spread)*timefact + 1) * li * -unfilledBaseLong
+                = ((1/(sqrt(1.0001^-10260) * sqrt(1.0001^-12426)))/100 - 0.001 + 1) * -6137674887
+                = 6_322_346_487
+            HUL Long = filledQuote + unfilledQuoteLong + (filledB + unfilledBLong) * li * (twap_adj * t + 1)
+                = (-takers[0].execQuote - takers[1].execQuote) + unfilledQuoteLong
+                    + (filledB + liq * (sqrtHigh - sqrtCurrent)) * (twap_adj + 1) 
+                = (-103_370_686 + 621_231_883) - 6_322_346_487 + 73_289_773/0.013 * (0.034005555117321891 - 0.001  + 1)
+                = 19264185 (upnl positive)
+
+            unfilledQuoteShort = ((1/sqrtCurr/sqrtLow/100 + spread)*timefact + 1) * li * -unfilledBaseLong
+                = ((1/(sqrt(1.0001^-12426) * sqrt(1.0001^-13920)))/100 + 0.001 + 1) * 3862325112
+                = 4_010_371_196
+            HUL Short = filledQuote + unfilledQuoteShort + (filledB + unfilledBShort) * li * (twap_adj * t + 1)
+                = (-takers[0].execQuote - takers[1].execQuote) + unfilledQuoteShort
+                    + (filledB + liq * (sqrtCurrent - sqrtLow)) * (twap_adj + 1) 
+                = (-103_370_686 + 621_231_883) + 4_010_371_196 - 56_710_226/0.013 * (0.034005555117321891 + 0.001  + 1)
+                = 13201668 (upnl positive)
+            */
+
+            assertEq(margin[0].liquidationMarginRequirement, 73272070, "Maths LMR LP");
+            assertEq(margin[0].initialMarginRequirement, 109908105, "Maths IMR LP");
+            assertEq(margin[0].highestUnrealizedLoss, 0, "Maths HUL LP");
+
+
+            // VT
+            /* LMR = riskParam * (filledB) * li * timeFact
+             = riskParam * (filledB )
+             = 0.013 * 600e6
+             = 7800000
+            console2.log(takers[0].executedQuoteAmount); // -621231883
+            HUL = filledQuote + (filledB) * li * (twap_adj * t + 1)
+                = -621231883  + 600000000 * (0.034005555117321891 - 0.001  + 1)
+                = -1428550 (upnl)
+            */
+
+            assertEq(margin[1].liquidationMarginRequirement, 7800000, "Maths LMR VT");
+            assertEq(margin[1].initialMarginRequirement, 11700000, "Maths IMR VT");
+            assertEq(margin[1].highestUnrealizedLoss, 1428550, "Maths HUL VT");
+
+            // FT
+            /* LMR = riskParam * (filledB) * li * timeFact
+             = riskParam * (filledB )
+             = 0.013 * -100e6
+             = 1300000
+            console2.log(takers[1].executedQuoteAmount); // 103370686
+            HUL = filledQuote + (filledB) * li * (twap_adj * t + 1)
+                = 103370686  - 100000000 * (0.034005555117321891 + 0.001  + 1)
+                = -129869 (upnl)
+            */
+
+            assertEq(margin[2].liquidationMarginRequirement, 1300000, "Maths LMR FT");
+            assertEq(margin[2].initialMarginRequirement, 1950000, "Maths IMR FT");
+            assertEq(margin[2].highestUnrealizedLoss, 129869, "Maths HUL FT");
+            
         }
 
-        // print twap
-        uint256 twap = UD60x18.unwrap(contracts.vammProxy.getDatedIRSTwap(marketId, maturityTimestamp, 0, 259200, false, false));
-        console2.log("TWAP after swaps", twap);
+        // // print twap = 0.034005555117321891
+        // uint256 twap = UD60x18.unwrap(contracts.vammProxy.getDatedIRSTwap(marketId, maturityTimestamp, 0, 259200, false, false));
+        // console2.log("TWAP after swaps", twap);
 
         // ADVANCE TIME 0.5 years
-        vm.warp(block.timestamp + 356 * 12 * 60 * 60);
+        vm.warp(block.timestamp + 365 * 12 * 60 * 60);
+
+        // twap 0.034643945147052780
+        // uint256 twap = UD60x18.unwrap(contracts.vammProxy.getDatedIRSTwap(marketId, maturityTimestamp, 0, 259200, false, false));
+        // console2.log("TWAP after time elapsed", twap);
+        // TWAP increased as effect of VT direction over time
+
+        // CHECK EFFECTS
+        {
+            //LP 
+            // currentTick = -12426 // console2.log(contracts.vammProxy.getVammTick(marketId, maturityTimestamp));
+
+            /* LMR Long= riskParam * (filledB + unfilledBLong) * li * timeFact
+             = riskParam * (filledB + liq * (sqrtHigh - sqrtCurrent))
+             = 0.013 * 1/2 * (-500e6 + 10000e6 * (sqrt(1.0001^-10260) - sqrt(1.0001^-12426)) /  (sqrt(1.0001^-10260) - sqrt(1.0001^-13920 )))
+             LMR Long = 36_644_886
+             LMR Short = riskParam * li * t * (filledB - liq * (sqrtCurrent - sqrtLow))
+                = -28_355_113
+            */
+
+            // unfilledBaseShort 3862325112
+            // unfilledBaseLong 6137674887
+            // console2.log(takers[0].executedQuoteAmount); // -621231883
+            // console2.log(takers[1].executedQuoteAmount); // 103370686
+            /* 
+            unfilledQuoteLong = ((1/sqrtCurr/sqrtHigh/100 + spread)*timefact + 1) * li * -unfilledBaseLong
+                = (((1/(sqrt(1.0001^-10260) * sqrt(1.0001^-12426)))/100 - 0.001)*1/2 + 1) * -6137674887
+                = 6_230_001_068
+            HUL Long = filledQuote + unfilledQuoteLong + (filledB + unfilledBLong) * li * (twap_adj * t + 1)
+                = (-takers[0].execQuote - takers[1].execQuote) + unfilledQuoteLong
+                    + (filledB + liq * (sqrtHigh - sqrtCurrent)) * (twap_adj + 1) 
+                = (-103_370_686 + 621_231_883) - 6_230_001_068 + 36_644_886 * 2 /0.013 * ((0.034643945147052780 - 0.001)*1/2  + 1)
+                = 20_371_708 (upnl positive)
+
+            unfilledQuoteShort = ((1/sqrtCurr/sqrtLow/100 + spread)*timefact + 1) * li * -unfilledBaseLong
+                = (((1/(sqrt(1.0001^-12426) * sqrt(1.0001^-13920)))/100 + 0.001)*1/2 + 1) * 3862325112
+                = 3_936_348_154
+            HUL Short = filledQuote + unfilledQuoteShort + (filledB - unfilledBShort) * li * (twap_adj * t + 1)
+                = (-takers[0].execQuote - takers[1].execQuote) + unfilledQuoteShort
+                    + (filledB + liq * (sqrtCurrent - sqrtLow)) * (twap_adj + 1) 
+                = (-103_370_686 + 621_231_883) + 3_936_348_154 - 28_355_113 * 2 /0.013 * ((0.034643945147052780 + 0.001)*1/2  + 1)
+                = 14_139_036 (upnl positive)
+            */
+            MarginData memory marginAfterTime = getMarginData(1);
+            assertEq(marginAfterTime.liquidationMarginRequirement, 36644886, "Maths LMR LP after time");
+            assertEq(marginAfterTime.initialMarginRequirement, 54967329, "Maths IMR LP after time");
+            assertEq(marginAfterTime.highestUnrealizedLoss, 0, "Maths HUL LP after time");
+
+
+            // VT
+            /* LMR = riskParam * (filledB) * li * timeFact
+             = riskParam * (filledB) / 2
+             = 0.013 * 600e6
+             = 7800000 / 2 = 3900000 
+            console2.log(takers[0].executedQuoteAmount); // -621231883
+            HUL = filledQuote + (filledB) * li * (twap_adj * t + 1)
+                = -621231883  + 600000000 * ((0.034643945147052780 - 0.001)/2  + 1)
+                = -11138699 (upnl)
+            */
+
+            marginAfterTime = getMarginData(2);
+            assertEq(marginAfterTime.liquidationMarginRequirement, 3900000, "Maths LMR VT");
+            assertEq(marginAfterTime.initialMarginRequirement, 5850000, "Maths IMR VT");
+            assertEq(marginAfterTime.highestUnrealizedLoss, 11138700, "Maths HUL VT");
+
+            // FT
+            /* LMR = riskParam * (filledB) * li * timeFact
+             = riskParam * (filledB )
+             = 0.013 * -100e6 / 2
+             = 650000
+            console2.log(takers[1].executedQuoteAmount); // 103370686
+            HUL = filledQuote + (filledB) * li * (twap_adj * t + 1)
+                = 103370686  - 100000000 * ((0.034643945147052780 + 0.001)/2  + 1)
+                = 1588488
+            */
+
+            marginAfterTime = getMarginData(3);
+            assertEq(marginAfterTime.liquidationMarginRequirement, 650000, "Maths LMR FT");
+            assertEq(marginAfterTime.initialMarginRequirement, 975000, "Maths IMR FT");
+            assertEq(marginAfterTime.highestUnrealizedLoss, 0, "Maths HUL FT");
+
+            // console2.log("LMR", margin[0].liquidationMarginRequirement);
+            // (,,uint256 unfilledQuoteLong,) =
+            //     contracts.vammProxy.getAccountUnfilledBaseAndQuote(marketId, maturityTimestamp, 1);
+
+            // console2.log(unfilledQuoteLong);
+            
+        }
+
         // set index apy -> 10%
         MockAaveLendingPool(address(contracts.aaveV3RateOracle.aaveLendingPool()))
-            .setReserveNormalizedIncome(ERC20Mock(address(token)), ud60x18(1.005e18));
+            .setReserveNormalizedIncome(ERC20Mock(address(token)), ud60x18(1.05e18));
 
-        // CHECK EFFECTS OF TIME ELAPSED
-        margin[0] = compareCurrentMarginData(1, margin[0], true); // hul grows due to twap
-        margin[1] = compareCurrentMarginData(2, margin[1], false); // hul reduces due to twap
-        // margin[2] = compareCurrentMarginData(3, margin[2], false);
+        {
+            //LP 
+            // currentTick = -12426 // console2.log(contracts.vammProxy.getVammTick(marketId, maturityTimestamp));
+
+            /* LMR Long= riskParam * (filledB + unfilledBLong) * li * timeFact
+             = riskParam * (filledB + liq * (sqrtHigh - sqrtCurrent)) * li * timeFact
+             = 0.013 * 1/2 * 1.05 * (-500e6 + 10000e6 * (sqrt(1.0001^-10260) - sqrt(1.0001^-12426)) /  (sqrt(1.0001^-10260) - sqrt(1.0001^-13920 )))
+             LMR Long = 38477131
+             LMR Short = riskParam * li * t * (filledB - liq * (sqrtCurrent - sqrtLow))
+                = -29772868
+            */
+
+            // unfilledBaseShort 3862325112
+            // unfilledBaseLong 6137674887
+            // console2.log(takers[0].executedQuoteAmount); // -621231883
+            // console2.log(takers[1].executedQuoteAmount); // 103370686
+            /* 
+            unfilledQuoteLong = ((1/sqrtCurr/sqrtHigh/100 + spread)*timefact + 1) * li * -unfilledBaseLong
+                = (((1/(sqrt(1.0001^-10260) * sqrt(1.0001^-12426)))/100 - 0.001)*1/2 + 1) * 1.05 * -6137674887
+                = -6541511221
+            HUL Long = filledQuote + unfilledQuoteLong + (filledB + unfilledBLong) * li * (twap_adj * t + 1)
+                = (-takers[0].execQuote - takers[1].execQuote) + unfilledQuoteLong
+                    + (filledB + liq * (sqrtHigh - sqrtCurrent)) * (twap_adj + 1) 
+                = (-103370686 + 621231883) - 6541511221 + (38477131 * 2 /0.013) * ((0.034643945147052780 - 0.001)*1/2  + 1)
+                = -4512755
+
+            unfilledQuoteShort = ((1/sqrtCurr/sqrtLow/100 + spread)*timefact + 1) * li * -unfilledBaseLong
+                = (((1/(sqrt(1.0001^-12426) * sqrt(1.0001^-13920)))/100 + 0.001)*1/2 + 1) * 1.05 * 3862325112
+                = 4133165562
+            HUL Short = filledQuote + unfilledQuoteShort + (filledB - unfilledBShort) * li * (twap_adj * t + 1)
+                = (-takers[0].execQuote - takers[1].execQuote) + unfilledQuoteShort
+                    + (filledB + liq * (sqrtCurrent - sqrtLow)) * (twap_adj + 1) 
+                = (-103370686 + 621231883) + 3956029895 - (-29772868 * 2 /0.013) * ((0.034643945147052780 + 0.001)*1/2  + 1)
+                = 9135964820
+            */
+            MarginData memory marginAfterIndex = getMarginData(1);
+            assertEq(marginAfterIndex.liquidationMarginRequirement, 38477131, "Maths LMR LP index growth");
+            assertEq(marginAfterIndex.initialMarginRequirement, 57715696, "Maths IMR index growth");
+            assertEq(marginAfterIndex.highestUnrealizedLoss, 4512742, "Maths HUL LP index growth");
+
+
+            // VT
+            /* LMR = riskParam * (filledB) * li * timeFact
+             = 0.013 * 600e6 / 2 * 1.05
+            console2.log(takers[0].executedQuoteAmount); // -621231883
+            HUL = filledQuote + (filledB) * li * (twap_adj * t + 1)
+                = -621231883  + 600000000 * 1.05 * ((0.034643945147052780 - 0.001)/2  + 1)
+                = 19365959
+            */
+
+            marginAfterIndex = getMarginData(2);
+            assertEq(marginAfterIndex.liquidationMarginRequirement, 4095000, "Maths LMR VT index growth");
+            assertEq(marginAfterIndex.initialMarginRequirement, 6142500, "Maths IMR VT index growth");
+            assertEq(marginAfterIndex.highestUnrealizedLoss, 0, "Maths HUL VT index growth");
+
+            // FT
+            /* LMR = riskParam * (filledB) * li * timeFact
+             = 0.013 * -100e6 / 2 * 1.05
+            console2.log(takers[1].executedQuoteAmount); // 103370686
+            HUL = filledQuote + (filledB) * li * (twap_adj * t + 1)
+                = 103370686  - 100000000 * 1.05 * ((0.034643945147052780 + 0.001)/2  + 1)
+                = -3500621
+            */
+
+            marginAfterIndex = getMarginData(3);
+            assertEq(marginAfterIndex.liquidationMarginRequirement, 682500, "Maths LMR FT index growth");
+            assertEq(marginAfterIndex.initialMarginRequirement, 1023750, "Maths IMR FT index growth");
+            assertEq(marginAfterIndex.highestUnrealizedLoss, 3500621, "Maths HUL FT index growth");
+
+            // console2.log("LMR", margin[0].liquidationMarginRequirement);
+            // (,,uint256 unfilledQuoteLong,) =
+            //     contracts.vammProxy.getAccountUnfilledBaseAndQuote(marketId, maturityTimestamp, 1);
+
+            // console2.log(unfilledQuoteLong);
+            
+        }
 
         // NEW TRADERS ENTRY
         {
@@ -183,7 +406,7 @@ contract Scenario1 is ScenarioHelper {
 
             margin[3] = getMarginData(4);
 
-            // FT
+            // VT
             takers[2] = executeTakerOrder({
                 _marketId: marketId,
                 _maturityTimestamp: maturityTimestamp,
@@ -192,12 +415,12 @@ contract Scenario1 is ScenarioHelper {
                 count: 1,
                 merkleIndex: 5, // NEW taker
                 margin: 110e6,
-                baseAmount: -600e6
+                baseAmount: 600e6
             });
 
             margin[4] = getMarginData(5);
 
-            // VT
+            // FT
             takers[3] = executeTakerOrder({
                 _marketId: marketId,
                 _maturityTimestamp: maturityTimestamp,
@@ -206,16 +429,320 @@ contract Scenario1 is ScenarioHelper {
                 count: 1,
                 merkleIndex: 6, // NEW taker
                 margin: 10e6,
-                baseAmount: 100e6
+                baseAmount: -100e6
             });
 
             margin[5] = getMarginData(6);
         }
 
-        // CHECK EFFECTS OF OF TRADING
-        margin[0] = compareCurrentMarginData(1, margin[0], true); // hul grows due to twap
-        margin[1] = compareCurrentMarginData(2, margin[1], false); // hul reduces due to twap
-        // margin[2] = compareCurrentMarginData(3, margin[2], false);
+        // NEW positions check
+        uint256 twap = UD60x18.unwrap(contracts.vammProxy.getDatedIRSTwap(marketId, maturityTimestamp, 0, 259200, false, false));
+        console2.log("TWAP after second trades", twap); // 34643945147052780
+        {
+            //LP 
+            // currentTick = -12519
+             console2.log(contracts.vammProxy.getVammTick(marketId, maturityTimestamp));
+
+            /* LMR Long= riskParam * (filledB + unfilledBLong) * li * timeFact
+             = riskParam * (filledB + liq * (sqrtHigh - sqrtCurrent)) * li * timeFact
+             = 0.013 * 1/2 * 1.05 * (-250e6 + 10000e6 * (sqrt(1.0001^-10260) - sqrt(1.0001^-12519)) /  (sqrt(1.0001^-10260) - sqrt(1.0001^-13920 )))
+             LMR Long = 41882382
+             LMR Short = riskParam * li * t * (filledB - liq * (sqrtCurrent - sqrtLow))
+                = -26367617
+            */
+
+            // unfilledBaseShort 4112423206
+            // unfilledBaseLong 5887576793
+            // console2.log(takers[2].executedQuoteAmount); // -641288635
+            // console2.log(takers[3].executedQuoteAmount); // 106784999
+            // filledQuote LP = 267251818
+            
+            /* 
+            unfilledQuoteLong = ((1/sqrtCurr/sqrtHigh/100 + spread)*timefact + 1) * li * -unfilledBaseLong
+                = (((1/(sqrt(1.0001^-10260) * sqrt(1.0001^-12519)))/100 - 0.001)*1/2 + 1) * 1.05 * -5887576793
+                = -6275405446
+            HUL Long = filledQuote + unfilledQuoteLong + (filledB + unfilledBLong) * li * (twap_adj * t + 1)
+                = (-takers[0].execQuote - takers[1].execQuote) + unfilledQuoteLong
+                    + (filledB + liq * (sqrtHigh - sqrtCurrent)) * (twap_adj + 1) 
+                = (-106784999 + 641288635)/2 - 6275405446 + (41882382 * 2 /0.013) * ((0.034643945147052780 - 0.001)*1/2  + 1)
+
+            unfilledQuoteShort = ((1/sqrtCurr/sqrtLow/100 + spread)*timefact + 1) * li * -unfilledBaseLong
+                = (((1/(sqrt(1.0001^-12519) * sqrt(1.0001^-13920)))/100 + 0.001)*1/2 + 1) * 1.05 * 4112423206
+                = 4401177089
+            HUL Short = filledQuote + unfilledQuoteShort + (filledB - unfilledBShort) * li * (twap_adj * t + 1)
+                = (-takers[0].execQuote - takers[1].execQuote) + unfilledQuoteShort
+                    + (filledB + liq * (sqrtCurrent - sqrtLow)) * (twap_adj + 1) 
+                = (-106784999 + 641288635)/2 + 4401177089 - (-26367617 * 2 /0.013) * ((0.034643945147052780+ 0.001)*1/2  + 1)
+            */
+            MarginData memory margin2 = getMarginData(4);
+            assertEq(margin2.liquidationMarginRequirement, 41882382, "Maths LMR LP 2");
+            assertEq(margin2.highestUnrealizedLoss, 0, "Maths HUL LP 2");
+
+
+            // VT
+            /* LMR = riskParam * (filledB) * li * timeFact
+             = 0.013 * 600e6 / 2 * 1.05
+            console2.log(takers[0].executedQuoteAmount); // -621231883
+            HUL = filledQuote + (filledB) * li * (twap_adj * t + 1)
+                = -641288635  + 600000000 * 1.05 * ((0.034643945147052780 - 0.001)/2  + 1)
+                = -690792
+            */
+
+            margin2 = getMarginData(5);
+            assertEq(margin2.liquidationMarginRequirement, 4095000, "Maths LMR VT 2");
+            assertEq(margin2.highestUnrealizedLoss, 690793, "Maths HUL VT 2");
+
+            // FT
+            /* LMR = riskParam * (filledB) * li * timeFact
+             = 0.013 * -100e6 / 2 * 1.05
+            console2.log(takers[1].executedQuoteAmount); // 103370686
+            HUL = filledQuote + (filledB) * li * (twap_adj * t + 1)
+                = 106784999  - 100000000 * 1.05 * ((0.034643945147052780 + 0.001)/2  + 1)
+                = -86308
+            */
+
+            margin2 = getMarginData(6);
+            assertEq(margin2.liquidationMarginRequirement, 682500, "Maths LMR FT index growth");
+            assertEq(margin2.highestUnrealizedLoss, 86308, "Maths HUL FT index growth");
+            
+        }
+
+        {
+            //LP 
+            // currentTick = -12519 // console2.log(contracts.vammProxy.getVammTick(marketId, maturityTimestamp));
+
+            /* LMR Long= riskParam * (filledB + unfilledBLong) * li * timeFact
+             = riskParam * (filledB + liq * (sqrtHigh - sqrtCurrent))
+             = 0.013 * 1/2 * 1.05 * (-750e6 + 10000e6 * (sqrt(1.0001^-10260) - sqrt(1.0001^-12519)) /  (sqrt(1.0001^-10260) - sqrt(1.0001^-13920 )))
+             LMR Long = 38469882
+             LMR Short = riskParam * li * t * (filledB - liq * (sqrtCurrent - sqrtLow))
+                = -19542617
+            */
+
+            // unfilledBaseShort 3613387217
+            // unfilledBaseLong 6386612782
+            // console2.log(takers[0].executedQuoteAmount); // -621231883
+            // console2.log(takers[1].executedQuoteAmount); // 103370686
+            /* 
+            unfilledQuoteLong = ((1/sqrtCurr/sqrtHigh/100 + spread)*timefact + 1) * li * -unfilledBaseLong
+                = (((1/(sqrt(1.0001^-10260) * sqrt(1.0001^-12519)))/100 - 0.001)*1/2 + 1) * 1.05 * -6386612782
+                = -6807314120
+            HUL Long = filledQuote + unfilledQuoteLong + (filledB + unfilledBLong) * li * (twap_adj * t + 1)
+                = (-takers[0].execQuote - takers[1].execQuote) + unfilledQuoteLong
+                    + (filledB + liq * (sqrtHigh - sqrtCurrent)) * (twap_adj + 1) 
+                = 785_113_015 - 6_807_314_120 + 38_469_882 * 2 /0.013 * ((0.034643945147052780 - 0.001)*1/2  + 1)
+                = -4197828
+
+            unfilledQuoteShort = ((1/sqrtCurr/sqrtLow/100 + spread)*timefact + 1) * li * -unfilledBaseLong
+                = (((1/(sqrt(1.0001^-12519) * sqrt(1.0001^-13920)))/100 + 0.001)*1/2 + 1) * 1.05 * 3613387217
+                = 3867101278
+            HUL Short = filledQuote + unfilledQuoteShort + (filledB - unfilledBShort) * li * (twap_adj * t + 1)
+                = (-takers[0].execQuote - takers[1].execQuote) + unfilledQuoteShort
+                    + (filledB + liq * (sqrtCurrent - sqrtLow)) * (twap_adj + 1) 
+                = 785_113_015 + 3867101278 - 19_542_617 * 2 /0.013 * ((0.034643945147052780 + 0.001)*1/2  + 1)
+                = 1592075064
+
+            */
+            MarginData memory margin2 = getMarginData(1);
+            assertEq(margin2.liquidationMarginRequirement, 38469882, "Maths LMR LP 2");
+            assertEq(margin2.highestUnrealizedLoss, 4197793, "Maths HUL LP 2");
+
+
+            // VT
+            /* LMR = riskParam * (filledB) * li * timeFact
+             = 0.013 * 600e6 / 2 * 1.05
+            console2.log(takers[0].executedQuoteAmount); // -621231883
+            HUL = filledQuote + (filledB) * li * (twap_adj * t + 1)
+                = -621231883  + 600000000 * 1.05 * ((0.034643945147052780 - 0.001)/2  + 1)
+                = 19365959
+            */
+
+            margin2 = getMarginData(2);
+            assertEq(margin2.liquidationMarginRequirement, 4095000, "Maths LMR VT index growth");
+            assertEq(margin2.initialMarginRequirement, 6142500, "Maths IMR VT index growth");
+            assertEq(margin2.highestUnrealizedLoss, 0, "Maths HUL VT index growth");
+
+            // FT
+            /* LMR = riskParam * (filledB) * li * timeFact
+             = 0.013 * -100e6 / 2 * 1.05
+            console2.log(takers[1].executedQuoteAmount); // 103370686
+            HUL = filledQuote + (filledB) * li * (twap_adj * t + 1)
+                = 103370686  - 100000000 * 1.05 * ((0.034643945147052780 + 0.001)/2  + 1)
+                = -3500621
+            */
+
+            margin2 = getMarginData(3);
+            assertEq(margin2.liquidationMarginRequirement, 682500, "Maths LMR FT index growth");
+            assertEq(margin2.initialMarginRequirement, 1023750, "Maths IMR FT index growth");
+            assertEq(margin2.highestUnrealizedLoss, 3500621, "Maths HUL FT index growth");
+            
+        }
+
+        vm.warp(block.timestamp + 365 * 12 * 60 * 60 + 1);
+        // set index apy -> 10%
+        MockAaveLendingPool(address(contracts.aaveV3RateOracle.aaveLendingPool()))
+            .setReserveNormalizedIncome(ERC20Mock(address(token)), ud60x18(1.1e18));
+
+        // SETTLE
+        {
+            int256[] memory cashflows = new int256[](6);
+
+            // LP 1
+            console2.log(makers[0].fee);
+            cashflows[0] = checkSettle(
+                marketId,
+                maturityTimestamp,
+                1, // accountId,
+                vm.addr(1), // user
+                1000e6 - 1, // deposited margin
+                -(
+                    takers[0].executedBaseAmount +
+                    takers[1].executedBaseAmount +
+                    takers[2].executedBaseAmount / 2 +
+                    takers[3].executedBaseAmount / 2
+                ),
+                -(
+                    takers[0].executedQuoteAmount +
+                    takers[1].executedQuoteAmount +
+                    takers[2].executedQuoteAmount / 2 +
+                    takers[3].executedQuoteAmount / 2
+                ),
+                makers[0].fee, // fee
+                1.1e18 // liquidityindex
+            );
+            /* cashflow ~=
+            ( + 500 * ((1.03464)^(1/2) - 1)
+                + 750 * ((1.034967)^(1/2) - 1)
+                - 500 * (1.05 - 1) 
+                - 750 * (1.05 - 1)
+            ) + (600 + 300) * 0.001
+             */
+            assertEq(makers[0].fee, 0);
+            assertLt(cashflows[0], 0);
+            assertAlmostEq(cashflows[0], -39863765, absUtil(cashflows[0] / 100)); // 1% diff
+
+            // VT 1
+            cashflows[1] = checkSettle(
+                marketId,
+                maturityTimestamp,
+                2, // accountId,
+                vm.addr(2), // user
+                110e6, // deposited margin
+                takers[0].executedBaseAmount,
+                takers[0].executedQuoteAmount,
+                takers[0].fee, // fee
+                1.1e18 // liquidityindex
+            );
+            /* cashflow ~=
+            (   + 600 * (1.05 - 1) * 2
+                - 600 * ((1.03432)^(1/2) - 1)
+                - 600 * ((1.034967)^(1/2) - 1)
+            ) - 600 * 0.001
+             */
+            assertEq(takers[0].fee, 120000);
+            assertGt(cashflows[1], 0);
+            assertAlmostEq(cashflows[1], int256(38790888), absUtil(cashflows[1] / 100)); // 1% diff
+
+            // FT 1
+            cashflows[2] = checkSettle(
+                marketId,
+                maturityTimestamp,
+                3, // accountId,
+                vm.addr(3), // user
+                60e6, // deposited margin
+                takers[1].executedBaseAmount,
+                takers[1].executedQuoteAmount,
+                takers[1].fee, // fee
+                1.1e18 // liquidityindex
+            );
+            /* cashflow ~=
+            (   - 100 * (1.05 - 1) * 2
+                + 100 * ((1.03464)^(1/2) - 1)
+                + 100 * ((1.034967)^(1/2) - 1)
+            ) - 100 * 0.001
+             */
+            assertEq(takers[1].fee, 20000);
+            assertLt(cashflows[2], 0);
+            assertAlmostEq(cashflows[2], int256(-6649416), absUtil(cashflows[2] / 100)); // 1% diff
+
+            // LP 2
+            cashflows[3] = checkSettle(
+                marketId,
+                maturityTimestamp,
+                4, // accountId,
+                vm.addr(4), // user
+                1000e6, // deposited margin
+                -(
+                    takers[2].executedBaseAmount / 2 +
+                    takers[3].executedBaseAmount / 2
+                ),
+                -(
+                    takers[2].executedQuoteAmount / 2 +
+                    takers[3].executedQuoteAmount / 2
+                ),
+                makers[1].fee, // fee
+                1.1e18 // liquidityindex
+            );
+            assertLt(cashflows[3], 0);
+            /* cashflow ~=
+            (   + 250 * 1.05 * ((1.034967)^(1/2) - 1)
+                - 250 * 1.05 * (1.1^(1/2)- 1)
+            ) + (150) * 1.05 * 0.001
+             */
+            assertEq(makers[1].fee, 0);
+            assertLt(cashflows[3], 0);
+            assertAlmostEq(cashflows[3], int256(-7748182), absUtil(cashflows[3] / 100)); // 1% diff
+
+            // VT 2
+            cashflows[4] = checkSettle(
+                marketId,
+                maturityTimestamp,
+                5, // accountId,
+                vm.addr(5), // user
+                110e6, // deposited margin
+                takers[2].executedBaseAmount,
+                takers[2].executedQuoteAmount,
+                takers[2].fee, // fee
+                1.1e18 // liquidityindex
+            );
+            assertGt(cashflows[4], 0);
+            console2.log(takers[2].executedQuoteAmount);
+            /* cashflow ~=
+            (   - 600 * 1.05 * ((1.04)^(1/2) - 1)
+                + 600 * 1.05 * (1.05- 1)
+            ) - (300) * 1.05 * 0.001
+             */
+            assertEq(takers[2].fee, 63000);
+            assertGt(cashflows[4], 0);
+            assertAlmostEq(cashflows[4], int256(18700000), absUtil(cashflows[4] / 100)); // 1% diff
+
+            assertGt(cashflows[4], 0);
+
+            // FT 2
+            cashflows[5] = checkSettle(
+                marketId,
+                maturityTimestamp,
+                6, // accountId,
+                vm.addr(6), // user
+                10e6, // deposited margin
+                takers[3].executedBaseAmount,
+                takers[3].executedQuoteAmount,
+                takers[3].fee, // fee
+                1.1e18 // liquidityIndex
+            );
+            /* cashflow ~=
+            (   + 100 * 1.05 * ((1.04)^(1/2) - 1)
+                - 100 * 1.05 * (1.05- 1)
+            ) - 50 * 1.05 * 0.001
+             */
+            assertEq(takers[3].fee, 10500);
+            assertLt(cashflows[5], 0);
+            assertAlmostEq(cashflows[5], int256(-3223090), absUtil(cashflows[5] / 100)); // 1% diff
+
+            // SOLVENCY
+            assertEq(cashflows[0] + cashflows[1] + cashflows[2] + cashflows[3] 
+                + cashflows[4] + cashflows[5], 0);
+        }
 
     }
 

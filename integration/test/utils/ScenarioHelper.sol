@@ -9,6 +9,7 @@ import {ERC20Mock} from "../utils/ERC20Mock.sol";
 
 import "./TestUtils.sol";
 import {Merkle} from "murky/Merkle.sol";
+import {Commands} from "@voltz-protocol/periphery/src/libraries/Commands.sol";
 
 import {UD60x18, ud60x18} from "@prb/math/UD60x18.sol";
 import {SD59x18, sd59x18} from "@prb/math/SD59x18.sol";
@@ -360,6 +361,63 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
             m.liquidationMarginRequirement,
             m.highestUnrealizedLoss
         ) = contracts.coreProxy.isLiquidatable(accountId, address(token));
+    }
+
+    function checkSettle(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        uint128 accountId,
+        address user,
+        int256 initialDeposit,
+        int256 executedBaseAmount,
+        int256 executedQuoteAmount,
+        uint256 fee,
+        int256 maturityIndex // int to fit the calculations
+    ) public  returns (int256 settlementCashflow){
+        uint256 userBalanceBeforeSettle = token.balanceOf(user);
+        // settlement CF = base * liqIndex + quote 
+        settlementCashflow = executedBaseAmount * maturityIndex / 1e18 + executedQuoteAmount;
+        // fee = annualizedNotional * atomic fee
+        int256 existingCollateral = initialDeposit - fee.toInt();
+
+        settle(
+            marketId,
+            maturityTimestamp,
+            accountId,
+            user,
+            settlementCashflow,
+            existingCollateral
+        );
+
+        uint256 collateralBalance = contracts.coreProxy.getAccountCollateralBalance(accountId, address(token));
+
+        uint256 userBalanceAfterSettle = token.balanceOf(user);
+        // console2.log(accountId);
+        assertEq(collateralBalance, 0);
+        assertEq(userBalanceAfterSettle.toInt(), userBalanceBeforeSettle.toInt() + settlementCashflow + existingCollateral);
+    }
+
+    function settle(
+        uint128 marketId,
+        uint32 maturityTimestamp,
+        uint128 accountId,
+        address user,
+        int256 settlementCashflow,
+        int256 existingCollateral
+    ) public {
+        changeSender(user);
+        bytes memory commands = abi.encodePacked(
+            bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)),
+            bytes1(uint8(Commands.V2_CORE_WITHDRAW))
+        );
+        bytes[] memory inputs = new bytes[](2);
+        inputs[0] = abi.encode(
+            accountId,
+            marketId,
+            maturityTimestamp
+        );
+        inputs[1] = abi.encode(accountId, address(token), settlementCashflow + existingCollateral);
+        periphery_execute(commands, inputs, block.timestamp + 1);
     }
 
 }
