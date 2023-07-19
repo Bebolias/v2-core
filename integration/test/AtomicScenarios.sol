@@ -20,7 +20,7 @@ import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 
 import { ud60x18, div, SD59x18, UD60x18 } from "@prb/math/UD60x18.sol";
 
-contract Scenario1 is BaseScenario, TestUtils {
+contract AtomicScenarios is BaseScenario, TestUtils {
   using SafeCastI256 for int256;
   using SafeCastU256 for uint256;
   using SafeCastU128 for uint128;

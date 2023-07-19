@@ -294,33 +294,37 @@ contract SetupProtocol is BatchScript {
     setMakerPositionsPerAccountLimit(makerPositionsPerAccountLimit);
   }
 
+  struct MintOrBurnParams {
+    uint128 marketId;
+    address tokenAddress;
+    uint128 accountId;
+    uint32 maturityTimestamp;
+    uint256 marginAmount;
+    int256 notionalAmount;  // positive means mint, negative means burn
+    int24 tickLower;
+    int24 tickUpper;
+    address rateOracleAddress;
+  }
+
   function mintOrBurn(
-    uint128 marketId,
-    address tokenAddress,
-    uint128 accountId,
-    uint32 maturityTimestamp,
-    uint256 marginAmount,
-    int256 notionalAmount,  // positive means mint, negative means burn
-    int24 tickLower,
-    int24 tickUpper,
-    address rateOracleAddress
-  ) public {
-    IRateOracle rateOracle = IRateOracle(rateOracleAddress);
+    MintOrBurnParams memory params
+  ) public returns (bytes memory) {
+    IRateOracle rateOracle = IRateOracle(params.rateOracleAddress);
 
-    uint256 liquidationBooster = contracts.coreProxy.getCollateralConfiguration(tokenAddress).liquidationBooster;
-    uint256 accountLiquidationBoosterBalance = contracts.coreProxy.getAccountLiquidationBoosterBalance(accountId, tokenAddress);
+    uint256 liquidationBooster = contracts.coreProxy.getCollateralConfiguration(params.tokenAddress).liquidationBooster;
+    uint256 accountLiquidationBoosterBalance = contracts.coreProxy.getAccountLiquidationBoosterBalance(params.accountId, params.tokenAddress);
 
-    int256 baseAmount = sd59x18(notionalAmount).div(rateOracle.getCurrentIndex().intoSD59x18()).unwrap();
+    int256 baseAmount = sd59x18(params.notionalAmount).div(rateOracle.getCurrentIndex().intoSD59x18()).unwrap();
 
     erc20_approve(
-      IERC20(tokenAddress), 
+      IERC20(params.tokenAddress), 
       address(contracts.peripheryProxy), 
-      marginAmount + liquidationBooster - accountLiquidationBoosterBalance
+      params.marginAmount + liquidationBooster - accountLiquidationBoosterBalance
     );
 
     bytes memory commands;
     bytes[] memory inputs;
-    if (Utils.existsAccountNft(metadata.accountNftProxy, accountId)) {
+    if (Utils.existsAccountNft(metadata.accountNftProxy, params.accountId)) {
       commands = abi.encodePacked(
         bytes1(uint8(Commands.TRANSFER_FROM)),
         bytes1(uint8(Commands.V2_CORE_DEPOSIT)),
@@ -336,20 +340,20 @@ contract SetupProtocol is BatchScript {
       );
 
       inputs = new bytes[](4);
-      inputs[0] = abi.encode(accountId);
+      inputs[0] = abi.encode(params.accountId);
     }
-    inputs[inputs.length-3] = abi.encode(tokenAddress, marginAmount + liquidationBooster - accountLiquidationBoosterBalance);
-    inputs[inputs.length-2] = abi.encode(accountId, tokenAddress, marginAmount);
+    inputs[inputs.length-3] = abi.encode(params.tokenAddress, params.marginAmount + liquidationBooster - accountLiquidationBoosterBalance);
+    inputs[inputs.length-2] = abi.encode(params.accountId, params.tokenAddress, params.marginAmount);
     inputs[inputs.length-1] = abi.encode(
-      accountId,
-      marketId,
-      maturityTimestamp,
-      tickLower,
-      tickUpper,
-      Utils.getLiquidityForBase(tickLower, tickUpper, baseAmount)    
+      params.accountId,
+      params.marketId,
+      params.maturityTimestamp,
+      params.tickLower,
+      params.tickUpper,
+      Utils.getLiquidityForBase(params.tickLower, params.tickUpper, baseAmount)    
     );
 
-    periphery_execute(commands, inputs, block.timestamp + 100);  
+    return periphery_execute(commands, inputs, block.timestamp + 100)[inputs.length-1];  
   }
 
   function swap(
@@ -360,7 +364,7 @@ contract SetupProtocol is BatchScript {
     uint256 marginAmount,
     int256 notionalAmount,  // positive means VT, negative means FT
     address rateOracleAddress
-  ) public {
+  ) public returns (bytes memory) {
     IRateOracle rateOracle = IRateOracle(rateOracleAddress);
 
     uint256 liquidationBooster = contracts.coreProxy.getCollateralConfiguration(tokenAddress).liquidationBooster;
@@ -404,7 +408,7 @@ contract SetupProtocol is BatchScript {
       0
     );
 
-    periphery_execute(commands, inputs, block.timestamp + 100);  
+    return periphery_execute(commands, inputs, block.timestamp + 100)[inputs.length-1];  
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -829,10 +833,11 @@ contract SetupProtocol is BatchScript {
     }
   }
 
-  function periphery_execute(bytes memory commands, bytes[] memory inputs, uint256 deadline) public {
+  function periphery_execute(bytes memory commands, bytes[] memory inputs, uint256 deadline)
+     public returns (bytes[] memory output) {
     if (!settings.multisig) {
       broadcastOrPrank();
-      contracts.peripheryProxy.execute(commands, inputs, deadline);
+      output = contracts.peripheryProxy.execute(commands, inputs, deadline);
     } else {
       addToBatch(
         address(contracts.peripheryProxy),

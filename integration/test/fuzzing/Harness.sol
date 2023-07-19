@@ -19,7 +19,7 @@ contract Harness {
 
   constructor() {
     owner = address(1);
-    token = new ERC20Mock();
+    token = new ERC20Mock(6);
 
     deployProtocol = new DeployProtocol(owner, address(token));
     setupProtocol = new SetupProtocol(

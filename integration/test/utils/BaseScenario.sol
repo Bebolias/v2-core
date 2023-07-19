@@ -75,7 +75,7 @@ contract BaseScenario is Test {
     VammRouter vammRouter = new VammRouter();
     vammProxy = new VammProxy(address(vammRouter), owner);
 
-    token = new ERC20Mock();
+    token = new ERC20Mock(18);
 
     aaveLendingPool = new MockAaveLendingPool();
     aaveV3RateOracle = new AaveV3RateOracle(aaveLendingPool, address(token));

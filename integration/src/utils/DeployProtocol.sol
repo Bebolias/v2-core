@@ -47,13 +47,12 @@ contract DeployProtocol {
 
     MockAaveLendingPool aaveLendingPool = new MockAaveLendingPool();
     aaveV3RateOracle = new AaveV3RateOracle(aaveLendingPool, tokenAddress);
-
-    MockAaveLendingPool aaveBorrowLendingPool = new MockAaveLendingPool();
-    aaveV3RateOracle = new AaveV3RateOracle(aaveBorrowLendingPool, tokenAddress);
+    aaveV3BorrowRateOracle = new AaveV3BorrowRateOracle(aaveLendingPool, tokenAddress);
 
     coreProxy.nominateNewOwner(owner);
     datedIrsProxy.nominateNewOwner(owner);
     peripheryProxy.nominateNewOwner(owner);
     vammProxy.nominateNewOwner(owner);
+    accessPassNft.transferOwnership(owner);
   }
 }

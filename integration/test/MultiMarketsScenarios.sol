@@ -355,8 +355,8 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
       ) = coreProxy.isLiquidatable(accountId, address(token));
 
       console2.log("liquidatable", m.liquidatable);
-      console2.log("initialMarginRequirement", m.initialMarginRequirement); // 785.8207615
-      console2.log("liquidationMarginRequirement", m.liquidationMarginRequirement); // 392.9103807
+      console2.log("initialMarginRequirement", m.initialMarginRequirement);
+      console2.log("liquidationMarginRequirement", m.liquidationMarginRequirement);
       console2.log("highestUnrealizedLoss",m.highestUnrealizedLoss);
 
       (u.unfilledBaseLong, u.unfilledBaseShort, u.unfilledQuoteLong, u.unfilledQuoteShort) =
@@ -394,34 +394,14 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
       uint256 expectedUnrealizedLoss = unrealizedLossUpper;
       uint256 expectedLmr = expectedLmrUpper;
       if (unrealizedLossLower + expectedLmrLower >  unrealizedLossUpper + expectedLmrUpper) {
-          expectedUnrealizedLoss = unrealizedLossUpper;
-          expectedLmr = expectedLmrUpper;
+          expectedUnrealizedLoss = unrealizedLossLower;
+          expectedLmr = expectedLmrLower;
       }
 
-      //0.048 105 974 536 278 189
       assertEq(expectedUnrealizedLoss, m.highestUnrealizedLoss, "expectedUnrealizedLoss");
       assertAlmostEq(expectedLmr, m.liquidationMarginRequirement, 1e5);
       assertAlmostEq(expectedLmr * imMultiplier, m.initialMarginRequirement, 1e5);
       assertGt(executedAmounts.depositedAmount, expectedLmr * imMultiplier + expectedUnrealizedLoss, "IMR");
-
-      // get unfilled base and quote balances of maker
-      
-
-      // todo: another scenario, two lps with identical base but different tick ranges should end up having different
-      // unrealized loss
-      // todo: need a scenario where highestUnrealizedLoss is positive, can artifically create this by having a
-      // very out of range tickLower and tickUpper
-      // todo: we want to make sure that highest unrealized loss does not change as takers trade against lp's liquidity
-
-      // todo: manually calculate unfilled balances using the current tick
-      // todo: investigate why this fails, in theory these should be equal
-      
-
-    // check against IM
-    // margin > im + unrealizedLoss
-    // compute unrealized loss
-
-    // check it fails if position exposure is increased
       // through unrealized
       // through withdraw
   }
@@ -450,7 +430,7 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
       console2.log("highestUnrealizedLoss",m.highestUnrealizedLoss);
 
       (u.unfilledBaseLong, u.unfilledBaseShort, u.unfilledQuoteLong, u.unfilledQuoteShort) =
-      vammProxy.getAccountUnfilledBaseAndQuote(_marketId, _maturityTimestamp, accountId);
+        vammProxy.getAccountUnfilledBaseAndQuote(_marketId, _maturityTimestamp, accountId);
 
       assertEq(0, u.unfilledBaseLong);
       assertEq(0, u.unfilledQuoteLong);
@@ -473,32 +453,6 @@ contract MultiMarketsScenarios is TestUtils, BaseScenario {
       assertAlmostEq(expectedLmr, m.liquidationMarginRequirement, 1e5);
       assertAlmostEq(expectedLmr * imMultiplier, m.initialMarginRequirement, 1e5);
       assertGt(executedAmounts.depositedAmount, expectedLmr * imMultiplier + expectedUnrealizedLoss, "IMR taker");
-
-      // assertEq(expectedUnrealizedLoss.toInt(), m.highestUnrealizedLoss.toInt(), "loss 1");
-      // assertEq(expectedLmr, m.liquidationMarginRequirement, "LMR");
-      // assertEq(expectedLmr * imMultiplier, m.initialMarginRequirement, "IMR");
-      // assertGt(executedAmounts.depositedAmount, expectedLmr * imMultiplier + expectedUnrealizedLoss, "IMR taker");
-
-      // get unfilled base and quote balances of maker
-      
-
-      // todo: another scenario, two lps with identical base but different tick ranges should end up having different
-      // unrealized loss
-      // todo: need a scenario where highestUnrealizedLoss is positive, can artifically create this by having a
-      // very out of range tickLower and tickUpper
-      // todo: we want to make sure that highest unrealized loss does not change as takers trade against lp's liquidity
-
-      // todo: manually calculate unfilled balances using the current tick
-      // todo: investigate why this fails, in theory these should be equal
-      
-
-    // check against IM
-    // margin > im + unrealizedLoss
-    // compute unrealized loss
-
-    // check it fails if position exposure is increased
-      // through unrealized
-      // through withdraw
   }
 
 

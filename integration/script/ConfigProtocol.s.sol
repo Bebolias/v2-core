@@ -106,7 +106,7 @@ contract ConfigProtocol is SetupProtocol {
       times: times,
       observedTicks: observedTicks
     });
-    mintOrBurn({
+    mintOrBurn(MintOrBurnParams({
       marketId: 1,
       tokenAddress: Utils.getUSDCAddress(metadata.chainId),
       accountId: 444,
@@ -116,7 +116,7 @@ contract ConfigProtocol is SetupProtocol {
       tickLower: -15420, // 4.67%
       tickUpper: -8580, // 2.35%
       rateOracleAddress: address(contracts.aaveV3RateOracle)
-    });
+    }));
 
     execute_multisig_batch();
   }
@@ -176,7 +176,7 @@ contract ConfigProtocol is SetupProtocol {
       times: times,
       observedTicks: observedTicks
     });
-    mintOrBurn({
+    mintOrBurn(MintOrBurnParams({
       marketId: 1,
       tokenAddress: Utils.getUSDCAddress(metadata.chainId),
       accountId: 123,
@@ -186,7 +186,7 @@ contract ConfigProtocol is SetupProtocol {
       tickLower: -14100, // 4.1%
       tickUpper: -13620, // 3.9%
       rateOracleAddress: address(contracts.aaveV3RateOracle)
-    });
+    }));
 
     execute_multisig_batch();
   }
