@@ -43,7 +43,10 @@ contract Harness {
     );
 
     setupProtocol.acceptOwnerships();
-    setupProtocol.enableFeatures();
+    address[] memory pausers = new address[](0);
+    setupProtocol.enableFeatureFlags({
+      pausers: pausers
+    });
     // commented out because we need to setup access pass nft
     // setupProtocol.configureProtocol({
     //   imMultiplier: ud60x18(2e18),

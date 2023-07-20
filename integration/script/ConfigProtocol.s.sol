@@ -53,7 +53,14 @@ contract ConfigProtocol is SetupProtocol {
       impl: 0x935b397d9888C70027eCF8F7Dc6a68AbdCceBEd4
     });
 
-    enableFeatures();
+    address[] memory pausers = new address[](4);
+      pausers[0] = 0x140d001689979ee77C2FB4c8d4B5F3E209135776;
+      pausers[1] = 0xA73d7b822Bfad43500a26aC38956dfEaBD3E066d;
+      pausers[2] = 0x4a02c244dCED6797d864B408F646Afe470147159;
+      pausers[3] = 0xf94e5Cdf41247E268d4847C30A0DC2893B33e85d;
+    enableFeatureFlags({
+      pausers: pausers
+    });
 
     configureProtocol({
       imMultiplier: ud60x18(1.5e18),
@@ -128,7 +135,11 @@ contract ConfigProtocol is SetupProtocol {
     // upgradeProxy(address(contracts.vammProxy), address(0));
 
     acceptOwnerships();
-    enableFeatures();
+
+    address[] memory pausers = new address[](0);
+    enableFeatureFlags({
+      pausers: pausers
+    });
     configureProtocol({
       imMultiplier: ud60x18(2e18),
       liquidatorRewardParameter: ud60x18(5e16),

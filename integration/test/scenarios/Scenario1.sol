@@ -32,7 +32,10 @@ contract Scenario1 is ScenarioHelper {
         redeemAccessPass(owner, 1, 0);
 
         acceptOwnerships();
-        enableFeatures();
+        address[] memory pausers = new address[](0);
+        enableFeatureFlags({
+            pausers: pausers
+        });
         configureProtocol({
             imMultiplier: ud60x18(1.5e18),
             liquidatorRewardParameter: ud60x18(0.05e18),

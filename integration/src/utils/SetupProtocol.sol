@@ -133,7 +133,7 @@ contract SetupProtocol is BatchScript {
     acceptOwnership(address(contracts.peripheryProxy));
   }
 
-  function enableFeatures() public {
+  function enableFeatureFlags(address[] memory pausers) public {
     setFeatureFlagAllowAll({
       feature: _GLOBAL_FEATURE_FLAG,
       allowAll: true
@@ -150,6 +150,11 @@ contract SetupProtocol is BatchScript {
     addToFeatureFlagAllowlist({
       feature: _REGISTER_PRODUCT_FEATURE_FLAG,
       account: metadata.owner
+    });
+
+    setDeniers({
+      feature: _GLOBAL_FEATURE_FLAG,
+      deniers: pausers
     });
   }
 
@@ -510,6 +515,21 @@ contract SetupProtocol is BatchScript {
         abi.encodeCall(
           contracts.coreProxy.addToFeatureFlagAllowlist, 
           (feature, account)
+        )
+      );
+    }
+  }
+
+  function setDeniers(bytes32 feature, address[] memory deniers) public {
+    if (!settings.multisig) {
+      broadcastOrPrank();
+      contracts.coreProxy.setDeniers(feature, deniers);
+    } else {
+      addToBatch(
+        address(contracts.coreProxy),
+        abi.encodeCall(
+          contracts.coreProxy.setDeniers,
+          (feature, deniers)
         )
       );
     }
