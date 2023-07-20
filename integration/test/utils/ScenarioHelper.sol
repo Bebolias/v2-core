@@ -17,6 +17,8 @@ import {SD59x18, sd59x18} from "@prb/math/SD59x18.sol";
 import {SetUtil} from "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 import {SafeCastI256, SafeCastU256, SafeCastU128} from "@voltz-protocol/util-contracts/src/helpers/SafeCast.sol";
 
+import {Commands} from "@voltz-protocol/periphery/src/libraries/Commands.sol";
+
 contract ScenarioHelper is Test, SetupProtocol, TestUtils {
     using SetUtil for SetUtil.Bytes32Set;
     using SafeCastI256 for int256;
@@ -199,7 +201,6 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
 
         executedAmounts.depositedAmount = margin;
     }
-
     struct MarginData {
         bool liquidatable;
         uint256 initialMarginRequirement;
@@ -354,7 +355,7 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
         }
     }
 
-    function getMarginData(uint128 accountId) public returns (MarginData memory m) {
+    function getMarginData(uint128 accountId) public view returns (MarginData memory m) {
         (
             m.liquidatable,
             m.initialMarginRequirement,
@@ -397,6 +398,7 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
         assertEq(userBalanceAfterSettle.toInt(), userBalanceBeforeSettle.toInt() + settlementCashflow + existingCollateral);
     }
 
+    // todo: duplicate with settleAccount below
     function settle(
         uint128 marketId,
         uint32 maturityTimestamp,
@@ -420,4 +422,105 @@ contract ScenarioHelper is Test, SetupProtocol, TestUtils {
         periphery_execute(commands, inputs, block.timestamp + 1);
     }
 
+    function getCollateralBalance(uint128 accountId) public view returns (uint256 balance) {
+        return contracts.coreProxy.getAccountCollateralBalance(accountId, address(token));
+    }
+
+    function closeAccount(address user, uint128 accountId) public {
+        vm.prank(user);
+        contracts.datedIrsProxy.closeAccount(accountId, address(token));
+    }
+
+    // todo: duplicate with executeMakerOrder above
+    function editExecuteMakerOrder(
+        uint128 _marketId,
+        uint32 _maturityTimestamp,
+        uint128 accountId,
+        address user,
+        uint256 margin,
+        int256 baseAmount,
+        int24 tickLower,
+        int24 tickUpper
+    ) public returns (MakerExecutedAmounts memory){
+        changeSender(user);
+
+        int256 liquidityIndex = UD60x18.unwrap(contracts.aaveV3RateOracle.getCurrentIndex()).toInt();
+
+        bytes memory output = mintOrBurn(MintOrBurnParams({
+            marketId: _marketId,
+            tokenAddress: address(token),
+            accountId: accountId,
+            maturityTimestamp: _maturityTimestamp,
+            marginAmount: margin,
+            notionalAmount: baseAmount * liquidityIndex / 1e18,
+            tickLower: tickLower,
+            tickUpper: tickUpper,
+            rateOracleAddress: address(contracts.aaveV3RateOracle)
+        }));
+
+        (
+            uint256 fee,
+            uint256 im
+        ) = abi.decode(output, (uint256, uint256));
+
+        return MakerExecutedAmounts({
+            baseAmount: baseAmount,
+            depositedAmount: margin,
+            tickLower: tickLower,
+            tickUpper: tickUpper,
+            fee: fee,
+            im: im
+        });
+    }
+
+    // todo: duplicate with executeTakerOrder above
+    function editExecuteTakerOrder(
+        uint128 _marketId,
+        uint32 _maturityTimestamp,
+        uint128 accountId,
+        address user,
+        uint256 margin,
+        int256 baseAmount
+    ) public returns (TakerExecutedAmounts memory executedAmounts) {
+        changeSender(user);
+
+        int256 liquidityIndex = UD60x18.unwrap(contracts.aaveV3RateOracle.getCurrentIndex()).toInt();
+
+        bytes memory output = swap({
+            marketId: _marketId,
+            tokenAddress: address(token),
+            accountId: accountId,
+            maturityTimestamp: _maturityTimestamp,
+            marginAmount: margin,
+            notionalAmount: baseAmount * liquidityIndex / 1e18, 
+            rateOracleAddress: address(contracts.aaveV3RateOracle)
+        });
+
+        (
+            executedAmounts.executedBaseAmount,
+            executedAmounts.executedQuoteAmount,
+            executedAmounts.fee, 
+            executedAmounts.im,,
+        ) = abi.decode(output, (int256, int256, uint256, uint256, uint256, int24));
+
+        executedAmounts.depositedAmount = margin;
+    }
+
+    // todo: duplicate with settle function above
+    function settleAccount(address user, uint128 accountId, uint128 marketId, uint32 maturityTimestamp) public {
+        bytes memory commands;
+        bytes[] memory inputs;
+        commands = abi.encodePacked(bytes1(uint8(Commands.V2_DATED_IRS_INSTRUMENT_SETTLE)));
+        inputs = new bytes[](1);
+
+        inputs[0] = abi.encode(accountId, marketId, maturityTimestamp);
+
+        changeSender(user);
+        periphery_execute(commands, inputs, block.timestamp + 100);  
+    }
+
+    function liquidateAccount(address user, uint128 liquidatorAccountId, uint128 accountId) public {
+        vm.prank(user);
+        contracts.coreProxy.liquidate(accountId, liquidatorAccountId, address(token));
+    }
 }

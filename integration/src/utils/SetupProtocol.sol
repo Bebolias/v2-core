@@ -347,6 +347,7 @@ contract SetupProtocol is BatchScript {
       inputs = new bytes[](4);
       inputs[0] = abi.encode(params.accountId);
     }
+
     inputs[inputs.length-3] = abi.encode(params.tokenAddress, params.marginAmount + liquidationBooster - accountLiquidationBoosterBalance);
     inputs[inputs.length-2] = abi.encode(params.accountId, params.tokenAddress, params.marginAmount);
     inputs[inputs.length-1] = abi.encode(

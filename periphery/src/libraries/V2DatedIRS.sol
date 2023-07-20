@@ -4,6 +4,7 @@ pragma solidity >=0.8.19;
 import "@voltz-protocol/products-dated-irs/src/interfaces/IProductIRSModule.sol";
 import { IVammModule } from "@voltz-protocol/v2-vamm/src/interfaces/IVammModule.sol";
 import "../storage/Config.sol";
+import "./AccessControl.sol";
 
 /**
  * @title Performs swaps and settements on top of the v2 dated irs instrument
@@ -20,6 +21,8 @@ library V2DatedIRS {
             int24 currentTick
         )
     {
+        AccessControl.onlyOwner(accountId);
+
         IProductIRSModule.TakerOrderParams memory params  = IProductIRSModule.TakerOrderParams({
             accountId: accountId,
             marketId: marketId,
@@ -27,14 +30,18 @@ library V2DatedIRS {
             baseAmount: baseAmount,
             priceLimit: priceLimit
         }); 
+    
         (executedBaseAmount, executedQuoteAmount, fee, im, highestUnrealizedLoss) =
             IProductIRSModule(Config.load().VOLTZ_V2_DATED_IRS_PROXY)
                 .initiateTakerOrder(params);
-        // get current tick
+
+        // Get current tick
         currentTick = IVammModule(Config.load().VOLTZ_V2_DATED_IRS_VAMM_PROXY).getVammTick(marketId, maturityTimestamp);
     }
 
     function settle(uint128 accountId, uint128 marketId, uint32 maturityTimestamp) internal {
+        AccessControl.onlyOwner(accountId);
+    
         IProductIRSModule(Config.load().VOLTZ_V2_DATED_IRS_PROXY).settle(accountId, marketId, maturityTimestamp);
     }
 }
