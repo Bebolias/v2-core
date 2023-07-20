@@ -1,4 +1,4 @@
-name = "voltz-access-pass-nft" # package name
+name = "voltz-access-pass-nft-mock" # package name
 version = "2.0.0"
 description = "Voltz V2 Access Pass NFT Mock"
 
@@ -12,7 +12,7 @@ description = "NFT name"
 [setting.symbol]
 description = "NFT symbol"
 
-[contract.AccessPassNft]
+[contract.AccessPassNftMock]
 artifact = "AccessPassNFTMock"
 args=[
   "<%= settings.name %>", # name
