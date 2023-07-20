@@ -4,6 +4,8 @@ import "forge-std/Test.sol";
 import "@voltz-protocol/v2-vamm/utils/vamm-math/TickMath.sol";
 import "@voltz-protocol/v2-vamm/utils/vamm-math/FullMath.sol";
 import "@voltz-protocol/v2-vamm/utils/vamm-math/FixedPoint96.sol";
+import {Account} from "@voltz-protocol/core/src/storage/Account.sol";
+import {DatedIrsRouter, DatedIrsProxy} from "../../src/proxies/DatedIrs.sol";
 
 contract TestUtils is Test {
 
@@ -39,5 +41,27 @@ contract TestUtils is Test {
         uint256 priceX96 = FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, FixedPoint96.Q96);
         return FullMath.mulDiv(1e18, FixedPoint96.Q96, priceX96);
     } 
+
+}
+
+contract ExposureUtil {
+
+    function getLpExpShort(uint128 accountId, address token, DatedIrsProxy datedIrsProxy) public returns (int256) {
+        (,Account.Exposure[] memory makerExpLow,)= 
+            datedIrsProxy.getAccountTakerAndMakerExposures(accountId, token);
+        return makerExpLow[0].annualizedNotional;
+    }
+
+    function getLpExpLong(uint128 accountId, address token, DatedIrsProxy datedIrsProxy) public returns (int256) {
+        (,,Account.Exposure[] memory makerExpHigh)= 
+            datedIrsProxy.getAccountTakerAndMakerExposures(accountId, token);
+        return makerExpHigh[0].annualizedNotional;
+    }
+
+    function getTraderExp(uint128 accountId, address token, DatedIrsProxy datedIrsProxy) public returns (int256) {
+        (Account.Exposure[] memory takerExp,,)= 
+            datedIrsProxy.getAccountTakerAndMakerExposures(accountId, token);
+        return takerExp[0].annualizedNotional;
+    }
 
 }

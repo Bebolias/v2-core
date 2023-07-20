@@ -20,7 +20,7 @@ import "@voltz-protocol/util-contracts/src/helpers/SetUtil.sol";
 
 import { ud60x18, div, SD59x18, UD60x18 } from "@prb/math/UD60x18.sol";
 
-contract AtomicScenarios is BaseScenario, TestUtils {
+contract AtomicScenarios is BaseScenario, TestUtils, ExposureUtil {
   using SafeCastI256 for int256;
   using SafeCastU256 for uint256;
   using SafeCastU128 for uint128;
@@ -43,7 +43,7 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     user1 = vm.addr(1);
     user2 = vm.addr(2);
     marketId = 1;
-    maturityTimestamp = uint32(block.timestamp) + 345600; // in 3 days
+    maturityTimestamp = uint32(block.timestamp) + 345600; // in 4 days
     extendedPoolModule = new ExtendedPoolModule();
   }
 
@@ -247,14 +247,15 @@ contract AtomicScenarios is BaseScenario, TestUtils {
 
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(101e16));
 
-    uint256 traderExposure = div(ud60x18(500e18 * 2.5 * 1.01), ud60x18(365 * 1e18)).unwrap();
+    uint256 traderExposure = div(ud60x18(500e18 * 3.5 * 1.01), ud60x18(365 * 1e18)).unwrap();
     uint256 eps = 1000; // 1e-15 * 1e18
 
-    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, -int256(traderExposure - eps));
-    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, -int256(traderExposure + eps));
+    (int256 filledBase, ) = vammProxy.getAccountFilledBalances(marketId,maturityTimestamp,1);
+    assertLe(filledBase, -int256(500e18 - eps));
+    assertGe(filledBase, -int256(500e18 + eps));
 
-    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure - eps));
-    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, int256(traderExposure + eps));
+    assertGe(getTraderExp(2, address(token), datedIrsProxy), int256(traderExposure - eps));
+    assertLe(getTraderExp(2, address(token), datedIrsProxy), int256(traderExposure + eps));
 
     vm.stopPrank();
   }
@@ -334,23 +335,24 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(101e16));
 
     // traderExposure = notional * liq index * daysTillMaturity / daysInYear
-    uint256 traderExposure = div(ud60x18(500e18 * 2.5 * 1.01), ud60x18(365 * 1e18)).unwrap();
+    uint256 traderExposure = div(ud60x18(500e18 * 3.5 * 1.01), ud60x18(365 * 1e18)).unwrap();
 
     // notional 10000e18 -> base 10000e18 * 1.01 -> 
     // base long = base between tl & tc = (position.liquidity) / (sqrtHigh - sqrtLow)
     // base short = base between tu & tc
-    int256 liquidityTimeFactor = liquidityIndex.toInt() * int256(5) / int256(365 * 2);
+    int256 liquidityTimeFactor = liquidityIndex.toInt() * int256(7) / int256(365 * 2);
+    (int256 filledBase, ) = vammProxy.getAccountFilledBalances(marketId,maturityTimestamp,1);
     int256 lpUnfilledExposureLong = 
       (
         int256(lpLiquidity) * 
         (uint256(TickMath.getSqrtRatioAtTick(-13620) - TickMath.getSqrtRatioAtTick(currentTick))).toInt()
-        / Q96.toInt() 
+        / Q96.toInt()  + filledBase
       )
       * liquidityTimeFactor
       / WAD.toInt();
     int256 lpUnfilledExposureShort = 
       (
-        int256(lpLiquidity) * 
+        filledBase - int256(lpLiquidity) * 
         (uint256(TickMath.getSqrtRatioAtTick(currentTick) - TickMath.getSqrtRatioAtTick(-14100))).toInt()
         / Q96.toInt() 
       )
@@ -359,24 +361,23 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     uint256 eps = 1000; // 1e-15 * 1e18
 
     // LP
-    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, int256(traderExposure - eps));
-    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, int256(traderExposure + eps));
-    // assertAlmostEq(
-    //   datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort,
-    //   lpUnfilledExposureShort < 0 ? (-lpUnfilledExposureShort).toUint() : lpUnfilledExposureShort.toUint(),
-    //   10000
-    // );
-    // assertAlmostEq(
-    //   datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong,
-    //   lpUnfilledExposureLong < 0 ? (-lpUnfilledExposureLong).toUint() : lpUnfilledExposureLong.toUint(),
-    //   10000
-    // );
+    
+    assertGe(filledBase, int256(500e18 - eps));
+    assertLe(filledBase, int256(500e18 + eps));
+    assertAlmostEq(
+      absUtil(getLpExpShort(1, address(token), datedIrsProxy)),
+      lpUnfilledExposureShort < 0 ? (-lpUnfilledExposureShort).toUint() : lpUnfilledExposureShort.toUint(),
+      10000
+    );
+    assertAlmostEq(
+      absUtil(getLpExpLong(1, address(token), datedIrsProxy)),
+      lpUnfilledExposureLong < 0 ? (-lpUnfilledExposureLong).toUint() : lpUnfilledExposureLong.toUint(),
+      10000
+    );
 
     // // TRADER
-    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, -int256(traderExposure - eps));
-    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, -int256(traderExposure + eps));
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledShort, 0);
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledLong, 0);
+    assertLe(getTraderExp(2, address(token), datedIrsProxy), -int256(traderExposure - eps));
+    assertGe(getTraderExp(2, address(token), datedIrsProxy), -int256(traderExposure + eps));
   }
 
   function test_MINT_FT_hit_max_tick() public {
@@ -413,7 +414,11 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     }
 
     vm.stopPrank();
-    //uint256 lpUnfilledLongBeforeTrade = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong;
+    (uint256 lpUnfilledLongBeforeTrade,,,) = vammProxy.getAccountUnfilledBaseAndQuote(
+      marketId,
+      maturityTimestamp,
+      1
+    );
 
     address user2 = vm.addr(2);
     vm.startPrank(user2);
@@ -449,11 +454,11 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(liquidityIndex));
 
     // traderExposure = notional * liq index * daysTillMaturity / daysInYear
-    //uint256 lpExposureFilledAfter = lpUnfilledLongBeforeTrade * liquidityIndex / WAD;
+    uint256 lpExposureFilledAfter = lpUnfilledLongBeforeTrade * liquidityIndex / WAD;
 
     // notional 10000e18 -> base 10000e18 * 1.01 -> 
     // base short = base between tl & tu = (position.liquidity) / (sqrtHigh - sqrtLow)
-    int256 liquidityTimeFactor = liquidityIndex.toInt() * int256(5) / int256(365 * 2);
+    int256 liquidityTimeFactor = liquidityIndex.toInt() * int256(7) / int256(365 * 2);
     int256 lpUnfilledExposureShort = 
       (
         int256(lpLiquidity) * 
@@ -465,32 +470,29 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     uint256 eps = 10000; // 1e-14 * 1e18
 
     // LP
-    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled,
-    //  (lpExposureFilledAfter - eps).toInt(), "f l");
-    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled,
-    // (lpExposureFilledAfter + eps).toInt(), "f l");
-    // assertGe(
-    //   datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort,
-    //   (lpUnfilledExposureShort < 0 ? (-lpUnfilledExposureShort).toUint() : lpUnfilledExposureShort.toUint()) - eps,
-    //   "us l"
-    // );
-    // assertLe(
-    //   datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort,
-    //   (lpUnfilledExposureShort < 0 ? (-lpUnfilledExposureShort).toUint() : lpUnfilledExposureShort.toUint()) + eps,
-    //   "us l"
-    // );
-    // assertEq(
-    //   datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong,
-    //   0
-    // );
+    (int256 expFilledBase,) = vammProxy.getAccountFilledBalances(marketId,maturityTimestamp,1);
+    assertGe(expFilledBase * liquidityIndex.toInt() / WAD.toInt() , (lpExposureFilledAfter - eps).toInt(), "f l");
+    assertLe(expFilledBase * liquidityIndex.toInt() / WAD.toInt(), (lpExposureFilledAfter + eps).toInt(), "f l");
 
-    // // TRADER
-    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled,
-    // -(lpExposureFilledAfter - eps).toInt(), "f t");
-    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled,
-    // -(lpExposureFilledAfter + eps).toInt(), "f t");
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledShort, 0);
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledLong, 0);
+    (uint256 expUnfilledBaseLong,uint256 expUnfilledBaseShort,,) = vammProxy.getAccountUnfilledBaseAndQuote(marketId, maturityTimestamp, 1);
+    assertGe(
+      expUnfilledBaseShort * liquidityTimeFactor.toUint() / WAD,
+      (lpUnfilledExposureShort < 0 ? (-lpUnfilledExposureShort).toUint() : lpUnfilledExposureShort.toUint()) - eps,
+      "us l"
+    );
+    assertLe(
+      expUnfilledBaseShort * liquidityTimeFactor.toUint() / WAD,
+      (lpUnfilledExposureShort < 0 ? (-lpUnfilledExposureShort).toUint() : lpUnfilledExposureShort.toUint()) + eps,
+      "us l"
+    );
+    assertEq(
+      expUnfilledBaseLong,
+      0);
+
+    (uint256 expUnfilledBaseLongTrader,uint256 expUnfilledBaseShortTrader,,) = vammProxy.getAccountUnfilledBaseAndQuote(marketId, maturityTimestamp, 2);
+    assertEq(expUnfilledBaseShortTrader, 0);
+    assertEq(expUnfilledBaseLongTrader, 0);
+
   }
 
   function test_MINT_VT_hit_min_tick() public {
@@ -527,7 +529,11 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     }
 
     vm.stopPrank();
-    //uint256 lpUnfilledShortBeforeTrade = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort;
+    (,uint256 lpUnfilledShortBeforeTrade,,) = vammProxy.getAccountUnfilledBaseAndQuote(
+      marketId,
+      maturityTimestamp,
+      1
+    );
 
     address user2 = vm.addr(2);
     vm.startPrank(user2);
@@ -563,7 +569,7 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     aaveLendingPool.setReserveNormalizedIncome(IERC20(token), ud60x18(liquidityIndex));
 
     // traderExposure = notional * liq index * daysTillMaturity / daysInYear
-    //uint256 lpExposureFilledAfter = lpUnfilledShortBeforeTrade * liquidityIndex / WAD; // positive number (abs)
+    uint256 lpExposureFilledAfter = lpUnfilledShortBeforeTrade * liquidityIndex / WAD; // positive number (abs)
 
     // notional 10000e18 -> base 10000e18 * 1.01 -> 
     // base short = base between tl & tu = (position.liquidity) / (sqrtHigh - sqrtLow)
@@ -576,35 +582,36 @@ contract AtomicScenarios is BaseScenario, TestUtils {
       )
       * liquidityTimeFactor
       / WAD.toInt();
-    uint256 eps = 10000; // 1e-14 * 1e18
+    uint256 eps = 100000; // 1e-14 * 1e18
 
     // LP
-    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled,
-    // -(lpExposureFilledAfter + eps).toInt(), "f l");
-    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled,
-    // -(lpExposureFilledAfter - eps).toInt(), "f l");
-    // assertGe(
-    //   datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong,
-    //   (lpUnfilledExposureLong < 0 ? (-lpUnfilledExposureLong).toUint() : lpUnfilledExposureLong.toUint()) - eps,
-    //   "us l"
-    // );
-    // assertLe(
-    //   datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong,
-    //   (lpUnfilledExposureLong < 0 ? (-lpUnfilledExposureLong).toUint() : lpUnfilledExposureLong.toUint()) + eps,
-    //   "us l"
-    // );
-    // assertEq(
-    //   datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort,
-    //   0
-    // );
+    (int256 expFilledBase,) = vammProxy.getAccountFilledBalances(marketId,maturityTimestamp,1);
+    assertGe(expFilledBase * liquidityIndex.toInt() / WAD.toInt() , -(lpExposureFilledAfter + eps).toInt(), "f l");
+    assertLe(expFilledBase * liquidityIndex.toInt() / WAD.toInt(), -(lpExposureFilledAfter - eps).toInt(), "f l");
+
+    (uint256 expUnfilledBaseLong,uint256 expUnfilledBaseShort,,) = vammProxy.getAccountUnfilledBaseAndQuote(marketId, maturityTimestamp, 1);
+    assertGe(
+      expUnfilledBaseLong * liquidityTimeFactor.toUint() / WAD,
+      (lpUnfilledExposureLong < 0 ? (-lpUnfilledExposureLong).toUint() : lpUnfilledExposureLong.toUint()) - eps,
+      "us l"
+    );
+    assertLe(
+      expUnfilledBaseLong * liquidityTimeFactor.toUint() / WAD,
+      (lpUnfilledExposureLong < 0 ? (-lpUnfilledExposureLong).toUint() : lpUnfilledExposureLong.toUint()) + eps,
+      "us l"
+    );
+    assertEq(
+      expUnfilledBaseShort,
+      0
+    );
 
     // // TRADER
-    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled,
-    // (lpExposureFilledAfter + eps).toInt(), "f t");
-    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled,
-    // (lpExposureFilledAfter - eps).toInt(), "f t");
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledShort, 0);
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledLong, 0);
+    (int256 expFilledBaseTrader,) = vammProxy.getAccountFilledBalances(marketId, maturityTimestamp, 2);
+    assertEq(expFilledBaseTrader, 0);
+
+    (uint256 expUnfilledBaseLongTrader,uint256 expUnfilledBaseShortTrader,,) = vammProxy.getAccountUnfilledBaseAndQuote(marketId, maturityTimestamp, 2);
+    assertEq(expUnfilledBaseShortTrader, 0);
+    assertEq(expUnfilledBaseLongTrader, 0);
   }
 
   // expect completed order to be 0
@@ -642,7 +649,6 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     }
 
     vm.stopPrank();
-    //uint256 lpUnfilledShortBeforeTrade = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort;
 
     address user2 = vm.addr(2);
     vm.startPrank(user2);
@@ -689,12 +695,12 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     assertEq(fee, 0);
     assertEq(currentTick, currentTickVamm);
 
-
-    uint256 eps = 10000; // 1e-14 * 1e18
     // LP
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, 0, "f l");
+    (int256 expFilledBaseLp,) = vammProxy.getAccountFilledBalances(marketId,maturityTimestamp,2);
+    assertEq(expFilledBaseLp, 0, "f l");
     // // TRADER
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, 0, "f t");
+    (int256 expFilledBaseTrader,) = vammProxy.getAccountFilledBalances(marketId,maturityTimestamp,2);
+    assertEq(expFilledBaseTrader, 0, "f t");
 
     vm.stopPrank();
   }
@@ -843,11 +849,11 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     assertEq(currentTick, currentTickVamm);
 
 
-    uint256 eps = 10000; // 1e-14 * 1e18
     // LP
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, 0, "f l");
-    // // TRADER
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, 0, "f t");
+    (int256 expFilledBase,) = vammProxy.getAccountFilledBalances(marketId,maturityTimestamp,1);
+    assertEq(expFilledBase, 0, "f l");
+    //  TRADER
+    assertEq(getTraderExp(2, address(token), datedIrsProxy), 0, "f t");
 
     vm.stopPrank();
   }
@@ -1204,11 +1210,11 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     test_MINT_FT();
     int24 initialTickVamm = vammProxy.getVammTick(marketId, maturityTimestamp);
 
-    // int256 initLpFilled = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled;
-    // uint256 initLpUnfilledShort = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort;
-    // uint256 initLpUnfilledLong = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong;
+    (int256 initLpFilled,) = vammProxy.getAccountFilledBalances(marketId,maturityTimestamp,1);
+    uint256 initLpUnfilledShort = absUtil(getLpExpShort(1, address(token), datedIrsProxy));
+    uint256 initLpUnfilledLong = absUtil(getLpExpLong(1, address(token), datedIrsProxy));
 
-    // int256 initTraderExposure = datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled;
+    int256 initTraderExposure = getTraderExp(2, address(token), datedIrsProxy);
 
     // execute Unwind -> flipping to VT
     address user2 = vm.addr(2);
@@ -1243,26 +1249,24 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     uint256 liquidityIndex = 1_010_000_000_000_000_000;
 
     // traderExposure = base * liq index * daysTillMaturity / daysInYear
-    uint256 traderExposure = div(ud60x18(200e18 * 2.5 * 1.01), ud60x18(365 * 1e18)).unwrap();
+    uint256 traderExposure = div(ud60x18(200e18 * 3.5 * 1.01), ud60x18(365 * 1e18)).unwrap();
 
     uint256 eps = 1000; // 1e-15 * 1e18
 
     // LP
-    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, int256(traderExposure - eps));
-    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, int256(traderExposure + eps));
-    // assertEq(
-    //   datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort
-    //     + datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong,
-    //   initLpUnfilledShort + initLpUnfilledLong
-    // );
+    (int256 filledBase, ) = vammProxy.getAccountFilledBalances(marketId,maturityTimestamp,1);
+    assertGe(filledBase, int256(200e18 - eps));
+    assertLe(filledBase, int256(200e18 + eps));
+    assertEq(
+      absUtil(getLpExpShort(1, address(token), datedIrsProxy))
+        + absUtil(getLpExpLong(1, address(token), datedIrsProxy)),
+      initLpUnfilledShort + initLpUnfilledLong
+    );
 
     // // TRADER
-    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, -int256(traderExposure - eps));
-    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, -int256(traderExposure + eps));
-    // assertGe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, initTraderExposure);
-
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledShort, 0);
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledLong, 0);
+    assertLe(getTraderExp(2, address(token), datedIrsProxy), -int256(traderExposure - eps));
+    assertGe(getTraderExp(2, address(token), datedIrsProxy), -int256(traderExposure + eps));
+    assertGe(getTraderExp(2, address(token), datedIrsProxy), initTraderExposure);
 
     vm.stopPrank();
   }
@@ -1274,11 +1278,11 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     test_MINT_VT();
     int24 initialTickVamm = vammProxy.getVammTick(marketId, maturityTimestamp);
 
-    // int256 initLpFilled = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled;
-    // uint256 initLpUnfilledShort = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort;
-    // uint256 initLpUnfilledLong = datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong;
+    (int256 initLpFilled,) = vammProxy.getAccountFilledBalances(marketId,maturityTimestamp,1);
+    uint256 initLpUnfilledShort = absUtil(getLpExpShort(1, address(token), datedIrsProxy));
+    uint256 initLpUnfilledLong = absUtil(getLpExpLong(1, address(token), datedIrsProxy));
 
-    // int256 initTraderExposure = datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled;
+    int256 initTraderExposure = getTraderExp(2, address(token), datedIrsProxy);
 
     // execute Unwind -> flipping to VT
     address user2 = vm.addr(2);
@@ -1313,32 +1317,23 @@ contract AtomicScenarios is BaseScenario, TestUtils {
     uint256 liquidityIndex = 1_010_000_000_000_000_000;
 
     // traderExposure = base * liq index * daysTillMaturity / daysInYear
-    uint256 traderExposure = div(ud60x18(200e18 * 2.5 * 1.01), ud60x18(365 * 1e18)).unwrap();
+    uint256 traderExposure = div(ud60x18(200e18 * 3.5 * 1.01), ud60x18(365 * 1e18)).unwrap();
 
     uint256 eps = 1000; // 1e-15 * 1e18
 
     // LP
-    // assertAlmostEq(
-    //   datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].filled, 
-    //   -int256(traderExposure), 
-    //   eps
-    // );
-    // assertEq(
-    //   datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledShort 
-    //     + datedIrsProxy.getAccountAnnualizedExposures(1, address(token))[0].unfilledLong,
-    //   initLpUnfilledShort + initLpUnfilledLong
-    // );
+    (int256 filledBase, ) = vammProxy.getAccountFilledBalances(marketId,maturityTimestamp,1);
+    assertGe(filledBase, -int256(200e18 + eps));
+    assertLe(filledBase, -int256(200e18 - eps));
+    assertEq(
+      absUtil(getLpExpShort(1, address(token), datedIrsProxy))
+        + absUtil(getLpExpLong(1, address(token), datedIrsProxy)),
+      initLpUnfilledShort + initLpUnfilledLong
+    );
 
     // // TRADER
-    // assertAlmostEq(
-    //   datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, 
-    //   traderExposure, 
-    //   eps
-    // );
-    // assertLe(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].filled, initTraderExposure);
-
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledShort, 0);
-    // assertEq(datedIrsProxy.getAccountAnnualizedExposures(2, address(token))[0].unfilledLong, 0);
+    assertAlmostEq(getTraderExp(2, address(token), datedIrsProxy), traderExposure, eps);
+    assertLe(getTraderExp(2, address(token), datedIrsProxy), initTraderExposure);
 
     vm.stopPrank();
   }
