@@ -1,0 +1,21 @@
+name = "voltz-access-pass-nft" # package name
+version = "2.0.0"
+description = "Voltz V2 Access Pass NFT Mock"
+
+# owner is required and must be overridden
+[setting.owner]
+description = "NFT owner"
+# name is required and must be overridden
+[setting.name]
+description = "NFT name"
+# symbol is required and must be overridden
+[setting.symbol]
+description = "NFT symbol"
+
+[contract.AccessPassNft]
+artifact = "AccessPassNFTMock"
+args=[
+  "<%= settings.name %>", # name
+  "<%= settings.symbol %>", # symbol
+]
+from = "<%= settings.owner %>"
